@@ -14,7 +14,7 @@ order: 2
 
 ## Account ID
 
-The account ID identifies your Cloudflare account. Every account-level operation in the generated clients takes it as an `accountId` argument, `StorageClient.D1CreateDatabase` among them.
+The account ID identifies your Cloudflare account. Most account-level operations in the generated clients take it as an `accountId` argument, `StorageClient.D1CreateDatabase` among them.
 
 1. Open the Cloudflare dashboard and go to **Account home**.
 2. Select **Search**, or press `Ctrl+K` (`Cmd+K` on a Mac).
@@ -51,17 +51,17 @@ All five are **Account** permissions at the **Edit** level. On the API tab of Cl
 | Queues Edit | Queues | [Account Setup](../libraries/control-plane/account-setup.md) |
 | Workers Scripts Edit | Worker scripts | [Worker Upload](../libraries/control-plane/worker-upload.md), [First Deploy](first-deploy.md) |
 
-Other clients require other permissions. You can add them later, since Cloudflare lets you edit an existing token.
+Other operations in the generated clients may require other permissions. You can add them later, since Cloudflare lets you edit an existing token.
 
 ## Token Safety
 
-- **Use a scoped token.** Cloudflare's Global API Key has the same permissions as your user, on all of your resources. Anyone holding your new token can perform the actions its five permissions grant.
+- **Use a scoped token, never the Global API Key.** That key has the same permissions as your user, on all of your resources. Anyone holding your new token can perform the actions its five permissions grant.
 - **Keep tokens out of source control.** The token belongs in `.env`, which Git ignores in the FSharp.CloudEdge folder. GitHub scans public repositories for Cloudflare tokens. When it finds one, Cloudflare revokes the token and notifies you by email.
-- **Roll a leaked token.** On **My Profile** > **API Tokens**, open the three-dot menu next to the token and choose **Roll**, then **Confirm**. Cloudflare invalidates the old secret, and the new one has the same permissions.
+- **Roll a lost or leaked token.** On **My Profile** > **API Tokens**, open the three-dot menu next to the token and choose **Roll**, then **Confirm**. Cloudflare invalidates the old secret, and the new one has the same permissions.
 
 ## The .env File
 
-You clone FSharp.CloudEdge into your `repos` folder on [Local Build](local-build.md). Its root holds a template for this file, `.env.template`, and its `.gitignore` lists `.env`.
+You clone FSharp.CloudEdge into your `repos` folder on [Local Build](local-build.md), the next page. Its root holds a template for this file, `.env.template`, and its `.gitignore` lists `.env`. Run the steps below after Local Build and before [First Deploy](first-deploy.md).
 
 1. From your `repos` folder, copy the template and make `.env` readable by your user alone.
 
@@ -107,7 +107,7 @@ set +a
 printenv CLOUDFLARE_ACCOUNT_ID
 ```
 
-It prints your account ID. If the output is empty, run the three lines again in this terminal.
+It prints your account ID. If the output is empty, check that you saved your account ID in `.env`, then run the three lines again in this terminal.
 
 In each new terminal, load `.env` again. From your hello-worker folder, the path is `../FSharp.CloudEdge/.env`:
 
@@ -119,7 +119,7 @@ set +a
 
 ## Client Setup
 
-Every generated client takes an `HttpClient`. This one uses Cloudflare's API base address and sends your token in a bearer header. When a variable is missing, `fromEnvironment` reports the name and exits.
+Every generated client takes an `HttpClient`. `cloudflareHttp` returns one with Cloudflare's API base address and your token in its `Authorization` header. When a variable is missing, `fromEnvironment` reports the name and exits.
 
 ```fsharp
 module ClientSetup
@@ -146,7 +146,7 @@ let cloudflareHttp () =
     http
 ```
 
-A program that uses it, started before `.env` is loaded, prints this line:
+A program that calls `cloudflareHttp` before you load `.env` prints this line:
 
 ```text
 CLOUDFLARE_API_TOKEN is not set. Load .env into this terminal first.
@@ -181,7 +181,7 @@ let checkToken (http: HttpClient) =
     }
 ```
 
-With a working token, the output is:
+With a working token, `checkToken` returns `true`, and the output is:
 
 ```text
 Token status: active

@@ -14,7 +14,7 @@ order: 4
 
 ## Project Folder
 
-You create `hello-worker` as a sibling of FSharp.CloudEdge, so the project file can reference the Workers library through the relative path `../FSharp.CloudEdge`.
+With `hello-worker` next to FSharp.CloudEdge, the project file can reference the Workers library through the relative path `../FSharp.CloudEdge`.
 
 1. Open a terminal in the `repos` folder from [Local Build](local-build.md).
 2. Create `hello-worker` and enter it.
@@ -28,7 +28,7 @@ Stay in `hello-worker` for the remaining commands.
 
 ## Project File
 
-Save the project as `hello-worker.fsproj`. It declares one source file and one package, and it references the Workers library in FSharp.CloudEdge.
+Save this as `hello-worker.fsproj`. It declares `Worker.fs` and one package. It also references the Workers library in FSharp.CloudEdge.
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -47,7 +47,7 @@ Save the project as `hello-worker.fsproj`. It declares one source file and one p
 </Project>
 ```
 
-Fable.Core 5.2.0 is the release the Workers library depends on. The Workers library also references two support packages, Xantham.Fable.Core and Xantham.Fable.Core.TS. NuGet restores both through your project reference. Their version numbers end in a digest that the bootstrap step on Local Build computes on your machine, so Fable.Core is the only package `hello-worker.fsproj` lists.
+Fable.Core 5.2.0 matches the Workers library's own dependency. The Workers library also references two support packages, Xantham.Fable.Core and Xantham.Fable.Core.TS. NuGet restores both through your project reference. Their version numbers end in a digest that the bootstrap step on Local Build computes on your machine, so Fable.Core is the only package `hello-worker.fsproj` lists.
 
 Next to it, add `NuGet.Config` with the package sources NuGet restores from. The first is the feed in `FSharp.CloudEdge/artifacts/tool-feed`, which holds the two support packages. The second, nuget.org, hosts Fable.Core and the Fable compiler.
 
@@ -91,15 +91,15 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
         U2.Case2 response)
 ```
 
-- `[<ExportDefault>]` declares `worker` as the default export of the JavaScript module. The Workers runtime passes each incoming request to its `fetch` handler.
-- `ExportedHandler.Create` builds the export from a `fetch` function. The function's first argument is the request, and the two `_` patterns discard the environment and the execution context.
+- `[<ExportDefault>]` declares `worker` as the default export of the JavaScript module. The Workers runtime passes each incoming request to the `fetch` handler of `worker`.
+- `ExportedHandler.Create` builds the export from a `fetch` function. The function's first argument is the request, and the two `_` patterns discard the environment and the execution context. All four type arguments of `ExportedHandler` are `obj`, the F# type for any value.
 - `Workers.Exports` contains the globals your Worker can call, so `Workers.Exports.URL` and `Workers.Exports.Response` are JavaScript's `URL` and `Response`.
 - An anonymous record such as `{| greeting = ... |}` compiles to a plain JavaScript object, and `Response.json` serializes it as the response body.
-- `U2.Case1` and `U2.Case2` select one side of a TypeScript union. `URL` accepts a string or a URL, and `fetch` returns either a response or a promise of a response.
+- `U2.Case1` and `U2.Case2` wrap a value as the first or second type of a TypeScript union. The `URL` constructor takes a `U2<string, URL>`, and the `fetch` function returns a `U2<JS.Promise<Response>, Response>`.
 
 ## Fable Compilation
 
-1. Create a tool manifest to pin .NET tool versions for this project.
+1. Create a tool manifest to pin .NET tool versions for `hello-worker`.
 
    ```bash
    dotnet new tool-manifest
@@ -119,7 +119,7 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
    You can invoke the tool from this directory using the following commands: 'dotnet tool run fable' or 'dotnet fable'.
    ```
 
-3. Compile the project into the `build` folder.
+3. Compile `hello-worker.fsproj` into the `build` folder.
 
    ```bash
    dotnet fable hello-worker.fsproj -o build
@@ -185,7 +185,7 @@ esbuild resolves the imports in `build/Worker.js` and writes one ES module, `dis
    npm init -y
    ```
 
-2. Install esbuild 0.28.2 and workerd 1.20260906.1, the releases that produced the output on this page. npm installs each with a binary for your platform.
+2. Install esbuild 0.28.2 and workerd 1.20260906.1, the releases that produced the output on this page. npm installs both with a binary for your platform.
 
    ```bash
    npm install --save-dev esbuild@0.28.2 workerd@1.20260906.1
@@ -197,7 +197,7 @@ esbuild resolves the imports in `build/Worker.js` and writes one ES module, `dis
    found 0 vulnerabilities
    ```
 
-3. Bundle the Fable output.
+3. Bundle `build/Worker.js`.
 
    ```bash
    npx esbuild build/Worker.js --bundle --format=esm '--external:cloudflare:*' --outfile=dist/worker.js
@@ -214,7 +214,7 @@ esbuild resolves the imports in `build/Worker.js` and writes one ES module, `dis
 
 ## Runtime Configuration
 
-workerd reads its settings from a Cap'n Proto text file. Save this one as `config.capnp` in `hello-worker`.
+workerd reads its settings from a Cap'n Proto text file. Put this one in `hello-worker` as `config.capnp`.
 
 ```text
 using Workerd = import "/workerd/workerd.capnp";
@@ -232,13 +232,13 @@ const helloWorker :Workerd.Worker = (
 
 - `using Workerd` loads the configuration schema built into workerd.
 - `const config` is the configuration that `workerd serve` starts from.
-- `services` defines one service, `hello-worker`, whose code is the `helloWorker` constant.
-- With `sockets`, workerd listens on port 8787 of `localhost` and passes each request to that service. HTTP is the default protocol for a socket.
+- `services` defines one service, `hello-worker`, whose Worker is the `helloWorker` constant.
+- With `sockets`, workerd listens on port 8787 of `localhost` and passes requests to that service. HTTP is the default protocol for a socket.
 - `const helloWorker` defines the Worker.
 - `modules` lists one ES module, `worker.js`, and `embed` reads its contents from `dist/worker.js`.
-- `compatibilityDate` is required. With it, you opt into the runtime changes up to that day. 2026-09-06 appears in the version number of `@cloudflare/workers-types` that the Workers library was generated from, 5.20260906.1.
+- `compatibilityDate` is required. With it, you opt into the runtime changes up to that day. 2026-09-06 is the date in 5.20260906.1, the version of `@cloudflare/workers-types` used to generate the Workers library.
 
-workerd exits at startup when the compatibility date is newer than its release supports. The error message states the newest date that release accepts. Cloudflare explains the scheme in [Compatibility dates](https://developers.cloudflare.com/workers/configuration/compatibility-dates/).
+workerd exits at startup when the compatibility date is later than the newest date it supports, and the error message states that date. Cloudflare explains the scheme in [Compatibility dates](https://developers.cloudflare.com/workers/configuration/compatibility-dates/).
 
 ## Local Run
 
@@ -260,9 +260,17 @@ workerd exits at startup when the compatibility date is newer than its release s
    {"greeting":"Hello, world"}
    ```
 
-   With `?name=Ada` added to that URL, the greeting is `Hello, Ada`.
+3. Add a name to the query string. Quote the URL, because `?` is a wildcard character in your shell.
 
-3. Ask for the time.
+   ```bash
+   curl 'http://localhost:8787/?name=Ada'
+   ```
+
+   ```text
+   {"greeting":"Hello, Ada"}
+   ```
+
+4. Ask for the time.
 
    ```bash
    curl http://localhost:8787/time
@@ -272,7 +280,7 @@ workerd exits at startup when the compatibility date is newer than its release s
    {"utc":"2026-09-29T21:16:55.773Z"}
    ```
 
-4. Try any other path. With `-i`, curl also prints the status line and headers.
+5. Try any other path. With `-i`, curl also prints the status line and headers.
 
    ```bash
    curl -i http://localhost:8787/nope
@@ -288,7 +296,7 @@ workerd exits at startup when the compatibility date is newer than its release s
 
 ## Edit Loop
 
-In watch mode, Fable keeps the project loaded and recompiles after every edit. With `--runWatch`, Fable starts esbuild after each compile, and workerd reloads the new bundle.
+In watch mode, Fable keeps the project loaded and recompiles whenever you save `Worker.fs`. With `--runWatch`, Fable starts esbuild after each compile, and workerd reloads the new bundle.
 
 1. In a third terminal, go to `hello-worker` and start the watch.
 
@@ -296,7 +304,7 @@ In watch mode, Fable keeps the project loaded and recompiles after every edit. W
    dotnet fable watch hello-worker.fsproj -o build --runWatch npx esbuild build/Worker.js --bundle --format=esm '--external:cloudflare:*' --outfile=dist/worker.js
    ```
 
-   The first compile takes as long as before. Fable prints `Watching ..` when it is ready.
+   The initial compile takes as long as before. Fable prints `Watching ..` when it is ready.
 
 2. In `Worker.fs`, change `Hello` to `Howdy` and save. Fable reports the recompile:
 

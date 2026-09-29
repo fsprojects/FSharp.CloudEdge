@@ -1,4 +1,4 @@
-module GuestbookWorker
+module GuestbookBindings
 
 open System.Text.Json
 open System.Text.Json.Nodes

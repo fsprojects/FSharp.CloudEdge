@@ -5,10 +5,10 @@ order: 5
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">A short F# program uploads <code>dist/worker.js</code> as the Worker hello-worker and prints its workers.dev address. It saves a fingerprint of each upload and skips the upload on a second run with an unchanged bundle.</p>
+<p class="ce-block-lead">A short F# program uploads <code>dist/worker.js</code> as the Worker hello-worker and prints its workers.dev address. It saves a fingerprint of each upload and skips the upload on a later run with an unchanged bundle.</p>
 <ul class="ce-facts">
 <li><span>You need</span> <code>dist/worker.js</code> from <a href="/FSharp.CloudEdge/guide/first-worker/">First Worker</a>, <code>.env</code> from <a href="/FSharp.CloudEdge/guide/credentials/">Credentials</a></li>
-<li><span>You get</span> hello-worker on Cloudflare at <code>https://hello-worker.&lt;your-subdomain&gt;.workers.dev</code></li>
+<li><span>You get</span> A deploy program for hello-worker that skips unchanged bundles</li>
 <li><span>Free plan</span> <a href="https://developers.cloudflare.com/workers/platform/pricing/">100,000 requests a day</a></li>
 </ul>
 </div>
@@ -51,7 +51,7 @@ The upload program is a .NET console project in a `deploy` folder inside hello-w
    </Project>
    ```
 
-F# compiles the files in the order of the `Compile` list, so each module can call the modules listed above it. Save the four files below in `deploy`.
+The F# compiler processes the files in the order of the `Compile` list, so each module can call only the modules listed above it. Save the four files below in `deploy`.
 
 ## Change Check
 
@@ -83,7 +83,7 @@ let remember (fingerprint: string) =
 
 `upload` sends the metadata and the bundle in one multipart request. In the metadata, `main_module` is the name of the part that contains the entry module, and the bundle's `PartName` is that name. Cloudflare's [infrastructure-as-code guide](https://developers.cloudflare.com/workers/platform/infrastructure-as-code/) states that this upload creates a version and a deployment.
 
-Per Cloudflare's [metadata reference](https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/), the default for an API upload without `compatibility_date` is the oldest date, 2021-11-02. `metadata` sets 2026-09-06, the same date as `config.capnp` on [First Worker](first-worker.md).
+Per Cloudflare's [metadata reference](https://developers.cloudflare.com/workers/configuration/multipart-upload-metadata/), the default for an API upload without `compatibility_date` is the oldest compatibility date, 2021-11-02. `metadata` has the date 2026-09-06, the same as `compatibilityDate` in `config.capnp` on [First Worker](first-worker.md).
 
 ```fsharp
 module WorkerUpload
@@ -115,7 +115,7 @@ let upload (compute: ComputeClient) accountId (bundle: byte[]) =
 
 ## Worker Address
 
-A Worker's workers.dev address has the form `<worker>.<subdomain>.workers.dev`, and the subdomain belongs to your account. `WorkerScriptGetSubdomain` returns whether the address of hello-worker is on, and `WorkerScriptPostSubdomain` turns it on when it is off. `WorkerSubdomainGetSubdomain` returns your account's subdomain, which the dashboard also shows under **Your subdomain** on the **Workers & Pages** page.
+A Worker's workers.dev address has the form `<worker>.<subdomain>.workers.dev`, and the subdomain belongs to your account. `WorkerScriptGetSubdomain` returns whether the address of hello-worker is on. When it is off, `show` turns it on with `WorkerScriptPostSubdomain`. `WorkerSubdomainGetSubdomain` returns your account's subdomain, which the dashboard also shows under **Your subdomain** on the **Workers & Pages** page.
 
 ```fsharp
 module WorkerAddress
@@ -143,7 +143,7 @@ let show (compute: ComputeClient) accountId =
 
 ## Program Flow
 
-`deploy` calls the three modules in order. When the fingerprint matches `dist/last-upload.txt`, `deploy` skips the upload and prints the address. When Cloudflare rejects an upload, `upload` prints the HTTP status and Cloudflare's JSON reply, and the program exits with code 1.
+`deploy` calls functions from the three modules above, in order. When the fingerprint matches `dist/last-upload.txt`, `deploy` skips the upload and prints the address. When Cloudflare rejects an upload, `upload` prints the HTTP status and Cloudflare's JSON reply, and the program exits with code 1.
 
 ```fsharp
 module Program
@@ -180,11 +180,7 @@ deploy().GetAwaiter().GetResult()
    set +a
    ```
 
-   Without this step, the program stops with this line:
-
-   ```text
-   CLOUDFLARE_API_TOKEN is not set. Load .env into this terminal, then run again.
-   ```
+   If you skip this step, `ClientSetup` reports the name of the missing variable and the program exits.
 
 2. Start the program from hello-worker, since it reads `dist/worker.js` relative to the working directory.
 
@@ -192,7 +188,7 @@ deploy().GetAwaiter().GetResult()
    dotnet run --project deploy -c Release
    ```
 
-   `-c Release` selects Release, the configuration of the libraries you built on [Local Build](local-build.md). A Debug build would compile them again.
+   `-c Release` matches the configuration of the libraries you compiled on [Local Build](local-build.md). With the default Debug configuration, the build would compile both libraries a second time.
 
    ```text
    Uploaded hello-worker, startup time 4 ms
@@ -200,7 +196,7 @@ deploy().GetAwaiter().GetResult()
    https://hello-worker.your-subdomain.workers.dev
    ```
 
-   This output was recorded against a local test server in place of Cloudflare's API, so your subdomain and startup time will differ.
+   This output was recorded against a local test server in place of Cloudflare's API. Your subdomain and startup time will differ, and the second line appears only when the workers.dev address was off.
 
 3. Open the printed address in a browser and compare the reply with the one workerd returned on [First Worker](first-worker.md).
 
@@ -217,7 +213,7 @@ No change since the last upload
 https://hello-worker.your-subdomain.workers.dev
 ```
 
-On the second run, the program sends two read requests for the address and skips the upload. After you change `Worker.fs`, build `dist/worker.js` again as on [First Worker](first-worker.md), and the program uploads the new bundle on the following run.
+On the second run, the program sends only two read requests, both for the address. After you change `Worker.fs`, build `dist/worker.js` again as on [First Worker](first-worker.md), and the program uploads the new bundle on the following run.
 
 ## Next Step
 

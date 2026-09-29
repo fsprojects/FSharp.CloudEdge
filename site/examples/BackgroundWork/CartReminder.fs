@@ -10,7 +10,7 @@ type Env =
     abstract REMINDERS: Workers.Queue<Cart>
 
 [<ExportDefault>]
-let worker: Workers.ExportedHandler<Env, Cart, obj, obj> =
+let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     Workers.ExportedHandler.Create(
         fetch = fun request env _ ->
             async {

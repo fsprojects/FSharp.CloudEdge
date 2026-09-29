@@ -6,7 +6,7 @@ open FSharp.CloudEdge.Management.Storage
 
 let listNamespaces (storage: StorageClient) accountId =
     task {
-        match! storage.WorkersKvNamespaceListNamespaces(accountId, perPage = 100.) with
+        match! storage.WorkersKvNamespaceListNamespaces(accountId) with
         | WorkersKvNamespaceListNamespaces.OK payload ->
             for kv in Option.defaultValue [] payload.result do
                 printfn "KV     %s  %s" kv.id kv.title

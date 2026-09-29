@@ -9,13 +9,13 @@ order: 5
 <ul class="ce-facts">
 <li><span>Libraries</span> <code>Runtime.Workers</code></li>
 <li><span>npm</span> <code>@cloudflare/workers-types</code> 5.20260906.1</li>
-<li><span>Free plan</span> 10,000 Queues operations and 3,000 Workflow steps a day</li>
+<li><span>Free plan</span> <a href="https://developers.cloudflare.com/queues/platform/pricing/">10,000 Queues operations</a> and <a href="https://developers.cloudflare.com/workflows/reference/pricing/">3,000 Workflow steps</a> a day</li>
 </ul>
 </div>
 
 ## Webhook Inbox
 
-The `fetch` handler puts each incoming webhook on a queue and answers 202 at once. The `queue` handler posts the payloads to your order service, with `ack` for each delivered message and `retry` for a failed one.
+The `fetch` handler writes each incoming webhook to a queue and responds with 202 at once. The `queue` handler posts the payloads to your order service, with `ack` for each delivered message and `retry` for a failed one.
 
 ```fsharp
 open Fable.Core
@@ -104,7 +104,7 @@ type Env =
     abstract REMINDERS: Workers.Queue<Cart>
 
 [<ExportDefault>]
-let worker: Workers.ExportedHandler<Env, Cart, obj, obj> =
+let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     Workers.ExportedHandler.Create(
         fetch = fun request env _ ->
             async {
@@ -117,6 +117,8 @@ let worker: Workers.ExportedHandler<Env, Cart, obj, obj> =
             |> U2.Case1
     )
 ```
+
+<div class="ce-needs"><p><strong>Needs</strong> a queue binding named <code>REMINDERS</code>, and a consumer Worker with a <code>queue</code> handler that emails the visitor.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -156,6 +158,7 @@ type Email = {| user: string; template: string |}
 type Env =
     abstract EMAILS: Workers.Queue<Email>
     abstract DB: Workers.D1Database
+    abstract TRIALS: Workers.Workflow<obj>
 
 type TrialEmails(ctx: Workers.ExecutionContext<obj>, env: Env) =
     inherit Runtime.WorkflowEntrypoint<Env, obj>(ctx, env)
@@ -170,30 +173,24 @@ type TrialEmails(ctx: Workers.ExecutionContext<obj>, env: Env) =
                 step.``do``("check plan", fun _ ->
                     env.DB.prepare("SELECT plan FROM users WHERE id = ?").bind(user).first<string>("plan"))
                 |> Async.AwaitPromise
-            if plan = Some "trial" then
+            let stillTrial = (plan = Some "trial")
+            if stillTrial then
                 do! step.``do``("reminder email", fun _ -> env.EMAILS.send {| user = user; template = "trial-ending" |})
                     |> Async.AwaitPromise |> Async.Ignore
-            return box {| user = user; plan = plan |}
+            return box {| user = user; reminded = stillTrial |}
         }
         |> Async.StartAsPromise
 ```
 
-Workflows cache the value each `step.do` returns, keyed by the step's name, so give steps fixed names. By default, Cloudflare [retries a failed step five times](https://developers.cloudflare.com/workflows/build/sleeping-and-retrying/) with exponential backoff.
+Workflows cache each `step.do` result under the step's name, so give steps fixed names. By default, Cloudflare [retries a failed step five times](https://developers.cloudflare.com/workflows/build/sleeping-and-retrying/) with exponential backoff. The record `run` returns is the instance's output. `box` converts it to `obj` because `run` has the result type `JS.Promise<obj>`.
 
 <div class="ce-needs"><p><strong>Needs</strong> a Workflow for the <code>TrialEmails</code> class, plus the <code>EMAILS</code> queue and <code>DB</code> database bindings. <code>ComputeClient.WorCreateOrModifyWorkflow</code> creates the Workflow from the class name and the Worker's script name.</p></div>
 
 ## Trial Signup
 
-This Worker takes the user's ID from the `user` query parameter. On a POST, it creates a `TrialEmails` instance under that ID, and on a GET it finds the instance with `get`. Either way, the response contains the instance status.
+This Worker takes the user's ID from the `user` query parameter. On a POST, it creates a `TrialEmails` instance under that ID, and on a GET it finds the instance with `get`. Either way, the response contains the instance status. The `TRIALS` binding refers to a class that this Worker exports, so its code follows `TrialEmails` in the same file.
 
 ```fsharp
-open Fable.Core
-
-module Workers = FSharp.CloudEdge.Runtime.Workers
-
-type Env =
-    abstract TRIALS: Workers.Workflow<obj>
-
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     Workers.ExportedHandler.Create(
@@ -242,7 +239,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a cron trigger on the Worker, such as <code>0 3 * * *</code> for 03:00 UTC every day. <code>ComputeClient.WorkerCronTriggerUpdateCronTriggers</code> sets the triggers, as <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows. The free plan limit is 5 per account.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a cron trigger on the Worker, such as <code>0 3 * * *</code> for 03:00 UTC every day. <code>ComputeClient.WorkerCronTriggerUpdateCronTriggers</code> sets the triggers, as <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows. The free plan limit is 5 cron triggers per account.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 

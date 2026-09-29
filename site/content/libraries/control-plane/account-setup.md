@@ -63,7 +63,7 @@ let createBucket (storage: StorageClient) accountId =
 
 ## Session Store
 
-The new namespace's `id` is the `namespace_id` of a `kv_namespace` binding. Cloudflare returns a 400 when the account already has a namespace with the same title, so running it twice gives the `Status4XX` case.
+The new namespace's `id` is the `namespace_id` of a `kv_namespace` binding. Cloudflare returns a 400 when the account already has a namespace with the same title, so a second run of `createNamespace` ends in the `Status4XX` case.
 
 ```fsharp
 open FSharp.CloudEdge.Core.Api.Types
@@ -136,7 +136,7 @@ open FSharp.CloudEdge.Management.Storage
 
 let listNamespaces (storage: StorageClient) accountId =
     task {
-        match! storage.WorkersKvNamespaceListNamespaces(accountId, perPage = 100.) with
+        match! storage.WorkersKvNamespaceListNamespaces(accountId) with
         | WorkersKvNamespaceListNamespaces.OK payload ->
             for kv in Option.defaultValue [] payload.result do
                 printfn "KV     %s  %s" kv.id kv.title

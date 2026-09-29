@@ -5,13 +5,13 @@ order: 8
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">Give your site a search box that ranks results by the words they share with the query and by closeness in meaning. One Worker answers the searches and updates a keyword index and a vector index, embedding a chunk again only when its hash changes.</p>
+<p class="ce-block-lead">Give your site a search box that ranks results by the words they share with the query and by closeness in meaning. One Worker serves search requests and updates a keyword index and a vector index, embedding a chunk again only when its hash changes.</p>
 <ul class="ce-facts">
 <li><span>Libraries</span> <code>Runtime.Workers</code> <code>Runtime.WorkersAIProvider</code> <code>Support.AI.V4.Provider</code></li>
 <li><span>npm</span> <code>@cloudflare/workers-types</code> 5.20260906.1, <code>workers-ai-provider</code> 4.0.0, <code>@ai-sdk/provider</code> 4.0.10</li>
-<li><span>Free plan</span> D1: 5 million rows read and 100,000 rows written a day</li>
-<li><span>Free plan</span> Workers AI: 10,000 Neurons a day</li>
-<li><span>Free plan</span> Vectorize: 5 million stored vector dimensions, 30 million queried a month</li>
+<li><span>Free plan</span> <a href="https://developers.cloudflare.com/d1/platform/pricing/">D1: 5 million rows read and 100,000 rows written a day</a></li>
+<li><span>Free plan</span> <a href="https://developers.cloudflare.com/workers-ai/platform/pricing/">Workers AI: 10,000 Neurons a day</a></li>
+<li><span>Free plan</span> <a href="https://developers.cloudflare.com/vectorize/platform/pricing/">Vectorize: 5 million stored vector dimensions, 30 million queried a month</a></li>
 </ul>
 </div>
 
@@ -101,7 +101,7 @@ let vectorSearch (ai: Workers.Ai<Workers.AiModels>) (index: Workers.Vectorize) (
     }
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Vectorize index created with 768 dimensions and the cosine metric. An index's dimensions and metric are fixed at creation, so choose the embedding model first. <code>StorageClient.VectorizeCreateVectorizeIndex</code> in <code>Management.Storage</code> creates the index from an F# program.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Vectorize index created with 768 dimensions and the cosine metric. An index's dimensions and metric are fixed at creation, so choose the embedding model first. <code>StorageClient.VectorizeCreateVectorizeIndex</code> in <code>Management.Storage</code> creates the index from an F# program. <a href="/FSharp.CloudEdge/libraries/control-plane/account-setup/">Account Setup</a> shows the same client creating a D1 database.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -153,7 +153,7 @@ let fuse (rankings: string[][]) =
 
 ## Chunk Hash
 
-Split each page into chunks, such as one per heading, and keep each chunk within the 512 input tokens that bge-base-en-v1.5 accepts. A chunk's id is also its Vectorize id, and [Vectorize limits](https://developers.cloudflare.com/vectorize/platform/limits/) ids to 64 bytes. `chunkHash` computes a SHA-256 digest with `crypto.subtle` and adds it to the chunk as a 64-character hex `hash`. The digest input is the title and the text, so an edited title also counts as a change.
+Split each page into chunks, such as one per heading, and keep each chunk within the 512 input tokens that bge-base-en-v1.5 accepts. A chunk's id is also its Vectorize id, and [Vectorize limits](https://developers.cloudflare.com/vectorize/platform/limits/) ids to 64 bytes. `chunkHash` computes a SHA-256 digest with `crypto.subtle` and returns the chunk with a `hash` field of 64 hex characters. The digest input is the title and the text, so an edited title also counts as a change.
 
 ```fsharp
 open Fable.Core

@@ -5,17 +5,17 @@ order: 4
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">Give each chat room or game its own Durable Object: one instance per name, with private storage and live WebSocket connections. Cloudflare routes every request for that name to the same instance, and its storage is strongly consistent.</p>
+<p class="ce-block-lead">Give each chat room or game its own Durable Object: one instance per name, with private storage and live WebSocket connections. Cloudflare routes every request for that name to the same instance, whose storage is strongly consistent.</p>
 <ul class="ce-facts">
 <li><span>Libraries</span> <code>Runtime.Workers</code> <code>Support.Workers</code></li>
 <li><span>npm</span> <code>@cloudflare/workers-types</code> 5.20260906.1</li>
-<li><span>Free plan</span> 100,000 requests a day, 5 GB stored</li>
+<li><span>Free plan</span> <a href="https://developers.cloudflare.com/durable-objects/platform/pricing/">100,000 requests a day, 5 GB stored</a></li>
 </ul>
 </div>
 
 ## Chat Room
 
-Each room is one `ChatRoom` object, and its `webSocketMessage` handler sends every text message to all sockets in the room. Sockets accepted with `acceptWebSocket`, part of the [WebSocket Hibernation API](https://developers.cloudflare.com/durable-objects/best-practices/websockets/), stay open while Cloudflare evicts an idle room from memory. Cloudflare bills duration only for the time a room is in memory.
+Each room is one `ChatRoom` object, and its `webSocketMessage` handler sends every text message to all sockets in the room. Sockets accepted with `acceptWebSocket`, part of the [Hibernation WebSocket API](https://developers.cloudflare.com/durable-objects/best-practices/websockets/), stay open while Cloudflare evicts an idle room from memory. Cloudflare bills this room for duration only while a handler runs.
 
 ```fsharp
 open Fable.Core
@@ -130,7 +130,7 @@ type RoomLookup(ctx: Workers.ExecutionContext<obj>, env: Env) =
 exportDefault jsConstructor<RoomLookup>
 ```
 
-The Worker is a `WorkerEntrypoint` class. Its `fetch` receives the request as the type that `FetchTransport.fetch` takes, so the Worker forwards it as it arrived. `exportDefault` makes `RoomLookup` the Worker's default export.
+The `fetch` method of a `WorkerEntrypoint` class receives requests of the type that `FetchTransport.fetch` accepts, so `RoomLookup` forwards the WebSocket upgrade unchanged. `exportDefault` marks `RoomLookup` as the module's default export.
 
 <div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding named <code>ROOMS</code> for the <code>ChatRoom</code> class, and a migration that lists <code>ChatRoom</code> in <code>new_sqlite_classes</code>. Durable Objects on the free plan use the SQLite storage backend. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how to declare the binding and the migration.</p></div>
 
@@ -154,7 +154,7 @@ export class RoomLookup extends WorkerEntrypoint {
 
 ## Invite Links
 
-For rooms with unguessable addresses, use this Worker instead of `RoomLookup`. With a `room` parameter, `idFromString` parses the ID and `getFetchById` returns a `FetchTransport` for that room. Otherwise the Worker creates an ID with `newUniqueId` and answers with it as JSON.
+For rooms with random IDs, use this Worker instead of `RoomLookup`. When the URL has a `room` query parameter, `idFromString` parses it as an ID, and `getFetchById` returns a `FetchTransport` for that room. Otherwise the Worker creates an ID with `newUniqueId` and responds with it as JSON.
 
 ```fsharp
 open Fable.Core
@@ -185,7 +185,7 @@ exportDefault jsConstructor<InviteLinks>
 
 ## Seat Booking
 
-A `SeatMap` object holds the bookings for one show. `storage.transaction` runs the seat check and both writes as one transaction that either commits or aborts. The object answers a second booking for a taken seat with 409.
+A `SeatMap` object holds the bookings for one show. `storage.transaction` runs the seat check and both writes as one transaction that either commits or aborts. The object responds to a second booking of a taken seat with status 409.
 
 ```fsharp
 open Fable.Core
@@ -286,14 +286,14 @@ type Leaderboard(ctx: Workers.DurableObjectState<obj>, env: obj) =
             |> U2.Case1
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> the <code>Leaderboard</code> class in a <code>new_sqlite_classes</code> migration, as for the chat room.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding and a <code>new_sqlite_classes</code> migration for each Durable Object class above, as for the chat room.</p></div>
 
 ## Library Table
 
 | Library | npm package | What it covers |
 | --- | --- | --- |
 | `Runtime.Workers` | `@cloudflare/workers-types` 5.20260906.1 | Durable Object classes, storage and WebSockets |
-| `Support.Workers` | Hand-written, no npm package | Typed `fetch` for Durable Object stubs |
+| `Support.Workers` | Handwritten, no npm package | Typed `fetch` for Durable Object stubs |
 
 ## Related Pages
 

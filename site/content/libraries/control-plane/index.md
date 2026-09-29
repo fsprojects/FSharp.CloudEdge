@@ -39,7 +39,7 @@ let storage = StorageClient http
 let compute = ComputeClient http
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> an API token in <code>CLOUDFLARE_API_TOKEN</code> and your account ID in <code>CLOUDFLARE_ACCOUNT_ID</code>. <a href="/FSharp.CloudEdge/guide/credentials/">Credentials</a> covers both.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> an API token in <code>CLOUDFLARE_API_TOKEN</code> and your account ID in <code>CLOUDFLARE_ACCOUNT_ID</code>. <a href="/FSharp.CloudEdge/guide/credentials/">Credentials</a> covers both values.</p></div>
 
 ## Token Check
 
@@ -90,7 +90,7 @@ let findAccount (tenancy: TenancyClient) (name: string) =
 
 ## Setup Program
 
-This entry point calls examples from [Account Setup](account-setup.md) and [Worker Upload](worker-upload.md) in order. It creates the storage and the queue, then uploads the Worker with bindings to them. After the upload it attaches the queue consumer and sets the schedule, and the last call turns on the workers.dev address.
+This entry point starts with Token Check and then calls examples from [Account Setup](account-setup.md) and [Worker Upload](worker-upload.md) in order. It creates the storage and the queue, then uploads the Worker with bindings to them. After the upload it attaches the queue consumer and sets the schedule, and the last call turns on the workers.dev address.
 
 ```fsharp
 open System.IO
@@ -104,7 +104,7 @@ let uploadGuestbook databaseId namespaceId =
           FileName = "worker.js"
           ContentType = Some "application/javascript+module"
           PartName = Some "worker.js" }
-    let metadata = GuestbookWorker.metadata databaseId namespaceId
+    let metadata = GuestbookBindings.metadata databaseId namespaceId
     compute.WorkerScriptUploadWorkerModule(accountId, "guestbook", metadata, files = [ worker ])
 
 let setup () =

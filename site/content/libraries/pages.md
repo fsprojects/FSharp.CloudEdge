@@ -15,7 +15,7 @@ order: 12
 
 ## Staff Area
 
-Pages runs the `onRequest` export of `functions/_middleware.js` for every route in that directory and in its subdirectories. This middleware validates the Access token in each request's `Cf-Access-Jwt-Assertion` header. When validation fails, it answers with a `302` redirect to your team's Access login page. `aud` is your Access application's audience tag, and `domain` is your team domain.
+Compiled to `functions/staff/_middleware.js`, this module is the middleware for `/staff` and every path below it. It validates the Access token in each request's `Cf-Access-Jwt-Assertion` header. When validation fails, it redirects the browser to your team's Access login page with a `302` status. `aud` is your Access application's audience tag, and `domain` is your team domain.
 
 ```fsharp
 module Access = FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess
@@ -29,7 +29,7 @@ let onRequest =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Cloudflare Access application for the site. Use its audience tag as <code>aud</code>.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Cloudflare Access application that covers <code>/staff</code>. Use its audience tag as <code>aud</code>.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -46,7 +46,7 @@ export const onRequest = pages_plugin_cloudflare_access({
 
 ## Staff Profile
 
-After the middleware, `context.data.cloudflareAccess.JWT` holds the token's payload and a `getIdentity` function. `getIdentity` requests the user's identity from your team domain with the token, and it resolves to `Some` identity when Access answers with a success status. The reply contains the user's name and email, with the identity's groups in `groups`.
+After the middleware, `context.data.cloudflareAccess.JWT` holds the token's payload and a `getIdentity` function. `getIdentity` requests the user's identity from your team domain with the token. It resolves to `Some` identity when the reply has a success status, and to `None` for any other status. The identity includes the user's name and email, and its `groups` array lists the user's groups.
 
 ```fsharp
 open Fable.Core
@@ -102,7 +102,7 @@ export function onRequestGet(_arg) {
 
 ## Signup Form
 
-Pages calls the functions of an exported array in order. The Turnstile plugin validates the token in the form's `cf-turnstile-response` field. When the token is valid, `register` handles the request next. For an invalid token, the plugin answers `400` with Turnstile's error descriptions.
+Pages calls the functions of an exported array in order. The Turnstile plugin validates the token in the form's `cf-turnstile-response` field. When the token is valid, `register` handles the request next. For an invalid token, the plugin returns a `400` response with Turnstile's error descriptions.
 
 ```fsharp
 open Fable.Core
@@ -134,7 +134,7 @@ The type of a form value is `U2<string, File>`, and `U2.Case1` matches the text 
 
 ## Library Table
 
-`Runtime.PagesPluginStaticForms` binds the plugin that replies to static HTML form submissions. From .NET, `Management.Security` creates Access applications with `AccessApplicationsAddAnApplication` and Turnstile widgets with `AccountsTurnstileWidgetCreate`.
+`Runtime.PagesPluginStaticForms` binds the plugin that handles submissions from HTML forms with a `data-static-form-name` attribute. From .NET, `Management.Security` creates Access applications with `AccessApplicationsAddAnApplication` and Turnstile widgets with `AccountsTurnstileWidgetCreate`.
 
 | Library | npm package | What it covers |
 | --- | --- | --- |

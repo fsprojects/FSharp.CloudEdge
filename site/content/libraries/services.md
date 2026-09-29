@@ -41,7 +41,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> the Workers Paid plan and a Durable Object binding named <code>RESIZER</code> whose class extends <code>Container</code>. F# code cannot subclass <code>Container</code> in 0.1.0, so that class is written in JavaScript. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how an F# program declares a Worker's bindings.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> the Workers Paid plan and a container image whose server listens on port 8080. The <code>RESIZER</code> binding refers to a Durable Object class that extends <code>Container</code>. F# code cannot subclass <code>Container</code> in 0.1.0, so that class is written in JavaScript. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how an F# program declares a Worker's bindings.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -65,9 +65,9 @@ export default worker;
 
 </details>
 
-## Leaderboard
+## Event RSVP
 
-The leaderboard stores scores in SQLite and lists the top ten. `Actor` cannot be subclassed from F# in 0.1.0, so the leaderboard inherits the Workers `DurableObject` class. The Actors `Storage` helper applies each numbered migration once.
+Each invitation is a Durable Object that stores RSVPs in SQLite and responds with the headcount, plus-ones included. The Actors `Storage` helper saves the number of the last migration it applied, so the second migration adds `plus_ones` once to every invitation, old or new. `Invitation` inherits the Workers `DurableObject` class because F# cannot subclass `Actor` either.
 
 ```fsharp
 open Fable.Core
@@ -77,16 +77,17 @@ module Runtime = FSharp.CloudEdge.Runtime.Workers.Cloudflare.Workers
 module Actors = FSharp.CloudEdge.Runtime.Actors
 module ActorStorage = FSharp.CloudEdge.Runtime.Actors.Storage
 
-type Score = {| player: string; points: float |}
+type Rsvp = {| email: string; plusOnes: float |}
+type Headcount = {| attending: float |}
 
-type Leaderboard(ctx: Workers.DurableObjectState<obj>, env: obj) =
+type Invitation(ctx: Workers.DurableObjectState<obj>, env: obj) =
     inherit Runtime.DurableObject<obj, obj>(ctx, env)
 
     let schema = ActorStorage.Exports.Storage ctx.storage
 
     do schema.migrations <- [|
-        Actors.SQLSchemaMigration.Create(1., "Create scores", "CREATE TABLE IF NOT EXISTS scores (player TEXT, points REAL)")
-        Actors.SQLSchemaMigration.Create(2., "Index points", "CREATE INDEX IF NOT EXISTS by_points ON scores (points)")
+        Actors.SQLSchemaMigration.Create(1., "RSVPs", "CREATE TABLE IF NOT EXISTS rsvps (email TEXT PRIMARY KEY)")
+        Actors.SQLSchemaMigration.Create(2., "Plus-ones", "ALTER TABLE rsvps ADD COLUMN plus_ones INTEGER DEFAULT 0")
     |]
 
     interface Runtime.DurableObject.IFetchHandler with
@@ -94,16 +95,16 @@ type Leaderboard(ctx: Workers.DurableObjectState<obj>, env: obj) =
             async {
                 let! _ = schema.runMigrations() |> Async.AwaitPromise
                 if request.``method`` = "POST" then
-                    let! score = request.json<Score>() |> Async.AwaitPromise
-                    ctx.storage.sql.exec("INSERT INTO scores VALUES (?, ?)", score.player, score.points) |> ignore
-                let top = ctx.storage.sql.exec<Score>("SELECT player, points FROM scores ORDER BY points DESC LIMIT 10")
-                return Workers.Exports.Response.json (top.toArray())
+                    let! rsvp = request.json<Rsvp>() |> Async.AwaitPromise
+                    ctx.storage.sql.exec("INSERT OR REPLACE INTO rsvps VALUES (?, ?)", rsvp.email, rsvp.plusOnes) |> ignore
+                let headcount = ctx.storage.sql.exec<Headcount>("SELECT COUNT(*) + TOTAL(plus_ones) AS attending FROM rsvps").one()
+                return Workers.Exports.Response.json headcount
             }
             |> Async.StartAsPromise
             |> U2.Case1
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding for <code>Leaderboard</code> with the <a href="https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/">SQLite storage backend</a>, which <code>ctx.storage.sql</code> requires.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding for <code>Invitation</code> with the <a href="https://developers.cloudflare.com/durable-objects/api/sqlite-storage-api/">SQLite storage backend</a>, which <code>ctx.storage.sql</code> requires.</p></div>
 
 :::info
 `@cloudflare/actors` 0.0.1-beta.6 is a beta release, and its README states that the project is in active development.
@@ -123,7 +124,7 @@ type User = {| userId: string |}
 
 let account: OAuth.OAuthProviderOptions.ApiHandler<obj> =
     OAuth.OAuthProviderOptions.ApiHandler.Create(
-        fetch = fun (_: obj) (_: obj) (ctx: Workers.ExecutionContext<User>) ->
+        fetch = fun _ _ (ctx: Workers.ExecutionContext<User>) ->
             Workers.Exports.Response.json {| userId = ctx.props.userId |})
 
 let home: Workers.ExportedHandler<obj, obj, obj, obj> =
@@ -207,7 +208,7 @@ let consent: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ## Single-Page App
 
-The Worker serves a built front end from Workers KV. `serveSinglePageApp` maps page routes such as `/settings` to `index.html`, so the front end's own router handles them. In 0.1.0 the result of `getAssetFromKV` is typed `obj`, so this Worker is a plain record whose `fetch` returns that result unchanged.
+The Worker serves a built front end from Workers KV. `serveSinglePageApp` maps page routes such as `/settings` to `index.html`, so the front end's own router handles them. Because the result of `getAssetFromKV` is typed `obj` in 0.1.0, this Worker is a plain record whose `fetch` returns that result unchanged.
 
 ```fsharp
 open Fable.Core
@@ -260,7 +261,7 @@ export default worker;
 
 ## Signup Check
 
-The schema is an anonymous record, which Fable emits as a plain JSON Schema object. With `applyDefaults`, Cabidela sets `plan` to `free` on a submission that has none. The Worker answers invalid JSON or a failed `validate` with status 400 and the error message.
+The schema is an anonymous record, which Fable emits as a plain JSON Schema object. With `applyDefaults`, Cabidela sets `plan` to `free` if a submission omits it. When `request.json` or `validate` throws, the Worker responds with status 400 and the error message.
 
 ```fsharp
 open Fable.Core
@@ -325,7 +326,7 @@ export const signup = new Cabidela(schema, ({
 
 `getSwaggerUI` and `getReDocUI` each build a standalone HTML page. That HTML loads its viewer from jsDelivr and fetches the OpenAPI document at the URL you pass. This Worker serves the document itself at `/openapi.json` and ReDoc at `/redoc`. Swagger UI is the response for every other path.
 
-Chanfana's routes are `OpenAPIRoute` subclasses on a Hono or itty-router app. In 0.1.0 `OpenAPIRoute` is an interface that F# code cannot subclass, and neither router is bound. Neither is required for the documentation pages.
+Chanfana's routes are `OpenAPIRoute` subclasses registered on a Hono or itty-router app. In 0.1.0 `OpenAPIRoute` is an interface that F# code cannot subclass, and neither router has an F# binding. This Worker calls the two documentation functions directly, since each takes only a URL.
 
 ```fsharp
 open Fable.Core

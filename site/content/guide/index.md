@@ -15,7 +15,7 @@ order: 1
 
 ## The Path
 
-You write the Worker and its deployment in F#. Fable compiles the Worker to JavaScript, and an F# program uploads it to Cloudflare through the REST API. Your project, `hello-worker`, is a folder of its own beside the FSharp.CloudEdge clone.
+You write the Worker and its deployment in F#. Fable compiles the Worker to JavaScript, and an F# program uploads it to Cloudflare through the REST API. You create your project folder, `hello-worker`, next to the FSharp.CloudEdge folder.
 
 <div class="ce-next">
 <a class="ce-next__card" href="/FSharp.CloudEdge/guide/credentials/"><strong>Credentials</strong><span>Account ID and API token in .env</span></a>
@@ -28,7 +28,7 @@ You write the Worker and its deployment in F#. Fable compiles the Worker to Java
 
 - **A Cloudflare account.** You [sign up](https://developers.cloudflare.com/fundamentals/account/create-account/) with an email address and a password. The free plan is enough for this path. It includes 100,000 Worker requests a day and 10 ms of CPU time per invocation.
 - **The .NET SDK 10.0.401** or a later 10.0.4xx patch, as the repository's `global.json` requires. [Download .NET 10.0](https://dotnet.microsoft.com/en-us/download/dotnet/10.0).
-- **Node.js with npm.** The repository's build scripts run on Node, and on First Worker you install the local tools with npm. [Node.js installers](https://nodejs.org/en/download).
+- **Node.js with npm.** The repository's build scripts run on Node, and on First Worker you install esbuild and workerd with npm. [Node.js installers](https://nodejs.org/en/download).
 - **Python 3**, for the script that generates the control-plane clients. [Python releases](https://www.python.org/downloads/).
 - **git**, to clone the repository and the three projects its build uses. [Install git](https://git-scm.com/install/).
 - **curl**, to send requests to your Worker from a terminal. [curl packages](https://curl.se/download.html).

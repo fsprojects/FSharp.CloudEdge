@@ -47,7 +47,7 @@ let upload (compute: ComputeClient) accountId =
 
 ## Guestbook Bindings
 
-Bindings are JSON objects in the metadata's `bindings` array. Anonymous records serialize with their field names as JSON keys, and double backticks make the keyword `type` usable as a field. Each binding's `name` is its JavaScript variable name inside the Worker.
+Bindings are JSON objects in the metadata's `bindings` array. Anonymous records serialize with their field names as JSON keys, and the field `type` requires double backticks because `type` is an F# keyword. Each binding's `name` is its JavaScript variable name inside the Worker.
 
 ```fsharp
 open System.Text.Json
@@ -73,7 +73,7 @@ A D1 binding takes `database_id`, which Cloudflare's [upload reference](https://
 
 ## Chat Room
 
-A Durable Object binding refers to the exported class by `class_name`. The upload that introduces the class includes a migration, and Cloudflare creates a SQLite-backed namespace for each class in `new_sqlite_classes`.
+A Durable Object binding refers to the exported class by `class_name`. The first upload with the class includes a migration, and Cloudflare creates a SQLite-backed namespace for each class in `new_sqlite_classes`.
 
 ```fsharp
 open System.Text.Json
@@ -96,7 +96,7 @@ For a later migration, set `old_tag` to the current migration tag and `new_tag` 
 
 ## Payment Key
 
-The program reads the key from an environment variable and uploads it in a `secret_text` binding. `keep_bindings` lists the binding types to keep from the previous upload, and with `secret_text` in that list, only the first upload includes the key.
+The program reads the key from an environment variable and uploads it in a `secret_text` binding. `keep_bindings` is the list of binding types to keep from the previous upload. With `secret_text` in that list, only the first upload includes the key.
 
 ```fsharp
 open System

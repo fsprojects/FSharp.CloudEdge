@@ -78,7 +78,7 @@ let onRequest (context: Workers.EventContext<obj, string, obj>) =
     Capnweb.Exports.newWorkersRpcResponse(context.request, Pricing.PricingApi())
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Pages project. Pages serves the <code>onRequest</code> export of <code>functions/api.js</code> at <code>/api</code>, following its <a href="https://developers.cloudflare.com/pages/functions/routing/">file-based routing</a>.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Pages project with this module compiled to <code>functions/api.js</code>. Pages serves that file's <code>onRequest</code> export at <code>/api</code>, following its <a href="https://developers.cloudflare.com/pages/functions/routing/">file-based routing</a>.</p></div>
 
 Browser code opens a session against that route with Cap'n Web's `newHttpBatchRpcSession` or `newWebSocketRpcSession`.
 

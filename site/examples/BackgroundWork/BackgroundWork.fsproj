@@ -7,7 +7,6 @@
     <Compile Include="WebhookInbox.fs" />
     <Compile Include="CartReminder.fs" />
     <Compile Include="TrialEmails.fs" />
-    <Compile Include="TrialSignup.fs" />
     <Compile Include="SessionCleanup.fs" />
   </ItemGroup>
 </Project>

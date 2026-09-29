@@ -11,7 +11,7 @@ let uploadGuestbook databaseId namespaceId =
           FileName = "worker.js"
           ContentType = Some "application/javascript+module"
           PartName = Some "worker.js" }
-    let metadata = GuestbookWorker.metadata databaseId namespaceId
+    let metadata = GuestbookBindings.metadata databaseId namespaceId
     compute.WorkerScriptUploadWorkerModule(accountId, "guestbook", metadata, files = [ worker ])
 
 let setup () =

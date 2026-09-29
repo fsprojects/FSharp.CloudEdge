@@ -5,7 +5,7 @@ order: 24
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">Serve a folder of static files, such as your site's pages and images, from hello-worker. Your program sends Cloudflare a manifest of file hashes and uploads only the new and changed files. A Worker upload then attaches the files to hello-worker.</p>
+<p class="ce-block-lead">Serve static files, such as your site's pages and images, from hello-worker. Your program sends Cloudflare a manifest of file hashes and uploads only the new and changed files. It then uploads hello-worker with a completion token, and Cloudflare attaches the files to the new version.</p>
 <ul class="ce-facts">
 <li><span>Library</span> <code>Management.Compute</code></li>
 <li><span>Operations</span> <code>WorkerScriptUpdateCreateAssetsUploadSession</code> <code>WorkerAssetsUpload</code> <code>WorkerScriptUploadWorkerModule</code></li>
@@ -16,7 +16,7 @@ order: 24
 
 ## File Hash
 
-Each file in the manifest has a hash of 32 hexadecimal characters. `hashFile` computes SHA-256 over the file's base64 text followed by its extension and keeps the first 16 bytes. The example in Cloudflare's [direct-upload guide](https://developers.cloudflare.com/workers/static-assets/direct-upload/) hashes the same inputs. With the extension in the input, `about.txt` and `about.html` with the same bytes are two assets, each uploaded with its own content type.
+Each file in the manifest has a hash of 32 hexadecimal characters. `hashFile` computes SHA-256 over the file's base64 text followed by its extension, such as `html`, and keeps the first 16 bytes. The example in Cloudflare's [direct-upload guide](https://developers.cloudflare.com/workers/static-assets/direct-upload/) hashes the same inputs. With the extension in the input, `about.txt` and `about.html` with the same bytes are two assets, each uploaded with its own content type.
 
 ```fsharp
 module FileHash
@@ -35,7 +35,7 @@ let hashFile (path: string) =
 
 ## Manifest
 
-`scan` returns an `Asset` record for each file under a folder. The key is the URL path of the file, such as `/index.html`. `manifest` builds the request's map from each key to the file's hash and its size in bytes.
+`scan` returns an `Asset` record for each file under a folder. The key is the URL path of the file, such as `/index.html`. `manifest` builds the request's map from each key to the file's hash and its size in bytes. In generated type names such as `workers_manifest_u002D_value`, `_u002D_` stands for a hyphen in the schema name.
 
 ```fsharp
 module Manifest
@@ -87,12 +87,12 @@ let check (compute: ComputeClient) accountId (assets: Manifest.Asset list) =
 ```
 
 :::warning
-The example response in the direct-upload guide has `"errors": null` and `"messages": null`. The 0.1.0 client reads both fields as lists, and the call throws a `JsonException` when either one is `null`. The client decodes a response with empty lists.
+The example response in the direct-upload guide has `"errors": null` and `"messages": null`. The 0.1.0 client reads both fields as lists, and the call throws a `JsonException` when either one is `null`. The client decodes a response that has empty lists in both fields.
 :::
 
 ## Batched Upload
 
-The program sends each bucket in one `WorkerAssetsUpload` request. Cloudflare expects the upload token on these requests in place of your API token, so `upload` creates a second `HttpClient` for them. Each file is a form field named by its hash, with the base64 contents as its value. Cloudflare serves each file with the content type of its field.
+`upload` sends each bucket in one `WorkerAssetsUpload` request. These requests require the upload token in place of your API token, so `upload` creates a second `HttpClient` with that bearer token. Each file is one form field. The field name is the file's hash, and the value is the base64 contents. Cloudflare serves each file with the content type of its field.
 
 The reply to the last bucket, HTTP 201, contains the completion token. The upload token and the completion token are each valid for one hour.
 
@@ -178,7 +178,7 @@ let deploy compute accountId (completionToken: string) =
 
 ## Code-Only Redeploy
 
-When only `dist/worker.js` changed, call `redeploy`. It sets `keep_assets` in the metadata in place of a completion token. The new version then has the same assets as the current one, and the program skips the upload session and the buckets.
+When only `dist/worker.js` has changed, call `redeploy`. It sets `keep_assets` in the metadata in place of a completion token. The new version then has the same assets as the current one, and the program skips the upload session and the buckets.
 
 ```fsharp
 module CodeOnlyRedeploy
@@ -226,9 +226,9 @@ let main args =
     0
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a <code>public</code> folder in hello-worker and the <code>ClientSetup</code> module from <a href="/FSharp.CloudEdge/guide/credentials/">Credentials</a>. The publisher's project file is like the one on <a href="/FSharp.CloudEdge/guide/first-deploy/">First Deploy</a>, and its <code>Compile</code> list holds <code>ClientSetup.fs</code>, then the seven files of this page in order.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a <code>public</code> folder in hello-worker and the <code>ClientSetup</code> module from <a href="/FSharp.CloudEdge/guide/credentials/">Credentials</a>. The publisher's project file is like the one on <a href="/FSharp.CloudEdge/guide/first-deploy/">First Deploy</a>, and its <code>Compile</code> list contains <code>ClientSetup.fs</code>, then the seven files of this page in order. Start it from hello-worker, since it reads <code>public</code> and <code>dist/worker.js</code> relative to the working directory.</p></div>
 
-On the first run, all four files are new.
+On the first run, all four files in `public` are new.
 
 ```text
 4 of 4 files need uploading
@@ -252,7 +252,7 @@ Uploading bucket 1 of 1
 Deployed hello-worker, has assets: true
 ```
 
-These runs were recorded against a local test server in place of Cloudflare's API, and that server put two hashes in each bucket.
+These runs were recorded against a local test server in place of Cloudflare's API. That server returned buckets of two hashes.
 
 ## Library Table
 

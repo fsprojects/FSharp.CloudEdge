@@ -14,7 +14,7 @@ order: 13
 
 ## Model Switch
 
-`workersModel` and `endpointModel` use different libraries to create their models. Both functions have the return type `LanguageModelV4`, so either model can be the result of `modelFor`. `createOpenAICompatible` builds a provider for any endpoint with an OpenAI-compatible API. Prompt code written against `LanguageModelV4`, like the Summarizer's on the [AI](ai.md) page, type-checks with either model.
+`workersModel` and `endpointModel` use different libraries to create their models. `createOpenAICompatible` builds a provider for an endpoint that exposes an OpenAI-compatible API. Both functions have the return type `LanguageModelV4`, so either model can be the result of `modelFor`. Prompt code written against `LanguageModelV4`, like the Summarizer's on the [AI](ai.md) page, type-checks with either model.
 
 ```fsharp
 open Fable.Core
@@ -87,7 +87,7 @@ export function modelFor(env, plan) {
 
 ## Usage Meter
 
-AI Search models implement version 3 of the AI SDK contract, and `Support.AI.V3.Provider` holds its F# types. Workers AI and AI Gateway models implement version 4, and the two versions are separate F# types. `askWithUsage` takes any `LanguageModelV3`, such as the AI Search model in Help Center Answers on the [AI](ai.md) page. The result holds the answer and the call's token counts. `finish` is the reason that generation stopped, such as `stop` or `length`.
+AI Search models implement version 3 of the AI SDK contract, and `Support.AI.V3.Provider` defines its F# types. Workers AI and AI Gateway models implement version 4, and the two versions are separate F# types. `askWithUsage` takes any `LanguageModelV3`, such as the AI Search model in Help Center Answers on the [AI](ai.md) page. The result contains the answer and the call's token counts. `finish` is the reason that generation stopped, such as `stop` or `length`.
 
 ```fsharp
 open Fable.Core

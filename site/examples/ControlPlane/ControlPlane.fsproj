@@ -28,7 +28,7 @@
     <Compile Include="BucketList.fs" />
     <Compile Include="ResourceList.fs" />
     <Compile Include="HelloWorker.fs" />
-    <Compile Include="GuestbookWorker.fs" />
+    <Compile Include="GuestbookBindings.fs" />
     <Compile Include="ChatRoomWorker.fs" />
     <Compile Include="ApiKeySecret.fs" />
     <Compile Include="NightlyCleanup.fs" />

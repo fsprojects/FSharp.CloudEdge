@@ -42,7 +42,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Flagship binding named <code>FLAGS</code> with your Flagship app's ID. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how to declare it.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a <code>flagship</code> binding named <code>FLAGS</code>, with your Flagship app's ID as <code>app_id</code>. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how to declare bindings.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -133,6 +133,6 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 <div class="ce-next">
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/"><strong>Workers</strong><span>Request handlers</span></a>
-<a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Declare the binding</span></a>
+<a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Declare bindings</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/clients/"><strong>Client Catalog</strong><span>Flagship apps from .NET</span></a>
 </div>

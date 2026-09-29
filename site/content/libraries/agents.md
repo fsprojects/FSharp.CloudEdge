@@ -51,7 +51,7 @@ type GameLobby(ctx: Workers.DurableObjectState<obj>, env: obj) as this =
         lifecycle.broadcast (message, [| player.id |])
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding for <code>GameLobby</code>, with each lobby addressed by name. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how to declare the binding.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding for <code>GameLobby</code> and a Worker that forwards each connection to a lobby by name, as Room Lookup on the <a href="/FSharp.CloudEdge/libraries/platform/durable-objects/">Durable Objects</a> page does. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how to declare the binding.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -120,7 +120,7 @@ type TeamChannel(ctx: Workers.DurableObjectState<obj>, env: obj) as this =
         | _ -> ()
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Durable Object binding for <code>TeamChannel</code> on the SQLite storage backend.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a SQLite-backed Durable Object binding for <code>TeamChannel</code>, with channels addressed by name.</p></div>
 
 ## Snippet Runner
 
@@ -151,7 +151,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> a Worker Loader binding named <code>LOADER</code>. <a href="https://developers.cloudflare.com/dynamic-workers/pricing/">Dynamic Workers</a> are available on the Workers Paid plan.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> a Worker Loader binding named <code>LOADER</code>. <a href="https://developers.cloudflare.com/dynamic-workers/pricing/">Dynamic Workers</a> require the Workers Paid plan.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
@@ -187,7 +187,7 @@ export default worker;
 
 ## Drafts Folder
 
-`Workspace` from `@cloudflare/shell` is a file system stored in the Durable Object's SQLite database. On a `PUT`, the object saves the request body as a Markdown file at the request path, and every response lists the drafts with their sizes.
+`Workspace` from `@cloudflare/shell` is a file system stored in the Durable Object's SQLite database. On a `PUT`, the object saves the request body as a Markdown file at the request path, and every response lists the `.md` files with their sizes.
 
 ```fsharp
 open Fable.Core

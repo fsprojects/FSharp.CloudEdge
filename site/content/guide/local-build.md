@@ -5,7 +5,7 @@ order: 3
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">Today you get the libraries by cloning the FSharp.CloudEdge repository and building it on your machine. The build generates each binding from exact versions of Cloudflare's npm packages and OpenAPI document, then compiles it. You add the result to your Worker project on the next page.</p>
+<p class="ce-block-lead">Today you get the libraries by cloning the FSharp.CloudEdge repository and building it on your machine. The build generates the runtime bindings from exact releases of Cloudflare's npm packages and the control-plane clients from a pinned copy of Cloudflare's OpenAPI document. You add the result to your Worker project on the next page.</p>
 <ul class="ce-facts">
 <li><span>You need</span> .NET SDK 10.0.401, Node.js with npm, Python 3, git</li>
 <li><span>You get</span> Compiled bindings and a local package feed</li>
@@ -32,7 +32,7 @@ The build requires three more repositories beside FSharp.CloudEdge. Xantham and 
    git clone https://github.com/FidelityFramework/BAREWire.git
    ```
 
-3. Switch Xantham to commit `c7e2fa0`. The pinned Xantham tool was packed from that commit.
+3. Switch Xantham to commit `c7e2fa0`. The runtime bindings in the repository were generated with a Xantham tool packed from that commit.
 
    ```bash
    git -C Xantham switch --detach c7e2fa0daa2ed3ec662cd453ae4c287a6a28673b
@@ -75,7 +75,13 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run tools:bootstrap
    ```
 
-   The bootstrap packs the Xantham and Hawaii checkouts with `dotnet pack` in Release and writes the packages to `artifacts/tool-feed`. It also packs `Xantham.Fable.Core` and `Xantham.Fable.Core.TS`, the two support packages that every runtime binding requires. Each version number ends in a digest of the package's source and build recipe, and your SDK version is part of that digest. The bootstrap then installs both tools in the repository's tool manifest, `.config/dotnet-tools.json`, and records the package hashes in `config/tool-packages.json`. Its last line on success starts `Local tools are pinned in`.
+   ```text
+   xantham: installed xantham 0.1.0-local.4c8eab44ac350e5cf178
+   hawaii-unofficial: installed Hawaii.Unofficial 1.0.0-local.8d94cc643f84f47d4848
+   Local tools are pinned in .config/dotnet-tools.json; package hashes are in config/tool-packages.json.
+   ```
+
+   The bootstrap packs the Xantham and Hawaii checkouts with `dotnet pack` in Release and writes the packages to `artifacts/tool-feed`. It also packs `Xantham.Fable.Core` and `Xantham.Fable.Core.TS`, the two support packages that every runtime binding requires. Each version number ends in a digest of the package's source and build recipe, and the digest also covers your SDK version. With another SDK patch, your digests differ from the ones above. The bootstrap then installs both tools in the repository's tool manifest, `.config/dotnet-tools.json`, and records the package hashes in `config/tool-packages.json`.
 
 3. Restore the tools that the manifest lists.
 
@@ -83,17 +89,17 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run tools:restore
    ```
 
-   The command wraps `dotnet tool restore`, which fetches Fable 5.13.0 from nuget.org and the two generators from `artifacts/tool-feed`.
+   The command wraps `dotnet tool restore`, which fetches Fable 5.13.0 from nuget.org and the two generators from `artifacts/tool-feed`. When the restore prints a notice about a newer Fable release, keep the manifest at 5.13.0. On First Worker you install Fable 5.13.0 as well.
 
 ## Library Build
 
-1. Install Cloudflare's npm packages.
+1. Install the npm packages that provide the TypeScript declarations.
 
    ```bash
    npm run install:profiles -- --delivery
    ```
 
-   Each folder under `profiles/` is a dependency profile: a set of npm packages with its own lock file. With `--delivery`, the installer calls `npm ci --ignore-scripts` in each of the 24 profiles that hold this release's inputs. It prints one line per profile, such as `agents: installed`.
+   Each folder under `profiles/` is a dependency profile: a set of npm packages with its own lock file. With `--delivery`, the installer runs `npm ci --ignore-scripts` in the 24 profiles that `npm run build` reads. It prints one line per profile, such as `agents: installed`.
 
 2. Check the support package.
 
@@ -101,7 +107,7 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run test:support-package
    ```
 
-   This builds a small F# project with `Xantham.Fable.Core`, restored from the local feed. Fable compiles that project to JavaScript, and Node verifies the output. It finishes with `Package-only support smoke passed` and the package version.
+   This builds a small F# project with `Xantham.Fable.Core`, restored from the local feed. Fable compiles that project to JavaScript, and a Node script checks the result. It finishes with `Package-only support smoke passed` and the package version.
 
 3. Generate and compile the libraries.
 
@@ -109,11 +115,11 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run build
    ```
 
-   - Xantham generates the 31 runtime libraries, and the 3 AI contract libraries they share, from the declarations in the profiles. An initial compile checks them.
-   - A Python runner downloads Cloudflare's OpenAPI document at a pinned commit and verifies its SHA-256. Hawaii generates the 11 control-plane clients and their shared model project from the downloaded file. The runner builds those 12 projects and exercises them with a loopback HTTP server.
+   - Xantham generates the 31 runtime libraries from the declarations in the profiles, along with the three AI SDK contract libraries they share. The build then compiles those 34 libraries.
+   - A Python runner downloads Cloudflare's OpenAPI document at a pinned commit and verifies its SHA-256. Hawaii generates the 11 control-plane clients and their shared model project from the downloaded file. The runner builds those 12 projects. A test program then sends four requests through the Tenancy and Compute clients to a loopback HTTP server.
    - The build compiles the solution, `FSharp.CloudEdge.slnx`, in Release.
 
-   On success, the final line reads `Complete hierarchy compiled`, followed by the project counts. The build writes a log for each stage under `artifacts/`, and `artifacts/library-build/latest.json` records how the last attempt ended. In the recorded generation that produced the committed clients, building those 12 projects took 350 seconds and peaked at 10.5 GiB of memory.
+   On success, the last line of output starts with `Complete hierarchy compiled` and lists the project counts. The build writes a log for each stage under `artifacts/`, and `artifacts/library-build/latest.json` records how the most recent attempt ended.
 
 4. Finish with the ByteBridge test.
 
@@ -121,17 +127,28 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run test:bridge
    ```
 
-   The ByteBridge test combines the Workers bindings with BAREWire. Fable translates it to JavaScript. Node then runs its 13 checks and prints a JSON object with the number that passed.
+   ```text
+   {"passed":13,"runtime":"v25.1.0","scope":"Fable, generated Workers Body bindings and BAREWire codecs in Node Fetch"}
+   ```
+
+   The ByteBridge test project references the Workers bindings and BAREWire. Fable translates it to JavaScript, and Node runs its 13 checks. The JSON line reports the number of checks that passed and the Node runtime.
 
 ## Rebuilds
 
-A second build can reuse the first. With `--resume`, the build compares each library's input and output hashes with the previous build. Where they match, the build skips generation for that library. Where they differ, the generator runs again. Compilation covers every library either way.
+A second build can reuse the first. With `--resume`, the build compares each library's input, generator and output hashes with the values that the previous build recorded. Where they match, the build skips generation for that library. Where they differ, the generator runs again. Compilation covers every library either way.
 
 ```bash
 npm run build -- --resume
 ```
 
-The bootstrap compares hashes too. When a generator's source is unchanged, it reuses the package in `artifacts/tool-feed`, provided the package still matches its receipt.
+The bootstrap compares hashes too. When a generator's source is unchanged, the bootstrap reuses the package in `artifacts/tool-feed` after it verifies the package against its build receipt.
+
+In a new clone on the same machine, the bootstrap packs the tools again with the same version numbers. NuGet still holds the packages from the first clone in its cache at `~/.nuget/packages`, so the bootstrap installs those copies and stops with `installed cache differs from the local package`. Delete the cached tool packages, then repeat the bootstrap.
+
+```bash
+rm -rf ~/.nuget/packages/xantham ~/.nuget/packages/hawaii.unofficial
+npm run tools:bootstrap
+```
 
 ## Build Output
 
