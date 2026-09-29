@@ -1,0 +1,62 @@
+/* Library pages. Orange is the accent; F# blue, F# cyan, amber and green mark the example sections in turn. */
+:root {
+  --ce-orange: #F38020;
+  --ce-amber: #FAAE40;
+  --ce-fs-blue: #378BBA;
+  --ce-fs-cyan: #30B9DB;
+  --ce-green: #3FB68B;
+  --ce-violet: #8E7CF0;
+}
+
+.ce-block-head {
+  margin: 0 0 2.25rem;
+  padding: 1.25rem 1.35rem;
+  border: 1px solid var(--nacara-border);
+  border-radius: .85rem;
+  background:
+    linear-gradient(90deg, var(--ce-orange), var(--ce-amber) 38%, var(--ce-fs-cyan) 72%, var(--ce-fs-blue)) top / 100% 3px no-repeat,
+    var(--nacara-bg-subtle);
+}
+.nacara-content .ce-block-head p.ce-block-lead { margin: .2rem 0 1rem; font-size: 1.08rem; line-height: 1.6; color: var(--nacara-text); }
+.nacara-content ul.ce-facts { list-style: none; display: flex; flex-wrap: wrap; gap: .5rem 1.4rem; margin: 0; padding: 0; font-size: .86rem; }
+.nacara-content ul.ce-facts li { margin: 0; padding: 0; color: var(--nacara-text-muted); }
+.ce-facts li > span { display: inline-block; margin-right: .4rem; font-weight: 650; font-size: .72rem; letter-spacing: .05em; text-transform: uppercase; color: var(--nacara-primary); }
+.ce-facts code { font-size: .8rem; }
+
+/* Example sections: a coloured marker before each heading, cycling through the palette. */
+.nacara-layout:not(.nacara-layout--splash) .nacara-content h2 { position: relative; padding-left: .9rem; }
+.nacara-layout:not(.nacara-layout--splash) .nacara-content h2::before {
+  content: ""; position: absolute; left: 0; top: .22em; bottom: .22em; width: 4px; border-radius: 2px; background: var(--ce-orange);
+}
+.nacara-layout:not(.nacara-layout--splash) .nacara-content h2:nth-of-type(4n+2)::before { background: var(--ce-fs-cyan); }
+.nacara-layout:not(.nacara-layout--splash) .nacara-content h2:nth-of-type(4n+3)::before { background: var(--ce-amber); }
+.nacara-layout:not(.nacara-layout--splash) .nacara-content h2:nth-of-type(4n+4)::before { background: var(--ce-fs-blue); }
+
+details.ce-js { margin: .25rem 0 1.75rem; border: 1px solid var(--nacara-border); border-radius: .6rem; background: var(--nacara-bg-subtle); }
+details.ce-js > summary {
+  cursor: pointer; list-style: none; padding: .6rem .9rem; font-size: .84rem; font-weight: 600; color: var(--nacara-text-muted);
+}
+details.ce-js > summary::-webkit-details-marker { display: none; }
+details.ce-js > summary::before { content: "JS"; display: inline-block; margin-right: .6rem; padding: .05rem .4rem; border-radius: .3rem; font-family: var(--nacara-font-mono); font-size: .7rem; font-weight: 700; background: var(--ce-amber); color: #1A1205; }
+details.ce-js[open] > summary { border-bottom: 1px solid var(--nacara-border); color: var(--nacara-text); }
+details.ce-js > :not(summary) { margin: 0; }
+.nacara-content details.ce-js pre { margin: 0; border: 0; border-radius: 0 0 .6rem .6rem; }
+
+.ce-needs { margin: .25rem 0 1.5rem; padding: .7rem .95rem; border-left: 3px solid var(--ce-fs-blue); border-radius: 0 .5rem .5rem 0; background: color-mix(in oklab, var(--ce-fs-blue) 9%, transparent); font-size: .9rem; }
+.nacara-content .ce-needs p { margin: 0; }
+.ce-needs strong { color: var(--nacara-heading); }
+
+.ce-next { display: grid; grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr)); gap: .8rem; margin: 1rem 0 2rem; }
+.nacara-content a.ce-next__card {
+  display: block; padding: .85rem 1rem; border: 1px solid var(--nacara-border); border-radius: .7rem; text-decoration: none;
+  background: var(--nacara-bg-subtle); color: var(--nacara-text); transition: border-color .15s ease, transform .15s ease;
+}
+.nacara-content a.ce-next__card:hover { border-color: color-mix(in oklab, var(--ce-orange) 50%, var(--nacara-border)); transform: translateY(-1px); }
+.ce-next__card strong { display: block; margin-bottom: .2rem; color: var(--nacara-heading); }
+.ce-next__card span { font-size: .86rem; color: var(--nacara-text-muted); }
+
+.nacara-content .ce-card h3 a { color: inherit; text-decoration: none; }
+.nacara-content .ce-card h3 a:hover { color: var(--nacara-primary); }
+
+/* Code keeps F# operators as typed: no font ligatures. */
+.nacara-content pre, .nacara-content code, .ce-code pre, .ce-code code { font-variant-ligatures: none; font-feature-settings: "liga" 0, "calt" 0; }

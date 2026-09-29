@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.Sandbox/FSharp.CloudEdge.Runtime.Sandbox.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxBridge/FSharp.CloudEdge.Runtime.SandboxBridge.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerArtifacts/FSharp.CloudEdge.Runtime.ComputerArtifacts.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="CodeRunner.fs" />
+  </ItemGroup>
+</Project>

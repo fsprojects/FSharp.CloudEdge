@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProvider/FSharp.CloudEdge.Runtime.AIGatewayProvider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.AISearchProvider/FSharp.CloudEdge.Runtime.AISearchProvider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.AIUtils/FSharp.CloudEdge.Runtime.AIUtils.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.AIChat/FSharp.CloudEdge.Runtime.AIChat.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Summarizer.fs" />
+  </ItemGroup>
+</Project>

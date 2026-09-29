@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="HealthCheck.fs" />
+    <Compile Include="ApiRouter.fs" />
+    <Compile Include="ApiProxy.fs" />
+    <Compile Include="VisitorGreeting.fs" />
+    <Compile Include="AnnouncementBanner.fs" />
+    <Compile Include="PageCache.fs" />
+  </ItemGroup>
+</Project>

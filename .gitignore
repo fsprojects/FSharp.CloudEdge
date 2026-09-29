@@ -11,3 +11,6 @@ artifacts/
 **/fable-out/
 tests/**/js/
 *.user
+
+# Nacara site output
+site/output/
