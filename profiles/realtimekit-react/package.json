@@ -1,0 +1,13 @@
+{
+  "name": "fsharp-cloudedge-input-realtimekit-react",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/realtimekit-callstats": "8.0.0",
+    "@cloudflare/realtimekit-react": "2.0.2",
+    "@cloudflare/realtimekit-utils": "1.0.0",
+    "@types/node": "16.18.126",
+    "@types/react": "19.2.18"
+  }
+}

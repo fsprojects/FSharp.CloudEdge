@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-stytch",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-stytch": "1.0.3"
+  }
+}

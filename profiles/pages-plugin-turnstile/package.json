@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-turnstile",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-turnstile": "1.0.2"
+  }
+}

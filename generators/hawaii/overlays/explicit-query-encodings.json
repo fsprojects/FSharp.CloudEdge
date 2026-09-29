@@ -1,0 +1,96 @@
+[
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1ai-gateway~1gateways~1{gateway_id}~1logs/delete/parameters/4/x-hawaii-query-encoding",
+    "value": "dotted-repeat"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1ai-gateway~1gateways~1{gateway_id}~1logs/get/parameters/7/x-hawaii-query-encoding",
+    "value": "dotted-repeat"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1indicators~1{indicator_id}~1relationships/get/parameters/3/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1indicators~1{indicator_id}~1relationships/get/parameters/3/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1indicators~1{indicator_id}~1relationships/get/parameters/3/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1tags~1{tag_uuid}~1indicators/get/parameters/7/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1tags~1{tag_uuid}~1indicators/get/parameters/7/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1dataset~1{dataset_id}~1tags~1{tag_uuid}~1indicators/get/parameters/7/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/4/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/4/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/4/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/9/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/9/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators/get/parameters/9/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags/get/parameters/5/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags/get/parameters/5/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags/get/parameters/5/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1indicators/get/parameters/7/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1indicators/get/parameters/7/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1indicators/get/parameters/7/content/application~1json/schema"
+  },
+  {
+    "op": "add",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1relationships/get/parameters/3/content",
+    "value": {
+      "application/json": {}
+    }
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1relationships/get/parameters/3/schema",
+    "path": "/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1tags~1{tag_uuid}~1relationships/get/parameters/3/content/application~1json/schema"
+  }
+]

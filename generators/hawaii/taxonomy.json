@@ -1,0 +1,1519 @@
+{
+  "schemaVersion": 1,
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "note": "Logical client taxonomy only. Shared schema types retain one Core owner. Version and lifecycle remain separate. No operation is omitted because it lacks a classification.",
+  "rules": [
+    {
+      "match": "exact",
+      "path": "/accounts",
+      "family": "accounts",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "exact",
+      "path": "/accounts/move",
+      "family": "accounts",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{accountId}/v1/images",
+      "family": "images",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{accountId}/v2/images",
+      "family": "images",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{accountId}/zones",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_identifier}/custom_pages",
+      "family": "custom-pages",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "exact",
+      "path": "/accounts/{account_id}",
+      "family": "accounts",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/abuse-reports",
+      "family": "abuse-reports",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/access",
+      "family": "access",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/addressing",
+      "family": "addressing",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/agent-memory",
+      "family": "agent-memory",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/ai",
+      "family": "ai",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/ai-gateway",
+      "family": "ai-gateway",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/ai-search",
+      "family": "ai-search",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/alerting",
+      "family": "alerting",
+      "purpose": "Messaging",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/analytics",
+      "family": "analytics",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/analytics_engine",
+      "family": "analytics-engine",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/artifacts",
+      "family": "artifacts",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/audit_logs",
+      "family": "audit-logs",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/autorag",
+      "family": "autorag",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/billable-usage",
+      "family": "billing",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/billable/usage",
+      "family": "billing",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/billing",
+      "family": "billing",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/botnet_feed",
+      "family": "botnet-feed",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/brand-protection",
+      "family": "brand-protection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/browser-extension",
+      "family": "browser-extension",
+      "purpose": "Browser",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/browser-rendering",
+      "family": "browser-rendering",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/builds",
+      "family": "builds",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/bulk/subscriptions",
+      "family": "subscriptions",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/calls",
+      "family": "calls",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/cfd_tunnel",
+      "family": "cfd-tunnel",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/challenges",
+      "family": "challenges",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/client-secret",
+      "family": "billing",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/cloudforce-one",
+      "family": "cloudforce-one",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/cni",
+      "family": "cni",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/connectivity",
+      "family": "connectivity",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/containers",
+      "family": "containers",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/custom_csrs",
+      "family": "custom-csrs",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/custom_ns",
+      "family": "custom-ns",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/d1",
+      "family": "d1",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/data-security",
+      "family": "data-security",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/devices",
+      "family": "devices",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dex",
+      "family": "dex",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/diagnostics",
+      "family": "diagnostics",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dlp",
+      "family": "dlp",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dls",
+      "family": "data-localization",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dns_firewall",
+      "family": "dns-firewall",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dns_records",
+      "family": "dns-records",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/dns_settings",
+      "family": "dns-settings",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/email",
+      "family": "email",
+      "purpose": "Messaging",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/email-security",
+      "family": "email-security",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/entitlements",
+      "family": "entitlements",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/event_notifications",
+      "family": "event-notifications",
+      "purpose": "Messaging",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/event_subscriptions",
+      "family": "event-subscriptions",
+      "purpose": "Messaging",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/firewall",
+      "family": "firewall",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/flagship",
+      "family": "flagship",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/gateway",
+      "family": "gateway",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/hyperdrive",
+      "family": "hyperdrive",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/iam",
+      "family": "iam",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/images",
+      "family": "images",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/infrastructure",
+      "family": "infrastructure",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/intel",
+      "family": "intel",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/invoices",
+      "family": "invoices",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/load_balancers",
+      "family": "load-balancers",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/logpush",
+      "family": "logpush",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/logs",
+      "family": "logs",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/magic",
+      "family": "magic",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/media",
+      "family": "media",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/members",
+      "family": "members",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/mnm",
+      "family": "mnm",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/moq",
+      "family": "moq",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/move",
+      "family": "accounts",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/mtls_certificates",
+      "family": "mtls-certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/oauth_clients",
+      "family": "oauth-clients",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/one",
+      "family": "one",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/organizations",
+      "family": "organizations",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pages",
+      "family": "pages",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pay-bad-debt",
+      "family": "pay-bad-debt",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pay-invoice",
+      "family": "pay-invoice",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pay-per-crawl",
+      "family": "pay-per-crawl",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/payment-methods",
+      "family": "payment-methods",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pcaps",
+      "family": "pcaps",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/pipelines",
+      "family": "pipelines",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/profile",
+      "family": "profile",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/queues",
+      "family": "queues",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/r2",
+      "family": "r2",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/r2-catalog",
+      "family": "r2-catalog",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/realtime",
+      "family": "realtime",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/receipts",
+      "family": "receipts",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/registrar",
+      "family": "registrar",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/registrar-sandbox",
+      "family": "registrar-sandbox",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/reporting",
+      "family": "reporting",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/request-tracer",
+      "family": "request-tracer",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/resource-library",
+      "family": "resource-library",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/roles",
+      "family": "roles",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/rules",
+      "family": "rules",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/rulesets",
+      "family": "rulesets",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/rum",
+      "family": "rum",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/scim",
+      "family": "scim",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/secondary_dns",
+      "family": "secondary-dns",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/secrets_store",
+      "family": "secrets-store",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/security-center",
+      "family": "security-center",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/settings",
+      "family": "settings",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/shares",
+      "family": "shares",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/slurper",
+      "family": "r2",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/sso_connectors",
+      "family": "sso-connectors",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/storage",
+      "family": "storage",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/stream",
+      "family": "stream",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/subscriptions",
+      "family": "subscriptions",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/tags",
+      "family": "tags",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/teamnet",
+      "family": "teamnet",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/tokens",
+      "family": "tokens",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/triggers",
+      "family": "triggers",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/tunnels",
+      "family": "tunnels",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/urlscanner",
+      "family": "urlscanner",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/vectorize",
+      "family": "vectorize",
+      "purpose": "Storage",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/vuln_scanner",
+      "family": "vuln-scanner",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/waiting_rooms",
+      "family": "waiting-rooms",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/warp_connector",
+      "family": "warp-connector",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/workers",
+      "family": "workers",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/workflows",
+      "family": "workflows",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/zerotrust",
+      "family": "zerotrust",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/accounts/{account_id}/zt_risk_scoring",
+      "family": "zt-risk-scoring",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/api/v4/health",
+      "family": "api-health",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/billing",
+      "family": "billing",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/certificates",
+      "family": "certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/internal/submit",
+      "family": "brand-protection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/ips",
+      "family": "ips",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/live",
+      "family": "brand-protection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/memberships",
+      "family": "memberships",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/oauth/scopes",
+      "family": "oauth",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/organizations",
+      "family": "organizations",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/pages",
+      "family": "pages",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/radar",
+      "family": "radar",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/ready",
+      "family": "brand-protection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/signed-url",
+      "family": "brand-protection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/tenants",
+      "family": "tenants",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/user",
+      "family": "user",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/workers",
+      "family": "workers",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "exact",
+      "path": "/zones",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_identifier}/analytics",
+      "family": "analytics",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_identifier}/custom_pages",
+      "family": "custom-pages",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "exact",
+      "path": "/zones/{zone_id}",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/access",
+      "family": "access",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/acm",
+      "family": "advanced-certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/activation_check",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/addressing",
+      "family": "addressing",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/ai-audit",
+      "family": "ai-audit",
+      "purpose": "AI",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/ai-security",
+      "family": "ai-security",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/analytics",
+      "family": "analytics",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/api_gateway",
+      "family": "api-gateway",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/argo",
+      "family": "argo",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/available_plans",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/available_rate_plans",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/bot_management",
+      "family": "bot-management",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/cache",
+      "family": "cache",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/certificate_authorities",
+      "family": "certificate-authorities",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/client_certificates",
+      "family": "client-certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/cloud_connector",
+      "family": "cloud-connector",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/content-upload-scan",
+      "family": "content-upload-scan",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/ct",
+      "family": "ct",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/custom_certificates",
+      "family": "custom-certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/custom_csrs",
+      "family": "custom-csrs",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/custom_hostnames",
+      "family": "custom-hostnames",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/custom_ns",
+      "family": "custom-ns",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/dcv_delegation",
+      "family": "dcv-delegation",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/devices",
+      "family": "devices",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/dns_analytics",
+      "family": "dns-analytics",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/dns_records",
+      "family": "dns-records",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/dns_settings",
+      "family": "dns-settings",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/dnssec",
+      "family": "dnssec",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/email",
+      "family": "email",
+      "purpose": "Messaging",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/entitlements",
+      "family": "entitlements",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/environments",
+      "family": "environments",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/filters",
+      "family": "filters",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/firewall",
+      "family": "firewall",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/fraud_detection",
+      "family": "fraud-detection",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/healthchecks",
+      "family": "healthchecks",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/hold",
+      "family": "zones",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/hostnames",
+      "family": "hostnames",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/intel",
+      "family": "intel",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/keyless_certificates",
+      "family": "keyless-certificates",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/leaked-credential-checks",
+      "family": "leaked-credential-checks",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/load_balancers",
+      "family": "load-balancers",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/logpush",
+      "family": "logpush",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/logs",
+      "family": "logs",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/managed_headers",
+      "family": "managed-headers",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/media",
+      "family": "media",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/origin",
+      "family": "origin",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/origin_tls_client_auth",
+      "family": "origin-tls-client-auth",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/page_shield",
+      "family": "page-shield",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/pagerules",
+      "family": "pagerules",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/pay-per-crawl",
+      "family": "pay-per-crawl",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/precursor",
+      "family": "precursor",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/purge_cache",
+      "family": "cache",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/rate_limit_analytics",
+      "family": "rate-limit-analytics",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/rate_limits",
+      "family": "rate-limits",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/rulesets",
+      "family": "rulesets",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/schema_validation",
+      "family": "schema-validation",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/secondary_dns",
+      "family": "secondary-dns",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/security-center",
+      "family": "security-center",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/settings",
+      "family": "settings",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/smart_shield",
+      "family": "smart-shield",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/snippets",
+      "family": "snippets",
+      "purpose": "Compute",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/spectrum",
+      "family": "spectrum",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/speed_api",
+      "family": "speed-api",
+      "purpose": "Observability",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/ssl",
+      "family": "ssl",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/stream",
+      "family": "stream",
+      "purpose": "Media",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/subscription",
+      "family": "subscription",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/subscriptions",
+      "family": "subscriptions",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/tags",
+      "family": "tags",
+      "purpose": "Tenancy",
+      "area": "Tenancy"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/token_validation",
+      "family": "token-validation",
+      "purpose": "Security",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/url_normalization",
+      "family": "url-normalization",
+      "purpose": "ContentDelivery",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/waiting_rooms",
+      "family": "waiting-rooms",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/web3",
+      "family": "web3",
+      "purpose": "Networking",
+      "area": "Management"
+    },
+    {
+      "match": "prefix",
+      "path": "/zones/{zone_id}/workers",
+      "family": "workers",
+      "purpose": "Compute",
+      "area": "Management"
+    }
+  ]
+}

@@ -1,0 +1,4124 @@
+{
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "totalOperations": 3448,
+  "deprecatedOperations": [
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/access/bookmarks",
+      "operationId": "access-bookmark-applications-(-deprecated)-list-bookmark-applications",
+      "tags": [
+        "Access Bookmark applications (Deprecated)"
+      ],
+      "description": "Lists Bookmark applications.",
+      "summary": "List Bookmark applications",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of using a specialized Access Application App Type.",
+          "display": true,
+          "eol": "2023-03-19T00:00:00Z",
+          "id": "bookmarks_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/access/bookmarks/{bookmark_id}",
+      "operationId": "access-bookmark-applications-(-deprecated)-delete-a-bookmark-application",
+      "tags": [
+        "Access Bookmark applications (Deprecated)"
+      ],
+      "description": "Deletes a Bookmark application.",
+      "summary": "Delete a Bookmark application",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of using a specialized Access Application App Type.",
+          "display": true,
+          "eol": "2023-03-19T00:00:00Z",
+          "id": "bookmarks_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/access/bookmarks/{bookmark_id}",
+      "operationId": "access-bookmark-applications-(-deprecated)-get-a-bookmark-application",
+      "tags": [
+        "Access Bookmark applications (Deprecated)"
+      ],
+      "description": "Fetches a single Bookmark application.",
+      "summary": "Get a Bookmark application",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of using a specialized Access Application App Type.",
+          "display": true,
+          "eol": "2023-03-19T00:00:00Z",
+          "id": "bookmarks_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/access/bookmarks/{bookmark_id}",
+      "operationId": "access-bookmark-applications-(-deprecated)-create-a-bookmark-application",
+      "tags": [
+        "Access Bookmark applications (Deprecated)"
+      ],
+      "description": "Create a new Bookmark application.",
+      "summary": "Create a Bookmark application",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of using a specialized Access Application App Type.",
+          "display": true,
+          "eol": "2023-03-19T00:00:00Z",
+          "id": "bookmarks_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/accounts/{account_id}/access/bookmarks/{bookmark_id}",
+      "operationId": "access-bookmark-applications-(-deprecated)-update-a-bookmark-application",
+      "tags": [
+        "Access Bookmark applications (Deprecated)"
+      ],
+      "description": "Updates a configured Bookmark application.",
+      "summary": "Update a Bookmark application",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of using a specialized Access Application App Type.",
+          "display": true,
+          "eol": "2023-03-19T00:00:00Z",
+          "id": "bookmarks_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/addressing/prefixes/{prefix_id}/bgp/status",
+      "operationId": "ip-address-management-dynamic-advertisement-get-advertisement-status",
+      "tags": [
+        "IP Address Management Dynamic Advertisement"
+      ],
+      "description": "View the current advertisement state for a prefix.\n\n**Deprecated:** Prefer the BGP Prefixes endpoints, which additionally allow for advertising and withdrawing \nsubnets of an IP prefix.\n",
+      "summary": "Get Advertisement Status",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/accounts/{account_id}/addressing/prefixes/{prefix_id}/bgp/status",
+      "operationId": "ip-address-management-dynamic-advertisement-update-prefix-dynamic-advertisement-status",
+      "tags": [
+        "IP Address Management Dynamic Advertisement"
+      ],
+      "description": "Advertise or withdraw the BGP route for a prefix.\n\n**Deprecated:** Prefer the BGP Prefixes endpoints, which additionally allow for advertising and withdrawing \nsubnets of an IP prefix.\n",
+      "summary": "Update Prefix Dynamic Advertisement Status",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/ai-gateway/billing/spending-limit",
+      "operationId": "aig-billing-set-spending-limit",
+      "tags": [
+        "AI Gateway"
+      ],
+      "description": "Deprecated: spending limits can no longer be created, enabled, or modified and this endpoint always responds 403. Use the new AI Gateway spend limits instead: https://developers.cloudflare.com/ai-gateway/features/spend-limits/. Existing limits can be removed via DELETE /spending-limit.",
+      "summary": "Set spending limit (deprecated)",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/cloudforce-one/events/create/bulk/relationships",
+      "operationId": "post_DOSEventCreateBulkWithRelationships",
+      "tags": [
+        "Event"
+      ],
+      "description": "This method is deprecated. Please use `event_create_bulk` instead",
+      "summary": "Creates bulk DOS event with relationships and indicators",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/indicators",
+      "operationId": "get_IndicatorListLegacy",
+      "tags": [
+        "Indicator"
+      ],
+      "description": "This method is deprecated. Please use /events/indicators to retrieve a paginated list of indicators.",
+      "summary": "Lists indicators",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/tags/{tag_uuid}/indicators",
+      "operationId": "get_DatasetTagIndicatorsList",
+      "tags": [
+        "Tag"
+      ],
+      "description": "This endpoint is deprecated. Use GET /:account_id/events/tags/:tag_uuid/indicators with the optional datasetIds query parameter instead. Returns indicators associated with the provided tag UUID within a single dataset's indicator shards, with pagination.",
+      "summary": "List indicators related to a tag within a dataset (deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/cloudforce-one/events/indicatorTypes",
+      "operationId": "get_LegacyIndicatorTypesList",
+      "tags": [
+        "Indicator Types"
+      ],
+      "description": "This Method is deprecated. Please use /events/dataset/:dataset_id/indicatorTypes instead.",
+      "summary": "Lists all indicator types",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/cloudforce-one/events/{event_id}",
+      "operationId": "get_EventReadDeprecated",
+      "tags": [
+        "Event"
+      ],
+      "description": "This Method is deprecated. Please use /events/dataset/:dataset_id/events/:event_id instead.",
+      "summary": "Reads an event",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/devices",
+      "operationId": "devices-list-devices",
+      "tags": [
+        "Devices"
+      ],
+      "description": "List WARP devices. Not supported when [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/) is enabled for the account.\n\n**Deprecated**: please use one of the following endpoints instead:\n- GET /accounts/{account_id}/devices/physical-devices\n- GET /accounts/{account_id}/devices/registrations\n",
+      "summary": "List devices (deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/devices/revoke",
+      "operationId": "devices-revoke-devices",
+      "tags": [
+        "Devices"
+      ],
+      "description": "Revokes a list of devices. Not supported when [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/) is enabled.\n\n**Deprecated**: please use POST /accounts/{account_id}/devices/registrations/revoke instead.\n",
+      "summary": "Revoke devices (deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/devices/unrevoke",
+      "operationId": "devices-unrevoke-devices",
+      "tags": [
+        "Devices"
+      ],
+      "description": "Unrevokes a list of devices. Not supported when [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/) is enabled.\n\n**Deprecated**: please use POST /accounts/{account_id}/devices/registrations/unrevoke instead.\n",
+      "summary": "Unrevoke devices (deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/devices/{device_id}",
+      "operationId": "devices-device-details",
+      "tags": [
+        "Devices"
+      ],
+      "description": "Fetches a single WARP device. Not supported when [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/) is enabled for the account.\n\n**Deprecated**: please use one of the following endpoints instead:\n- GET /accounts/{account_id}/devices/physical-devices/{device_id}\n- GET /accounts/{account_id}/devices/registrations/{registration_id}\n",
+      "summary": "Get device (deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/devices/{device_id}/override_codes",
+      "operationId": "devices-list-admin-override-code-for-device",
+      "tags": [
+        "Devices"
+      ],
+      "description": "Fetches a one-time use admin override code for a device. This relies on the **Admin Override** setting being enabled in your device configuration. Not supported when [multi-user mode](https://developers.cloudflare.com/cloudflare-one/connections/connect-devices/warp/deployment/mdm-deployment/windows-multiuser/) is enabled for the account.\n**Deprecated:** please use GET /accounts/{account_id}/devices/registrations/{registration_id}/override_codes instead.\n",
+      "summary": "Get override codes (deprecated)\n",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/dns_firewall/{dns_firewall_id}/dns_analytics/report",
+      "operationId": "dns-firewall-analytics-table",
+      "tags": [
+        "DNS Firewall Analytics"
+      ],
+      "description": "Retrieves a list of summarised aggregate metrics over a given time period.\n\nSee [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/) for detailed information about the available query parameters.",
+      "summary": "Table",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint is deprecated. See [the API deprecation notice](https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-12-09)."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/dns_firewall/{dns_firewall_id}/dns_analytics/report/bytime",
+      "operationId": "dns-firewall-analytics-by-time",
+      "tags": [
+        "DNS Firewall Analytics"
+      ],
+      "description": "Retrieves a list of aggregate metrics grouped by time interval.\n\nSee [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/) for detailed information about the available query parameters.",
+      "summary": "By Time",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint is deprecated. See [the API deprecation notice](https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-12-09)."
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/email-security/settings/domains",
+      "operationId": "email_security_delete_domains",
+      "tags": [
+        "Email Security Settings"
+      ],
+      "description": "Removes protection from multiple email domains. Deprecated; use the batch endpoint instead.",
+      "summary": "Unprotect multiple email domains",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true,
+        "x-stability": "beta"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/email/routing/suppression",
+      "operationId": "get_publicListSuppressionRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Lists email suppressions for the specified account.",
+      "summary": "List account email suppressions",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/email/routing/suppression",
+      "operationId": "post_publicNewSuppressionRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Creates a new email suppression for the specified account.",
+      "summary": "Create account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/email/routing/suppression/{suppression_id}",
+      "operationId": "delete_publicDeleteSuppressionRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Deletes an email suppression for the specified account.",
+      "summary": "Delete account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/email/routing/suppression/{suppression_id}",
+      "operationId": "get_publicGetSuppressionRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Retrieves a single email suppression for the specified account.",
+      "summary": "Get account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/email/sending/suppression",
+      "operationId": "get_publicListSuppressionSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Lists email suppressions for the specified account.",
+      "summary": "List account email suppressions",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/email/sending/suppression",
+      "operationId": "post_publicNewSuppressionSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Creates a new email suppression for the specified account.",
+      "summary": "Create account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/email/sending/suppression/{suppression_id}",
+      "operationId": "delete_publicDeleteSuppressionSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Deletes an email suppression for the specified account.",
+      "summary": "Delete account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/email/sending/suppression/{suppression_id}",
+      "operationId": "get_publicGetSuppressionSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Retrieves a single email suppression for the specified account.",
+      "summary": "Get account email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/gateway/configuration/custom_certificate",
+      "operationId": "zero-trust-accounts-get-zero-trust-certificate-configuration",
+      "tags": [
+        "Zero Trust accounts"
+      ],
+      "description": "Retrieve the current Zero Trust certificate configuration.",
+      "summary": "Get Zero Trust certificate configuration",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/images/v1",
+      "operationId": "cloudflare-images-list-images",
+      "tags": [
+        "Cloudflare Images"
+      ],
+      "description": "List up to 100 images with one request. Use the optional parameters below to get a specific range of images.",
+      "summary": "List images",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/images/v1/direct_upload",
+      "operationId": "cloudflare-images-create-authenticated-direct-upload-url-v-1",
+      "tags": [
+        "Cloudflare Images"
+      ],
+      "description": "Direct uploads allow users to upload images without API keys. A common use\ncase are web apps, client-side applications, or mobile devices where users\nupload content directly to Cloudflare Images. This method creates a one-time\nupload URL. Use the V2 endpoint for additional features such as custom IDs and\nmetadata.\n",
+      "summary": "Create authenticated direct upload URL V1",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/infrastructure/targets/batch",
+      "operationId": "infra-targets-delete-batch",
+      "tags": [
+        "Infrastructure Access Targets"
+      ],
+      "description": "Removes one or more targets.",
+      "summary": "Delete targets (Deprecated)",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/intel/attack-surface-report/issues",
+      "operationId": "get-security-center-issues",
+      "tags": [
+        "Security Center Insights"
+      ],
+      "description": "Lists all Security Center issues for the account, showing active security problems requiring attention.",
+      "summary": "Retrieves Security Center Issues",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/intel/attack-surface-report/issues/class",
+      "operationId": "get-security-center-issue-counts-by-class",
+      "tags": [
+        "Security Center Insights"
+      ],
+      "description": "Retrieves Security Center issue counts aggregated by classification class.",
+      "summary": "Retrieves Security Center Issue Counts by Class",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/intel/attack-surface-report/issues/severity",
+      "operationId": "get-security-center-issue-counts-by-severity",
+      "tags": [
+        "Security Center Insights"
+      ],
+      "description": "Retrieves Security Center issue counts aggregated by severity level.",
+      "summary": "Retrieves Security Center Issue Counts by Severity",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/intel/attack-surface-report/issues/type",
+      "operationId": "get-security-center-issue-counts-by-type",
+      "tags": [
+        "Security Center Insights"
+      ],
+      "description": "Retrieves Security Center issue counts aggregated by issue type.",
+      "summary": "Retrieves Security Center Issue Counts by Type",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/accounts/{account_id}/intel/attack-surface-report/issues/{issue_id}/dismiss",
+      "operationId": "archive-security-center-insight-deprecated",
+      "tags": [
+        "Security Center Insights"
+      ],
+      "description": "Deprecated endpoint for archiving Security Center insights. Use the newer archive-security-center-insight endpoint instead.",
+      "summary": "Archives Security Center Insight",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/logs/explorer/query/sql",
+      "operationId": "accounts-logs-explorer-query-get",
+      "tags": [
+        "Log Explorer Queries"
+      ],
+      "description": "Run a SQL query against account-level datasets. The SQL query is passed as the `query` query parameter. Because the query appears in the URL, it is subject to gateway and proxy URL-length limits and may be recorded in access logs. This endpoint is deprecated in favour of the POST variant which sends the query in the request body.",
+      "summary": "Run a log query",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/pipelines",
+      "operationId": "getV4AccountsByAccount_idPipelines_deprecated",
+      "tags": [
+        "workers_pipelines_other"
+      ],
+      "description": "[DEPRECATED] List, filter, and paginate pipelines in an account. Use the new /pipelines/v1/pipelines endpoint instead.",
+      "summary": "[DEPRECATED] List Pipelines",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/pipelines",
+      "operationId": "postV4AccountsByAccount_idPipelines_deprecated",
+      "tags": [
+        "workers_pipelines_other"
+      ],
+      "description": "[DEPRECATED] Create a new pipeline. Use the new /pipelines/v1/pipelines endpoint instead.",
+      "summary": "[DEPRECATED] Create Pipeline",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/pipelines/{pipeline_name}",
+      "operationId": "deleteV4AccountsByAccount_idPipelinesByPipeline_name_deprecated",
+      "tags": [
+        "workers_pipelines_other"
+      ],
+      "description": "[DEPRECATED] Delete a pipeline. Use the new /pipelines/v1/pipelines endpoint instead.",
+      "summary": "[DEPRECATED] Delete Pipeline",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/pipelines/{pipeline_name}",
+      "operationId": "getV4AccountsByAccount_idPipelinesByPipeline_name_deprecated",
+      "tags": [
+        "workers_pipelines_other"
+      ],
+      "description": "[DEPRECATED] Get configuration of a pipeline. Use the new /pipelines/v1/pipelines endpoint instead.",
+      "summary": "[DEPRECATED] Get Pipeline",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/accounts/{account_id}/pipelines/{pipeline_name}",
+      "operationId": "putV4AccountsByAccount_idPipelinesByPipeline_name_deprecated",
+      "tags": [
+        "workers_pipelines_other"
+      ],
+      "description": "[DEPRECATED] Update an existing pipeline. Use the new /pipelines/v1/pipelines endpoint instead.",
+      "summary": "[DEPRECATED] Update Pipeline",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/registrar/domains",
+      "operationId": "registrar-domains-list-domains",
+      "tags": [
+        "Registrar Domains"
+      ],
+      "description": "Lists domains handled by Registrar.",
+      "summary": "List domains",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This operation is deprecated and will reach end of life on September 27, 2026. Use the new Registrar API endpoints (domain-search, domain-check, registrations) instead. Refer to https://developers.cloudflare.com/fundamentals/api/reference/deprecations/ for details."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/registrar/domains/{domain_name}",
+      "operationId": "registrar-domains-get-domain",
+      "tags": [
+        "Registrar Domains"
+      ],
+      "description": "Show individual domain.",
+      "summary": "Get domain",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This operation is deprecated and will reach end of life on September 27, 2026. Use the new Registrar API endpoints (domain-search, domain-check, registrations) instead. Refer to https://developers.cloudflare.com/fundamentals/api/reference/deprecations/ for details."
+      }
+    },
+    {
+      "method": "put",
+      "path": "/accounts/{account_id}/registrar/domains/{domain_name}",
+      "operationId": "registrar-domains-update-domain",
+      "tags": [
+        "Registrar Domains"
+      ],
+      "description": "Updates an individual domain.",
+      "summary": "Update domain",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This operation is deprecated and will reach end of life on September 27, 2026. Use the new Registrar API endpoints (domain-search, domain-check, registrations) instead. Refer to https://developers.cloudflare.com/fundamentals/api/reference/deprecations/ for details."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/roles",
+      "operationId": "account-roles-list-roles",
+      "tags": [
+        "Account Roles"
+      ],
+      "description": "Get all available roles for an account.",
+      "summary": "List Roles",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use /accounts/{account_id}/iam/permission_groups instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/roles/{role_id}",
+      "operationId": "account-roles-role-details",
+      "tags": [
+        "Account Roles"
+      ],
+      "description": "Get information about a specific role for an account.",
+      "summary": "Role Details",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use /accounts/{account_id}/iam/permission_groups/{permission_group_id} instead."
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/storage/kv/namespaces/{namespace_id}/bulk",
+      "operationId": "workers-kv-namespace-delete-multiple-key-value-pairs-deprecated",
+      "tags": [
+        "Workers KV Namespace"
+      ],
+      "description": "Remove multiple KV pairs from the namespace. Body should be an array of up to 10,000 keys to be removed.",
+      "summary": "Delete multiple key-value pairs",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/teamnet/routes/network/{ip_network_encoded}",
+      "operationId": "tunnel-route-delete-a-tunnel-route-with-cidr",
+      "tags": [
+        "Tunnel Routing"
+      ],
+      "description": "Deletes a private network route from an account. The CIDR in `ip_network_encoded` must be written in URL-encoded format. If no virtual_network_id is provided it will delete the route from the default vnet. If no tun_type is provided it will fetch the type from the tunnel_id or if that is missing it will assume Cloudflare Tunnel as default. If tunnel_id is provided it will delete the route from that tunnel, otherwise it will delete the route based on the vnet and tun_type.\n",
+      "summary": "Delete a tunnel route (CIDR Endpoint)",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/accounts/{account_id}/teamnet/routes/network/{ip_network_encoded}",
+      "operationId": "tunnel-route-update-a-tunnel-route-with-cidr",
+      "tags": [
+        "Tunnel Routing"
+      ],
+      "description": "Updates an existing private network route in an account. The CIDR in `ip_network_encoded` must be written in URL-encoded format.",
+      "summary": "Update a tunnel route (CIDR Endpoint)",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/teamnet/routes/network/{ip_network_encoded}",
+      "operationId": "tunnel-route-create-a-tunnel-route-with-cidr",
+      "tags": [
+        "Tunnel Routing"
+      ],
+      "description": "Routes a private network through a Cloudflare Tunnel. The CIDR in `ip_network_encoded` must be written in URL-encoded format.",
+      "summary": "Create a tunnel route (CIDR Endpoint)",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/urlscanner/response/{response_id}",
+      "operationId": "urlscanner-get-response-text",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Returns the plain response of the network request.",
+      "summary": "Get raw response",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/responses/methods/get/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/urlscanner/scan",
+      "operationId": "urlscanner-search-scans",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Search scans by date and webpages' requests, including full URL (after redirects), hostname, and path. <br/> A successful scan will appear in search results a few minutes after finishing but may take much longer if the system in under load. By default, only successfully completed scans will appear in search results, unless searching by `scanId`. Please take into account that older scans may be removed from the search index at an unspecified time.",
+      "summary": "Search URL scans",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/scans/methods/list/) instead."
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/urlscanner/scan",
+      "operationId": "urlscanner-create-scan",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Submit a URL to scan. You can also set some options, like the visibility level and custom headers. Check limits at https://developers.cloudflare.com/security-center/investigate/scan-limits/.",
+      "summary": "Create URL Scan",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/scans/methods/create/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/urlscanner/scan/{scan_id}",
+      "operationId": "urlscanner-get-scan",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Get URL scan by uuid",
+      "summary": "Get URL scan",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/scans/methods/get/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/urlscanner/scan/{scan_id}/har",
+      "operationId": "urlscanner-get-scan-har",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Get a URL scan's HAR file. See HAR spec at http://www.softwareishard.com/blog/har-12-spec/.",
+      "summary": "Get URL scan's HAR",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/scans/methods/har/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/urlscanner/scan/{scan_id}/screenshot",
+      "operationId": "urlscanner-get-scan-screenshot",
+      "tags": [
+        "URL Scanner (Deprecated)"
+      ],
+      "description": "Get scan's screenshot by resolution (desktop/mobile/tablet).",
+      "summary": "Get screenshot",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "Use [V2](https://developers.cloudflare.com/api/resources/url_scanner/subresources/scans/methods/screenshot/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/vectorize/indexes",
+      "operationId": "vectorize-(-deprecated)-list-vectorize-indexes",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Returns a list of Vectorize Indexes",
+      "summary": "List Vectorize Indexes (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the GET `/accounts/{account_id}/vectorize/v2/indexes` endpoint.",
+          "display": true,
+          "id": "vectorize_list_index_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes",
+      "operationId": "vectorize-(-deprecated)-create-vectorize-index",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Creates and returns a new Vectorize Index.",
+      "summary": "Create Vectorize Index (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes` endpoint.",
+          "display": true,
+          "id": "vectorize_create_index_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}",
+      "operationId": "vectorize-(-deprecated)-delete-vectorize-index",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Deletes the specified Vectorize Index.",
+      "summary": "Delete Vectorize Index (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the DELETE `/accounts/{account_id}/vectorize/v2/indexes/{index_name}` endpoint.",
+          "display": true,
+          "id": "vectorize_delete_index_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}",
+      "operationId": "vectorize-(-deprecated)-get-vectorize-index",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Returns the specified Vectorize Index.",
+      "summary": "Get Vectorize Index (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the GET `/accounts/{account_id}/vectorize/v2/indexes/{index_name}` endpoint.",
+          "display": true,
+          "id": "vectorize_get_index_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "put",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}",
+      "operationId": "vectorize-(-deprecated)-update-vectorize-index",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Updates and returns the specified Vectorize Index.",
+      "summary": "Update Vectorize Index (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint has been deprecated and will soon be removed.",
+          "display": true,
+          "id": "vectorize_update_index_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}/delete-by-ids",
+      "operationId": "vectorize-(-deprecated)-delete-vectors-by-id",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Delete a set of vectors from an index by their vector identifiers.",
+      "summary": "Delete Vectors By Identifier (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes/{index_name}/delete_by_ids` endpoint.",
+          "display": true,
+          "id": "vectorize_delete_by_ids_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}/get-by-ids",
+      "operationId": "vectorize-(-deprecated)-get-vectors-by-id",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Get a set of vectors from an index by their vector identifiers.",
+      "summary": "Get Vectors By Identifier (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes/{index_name}/get_by_ids` endpoint.",
+          "display": true,
+          "id": "vectorize_get_by_ids_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}/insert",
+      "operationId": "vectorize-(-deprecated)-insert-vector",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Inserts vectors into the specified index and returns the count of the vectors successfully inserted.",
+      "summary": "Insert Vectors (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes/{index_name}/insert` endpoint.",
+          "display": true,
+          "id": "vectorize_insert_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}/query",
+      "operationId": "vectorize-(-deprecated)-query-vector",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Finds vectors closest to a given vector in an index.",
+      "summary": "Query Vectors (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes/{index_name}/query` endpoint.",
+          "display": true,
+          "id": "vectorize_query_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/accounts/{account_id}/vectorize/indexes/{index_name}/upsert",
+      "operationId": "vectorize-(-deprecated)-upsert-vector",
+      "tags": [
+        "Vectorize Beta (Deprecated)"
+      ],
+      "description": "Upserts vectors into the specified index, creating them if they do not exist and returns the count of values and ids successfully inserted.",
+      "summary": "Upsert Vectors (Deprecated)",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint is deprecated in favor of the POST `/accounts/{account_id}/vectorize/v2/indexes/{index_name}/upsert` endpoint.",
+          "display": true,
+          "id": "vectorize_upsert_deprecation"
+        },
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/bots/summary/user_agent",
+      "operationId": "radar-get-ai-bots-summary-by-user-agent",
+      "tags": [
+        "Radar AI Bots"
+      ],
+      "description": "Retrieves the distribution of traffic by AI user agent.",
+      "summary": "Get AI user agents summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Bots Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/bots/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/bots/timeseries_groups/user_agent",
+      "operationId": "radar-get-ai-bots-timeseries-group-by-user-agent",
+      "tags": [
+        "Radar AI Bots"
+      ],
+      "description": "Retrieves the distribution of traffic by AI user agent over time.",
+      "summary": "Get AI user agents time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Bots Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/bots/methods/timeseries_groups/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/inference/summary/model",
+      "operationId": "radar-get-ai-inference-summary-by-model",
+      "tags": [
+        "Radar AI Inference"
+      ],
+      "description": "Retrieves the distribution of the number of inferences by model.",
+      "summary": "Get Workers AI models summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Inference Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/inference/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/inference/summary/task",
+      "operationId": "radar-get-ai-inference-summary-by-task",
+      "tags": [
+        "Radar AI Inference"
+      ],
+      "description": "Retrieves the distribution of the number of inferences by task.",
+      "summary": "Get Workers AI tasks summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Inference Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/inference/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/inference/timeseries_groups/model",
+      "operationId": "radar-get-ai-inference-timeseries-group-by-model",
+      "tags": [
+        "Radar AI Inference"
+      ],
+      "description": "Retrieves the distribution of the number of inferences by model over time.",
+      "summary": "Get Workers AI models time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Inference Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/inference/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/ai/inference/timeseries_groups/task",
+      "operationId": "radar-get-ai-inference-timeseries-group-by-task",
+      "tags": [
+        "Radar AI Inference"
+      ],
+      "description": "Retrieves the distribution of the number of inferences by task over time.",
+      "summary": "Get Workers AI tasks time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AI Inference Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/ai/subresources/inference/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/dnssec",
+      "operationId": "radar-get-dns-as112-timeseries-by-dnssec",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of DNS queries to AS112 by DNSSEC (DNS Security Extensions) support.",
+      "summary": "Get AS112 DNS queries by DNSSEC summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/edns",
+      "operationId": "radar-get-dns-as112-timeseries-by-edns",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of DNS queries to AS112 by EDNS (Extension Mechanisms for DNS) support.",
+      "summary": "Get AS112 DNS queries by EDNS summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/ip_version",
+      "operationId": "radar-get-dns-as112-timeseries-by-ip-version",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of DNS queries to AS112 by IP version.",
+      "summary": "Get AS112 DNS queries by IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/protocol",
+      "operationId": "radar-get-dns-as112-timeseries-by-protocol",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of DNS queries to AS112 by protocol.",
+      "summary": "Get AS112 DNS queries by DNS protocol summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/query_type",
+      "operationId": "radar-get-dns-as112-timeseries-by-query-type",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of DNS queries to AS112 by type.",
+      "summary": "Get AS112 DNS queries by type summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/summary/response_codes",
+      "operationId": "radar-get-dns-as112-timeseries-by-response-codes",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS requests classified by response code.",
+      "summary": "Get AS112 DNS queries by response code summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/dnssec",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-dnssec",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS queries by DNSSEC (DNS Security Extensions) support over time.",
+      "summary": "Get AS112 DNS queries by DNSSEC support time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/edns",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-edns",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS queries by EDNS (Extension Mechanisms for DNS) support over time.",
+      "summary": "Get AS112 DNS queries by EDNS support summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/ip_version",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS queries by IP version over time.",
+      "summary": "Get AS112 DNS queries by IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/protocol",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-protocol",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS requests classified by protocol over time.",
+      "summary": "Get AS112 DNS queries by DNS protocol time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/query_type",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-query-type",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS queries by type over time.",
+      "summary": "Get AS112 DNS queries by type time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/as112/timeseries_groups/response_codes",
+      "operationId": "radar-get-dns-as112-timeseries-group-by-response-codes",
+      "tags": [
+        "Radar AS112"
+      ],
+      "description": "Retrieves the distribution of AS112 DNS requests classified by response code over time.",
+      "summary": "Get AS112 DNS queries by response code time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar AS112 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/as112/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/bitrate",
+      "operationId": "radar-get-attacks-layer3-summary-by-bitrate",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by bitrate.",
+      "summary": "Get layer 3 attacks by bitrate summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/duration",
+      "operationId": "radar-get-attacks-layer3-summary-by-duration",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by duration.",
+      "summary": "Get layer 3 attacks by duration summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/industry",
+      "operationId": "radar-get-attacks-layer3-summary-by-industry",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by targeted industry.",
+      "summary": "Get layer 3 attacks by targeted industry summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/ip_version",
+      "operationId": "radar-get-attacks-layer3-summary-by-ip-version",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by IP version.",
+      "summary": "Get layer 3 attacks by IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/protocol",
+      "operationId": "radar-get-attacks-layer3-summary-by-protocol",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by protocol.",
+      "summary": "Get layer 3 attacks by protocol summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/vector",
+      "operationId": "radar-get-attacks-layer3-summary-by-vector",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by vector.",
+      "summary": "Get layer 3 attacks by vector summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/summary/vertical",
+      "operationId": "radar-get-attacks-layer3-summary-by-vertical",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by targeted vertical.",
+      "summary": "Get layer 3 attacks by targeted vertical summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/bitrate",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-bitrate",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by bitrate over time.",
+      "summary": "Get layer 3 attacks by bitrate time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/duration",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-duration",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by duration over time.",
+      "summary": "Get layer 3 attacks by duration time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/industry",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-industry",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by targeted industry over time.",
+      "summary": "Get layer 3 attacks by target industries time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/ip_version",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by IP version over time.",
+      "summary": "Get layer 3 attacks by IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/protocol",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-protocol",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by protocol over time.",
+      "summary": "Get layer 3 attacks by protocol time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/vector",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-vector",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by vector over time.",
+      "summary": "Get layer 3 attacks by vector time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/timeseries_groups/vertical",
+      "operationId": "radar-get-attacks-layer3-timeseries-group-by-vertical",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 3 attacks by targeted vertical over time.",
+      "summary": "Get layer 3 attacks by vertical time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/top/industry",
+      "operationId": "radar-get-attacks-layer3-top-industries",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "This endpoint is deprecated. To continue getting this data, switch to the summary by industry endpoint.",
+      "summary": "Get top industries targeted by layer 3 attacks",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/top/vertical",
+      "operationId": "radar-get-attacks-layer3-top-verticals",
+      "tags": [
+        "Radar Layer 3 Attacks"
+      ],
+      "description": "This endpoint is deprecated. To continue getting this data, switch to the summary by vertical endpoint.",
+      "summary": "Get top verticals targeted by layer 3 attacks",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 3 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer3/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/http_method",
+      "operationId": "radar-get-attacks-layer7-summary-by-http-method",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by HTTP method.",
+      "summary": "Get layer 7 attacks by HTTP method summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/http_version",
+      "operationId": "radar-get-attacks-layer7-summary-by-http-version",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by HTTP version.",
+      "summary": "Get layer 7 attacks by HTTP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/industry",
+      "operationId": "radar-get-attacks-layer7-summary-by-industry",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by targeted industry.",
+      "summary": "Get layer 7 attacks by targeted industry summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/ip_version",
+      "operationId": "radar-get-attacks-layer7-summary-by-ip-version",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by IP version.",
+      "summary": "Get layer 7 attacks by IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/managed_rules",
+      "operationId": "radar-get-attacks-layer7-summary-by-managed-rules",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by managed rules.",
+      "summary": "Get layer 7 attacks by managed rules summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/mitigation_product",
+      "operationId": "radar-get-attacks-layer7-summary-by-mitigation-product",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by mitigation product.",
+      "summary": "Get layer 7 attacks by mitigation product summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/summary/vertical",
+      "operationId": "radar-get-attacks-layer7-summary-by-vertical",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by targeted vertical.",
+      "summary": "Get layer 7 attacks by targeted vertical summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/http_method",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-http-method",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by HTTP method over time.",
+      "summary": "Get layer 7 attacks by HTTP method time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/http_version",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-http-version",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by HTTP version over time.",
+      "summary": "Get layer 7 attacks by HTTP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/industry",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-industry",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by targeted industry over time.",
+      "summary": "Get layer 7 attacks by target industries time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/ip_version",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by IP version used over time.",
+      "summary": "Get layer 7 attacks by IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/managed_rules",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-managed-rules",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by managed rules over time.",
+      "summary": "Get layer 7 attacks by managed rules time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/mitigation_product",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-mitigation-product",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by mitigation product over time.",
+      "summary": "Get layer 7 attacks by mitigation product time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/timeseries_groups/vertical",
+      "operationId": "radar-get-attacks-layer7-timeseries-group-by-vertical",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "Retrieves the distribution of layer 7 attacks by targeted vertical over time.",
+      "summary": "Get layer 7 attacks by vertical time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/top/industry",
+      "operationId": "radar-get-attacks-layer7-top-industries",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "This endpoint is deprecated. To continue getting this data, switch to the summary by industry endpoint.",
+      "summary": "Get top industries targeted by layer 7 attacks",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/top/vertical",
+      "operationId": "radar-get-attacks-layer7-top-verticals",
+      "tags": [
+        "Radar Layer 7 Attacks"
+      ],
+      "description": "This endpoint is deprecated. To continue getting this data, switch to the summary by vertical endpoint.",
+      "summary": "Get top verticals targeted by layer 7 attacks",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Attacks Layer 7 Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/attacks/subresources/layer7/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/cache_hit",
+      "operationId": "radar-get-dns-summary-by-cache-hit-status",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by cache status.",
+      "summary": "Get DNS queries by cache status summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/dnssec",
+      "operationId": "radar-get-dns-summary-by-dnssec",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS responses by DNSSEC (DNS Security Extensions) support.",
+      "summary": "Get DNS queries by DNSSEC support summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/dnssec_aware",
+      "operationId": "radar-get-dns-summary-by-dnssec-awareness",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by DNSSEC (DNS Security Extensions) client awareness.",
+      "summary": "Get DNS queries by DNSSEC awareness summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/dnssec_e2e",
+      "operationId": "radar-get-dns-summary-by-dnssec-e2e-version",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNSSEC-validated answers by end-to-end security status.",
+      "summary": "Get DNS queries by DNSSEC end-to-end summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/ip_version",
+      "operationId": "radar-get-dns-summary-by-ip-version",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by IP version.",
+      "summary": "Get DNS queries by IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/matching_answer",
+      "operationId": "radar-get-dns-summary-by-matching-answer-status",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by matching answers.",
+      "summary": "Get DNS queries by matching answer summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/protocol",
+      "operationId": "radar-get-dns-summary-by-protocol",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by DNS transport protocol.",
+      "summary": "Get DNS queries by protocol summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/query_type",
+      "operationId": "radar-get-dns-summary-by-query-type",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by type.",
+      "summary": "Get DNS queries by type summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/response_code",
+      "operationId": "radar-get-dns-summary-by-response-code",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by response code.",
+      "summary": "Get DNS queries by response code summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/summary/response_ttl",
+      "operationId": "radar-get-dns-summary-by-response-ttl",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by minimum response TTL.",
+      "summary": "Get DNS queries by response TTL summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/cache_hit",
+      "operationId": "radar-get-dns-timeseries-group-by-cache-hit-status",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by cache status over time.",
+      "summary": "Get DNS queries by cache status time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/dnssec",
+      "operationId": "radar-get-dns-timeseries-group-by-dnssec",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS responses by DNSSEC (DNS Security Extensions) support over time.",
+      "summary": "Get DNS queries by DNSSEC support time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/dnssec_aware",
+      "operationId": "radar-get-dns-timeseries-group-by-dnssec-awareness",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by DNSSEC (DNS Security Extensions) client awareness over time.",
+      "summary": "Get DNS queries by DNSSEC awareness time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/dnssec_e2e",
+      "operationId": "radar-get-dns-timeseries-group-by-dnssec-e2e-version",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNSSEC-validated answers by end-to-end security status over time.",
+      "summary": "Get DNS queries by DNSSEC end-to-end time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/ip_version",
+      "operationId": "radar-get-dns-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by IP version over time.",
+      "summary": "Get DNS queries by IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/matching_answer",
+      "operationId": "radar-get-dns-timeseries-group-by-matching-answer-status",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by matching answers over time.",
+      "summary": "Get DNS queries by matching answer time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/protocol",
+      "operationId": "radar-get-dns-timeseries-group-by-protocol",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by DNS transport protocol over time.",
+      "summary": "Get DNS queries by protocol time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/query_type",
+      "operationId": "radar-get-dns-timeseries-group-by-query-type",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by type over time.",
+      "summary": "Get DNS queries by type time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/response_code",
+      "operationId": "radar-get-dns-timeseries-group-by-response-code",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by response code over time.",
+      "summary": "Get DNS queries by response code time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/dns/timeseries_groups/response_ttl",
+      "operationId": "radar-get-dns-timeseries-group-by-response-ttl",
+      "tags": [
+        "Radar DNS"
+      ],
+      "description": "Retrieves the distribution of DNS queries by minimum answer TTL over time.",
+      "summary": "Get DNS queries by response TTL time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar DNS Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/dns/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/arc",
+      "operationId": "radar-get-email-routing-summary-by-arc",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by ARC (Authenticated Received Chain) validation.",
+      "summary": "Get email ARC validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/dkim",
+      "operationId": "radar-get-email-routing-summary-by-dkim",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail) validation.",
+      "summary": "Get email DKIM validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/dmarc",
+      "operationId": "radar-get-email-routing-summary-by-dmarc",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by DMARC (Domain-based Message Authentication, Reporting and Conformance) validation.",
+      "summary": "Get email DMARC validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/encrypted",
+      "operationId": "radar-get-email-routing-summary-by-encrypted",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by encryption status (encrypted vs. not-encrypted).",
+      "summary": "Get email encryption status summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/ip_version",
+      "operationId": "radar-get-email-routing-summary-by-ip-version",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by IP version.",
+      "summary": "Get email IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/summary/spf",
+      "operationId": "radar-get-email-routing-summary-by-spf",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by SPF (Sender Policy Framework) validation.",
+      "summary": "Get email SPF validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/arc",
+      "operationId": "radar-get-email-routing-timeseries-group-by-arc",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by ARC (Authenticated Received Chain) validation over time.",
+      "summary": "Get email ARC validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/dkim",
+      "operationId": "radar-get-email-routing-timeseries-group-by-dkim",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail) validation over time.",
+      "summary": "Get email DKIM validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/dmarc",
+      "operationId": "radar-get-email-routing-timeseries-group-by-dmarc",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by DMARC (Domain-based Message Authentication, Reporting and Conformance) validation over time.",
+      "summary": "Get email DMARC validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/encrypted",
+      "operationId": "radar-get-email-routing-timeseries-group-by-encrypted",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by encryption status (encrypted vs. not-encrypted) over time.",
+      "summary": "Get email encryption status time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/ip_version",
+      "operationId": "radar-get-email-routing-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by IP version over time.",
+      "summary": "Get email IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/routing/timeseries_groups/spf",
+      "operationId": "radar-get-email-routing-timeseries-group-by-spf",
+      "tags": [
+        "Radar Email Routing"
+      ],
+      "description": "Retrieves the distribution of emails by SPF (Sender Policy Framework) validation over time.",
+      "summary": "Get email SPF validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Routing Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/routing/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/arc",
+      "operationId": "radar-get-email-security-summary-by-arc",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by ARC (Authenticated Received Chain) validation.",
+      "summary": "Get email ARC validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/dkim",
+      "operationId": "radar-get-email-security-summary-by-dkim",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail) validation.",
+      "summary": "Get email DKIM validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/dmarc",
+      "operationId": "radar-get-email-security-summary-by-dmarc",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by DMARC (Domain-based Message Authentication, Reporting and Conformance) validation.",
+      "summary": "Get email DMARC validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/malicious",
+      "operationId": "radar-get-email-security-summary-by-malicious",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by malicious classification.",
+      "summary": "Get email malicious classification summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/spam",
+      "operationId": "radar-get-email-security-summary-by-spam",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the proportion of emails by spam classification (spam vs. non-spam).",
+      "summary": "Get email spam classification summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/spf",
+      "operationId": "radar-get-email-security-summary-by-spf",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by SPF (Sender Policy Framework) validation.",
+      "summary": "Get email SPF validation summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/spoof",
+      "operationId": "radar-get-email-security-summary-by-spoof",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the proportion of emails by spoof classification (spoof vs. non-spoof).",
+      "summary": "Get email spoof classification summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/threat_category",
+      "operationId": "radar-get-email-security-summary-by-threat-category",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by threat categories.",
+      "summary": "Get email threat category summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/summary/tls_version",
+      "operationId": "radar-get-email-security-summary-by-tls-version",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by TLS version.",
+      "summary": "Get email TLS version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/arc",
+      "operationId": "radar-get-email-security-timeseries-group-by-arc",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by ARC (Authenticated Received Chain) validation over time.",
+      "summary": "Get email ARC validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/dkim",
+      "operationId": "radar-get-email-security-timeseries-group-by-dkim",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by DKIM (DomainKeys Identified Mail) validation over time.",
+      "summary": "Get email DKIM validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/dmarc",
+      "operationId": "radar-get-email-security-timeseries-group-by-dmarc",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by DMARC (Domain-based Message Authentication, Reporting and Conformance) validation over time.",
+      "summary": "Get email DMARC validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/malicious",
+      "operationId": "radar-get-email-security-timeseries-group-by-malicious",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by malicious classification over time.",
+      "summary": "Get email malicious classification time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/spam",
+      "operationId": "radar-get-email-security-timeseries-group-by-spam",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by spam classification (spam vs. non-spam) over time.",
+      "summary": "Get email spam classification time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/spf",
+      "operationId": "radar-get-email-security-timeseries-group-by-spf",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by SPF (Sender Policy Framework) validation over time.",
+      "summary": "Get email SPF validation time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/spoof",
+      "operationId": "radar-get-email-security-timeseries-group-by-spoof",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by spoof classification (spoof vs. non-spoof) over time.",
+      "summary": "Get email spoof classification time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/threat_category",
+      "operationId": "radar-get-email-security-timeseries-group-by-threat-category",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by threat category over time.",
+      "summary": "Get email threat category time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/email/security/timeseries_groups/tls_version",
+      "operationId": "radar-get-email-security-timeseries-group-by-tls-version",
+      "tags": [
+        "Radar Email Security"
+      ],
+      "description": "Retrieves the distribution of emails by TLS version over time.",
+      "summary": "Get email TLS version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Email Security Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/email/subresources/security/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/bot_class",
+      "operationId": "radar-get-http-summary-by-bot-class",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of bot-generated HTTP requests to genuine human traffic, as classified by Cloudflare. Visit https://developers.cloudflare.com/radar/concepts/bot-classes/ for more information.",
+      "summary": "Get HTTP requests by bot class summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/device_type",
+      "operationId": "radar-get-http-summary-by-device-type",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests generated by mobile, desktop, and other types of devices.",
+      "summary": "Get HTTP requests by device type summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/http_protocol",
+      "operationId": "radar-get-http-summary-by-http-protocol",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by HTTP protocol (HTTP vs. HTTPS).",
+      "summary": "Get HTTP requests by HTTP/HTTPS summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/http_version",
+      "operationId": "radar-get-http-summary-by-http-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by HTTP version.",
+      "summary": "Get HTTP requests by HTTP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/ip_version",
+      "operationId": "radar-get-http-summary-by-ip-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by IP version.",
+      "summary": "Get HTTP requests by IP version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/os",
+      "operationId": "radar-get-http-summary-by-operating-system",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by operating system (Windows, macOS, Android, iOS, and others).",
+      "summary": "Get HTTP requests by OS summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/post_quantum",
+      "operationId": "radar-get-http-summary-by-post-quantum",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by post-quantum support.",
+      "summary": "Get HTTP requests by post-quantum support summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/summary/tls_version",
+      "operationId": "radar-get-http-summary-by-tls-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by TLS version.",
+      "summary": "Get HTTP requests by TLS version summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/bot_class",
+      "operationId": "radar-get-http-timeseries-group-by-bot-class",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests classified as automated or human over time. Visit https://developers.cloudflare.com/radar/concepts/bot-classes/ for more information.",
+      "summary": "Get HTTP requests by bot class time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/browser",
+      "operationId": "radar-get-http-timeseries-group-by-browsers",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by user agent over time.",
+      "summary": "Get HTTP requests by user agent time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/browser_family",
+      "operationId": "radar-get-http-timeseries-group-by-browser-families",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by user agent family over time.",
+      "summary": "Get HTTP requests by user agent family time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/device_type",
+      "operationId": "radar-get-http-timeseries-group-by-device-type",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by device type over time.",
+      "summary": "Get HTTP requests by device type time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/http_protocol",
+      "operationId": "radar-get-http-timeseries-group-by-http-protocol",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by HTTP protocol (HTTP vs. HTTPS) over time.",
+      "summary": "Get HTTP requests by HTTP/HTTPS time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/http_version",
+      "operationId": "radar-get-http-timeseries-group-by-http-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by HTTP version over time.",
+      "summary": "Get HTTP requests by HTTP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/ip_version",
+      "operationId": "radar-get-http-timeseries-group-by-ip-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by IP version over time.",
+      "summary": "Get HTTP requests by IP version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/os",
+      "operationId": "radar-get-http-timeseries-group-by-operating-system",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by operating system over time.",
+      "summary": "Get HTTP requests by OS time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/post_quantum",
+      "operationId": "radar-get-http-timeseries-group-by-post-quantum",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by post-quantum support over time.",
+      "summary": "Get HTTP requests by post-quantum support time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/timeseries_groups/tls_version",
+      "operationId": "radar-get-http-timeseries-group-by-tls-version",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the distribution of HTTP requests by TLS version over time.",
+      "summary": "Get HTTP requests by TLS version time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/top/browser",
+      "operationId": "radar-get-http-top-browsers",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the top user agents by HTTP requests.",
+      "summary": "Get top user agents by HTTP requests",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/http/top/browser_family",
+      "operationId": "radar-get-http-top-browser-families",
+      "tags": [
+        "Radar HTTP"
+      ],
+      "description": "Retrieves the top user agents, aggregated in families, by HTTP requests.",
+      "summary": "Get top user agent families by HTTP requests",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar HTTP Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/http/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/leaked_credential_checks/summary/bot_class",
+      "operationId": "radar-get-leaked-credential-checks-summary-by-bot-class",
+      "tags": [
+        "Radar Leaked Credential Checks"
+      ],
+      "description": "Retrieves the distribution of HTTP authentication requests by bot class.",
+      "summary": "Get HTTP authentication requests by bot class summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Leaked Credentials Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/leaked_credentials/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/leaked_credential_checks/summary/compromised",
+      "operationId": "radar-get-leaked-credential-checks-summary-by-compromised",
+      "tags": [
+        "Radar Leaked Credential Checks"
+      ],
+      "description": "Retrieves the distribution of HTTP authentication requests by compromised credential status.",
+      "summary": "Get HTTP authentication requests by compromised credential status summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Leaked Credentials Summary By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/leaked_credentials/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/leaked_credential_checks/timeseries_groups/bot_class",
+      "operationId": "radar-get-leaked-credential-checks-timeseries-group-by-bot-class",
+      "tags": [
+        "Radar Leaked Credential Checks"
+      ],
+      "description": "Retrieves the distribution of HTTP authentication requests by bot class over time.",
+      "summary": "Get HTTP authentication requests by bot class time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Leaked Credentials Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/leaked_credentials/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/leaked_credential_checks/timeseries_groups/compromised",
+      "operationId": "radar-get-leaked-credential-checks-timeseries-group-by-compromised",
+      "tags": [
+        "Radar Leaked Credential Checks"
+      ],
+      "description": "Retrieves the distribution of HTTP authentication requests by compromised credential status over time.",
+      "summary": "Get HTTP authentication requests by compromised credential status time series",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Leaked Credentials Timeseries Groups By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/leaked_credentials/methods/timeseries_groups_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/netflows/summary",
+      "operationId": "radar-get-netflows-summary-deprecated",
+      "tags": [
+        "Radar NetFlows"
+      ],
+      "description": "Retrieves the distribution of network traffic (NetFlows) by HTTP vs other protocols.",
+      "summary": "Get network traffic summary",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Get Network Traffic Distribution By Dimension](https://developers.cloudflare.com/api/resources/radar/subresources/netflows/methods/summary_v2/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/verified_bots/top/bots",
+      "operationId": "radar-get-verified-bots-top-by-http-requests",
+      "tags": [
+        "Radar Verified Bots"
+      ],
+      "description": "Retrieves the top verified bots by HTTP requests, with owner and category.",
+      "summary": "Get top verified bots by HTTP requests",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Bots API](https://developers.cloudflare.com/api/resources/radar/subresources/bots/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/radar/verified_bots/top/categories",
+      "operationId": "radar-get-verified-bots-top-categories-by-http-requests",
+      "tags": [
+        "Radar Verified Bots"
+      ],
+      "description": "Retrieves the top verified bot categories by HTTP requests, along with their corresponding percentage, over the total verified bot HTTP requests.",
+      "summary": "Get top verified bot categories by HTTP requests",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use [Radar Bots API](https://developers.cloudflare.com/api/resources/radar/subresources/bots/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/user/analytics/dashboard",
+      "operationId": "user-analytics-get-dashboard",
+      "tags": [
+        "User Analytics (Deprecated)"
+      ],
+      "description": "The user analytics dashboard provides totals and timeseries data aggregated\nacross all zones owned by the authenticated user for the given time period.\nOnly zones for which the user has the `#analytics:read` permission are included.\n\nThis endpoint is deprecated. Please use the GraphQL Analytics API instead:\nhttps://developers.cloudflare.com/analytics/graphql-api/",
+      "summary": "Get user analytics dashboard",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "This endpoint is deprecated and will be removed in a future version. Please use the GraphQL Analytics API instead: https://developers.cloudflare.com/analytics/graphql-api/ It provides equivalent data and more features, including the ability to select only the metrics you need. Migration guide: https://developers.cloudflare.com/analytics/migration-guides/zone-analytics/\n"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/user/billing/history",
+      "operationId": "user-billing-history-(-deprecated)-billing-history-details",
+      "tags": [
+        "User Billing History"
+      ],
+      "description": "Accesses your billing history object.",
+      "summary": "Billing History Details",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/user/billing/profile",
+      "operationId": "user-billing-profile-(-deprecated)-billing-profile-details",
+      "tags": [
+        "User Billing Profile"
+      ],
+      "description": "Accesses your billing profile object.",
+      "summary": "Billing Profile Details",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/user/organizations",
+      "operationId": "user'-s-organizations-list-organizations",
+      "tags": [
+        "User's Organizations"
+      ],
+      "description": "Lists organizations the user is associated with.",
+      "summary": "List Organizations",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint and its related APIs are deprecated in favor of the `/accounts` equivalent APIs, which have a broader range of features and are backwards compatible with these API.",
+          "display": true,
+          "eol": "2020-02-04T00:00:00Z",
+          "id": "org_deprecation"
+        },
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/user/organizations/{organization_id}",
+      "operationId": "user'-s-organizations-leave-organization",
+      "tags": [
+        "User's Organizations"
+      ],
+      "description": "Removes association to an organization.",
+      "summary": "Leave Organization",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint and its related APIs are deprecated in favor of the `/accounts` equivalent APIs, which have a broader range of features and are backwards compatible with these API.",
+          "display": true,
+          "eol": "2020-02-04T00:00:00Z",
+          "id": "org_deprecation"
+        },
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/user/organizations/{organization_id}",
+      "operationId": "user'-s-organizations-organization-details",
+      "tags": [
+        "User's Organizations"
+      ],
+      "description": "Gets a specific organization the user is associated with.",
+      "summary": "Organization Details",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "This endpoint and its related APIs are deprecated in favor of the `/accounts` equivalent APIs, which have a broader range of features and are backwards compatible with these API.",
+          "display": true,
+          "eol": "2020-02-04T00:00:00Z",
+          "id": "org_deprecation"
+        },
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_identifier}/analytics/colos",
+      "operationId": "zone-analytics-(-deprecated)-get-analytics-by-co-locations",
+      "tags": [
+        "Zone Analytics (Deprecated)"
+      ],
+      "description": "This view provides a breakdown of analytics data by datacenter. Note: This is available to Enterprise customers only.",
+      "summary": "Get analytics by Co-locations",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Please use the new GraphQL Analytics API instead: https://developers.cloudflare.com/analytics/graphql-api/. It provides equivalent data and more features, including the ability to select only the metrics you need. Migration guide: https://developers.cloudflare.com/analytics/migration-guides/zone-analytics/.",
+          "display": true,
+          "eol": "2021-03-01T00:00:00Z",
+          "id": "zone_analytics_deprecation"
+        },
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_identifier}/analytics/dashboard",
+      "operationId": "zone-analytics-(-deprecated)-get-dashboard",
+      "tags": [
+        "Zone Analytics (Deprecated)"
+      ],
+      "description": "The dashboard view provides both totals and timeseries data for the given zone and time period across the entire Cloudflare network.",
+      "summary": "Get dashboard",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Please use the new GraphQL Analytics API instead: https://developers.cloudflare.com/analytics/graphql-api/. It provides equivalent data and more features, including the ability to select only the metrics you need. Migration guide: https://developers.cloudflare.com/analytics/migration-guides/zone-analytics/.",
+          "display": true,
+          "eol": "2021-03-01T00:00:00Z",
+          "id": "zone_analytics_deprecation"
+        },
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/api_gateway/expression-template/fallthrough",
+      "operationId": "api-shield-expression-templates-fallthrough",
+      "tags": [
+        "API Shield WAF Expression Templates"
+      ],
+      "description": "Generates a WAF expression template that matches fallthrough traffic for the supplied API hosts. This operation is deprecated and should not be used for new integrations.",
+      "summary": "Generate a fallthrough WAF expression template",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-stainless-deprecation-message": "Use the cf.api_gateway.fallthrough_detected field in custom rule for a more customized logic check."
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/api_gateway/operations/schema_validation",
+      "operationId": "api-shield-schema-validation-update-multiple-operation-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Updates multiple operation-level schema validation settings on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings/operations` instead.",
+      "summary": "Update multiple operation-level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/operations/{operation_id}/schema_validation",
+      "operationId": "api-shield-schema-validation-retrieve-operation-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Retrieves operation-level schema validation settings on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings/operations/{operation_id}` instead.",
+      "summary": "Retrieve operation-level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/api_gateway/operations/{operation_id}/schema_validation",
+      "operationId": "api-shield-schema-validation-update-operation-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Updates operation-level schema validation settings on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings/operations/{operation_id}` instead.",
+      "summary": "Update operation-level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/settings/schema_validation",
+      "operationId": "api-shield-schema-validation-retrieve-zone-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Retrieves zone level schema validation settings currently set on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings` instead.",
+      "summary": "Retrieve zone level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/api_gateway/settings/schema_validation",
+      "operationId": "api-shield-schema-validation-patch-zone-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Updates zone level schema validation settings on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings` instead.",
+      "summary": "Update zone level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/api_gateway/settings/schema_validation",
+      "operationId": "api-shield-schema-validation-update-zone-level-settings",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Updates zone level schema validation settings on the zone. Deprecated; use `/zones/{zone_id}/schema_validation/settings` instead.",
+      "summary": "Update zone level schema validation settings",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas",
+      "operationId": "api-shield-schema-validation-retrieve-information-about-all-schemas",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Lists all OpenAPI schemas uploaded to API Shield for the zone, including their validation status and associated operations. Deprecated; use `/zones/{zone_id}/schema_validation/schemas` instead.",
+      "summary": "Retrieve information about all schemas on a zone",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas",
+      "operationId": "api-shield-schema-validation-post-schema",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Uploads an OpenAPI schema that defines expected request formats for API endpoints. Deprecated; use `/zones/{zone_id}/schema_validation/schemas` instead.",
+      "summary": "Upload a legacy schema",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas/hosts",
+      "operationId": "api-shield-schema-validation-retrieve-user-schema-hosts",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Lists all unique hosts found in uploaded OpenAPI schemas for the zone. Useful for understanding which domains have schema coverage. Deprecated; use `/zones/{zone_id}/schema_validation/schemas/hosts` instead.",
+      "summary": "Retrieve schema hosts in a zone",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas/{schema_id}",
+      "operationId": "api-shield-schema-delete-a-schema",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Permanently removes an uploaded OpenAPI schema from API Shield schema validation. Operations using this schema will lose their validation rules. Deprecated; use `/zones/{zone_id}/schema_validation/schemas/{schema_id}` instead.",
+      "summary": "Delete a schema",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas/{schema_id}",
+      "operationId": "api-shield-schema-validation-retrieve-information-about-specific-schema",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Gets detailed information about a specific uploaded OpenAPI schema, including its contents and validation configuration. Deprecated; use `/zones/{zone_id}/schema_validation/schemas/{schema_id}` instead.",
+      "summary": "Retrieve information about a specific schema on a zone",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas/{schema_id}",
+      "operationId": "api-shield-schema-validation-enable-validation-for-a-schema",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Activates schema validation for an uploaded OpenAPI schema. Requests to matching endpoints will be validated against the schema definitions. Deprecated; use `/zones/{zone_id}/schema_validation/schemas/{schema_id}` instead.",
+      "summary": "Enable validation for a schema",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/api_gateway/user_schemas/{schema_id}/operations",
+      "operationId": "api-shield-schema-validation-extract-operations-from-schema",
+      "tags": [
+        "API Shield Schema Validation 2.0"
+      ],
+      "description": "Retrieves all operations from the schema. Operations that already exist in API Shield Endpoint Management will be returned as full operations. Deprecated; use `/zones/{zone_id}/schema_validation/schemas/{schema_id}/operations` instead.",
+      "summary": "Retrieve all operations from a schema",
+      "extensions": {
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "Use [Schema Validation API](https://developers.cloudflare.com/api/resources/schema_validation/) instead."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions",
+      "operationId": "origin-cloud-regions-list",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Returns all IP-to-cloud-region mappings configured for the zone. Each mapping tells Cloudflare which cloud vendor and region hosts the origin at that IP, enabling the edge to route via the nearest Tiered Cache upper-tier co-located with that cloud provider. Returns an empty array when no mappings exist.",
+      "summary": "List origin cloud region mappings",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions",
+      "operationId": "origin-cloud-regions-upsert",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Adds or updates a single IP-to-cloud-region mapping for the zone. Unlike POST, this operation is idempotent \u2014 if a mapping for the IP already exists it is overwritten. Returns the complete updated list of all mappings for the zone. Returns 403 (code 1164) when the zone has reached the limit of 3,500 IP mappings.",
+      "summary": "Create or update an origin cloud region mapping",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions",
+      "operationId": "origin-cloud-regions-create",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Adds a single IP-to-cloud-region mapping for the zone. The IP must be a valid IPv4 or IPv6 address and is normalized to canonical form before storage (RFC 5952 for IPv6). Returns 400 (code 1145) if a mapping for that IP already exists \u2014 use PATCH to update an existing entry. The vendor and region are validated against the list from `GET /zones/{zone_id}/cache/origin_cloud_regions/supported_regions`.",
+      "summary": "Create an origin cloud region mapping",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions/batch",
+      "operationId": "origin-cloud-regions-batch-delete",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Removes up to 100 IP-to-cloud-region mappings in a single request. Each IP is validated independently \u2014 successfully deleted items are returned in the `succeeded` array and IPs that could not be found or are invalid are returned in the `failed` array.",
+      "summary": "Batch delete origin cloud region mappings",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions/batch",
+      "operationId": "origin-cloud-regions-batch-upsert",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Adds or updates up to 100 IP-to-cloud-region mappings in a single request. Each item is validated independently \u2014 valid items are applied and invalid items are returned in the `failed` array. The vendor and region for every item are validated against the list from `GET /zones/{zone_id}/cache/origin_cloud_regions/supported_regions`.",
+      "summary": "Batch create or update origin cloud region mappings",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions/supported_regions",
+      "operationId": "origin-cloud-regions-supported-regions",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Returns the cloud vendors and regions that are valid values for origin cloud region mappings. Each region includes the Tiered Cache upper-tier colocation codes that will be used for cache routing when a mapping targeting that region is active. Requires the zone to have Tiered Cache enabled.",
+      "summary": "List supported cloud vendors and regions",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions/{origin_ip}",
+      "operationId": "origin-cloud-regions-delete",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Removes the cloud region mapping for a single origin IP address. The IP path parameter is normalized before lookup. Returns the deleted entry on success. Returns 404 (code 1163) if no mapping exists for the specified IP. When the last mapping for the zone is removed the underlying rule record is also deleted.",
+      "summary": "Delete an origin cloud region mapping",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/cache/origin_cloud_regions/{origin_ip}",
+      "operationId": "origin-cloud-regions-get",
+      "tags": [
+        "Origin Cloud Regions"
+      ],
+      "description": "Returns the cloud region mapping for a single origin IP address. The IP path parameter is normalized before lookup (RFC 5952 for IPv6). Returns 404 (code 1142) if the zone has no mappings or if the specified IP has no mapping.",
+      "summary": "Get an origin cloud region mapping",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Use the v2 endpoints under `/zones/{zone_id}/origin/cloud_regions` instead. The v2 API uses idempotent PUT semantics for create+update, provides a flat response shape, and is the supported path for Terraform and SDK clients. The v1 endpoints under `/zones/{zone_id}/cache/origin_cloud_regions` will be removed on 2026-10-01.",
+          "display": true,
+          "eol": "2026-10-01T00:00:00Z",
+          "id": "opcr_v1_deprecation"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/cache/origin_post_quantum_encryption",
+      "operationId": "zone-cache-settings-get-origin-post-quantum-encryption-setting",
+      "tags": [
+        "Origin Post-Quantum"
+      ],
+      "description": "Instructs Cloudflare to use Post-Quantum (PQ) key agreement algorithms when connecting to your origin. Preferred instructs Cloudflare to opportunistically send a Post-Quantum keyshare in the first message to the origin (for fastest connections when the origin supports and prefers PQ), supported means that PQ algorithms are advertised but only used when requested by the origin, and off means that PQ algorithms are not advertised.",
+      "summary": "Get Origin Post-Quantum Encryption setting",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Origin post-quantum encryption selection is now handled automatically by Auto-Origin TLS KEX (`/zones/{zone_id}/settings/auto_origin_tls_kex`) combined with Origin TLS Compliance Modes (`/zones/{zone_id}/settings/origin_tls_compliance_modes`). As that rollout proceeds, the manual `origin_post_quantum_encryption` setting becomes ineffective and the endpoint will be removed on 2026-07-19.",
+          "display": true,
+          "eol": "2026-07-19T00:00:00Z",
+          "id": "origin_pqe_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/cache/origin_post_quantum_encryption",
+      "operationId": "zone-cache-settings-change-origin-post-quantum-encryption-setting",
+      "tags": [
+        "Origin Post-Quantum"
+      ],
+      "description": "Instructs Cloudflare to use Post-Quantum (PQ) key agreement algorithms when connecting to your origin. Preferred instructs Cloudflare to opportunistically send a Post-Quantum keyshare in the first message to the origin (for fastest connections when the origin supports and prefers PQ), supported means that PQ algorithms are advertised but only used when requested by the origin, and off means that PQ algorithms are not advertised.",
+      "summary": "Change Origin Post-Quantum Encryption setting",
+      "extensions": {
+        "x-cfDeprecation": {
+          "description": "Origin post-quantum encryption selection is now handled automatically by Auto-Origin TLS KEX (`/zones/{zone_id}/settings/auto_origin_tls_kex`) combined with Origin TLS Compliance Modes (`/zones/{zone_id}/settings/origin_tls_compliance_modes`). As that rollout proceeds, the manual `origin_post_quantum_encryption` setting becomes ineffective and the endpoint will be removed on 2026-07-19.",
+          "display": true,
+          "eol": "2026-07-19T00:00:00Z",
+          "id": "origin_pqe_deprecation"
+        },
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/custom_ns",
+      "operationId": "account-level-custom-nameservers-usage-for-a-zone-get-account-custom-nameserver-related-zone-metadata",
+      "tags": [
+        "Account-Level Custom Nameservers Usage for a Zone"
+      ],
+      "description": "Get metadata for account-level custom nameservers on a zone.\n\nDeprecated in favor of [Show DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-a-zone-list-dns-settings).\n",
+      "summary": "Get Account Custom Nameserver Related Zone Metadata",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/custom_ns",
+      "operationId": "account-level-custom-nameservers-usage-for-a-zone-set-account-custom-nameserver-related-zone-metadata",
+      "tags": [
+        "Account-Level Custom Nameservers Usage for a Zone"
+      ],
+      "description": "Set metadata for account-level custom nameservers on a zone.\n\nIf you would like new zones in the account to use account custom nameservers by default, use PUT /accounts/:identifier to set the account setting use_account_custom_ns_by_default to true.\n\nDeprecated in favor of [Update DNS Settings](https://developers.cloudflare.com/api/operations/dns-settings-for-a-zone-update-dns-settings).\n",
+      "summary": "Set Account Custom Nameserver Related Zone Metadata",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/dns_analytics/report",
+      "operationId": "dns-analytics-table",
+      "tags": [
+        "DNS Analytics"
+      ],
+      "description": "Retrieves a list of summarised aggregate metrics over a given time period.\n\nSee [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/) for detailed information about the available query parameters.",
+      "summary": "Table",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint is deprecated. See [the API deprecation notice](https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-12-09)."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/dns_analytics/report/bytime",
+      "operationId": "dns-analytics-by-time",
+      "tags": [
+        "DNS Analytics"
+      ],
+      "description": "Retrieves a list of aggregate metrics grouped by time interval.\n\nSee [Analytics API properties](https://developers.cloudflare.com/dns/reference/analytics-api-properties/) for detailed information about the available query parameters.",
+      "summary": "By Time",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This endpoint is deprecated. See [the API deprecation notice](https://developers.cloudflare.com/fundamentals/api/reference/deprecations/#2025-12-09)."
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/dns_records/scan",
+      "operationId": "dns-records-for-a-zone-scan-dns-records",
+      "tags": [
+        "DNS Records for a Zone"
+      ],
+      "description": "Scan for common DNS records on your domain and automatically add them to your zone. Useful if you haven't updated your nameservers yet.",
+      "summary": "Scan DNS Records",
+      "extensions": {
+        "x-fern-availability": "generally-available",
+        "x-stainless-deprecation-message": "This endpoint is deprecated in favor of a new asynchronous version. Please use the [/scan/trigger](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/scan/trigger) and [/scan/review](https://developers.cloudflare.com/api/resources/dns/subresources/records/methods/scan/review) endpoints instead.\n"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/email/routing/disable",
+      "operationId": "email-routing-settings-disable-email-routing",
+      "tags": [
+        "Email Routing settings"
+      ],
+      "description": "Disable your Email Routing zone. Also removes additional MX records previously required for Email Routing to work.",
+      "summary": "Disable Email Routing",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/email/routing/enable",
+      "operationId": "email-routing-settings-enable-email-routing",
+      "tags": [
+        "Email Routing settings"
+      ],
+      "description": "Enable you Email Routing zone. Add and lock the necessary MX and SPF records.",
+      "summary": "Enable Email Routing",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/email/routing/suppression",
+      "operationId": "get_publicListSuppressionZoneRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Lists email suppressions for the specified zone.",
+      "summary": "List zone email suppressions",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/email/routing/suppression",
+      "operationId": "post_publicNewSuppressionZoneRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Creates a new email suppression for the specified zone.",
+      "summary": "Create zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/email/routing/suppression/{suppression_id}",
+      "operationId": "delete_publicDeleteSuppressionZoneRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Deletes an email suppression for the specified zone.",
+      "summary": "Delete zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/email/routing/suppression/{suppression_id}",
+      "operationId": "get_publicGetSuppressionZoneRouting",
+      "tags": [
+        "Email Routing suppressions"
+      ],
+      "description": "Retrieves a single email suppression for the specified zone.",
+      "summary": "Get zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/email/routing/unlock",
+      "operationId": "email-routing-settings-unlock-email-routing",
+      "tags": [
+        "Email Routing settings"
+      ],
+      "description": "Unlock MX records previously locked by Email Routing. Deprecated - use PATCH /zones/{zone_id}/email/routing/dns instead.",
+      "summary": "Unlock Email Routing",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/email/sending/suppression",
+      "operationId": "get_publicListSuppressionZoneSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Lists email suppressions for the specified zone.",
+      "summary": "List zone email suppressions",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/email/sending/suppression",
+      "operationId": "post_publicNewSuppressionZoneSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Creates a new email suppression for the specified zone.",
+      "summary": "Create zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/email/sending/suppression/{suppression_id}",
+      "operationId": "delete_publicDeleteSuppressionZoneSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Deletes an email suppression for the specified zone.",
+      "summary": "Delete zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/email/sending/suppression/{suppression_id}",
+      "operationId": "get_publicGetSuppressionZoneSending",
+      "tags": [
+        "Email Sending suppressions"
+      ],
+      "description": "Retrieves a single email suppression for the specified zone.",
+      "summary": "Get zone email suppression",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/filters",
+      "operationId": "filters-delete-filters",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Deletes one or more existing filters.",
+      "summary": "Delete filters",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/filters",
+      "operationId": "filters-list-filters",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Fetches filters in a zone. You can filter the results using several optional parameters.",
+      "summary": "List filters",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/filters",
+      "operationId": "filters-create-filters",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Creates one or more filters.",
+      "summary": "Create filters",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/filters",
+      "operationId": "filters-update-filters",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Updates one or more existing filters.",
+      "summary": "Update filters",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/filters/{filter_id}",
+      "operationId": "filters-delete-a-filter",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Deletes an existing filter.",
+      "summary": "Delete a filter",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/filters/{filter_id}",
+      "operationId": "filters-get-a-filter",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Fetches the details of a filter.",
+      "summary": "Get a filter",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/filters/{filter_id}",
+      "operationId": "filters-update-a-filter",
+      "tags": [
+        "Filters"
+      ],
+      "description": "Updates an existing filter.",
+      "summary": "Update a filter",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/firewall/rules",
+      "operationId": "firewall-rules-delete-firewall-rules",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Deletes existing firewall rules.",
+      "summary": "Delete firewall rules",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/rules",
+      "operationId": "firewall-rules-list-firewall-rules",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Fetches firewall rules in a zone. You can filter the results using several optional parameters.",
+      "summary": "List firewall rules",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/firewall/rules",
+      "operationId": "firewall-rules-update-priority-of-firewall-rules",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Updates the priority of existing firewall rules.",
+      "summary": "Update priority of firewall rules",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/firewall/rules",
+      "operationId": "firewall-rules-create-firewall-rules",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Create one or more firewall rules.",
+      "summary": "Create firewall rules",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/firewall/rules",
+      "operationId": "firewall-rules-update-firewall-rules",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Updates one or more existing firewall rules.",
+      "summary": "Update firewall rules",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/firewall/rules/{rule_id}",
+      "operationId": "firewall-rules-delete-a-firewall-rule",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Deletes an existing firewall rule.",
+      "summary": "Delete a firewall rule",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/rules/{rule_id}",
+      "operationId": "firewall-rules-get-a-firewall-rule",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Fetches the details of a firewall rule.",
+      "summary": "Get a firewall rule",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/firewall/rules/{rule_id}",
+      "operationId": "firewall-rules-update-priority-of-a-firewall-rule",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Updates the priority of an existing firewall rule.",
+      "summary": "Update priority of a firewall rule",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/firewall/rules/{rule_id}",
+      "operationId": "firewall-rules-update-a-firewall-rule",
+      "tags": [
+        "Firewall rules"
+      ],
+      "description": "Updates an existing firewall rule.",
+      "summary": "Update a firewall rule",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/overrides",
+      "operationId": "waf-overrides-list-waf-overrides",
+      "tags": [
+        "WAF overrides"
+      ],
+      "description": "**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**\n\nPreviously fetched the URI-based WAF overrides in a zone.",
+      "summary": "List WAF overrides",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/firewall/waf/overrides",
+      "operationId": "waf-overrides-create-a-waf-override",
+      "tags": [
+        "WAF overrides"
+      ],
+      "description": "**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**\n\nPreviously created a URI-based WAF override for a zone.",
+      "summary": "Create a WAF override",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/firewall/waf/overrides/{overrides_id}",
+      "operationId": "waf-overrides-delete-a-waf-override",
+      "tags": [
+        "WAF overrides"
+      ],
+      "description": "**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**\n\nPreviously deleted an existing URI-based WAF override.",
+      "summary": "Delete a WAF override",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/overrides/{overrides_id}",
+      "operationId": "waf-overrides-get-a-waf-override",
+      "tags": [
+        "WAF overrides"
+      ],
+      "description": "**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**\n\nPreviously fetched the details of a URI-based WAF override.",
+      "summary": "Get a WAF override",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/firewall/waf/overrides/{overrides_id}",
+      "operationId": "waf-overrides-update-waf-override",
+      "tags": [
+        "WAF overrides"
+      ],
+      "description": "**This endpoint has been deprecated and returns 410 Gone. Please use the [Rulesets API](https://developers.cloudflare.com/ruleset-engine/) instead.**\n\nPreviously updated an existing URI-based WAF override.",
+      "summary": "Update WAF override",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages",
+      "operationId": "waf-packages-list-waf-packages",
+      "tags": [
+        "WAF packages"
+      ],
+      "description": "Fetches WAF packages for a zone.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "List WAF packages",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}",
+      "operationId": "waf-packages-get-a-waf-package",
+      "tags": [
+        "WAF packages"
+      ],
+      "description": "Fetches the details of a WAF package.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Get a WAF package",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}",
+      "operationId": "waf-packages-update-a-waf-package",
+      "tags": [
+        "WAF packages"
+      ],
+      "description": "Updates a WAF package. You can update the sensitivity and the action of an anomaly detection WAF package.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Update a WAF package",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/groups",
+      "operationId": "waf-rule-groups-list-waf-rule-groups",
+      "tags": [
+        "WAF rule groups"
+      ],
+      "description": "Fetches the WAF rule groups in a WAF package.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "List WAF rule groups",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/groups/{group_id}",
+      "operationId": "waf-rule-groups-get-a-waf-rule-group",
+      "tags": [
+        "WAF rule groups"
+      ],
+      "description": "Fetches the details of a WAF rule group.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Get a WAF rule group",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/groups/{group_id}",
+      "operationId": "waf-rule-groups-update-a-waf-rule-group",
+      "tags": [
+        "WAF rule groups"
+      ],
+      "description": "Updates a WAF rule group. You can update the state (`mode` parameter) of a rule group.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Update a WAF rule group",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/rules",
+      "operationId": "waf-rules-list-waf-rules",
+      "tags": [
+        "WAF rules"
+      ],
+      "description": "Fetches WAF rules in a WAF package.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "List WAF rules",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/rules/{rule_id}",
+      "operationId": "waf-rules-get-a-waf-rule",
+      "tags": [
+        "WAF rules"
+      ],
+      "description": "Fetches the details of a WAF rule in a WAF package.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Get a WAF rule",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/firewall/waf/packages/{package_id}/rules/{rule_id}",
+      "operationId": "waf-rules-update-a-waf-rule",
+      "tags": [
+        "WAF rules"
+      ],
+      "description": "Updates a WAF rule. You can only update the mode/action of the rule.\n\n**Note:** Applies only to the [previous version of WAF managed rules](https://developers.cloudflare.com/support/firewall/managed-rules-web-application-firewall-waf/understanding-waf-managed-rules-web-application-firewall/).",
+      "summary": "Update a WAF rule",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/logs/explorer/query/sql",
+      "operationId": "zones-logs-explorer-query-get",
+      "tags": [
+        "Log Explorer Queries"
+      ],
+      "description": "Run a SQL query against zone-level datasets. The SQL query is passed as the `query` query parameter. Because the query appears in the URL, it is subject to gateway and proxy URL-length limits and may be recorded in access logs. This endpoint is deprecated in favour of the POST variant which sends the query in the request body.",
+      "summary": "Run a log query",
+      "extensions": {
+        "x-fern-ignore": true
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/pagerules/settings",
+      "operationId": "available-page-rules-settings-list-available-page-rules-settings",
+      "tags": [
+        "Available Page Rules settings"
+      ],
+      "description": "Returns a list of settings (and their details) that Page Rules can apply to matching requests.",
+      "summary": "List available Page Rules settings",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        }
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/rate_limit_analytics",
+      "operationId": "rate-limit-analytics-get-zone-analytics",
+      "tags": [
+        "Rate Limiting Analytics"
+      ],
+      "description": "Returns rate limiting analytics for a zone over the specified time period.\nThe time period divides into time segments of a given length. Each segment\ncontains total action counts and action counts broken down by colo.",
+      "summary": "Get Rate Limiting Analytics",
+      "extensions": {
+        "x-fern-availability": "deprecated"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/rate_limits",
+      "operationId": "rate-limits-for-a-zone-list-rate-limits",
+      "tags": [
+        "Rate limits for a zone"
+      ],
+      "description": "**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.",
+      "summary": "List rate limits",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "post",
+      "path": "/zones/{zone_id}/rate_limits",
+      "operationId": "rate-limits-for-a-zone-create-a-rate-limit",
+      "tags": [
+        "Rate limits for a zone"
+      ],
+      "description": "**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.",
+      "summary": "Create a rate limit",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "delete",
+      "path": "/zones/{zone_id}/rate_limits/{rate_limit_id}",
+      "operationId": "rate-limits-for-a-zone-delete-a-rate-limit",
+      "tags": [
+        "Rate limits for a zone"
+      ],
+      "description": "**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.",
+      "summary": "Delete a rate limit",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/rate_limits/{rate_limit_id}",
+      "operationId": "rate-limits-for-a-zone-get-a-rate-limit",
+      "tags": [
+        "Rate limits for a zone"
+      ],
+      "description": "**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.",
+      "summary": "Get a rate limit",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/rate_limits/{rate_limit_id}",
+      "operationId": "rate-limits-for-a-zone-update-a-rate-limit",
+      "tags": [
+        "Rate limits for a zone"
+      ],
+      "description": "**Deprecated**: This endpoint returns 410 Gone. Please use the Rulesets API instead.",
+      "summary": "Update a rate limit",
+      "extensions": {
+        "x-fern-availability": "generally-available"
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/settings",
+      "operationId": "zone-settings-get-all-zone-settings",
+      "tags": [
+        "Zone Settings"
+      ],
+      "description": "Available settings for your user in relation to a zone.",
+      "summary": "Get all zone settings",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "This endpoint is deprecated. Zone settings should instead be managed individually."
+      }
+    },
+    {
+      "method": "patch",
+      "path": "/zones/{zone_id}/settings",
+      "operationId": "zone-settings-edit-zone-settings-info",
+      "tags": [
+        "Zone Settings"
+      ],
+      "description": "Edit settings for a zone.",
+      "summary": "Edit multiple zone settings",
+      "extensions": {
+        "x-fern-availability": "deprecated",
+        "x-forge-sunset": {
+          "date": "2030-01-01T00:00:00Z"
+        },
+        "x-stainless-deprecation-message": "This endpoint is deprecated. Zone settings should instead be managed individually."
+      }
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/ssl/recommendation",
+      "operationId": "ssl/-tls-mode-recommendation-ssl/-tls-recommendation",
+      "tags": [
+        "SSL/TLS Mode Recommendation"
+      ],
+      "description": "Retrieve the SSL/TLS Recommender's recommendation for a zone.",
+      "summary": "SSL/TLS Recommendation",
+      "extensions": {
+        "x-fern-availability": "generally-available",
+        "x-stainless-deprecation-message": "SSL/TLS Recommender has been decommissioned in favor of Automatic SSL/TLS"
+      }
+    }
+  ],
+  "note": "Source metadata inventory; deprecated does not establish retirement. No exclusions are implied."
+}

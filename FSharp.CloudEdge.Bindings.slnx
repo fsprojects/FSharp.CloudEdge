@@ -1,0 +1,75 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="src/Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
+  </Folder>
+  <Folder Name="/Management/">
+    <Project Path="src/Management/FSharp.CloudEdge.Management.AI/FSharp.CloudEdge.Management.AI.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Browser/FSharp.CloudEdge.Management.Browser.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.ContentDelivery/FSharp.CloudEdge.Management.ContentDelivery.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Media/FSharp.CloudEdge.Management.Media.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Messaging/FSharp.CloudEdge.Management.Messaging.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Networking/FSharp.CloudEdge.Management.Networking.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Observability/FSharp.CloudEdge.Management.Observability.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Security/FSharp.CloudEdge.Management.Security.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Storage/FSharp.CloudEdge.Management.Storage.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/Agents/">
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient/FSharp.CloudEdge.Runtime.AgentsMcpClient.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode/FSharp.CloudEdge.Runtime.CodeMode.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Shell/FSharp.CloudEdge.Runtime.Shell.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/AI/">
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.AIChat/FSharp.CloudEdge.Runtime.AIChat.fsproj" />
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProvider/FSharp.CloudEdge.Runtime.AIGatewayProvider.fsproj" />
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.AISearchProvider/FSharp.CloudEdge.Runtime.AISearchProvider.fsproj" />
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.AIUtils/FSharp.CloudEdge.Runtime.AIUtils.fsproj" />
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.Think/FSharp.CloudEdge.Runtime.Think.fsproj" />
+    <Project Path="src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/Compute/">
+    <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.Computer/FSharp.CloudEdge.Runtime.Computer.fsproj" />
+    <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerArtifacts/FSharp.CloudEdge.Runtime.ComputerArtifacts.fsproj" />
+    <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.Sandbox/FSharp.CloudEdge.Runtime.Sandbox.fsproj" />
+    <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxBridge/FSharp.CloudEdge.Runtime.SandboxBridge.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/FeatureFlags/">
+    <Project Path="src/Runtime/FeatureFlags/FSharp.CloudEdge.Runtime.Flagship/FSharp.CloudEdge.Runtime.Flagship.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/Pages/">
+    <Project Path="src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess.fsproj" />
+    <Project Path="src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginStaticForms/FSharp.CloudEdge.Runtime.PagesPluginStaticForms.fsproj" />
+    <Project Path="src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/FSharp.CloudEdge.Runtime.PagesPluginTurnstile.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/Platform/">
+    <Project Path="src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/RPC/">
+    <Project Path="src/Runtime/RPC/FSharp.CloudEdge.Runtime.Capnweb/FSharp.CloudEdge.Runtime.Capnweb.fsproj" />
+  </Folder>
+  <Folder Name="/Runtime/Services/">
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.Actors/FSharp.CloudEdge.Runtime.Actors.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.Cabidela/FSharp.CloudEdge.Runtime.Cabidela.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.Chanfana/FSharp.CloudEdge.Runtime.Chanfana.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.Containers/FSharp.CloudEdge.Runtime.Containers.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.DynamicWorkflows/FSharp.CloudEdge.Runtime.DynamicWorkflows.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.KvAssetHandler/FSharp.CloudEdge.Runtime.KvAssetHandler.fsproj" />
+    <Project Path="src/Runtime/Services/FSharp.CloudEdge.Runtime.WorkersOauthProvider/FSharp.CloudEdge.Runtime.WorkersOauthProvider.fsproj" />
+  </Folder>
+  <Folder Name="/Support/">
+    <Project Path="src/Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" />
+  </Folder>
+  <Folder Name="/Support/AI/">
+    <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" />
+    <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" />
+    <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+  </Folder>
+  <Folder Name="/Tenancy/">
+    <Project Path="src/Tenancy/FSharp.CloudEdge.Tenancy/FSharp.CloudEdge.Tenancy.fsproj" />
+  </Folder>
+</Solution>

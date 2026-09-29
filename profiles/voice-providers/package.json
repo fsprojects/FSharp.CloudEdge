@@ -1,0 +1,19 @@
+{
+  "name": "fsharp-cloudedge-input-voice-providers",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/voice-assemblyai": "0.2.0",
+    "@cloudflare/voice-deepgram": "0.2.0",
+    "@cloudflare/voice-elevenlabs": "0.2.0",
+    "@cloudflare/voice-plivo": "0.2.0",
+    "@cloudflare/voice-telnyx": "0.2.0",
+    "@cloudflare/voice-twilio": "0.1.0",
+    "agents": "0.23.0",
+    "@cloudflare/workers-types": "5.20260906.1",
+    "@types/node": "22.20.1",
+    "@types/react": "19.2.18",
+    "ai": "7.0.93"
+  }
+}

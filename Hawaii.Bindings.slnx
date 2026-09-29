@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Core/">
+    <Project Path="src/Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
+  </Folder>
+  <Folder Name="/Management/">
+    <Project Path="src/Management/FSharp.CloudEdge.Management.AI/FSharp.CloudEdge.Management.AI.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Browser/FSharp.CloudEdge.Management.Browser.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.ContentDelivery/FSharp.CloudEdge.Management.ContentDelivery.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Media/FSharp.CloudEdge.Management.Media.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Messaging/FSharp.CloudEdge.Management.Messaging.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Networking/FSharp.CloudEdge.Management.Networking.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Observability/FSharp.CloudEdge.Management.Observability.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Security/FSharp.CloudEdge.Management.Security.fsproj" />
+    <Project Path="src/Management/FSharp.CloudEdge.Management.Storage/FSharp.CloudEdge.Management.Storage.fsproj" />
+  </Folder>
+  <Folder Name="/Tenancy/">
+    <Project Path="src/Tenancy/FSharp.CloudEdge.Tenancy/FSharp.CloudEdge.Tenancy.fsproj" />
+  </Folder>
+</Solution>

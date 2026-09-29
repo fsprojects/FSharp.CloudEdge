@@ -1,0 +1,5848 @@
+{
+  "schemaVersion": 2,
+  "toolchain": {
+    "typescript": "7.1.0-dev.20260902.1"
+  },
+  "xantham": {
+    "tool": "xantham"
+  },
+  "targets": [
+    {
+      "id": "workers",
+      "package": "@cloudflare/workers-types",
+      "version": "5.20260906.1",
+      "profile": "workers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Workers.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Workers",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "lib": [
+          "esnext"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "workers--experimental",
+      "package": "@cloudflare/workers-types",
+      "version": "5.20260906.1",
+      "profile": "workers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Platform/FSharp.CloudEdge.Runtime.WorkersExperimental",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersExperimental.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersExperimental",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "experimental/index.d.ts",
+        "lib": [
+          "esnext"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Agents.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Agents",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "agents",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents--agent-tools",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAgentTools",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsAgentTools.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsAgentTools",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/agent-tools.d.ts",
+        "runtime": "agents/agent-tools",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents"
+      ]
+    },
+    {
+      "id": "agents--ai-chat-agent",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsAiChatAgent",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai-chat-agent.d.ts",
+        "runtime": "agents/ai-chat-agent",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents--ai-chat-v5-migration",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatV5Migration",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsAiChatV5Migration.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsAiChatV5Migration",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai-chat-v5-migration.d.ts",
+        "runtime": "agents/ai-chat-v5-migration",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--ai-chat-agent"
+      ]
+    },
+    {
+      "id": "agents--ai-react",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsAiReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsAiReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai-react.d.ts",
+        "runtime": "agents/ai-react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents--ai-types",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiTypes",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsAiTypes.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsAiTypes",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai-types.d.ts",
+        "runtime": "agents/ai-types",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--ai-chat-v5-migration"
+      ]
+    },
+    {
+      "id": "agents--browser",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsBrowser",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsBrowser.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsBrowser",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/browser/index.d.ts",
+        "runtime": "agents/browser",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents--browser-ai",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsBrowserAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsBrowserAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsBrowserAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/browser/ai.d.ts",
+        "runtime": "agents/browser/ai",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--browser"
+      ]
+    },
+    {
+      "id": "agents--browser-tanstack-ai",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsBrowserTanstackAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsBrowserTanstackAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsBrowserTanstackAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/browser/tanstack-ai.d.ts",
+        "runtime": "agents/browser/tanstack-ai",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--browser-ai"
+      ]
+    },
+    {
+      "id": "agents--chat",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsChat",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsChat.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsChat",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/chat/index.d.ts",
+        "runtime": "agents/chat",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--agent-tools"
+      ]
+    },
+    {
+      "id": "agents--chat-react",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsChatReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsChatReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsChatReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/chat/react.d.ts",
+        "runtime": "agents/chat/react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "agents--chat-sdk",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsChatSdk",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsChatSdk.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsChatSdk",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/chat-sdk/index.d.ts",
+        "runtime": "agents/chat-sdk",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--chat"
+      ]
+    },
+    {
+      "id": "agents--chat-transport",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsChatTransport",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsChatTransport.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsChatTransport",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/chat/transport.d.ts",
+        "runtime": "agents/chat/transport",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--chat-sdk"
+      ]
+    },
+    {
+      "id": "agents--client",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsClient",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsClient.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsClient",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/client.d.ts",
+        "runtime": "agents/client",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--browser-tanstack-ai"
+      ]
+    },
+    {
+      "id": "agents--codemode-ai",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsCodemodeAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsCodemodeAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsCodemodeAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/codemode/ai.d.ts",
+        "runtime": "agents/codemode/ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--ai-types"
+      ]
+    },
+    {
+      "id": "agents--email",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsEmail",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsEmail.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsEmail",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/email.d.ts",
+        "runtime": "agents/email",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--codemode-ai"
+      ]
+    },
+    {
+      "id": "agents--experimental-memory-session",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsExperimentalMemorySession",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsExperimentalMemorySession.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsExperimentalMemorySession",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/experimental/memory/session/index.d.ts",
+        "runtime": "agents/experimental/memory/session",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--chat-transport"
+      ]
+    },
+    {
+      "id": "agents--experimental-memory-utils",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsExperimentalMemoryUtils",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsExperimentalMemoryUtils.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsExperimentalMemoryUtils",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/experimental/memory/utils/index.d.ts",
+        "runtime": "agents/experimental/memory/utils",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--experimental-memory-session"
+      ]
+    },
+    {
+      "id": "agents--experimental-webmcp",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsExperimentalWebmcp",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsExperimentalWebmcp.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsExperimentalWebmcp",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/experimental/webmcp.d.ts",
+        "runtime": "agents/experimental/webmcp",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--email"
+      ]
+    },
+    {
+      "id": "agents--lifecycle",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsLifecycle",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsLifecycle.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsLifecycle",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/lifecycle/index.d.ts",
+        "runtime": "agents/lifecycle",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--experimental-memory-utils"
+      ]
+    },
+    {
+      "id": "agents--mcp",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcp",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsMcp.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsMcp",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp/index.d.ts",
+        "runtime": "agents/mcp",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--lifecycle"
+      ]
+    },
+    {
+      "id": "agents--mcp-client",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsMcpClient.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsMcpClient",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp/client/index.d.ts",
+        "runtime": "agents/mcp/client",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--client"
+      ]
+    },
+    {
+      "id": "agents--mcp-do-oauth-client-provider",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpDoOauthClientProvider",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsMcpDoOauthClientProvider.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsMcpDoOauthClientProvider",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp/client/do-oauth-client-provider.d.ts",
+        "runtime": "agents/mcp/do-oauth-client-provider",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--experimental-webmcp"
+      ]
+    },
+    {
+      "id": "agents--mcp-server",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpServer",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsMcpServer.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsMcpServer",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp/server/index.d.ts",
+        "runtime": "agents/mcp/server",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--mcp-do-oauth-client-provider"
+      ]
+    },
+    {
+      "id": "agents--observability",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsObservability",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsObservability.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsObservability",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/observability/index.d.ts",
+        "runtime": "agents/observability",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--mcp"
+      ]
+    },
+    {
+      "id": "agents--observability-ai",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsObservabilityAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsObservabilityAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsObservabilityAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/observability/ai/index.d.ts",
+        "runtime": "agents/observability/ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--mcp-server"
+      ]
+    },
+    {
+      "id": "agents--react",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/react.d.ts",
+        "runtime": "agents/react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--mcp-client"
+      ]
+    },
+    {
+      "id": "agents--schedule",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsSchedule",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsSchedule.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsSchedule",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/schedule.d.ts",
+        "runtime": "agents/schedule",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--observability-ai"
+      ]
+    },
+    {
+      "id": "agents--schedules",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsSchedules",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsSchedules.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsSchedules",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/schedules/index.d.ts",
+        "runtime": "agents/schedules",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--schedule"
+      ]
+    },
+    {
+      "id": "agents--schedules-parser",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsSchedulesParser",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsSchedulesParser.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsSchedulesParser",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/schedules/parser.d.ts",
+        "runtime": "agents/schedules/parser",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--schedules"
+      ]
+    },
+    {
+      "id": "agents--skills",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsSkills",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsSkills.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsSkills",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/skills/index.d.ts",
+        "runtime": "agents/skills",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--observability"
+      ]
+    },
+    {
+      "id": "agents--skills-compile",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsSkillsCompile",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsSkillsCompile.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsSkillsCompile",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/skills/compile.d.ts",
+        "runtime": "agents/skills/compile",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--schedules-parser"
+      ]
+    },
+    {
+      "id": "agents--types",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsTypes",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsTypes.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsTypes",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types.d.ts",
+        "runtime": "agents/types",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--skills-compile"
+      ]
+    },
+    {
+      "id": "agents--vite",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsVite",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsVite.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsVite",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/vite.d.ts",
+        "runtime": "agents/vite",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--types"
+      ]
+    },
+    {
+      "id": "agents--workflows",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsWorkflows",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsWorkflows.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsWorkflows",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/workflows.d.ts",
+        "runtime": "agents/workflows",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--skills"
+      ]
+    },
+    {
+      "id": "agents--x402",
+      "package": "agents",
+      "version": "0.22.0",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsX402",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AgentsX402.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AgentsX402",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp/client/x402.d.ts",
+        "runtime": "agents/x402",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "agents--vite"
+      ]
+    },
+    {
+      "id": "aichat",
+      "package": "@cloudflare/ai-chat",
+      "version": "0.11.0",
+      "profile": "ai-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIChat",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIChat.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIChat",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/ai-chat",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "aichat--ai-chat-v5-migration",
+      "package": "@cloudflare/ai-chat",
+      "version": "0.11.0",
+      "profile": "ai-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIChatAiChatV5Migration",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIChatAiChatV5Migration.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIChatAiChatV5Migration",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai-chat-v5-migration.d.ts",
+        "runtime": "@cloudflare/ai-chat/ai-chat-v5-migration",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aichat"
+      ]
+    },
+    {
+      "id": "aichat--react",
+      "package": "@cloudflare/ai-chat",
+      "version": "0.11.0",
+      "profile": "ai-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIChatReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIChatReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIChatReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/react.d.ts",
+        "runtime": "@cloudflare/ai-chat/react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "aichat--types",
+      "package": "@cloudflare/ai-chat",
+      "version": "0.11.0",
+      "profile": "ai-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIChatTypes",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIChatTypes.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIChatTypes",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types.d.ts",
+        "runtime": "@cloudflare/ai-chat/types",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aichat--ai-chat-v5-migration"
+      ]
+    },
+    {
+      "id": "codemode",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeMode.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeMode",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/codemode",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "codemode--ai",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeModeAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeModeAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeModeAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ai.d.ts",
+        "runtime": "@cloudflare/codemode/ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "codemode"
+      ]
+    },
+    {
+      "id": "codemode--browser",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeModeBrowser",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeModeBrowser.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeModeBrowser",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/browser.d.ts",
+        "runtime": "@cloudflare/codemode/browser",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "codemode--mcp",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeModeMcp",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeModeMcp.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeModeMcp",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/mcp.d.ts",
+        "runtime": "@cloudflare/codemode/mcp",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "codemode--ai"
+      ]
+    },
+    {
+      "id": "codemode--tanstack-ai",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeModeTanstackAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeModeTanstackAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeModeTanstackAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tanstack-ai.d.ts",
+        "runtime": "@cloudflare/codemode/tanstack-ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "codemode--mcp"
+      ]
+    },
+    {
+      "id": "codemode--vite",
+      "package": "@cloudflare/codemode",
+      "version": "0.5.1",
+      "profile": "codemode",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeModeVite",
+      "files": [
+        "FSharp.CloudEdge.Runtime.CodeModeVite.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.CodeModeVite",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/vite.d.ts",
+        "runtime": "@cloudflare/codemode/vite",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "think",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.Think",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Think.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Think",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/think.d.ts",
+        "runtime": "@cloudflare/think",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "think--extensions",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkExtensions",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkExtensions.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkExtensions",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/extensions/index.d.ts",
+        "runtime": "@cloudflare/think/extensions",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think"
+      ]
+    },
+    {
+      "id": "think--messengers",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkMessengers",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkMessengers.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkMessengers",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/messengers/index.d.ts",
+        "runtime": "@cloudflare/think/messengers",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--extensions"
+      ]
+    },
+    {
+      "id": "think--messengers-telegram",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkMessengersTelegram",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkMessengersTelegram.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkMessengersTelegram",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/messengers/telegram.d.ts",
+        "runtime": "@cloudflare/think/messengers/telegram",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--messengers"
+      ]
+    },
+    {
+      "id": "think--react",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/react.d.ts",
+        "runtime": "@cloudflare/think/react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "think--tools-browser",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsBrowser",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsBrowser.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsBrowser",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/browser.d.ts",
+        "runtime": "@cloudflare/think/tools/browser",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "think--tools-execute",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsExecute",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsExecute.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsExecute",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/execute.d.ts",
+        "runtime": "@cloudflare/think/tools/execute",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--messengers-telegram"
+      ]
+    },
+    {
+      "id": "think--tools-extensions",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsExtensions",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsExtensions.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsExtensions",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/extensions.d.ts",
+        "runtime": "@cloudflare/think/tools/extensions",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--tools-execute"
+      ]
+    },
+    {
+      "id": "think--tools-fetch",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsFetch",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsFetch.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsFetch",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/fetch.d.ts",
+        "runtime": "@cloudflare/think/tools/fetch",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--tools-extensions"
+      ]
+    },
+    {
+      "id": "think--tools-sandbox",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsSandbox",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsSandbox.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsSandbox",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/sandbox.d.ts",
+        "runtime": "@cloudflare/think/tools/sandbox",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--tools-fetch"
+      ]
+    },
+    {
+      "id": "think--tools-workspace",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkToolsWorkspace",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkToolsWorkspace.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkToolsWorkspace",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/workspace.d.ts",
+        "runtime": "@cloudflare/think/tools/workspace",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--tools-sandbox"
+      ]
+    },
+    {
+      "id": "think--workflows",
+      "package": "@cloudflare/think",
+      "version": "0.17.0",
+      "profile": "think",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.ThinkWorkflows",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ThinkWorkflows.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ThinkWorkflows",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/workflows.d.ts",
+        "runtime": "@cloudflare/think/workflows",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "think--tools-workspace"
+      ]
+    },
+    {
+      "id": "voice",
+      "package": "@cloudflare/voice",
+      "version": "0.4.0",
+      "profile": "voice",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Voice",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Voice.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Voice",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/voice.d.ts",
+        "runtime": "@cloudflare/voice",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice--client",
+      "package": "@cloudflare/voice",
+      "version": "0.4.0",
+      "profile": "voice",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceClient",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceClient.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceClient",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/voice-client.d.ts",
+        "runtime": "@cloudflare/voice/client",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice--errors",
+      "package": "@cloudflare/voice",
+      "version": "0.4.0",
+      "profile": "voice",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceErrors.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceErrors",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/errors.d.ts",
+        "runtime": "@cloudflare/voice/errors",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice--react",
+      "package": "@cloudflare/voice",
+      "version": "0.4.0",
+      "profile": "voice",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/voice-react.d.ts",
+        "runtime": "@cloudflare/voice/react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "voice--client"
+      ]
+    },
+    {
+      "id": "shell",
+      "package": "@cloudflare/shell",
+      "version": "0.4.3",
+      "profile": "shell",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Shell",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Shell.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Shell",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/shell",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "shell--git",
+      "package": "@cloudflare/shell",
+      "version": "0.4.3",
+      "profile": "shell",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ShellGit.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ShellGit",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/git/index.d.ts",
+        "runtime": "@cloudflare/shell/git",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "shell--workers",
+      "package": "@cloudflare/shell",
+      "version": "0.4.3",
+      "profile": "shell",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellWorkers",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ShellWorkers.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ShellWorkers",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/workers.d.ts",
+        "runtime": "@cloudflare/shell/workers",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "shell--git"
+      ]
+    },
+    {
+      "id": "workerbundler",
+      "package": "@cloudflare/worker-bundler",
+      "version": "0.2.3",
+      "profile": "worker-bundler",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Tooling/FSharp.CloudEdge.Runtime.WorkerBundler",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkerBundler.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkerBundler",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/worker-bundler",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "workerbundler--typescript",
+      "package": "@cloudflare/worker-bundler",
+      "version": "0.2.3",
+      "profile": "worker-bundler",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Tooling/FSharp.CloudEdge.Runtime.WorkerBundlerTypescript",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkerBundlerTypescript.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkerBundlerTypescript",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/typescript.d.ts",
+        "runtime": "@cloudflare/worker-bundler/typescript",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "workerbundler"
+      ]
+    },
+    {
+      "id": "honoagents",
+      "package": "hono-agents",
+      "version": "3.0.12",
+      "profile": "hono-agents",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.HonoAgents",
+      "files": [
+        "FSharp.CloudEdge.Runtime.HonoAgents.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.HonoAgents",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "hono-agents",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "sandbox",
+      "package": "@cloudflare/sandbox",
+      "version": "0.12.9",
+      "profile": "sandbox",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.Sandbox",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Sandbox.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Sandbox",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/sandbox",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "sandbox--bridge",
+      "package": "@cloudflare/sandbox",
+      "version": "0.12.9",
+      "profile": "sandbox",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxBridge",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxBridge.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxBridge",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/bridge/index.d.ts",
+        "runtime": "@cloudflare/sandbox/bridge",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "sandbox--openai",
+      "package": "@cloudflare/sandbox",
+      "version": "0.12.9",
+      "profile": "sandbox",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxOpenai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxOpenai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxOpenai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/openai/index.d.ts",
+        "runtime": "@cloudflare/sandbox/openai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandbox--bridge"
+      ]
+    },
+    {
+      "id": "sandbox--opencode",
+      "package": "@cloudflare/sandbox",
+      "version": "0.12.9",
+      "profile": "sandbox",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxOpencode",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxOpencode.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxOpencode",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/opencode/index.d.ts",
+        "runtime": "@cloudflare/sandbox/opencode",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandbox"
+      ]
+    },
+    {
+      "id": "sandbox--xterm",
+      "package": "@cloudflare/sandbox",
+      "version": "0.12.9",
+      "profile": "sandbox",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxXterm",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxXterm.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxXterm",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/xterm/index.d.ts",
+        "runtime": "@cloudflare/sandbox/xterm",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "containers",
+      "package": "@cloudflare/containers",
+      "version": "0.3.7",
+      "profile": "containers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.Containers",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Containers.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Containers",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/containers",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "dynamicworkflows",
+      "package": "@cloudflare/dynamic-workflows",
+      "version": "0.1.1",
+      "profile": "dynamic-workflows",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.DynamicWorkflows",
+      "files": [
+        "FSharp.CloudEdge.Runtime.DynamicWorkflows.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.DynamicWorkflows",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/dynamic-workflows",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "computer",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.Computer",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Computer.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Computer",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/computer",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "computer--artifacts",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerArtifacts",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerArtifacts.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerArtifacts",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/artifacts/index.d.ts",
+        "runtime": "@cloudflare/computer/artifacts",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "computer--assets",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerAssets",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerAssets.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerAssets",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/assets/index.d.ts",
+        "runtime": "@cloudflare/computer/assets",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--artifacts"
+      ]
+    },
+    {
+      "id": "computer--backends-container",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerBackendsContainer",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerBackendsContainer.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerBackendsContainer",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/container/index.d.ts",
+        "runtime": "@cloudflare/computer/backends/container",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer"
+      ]
+    },
+    {
+      "id": "computer--backends-worker-javascript",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerBackendsWorkerJavascript",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerBackendsWorkerJavascript.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerBackendsWorkerJavascript",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-javascript/index.d.ts",
+        "runtime": "@cloudflare/computer/backends/worker-javascript",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--backends-container"
+      ]
+    },
+    {
+      "id": "computer--backends-worker-shell",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerBackendsWorkerShell",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerBackendsWorkerShell.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerBackendsWorkerShell",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/index.d.ts",
+        "runtime": "@cloudflare/computer/backends/worker-shell",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--backends-worker-javascript"
+      ]
+    },
+    {
+      "id": "computer--git",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerGit",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerGit.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerGit",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/git.d.ts",
+        "runtime": "@cloudflare/computer/git",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--backends-worker-shell"
+      ]
+    },
+    {
+      "id": "computer--observe-cloudflare",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerObserveCloudflare",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerObserveCloudflare.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerObserveCloudflare",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/observe/cloudflare.d.ts",
+        "runtime": "@cloudflare/computer/observe/cloudflare",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--assets"
+      ]
+    },
+    {
+      "id": "computer--shell-core",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellCore",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellCore.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellCore",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/core.d.ts",
+        "runtime": "@cloudflare/computer/shell/core",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--observe-cloudflare"
+      ]
+    },
+    {
+      "id": "computer--shell-curl",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellCurl",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellCurl.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellCurl",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/curl.d.ts",
+        "runtime": "@cloudflare/computer/shell/curl",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-core"
+      ]
+    },
+    {
+      "id": "computer--shell-file",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellFile",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellFile.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellFile",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/file.d.ts",
+        "runtime": "@cloudflare/computer/shell/file",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-curl"
+      ]
+    },
+    {
+      "id": "computer--shell-html-to-markdown",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellHtmlToMarkdown",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellHtmlToMarkdown.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellHtmlToMarkdown",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/html-to-markdown.d.ts",
+        "runtime": "@cloudflare/computer/shell/html-to-markdown",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-file"
+      ]
+    },
+    {
+      "id": "computer--shell-jq",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellJq",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellJq.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellJq",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/jq.d.ts",
+        "runtime": "@cloudflare/computer/shell/jq",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-html-to-markdown"
+      ]
+    },
+    {
+      "id": "computer--shell-js-exec",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellJsExec",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellJsExec.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellJsExec",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/js-exec.d.ts",
+        "runtime": "@cloudflare/computer/shell/js-exec",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-jq"
+      ]
+    },
+    {
+      "id": "computer--shell-python",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellPython",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellPython.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellPython",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/python.d.ts",
+        "runtime": "@cloudflare/computer/shell/python",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-js-exec"
+      ]
+    },
+    {
+      "id": "computer--shell-sqlite",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellSqlite",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellSqlite.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellSqlite",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/sqlite.d.ts",
+        "runtime": "@cloudflare/computer/shell/sqlite",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-python"
+      ]
+    },
+    {
+      "id": "computer--shell-xan",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellXan",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellXan.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellXan",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/xan.d.ts",
+        "runtime": "@cloudflare/computer/shell/xan",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-sqlite"
+      ]
+    },
+    {
+      "id": "computer--shell-yq",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerShellYq",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerShellYq.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerShellYq",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/backends/worker-shell/shell/yq.d.ts",
+        "runtime": "@cloudflare/computer/shell/yq",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--shell-xan"
+      ]
+    },
+    {
+      "id": "computer--tools",
+      "package": "@cloudflare/computer",
+      "version": "0.2.1",
+      "profile": "computer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerTools",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerTools.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ComputerTools",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tools/index.d.ts",
+        "runtime": "@cloudflare/computer/tools",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "computer--git"
+      ]
+    },
+    {
+      "id": "workersaiprovider",
+      "package": "workers-ai-provider",
+      "version": "4.0.0",
+      "profile": "workers-ai-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersAIProvider.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersAIProvider",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "workers-ai-provider",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "workersaiprovider--anthropic",
+      "package": "workers-ai-provider",
+      "version": "4.0.0",
+      "profile": "workers-ai-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProviderAnthropic",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersAIProviderAnthropic.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersAIProviderAnthropic",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/anthropic.d.mts",
+        "runtime": "workers-ai-provider/anthropic",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "workersaiprovider"
+      ]
+    },
+    {
+      "id": "workersaiprovider--gateway",
+      "package": "workers-ai-provider",
+      "version": "4.0.0",
+      "profile": "workers-ai-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProviderGateway",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersAIProviderGateway.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersAIProviderGateway",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/gateway-provider.d.mts",
+        "runtime": "workers-ai-provider/gateway",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "workersaiprovider--anthropic"
+      ]
+    },
+    {
+      "id": "workersaiprovider--google",
+      "package": "workers-ai-provider",
+      "version": "4.0.0",
+      "profile": "workers-ai-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProviderGoogle",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersAIProviderGoogle.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersAIProviderGoogle",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/google.d.mts",
+        "runtime": "workers-ai-provider/google",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "workersaiprovider--gateway"
+      ]
+    },
+    {
+      "id": "workersaiprovider--openai",
+      "package": "workers-ai-provider",
+      "version": "4.0.0",
+      "profile": "workers-ai-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProviderOpenai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersAIProviderOpenai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersAIProviderOpenai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/openai.d.mts",
+        "runtime": "workers-ai-provider/openai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "workersaiprovider--google"
+      ]
+    },
+    {
+      "id": "aigatewayprovider",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProvider",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProvider.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProvider",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "ai-gateway-provider",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "aigatewayprovider--providers-amazon-bedrock",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAmazonBedrock",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAmazonBedrock.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAmazonBedrock",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/amazon-bedrock.d.mts",
+        "runtime": "ai-gateway-provider/providers/amazon-bedrock",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-anthropic",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAnthropic",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAnthropic.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAnthropic",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/anthropic.d.mts",
+        "runtime": "ai-gateway-provider/providers/anthropic",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-amazon-bedrock"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-azure",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAzure",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAzure.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersAzure",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/azure.d.mts",
+        "runtime": "ai-gateway-provider/providers/azure",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-anthropic"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-cerebras",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCerebras",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCerebras.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCerebras",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/cerebras.d.mts",
+        "runtime": "ai-gateway-provider/providers/cerebras",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-azure"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-cohere",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCohere",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCohere.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersCohere",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/cohere.d.mts",
+        "runtime": "ai-gateway-provider/providers/cohere",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-cerebras"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-deepgram",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepgram",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepgram.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepgram",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/deepgram.d.mts",
+        "runtime": "ai-gateway-provider/providers/deepgram",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-cohere"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-deepseek",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepseek",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepseek.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersDeepseek",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/deepseek.d.mts",
+        "runtime": "ai-gateway-provider/providers/deepseek",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-deepgram"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-elevenlabs",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersElevenlabs",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersElevenlabs.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersElevenlabs",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/elevenlabs.d.mts",
+        "runtime": "ai-gateway-provider/providers/elevenlabs",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-deepseek"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-fireworks",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersFireworks",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersFireworks.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersFireworks",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/fireworks.d.mts",
+        "runtime": "ai-gateway-provider/providers/fireworks",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-elevenlabs"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-google",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogle",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogle.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogle",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/google.d.mts",
+        "runtime": "ai-gateway-provider/providers/google",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-fireworks"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-google-vertex",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogleVertex",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogleVertex.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGoogleVertex",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/google-vertex.d.mts",
+        "runtime": "ai-gateway-provider/providers/google-vertex",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-google"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-groq",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGroq",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGroq.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersGroq",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/groq.d.mts",
+        "runtime": "ai-gateway-provider/providers/groq",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-google-vertex"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-mistral",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersMistral",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersMistral.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersMistral",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/mistral.d.mts",
+        "runtime": "ai-gateway-provider/providers/mistral",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-groq"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-openai",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/openai.d.mts",
+        "runtime": "ai-gateway-provider/providers/openai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-mistral"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-openrouter",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenrouter",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenrouter.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersOpenrouter",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/openrouter.d.mts",
+        "runtime": "ai-gateway-provider/providers/openrouter",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-openai"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-perplexity",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersPerplexity",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersPerplexity.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersPerplexity",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/perplexity.d.mts",
+        "runtime": "ai-gateway-provider/providers/perplexity",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-openrouter"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-unified",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersUnified",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersUnified.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersUnified",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/unified.d.mts",
+        "runtime": "ai-gateway-provider/providers/unified",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-perplexity"
+      ]
+    },
+    {
+      "id": "aigatewayprovider--providers-xai",
+      "package": "ai-gateway-provider",
+      "version": "4.0.0",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersXai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersXai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayProviderProvidersXai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/providers/xai.d.mts",
+        "runtime": "ai-gateway-provider/providers/xai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewayprovider--providers-unified"
+      ]
+    },
+    {
+      "id": "aisearchprovider",
+      "package": "ai-search-provider",
+      "version": "0.1.1",
+      "profile": "ai-search-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AISearchProvider",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AISearchProvider.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AISearchProvider",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "ai-search-provider",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "tanstackai",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAI",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAI.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAI",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "@cloudflare/tanstack-ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "tanstackai--adapters-anthropic",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersAnthropic",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersAnthropic.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersAnthropic",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/anthropic.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/anthropic",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-gemini",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersGemini",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersGemini.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersGemini",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/gemini.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/gemini",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-anthropic"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-grok",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersGrok",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersGrok.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersGrok",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/grok.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/grok",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "tanstackai--adapters-openai",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/openai.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/openai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-grok"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-openrouter",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenrouter",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenrouter.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersOpenrouter",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/openrouter.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/openrouter",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-gemini"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-workers-ai",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/workers-ai.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/workers-ai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-openrouter"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-workers-ai-image",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiImage",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiImage.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiImage",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/workers-ai-image.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/workers-ai-image",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-workers-ai"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-workers-ai-summarize",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiSummarize",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiSummarize.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiSummarize",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/workers-ai-summarize.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/workers-ai-summarize",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-workers-ai-image"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-workers-ai-transcription",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTranscription",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTranscription.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTranscription",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/workers-ai-transcription.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/workers-ai-transcription",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-workers-ai-summarize"
+      ]
+    },
+    {
+      "id": "tanstackai--adapters-workers-ai-tts",
+      "package": "@cloudflare/tanstack-ai",
+      "version": "0.2.1",
+      "profile": "tanstack-ai",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTts",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTts.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TanStackAIAdaptersWorkersAiTts",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/adapters/workers-ai-tts.d.mts",
+        "runtime": "@cloudflare/tanstack-ai/adapters/workers-ai-tts",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "tanstackai--adapters-workers-ai-transcription"
+      ]
+    },
+    {
+      "id": "aiutils",
+      "package": "@cloudflare/ai-utils",
+      "version": "1.0.1",
+      "profile": "ai-utils",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIUtils",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIUtils.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIUtils",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/ai-utils",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "playwright",
+      "package": "@cloudflare/playwright",
+      "version": "1.3.6",
+      "profile": "playwright",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/BrowserAutomation/FSharp.CloudEdge.Runtime.Playwright",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Playwright.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Playwright",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/playwright",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "playwright--internal",
+      "package": "@cloudflare/playwright",
+      "version": "1.3.6",
+      "profile": "playwright",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/BrowserAutomation/FSharp.CloudEdge.Runtime.PlaywrightInternal",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PlaywrightInternal.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PlaywrightInternal",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "internal.d.ts",
+        "runtime": "@cloudflare/playwright/internal",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "playwright"
+      ]
+    },
+    {
+      "id": "playwright--test",
+      "package": "@cloudflare/playwright",
+      "version": "1.3.6",
+      "profile": "playwright",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/BrowserAutomation/FSharp.CloudEdge.Runtime.PlaywrightTest",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PlaywrightTest.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PlaywrightTest",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "test.d.ts",
+        "runtime": "@cloudflare/playwright/test",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "playwright--internal"
+      ]
+    },
+    {
+      "id": "puppeteer",
+      "package": "@cloudflare/puppeteer",
+      "version": "1.4.0",
+      "profile": "puppeteer",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/BrowserAutomation/FSharp.CloudEdge.Runtime.Puppeteer",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Puppeteer.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Puppeteer",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "lib/types.d.ts",
+        "runtime": "@cloudflare/puppeteer",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "playwrightmcp",
+      "package": "@cloudflare/playwright-mcp",
+      "version": "0.0.5",
+      "profile": "playwright-mcp",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/BrowserAutomation/FSharp.CloudEdge.Runtime.PlaywrightMcp",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PlaywrightMcp.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PlaywrightMcp",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/playwright-mcp",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "workersoauthprovider",
+      "package": "@cloudflare/workers-oauth-provider",
+      "version": "0.10.3",
+      "profile": "workers-oauth-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.WorkersOauthProvider",
+      "files": [
+        "FSharp.CloudEdge.Runtime.WorkersOauthProvider.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.WorkersOauthProvider",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/oauth-provider.d.ts",
+        "runtime": "@cloudflare/workers-oauth-provider",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "capnweb",
+      "package": "capnweb",
+      "version": "0.12.0",
+      "profile": "capnweb",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/RPC/FSharp.CloudEdge.Runtime.Capnweb",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Capnweb.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Capnweb",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "capnweb",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "flagship",
+      "package": "@cloudflare/flagship",
+      "version": "0.5.0",
+      "profile": "flagship",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/FeatureFlags/FSharp.CloudEdge.Runtime.Flagship",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Flagship.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Flagship",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "@cloudflare/flagship",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "flagship--server",
+      "package": "@cloudflare/flagship",
+      "version": "0.5.0",
+      "profile": "flagship",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/FeatureFlags/FSharp.CloudEdge.Runtime.FlagshipServer",
+      "files": [
+        "FSharp.CloudEdge.Runtime.FlagshipServer.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.FlagshipServer",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/server.d.mts",
+        "runtime": "@cloudflare/flagship/server",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "flagship"
+      ]
+    },
+    {
+      "id": "flagship--web",
+      "package": "@cloudflare/flagship",
+      "version": "0.5.0",
+      "profile": "flagship",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/FeatureFlags/FSharp.CloudEdge.Runtime.FlagshipWeb",
+      "files": [
+        "FSharp.CloudEdge.Runtime.FlagshipWeb.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.FlagshipWeb",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/web.d.mts",
+        "runtime": "@cloudflare/flagship/web",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "flagship--server"
+      ]
+    },
+    {
+      "id": "sandboxpreview",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreview",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreview.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreview",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/sandbox",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "sandboxpreview--bridge",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewBridge",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewBridge.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewBridge",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/bridge/index.d.ts",
+        "runtime": "@cloudflare/sandbox/bridge",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "sandboxpreview--errors",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewErrors",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewErrors.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewErrors",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/errors/index.d.ts",
+        "runtime": "@cloudflare/sandbox/errors",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--bridge"
+      ]
+    },
+    {
+      "id": "sandboxpreview--extensions",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewExtensions",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewExtensions.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewExtensions",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/extensions/index.d.ts",
+        "runtime": "@cloudflare/sandbox/extensions",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--errors"
+      ]
+    },
+    {
+      "id": "sandboxpreview--git",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewGit",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewGit.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewGit",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/git/index.d.ts",
+        "runtime": "@cloudflare/sandbox/git",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--extensions"
+      ]
+    },
+    {
+      "id": "sandboxpreview--interpreter",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewInterpreter",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewInterpreter.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewInterpreter",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/interpreter/index.d.ts",
+        "runtime": "@cloudflare/sandbox/interpreter",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--git"
+      ]
+    },
+    {
+      "id": "sandboxpreview--openai",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewOpenai",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewOpenai.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewOpenai",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/openai/index.d.ts",
+        "runtime": "@cloudflare/sandbox/openai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--interpreter"
+      ]
+    },
+    {
+      "id": "sandboxpreview--opencode",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewOpencode",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewOpencode.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewOpencode",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/opencode/index.d.ts",
+        "runtime": "@cloudflare/sandbox/opencode",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview--openai"
+      ]
+    },
+    {
+      "id": "sandboxpreview--sidecar",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewSidecar",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewSidecar.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewSidecar",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/sidecar/index.d.ts",
+        "runtime": "@cloudflare/sandbox/sidecar",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types",
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "sandboxpreview"
+      ]
+    },
+    {
+      "id": "sandboxpreview--xterm",
+      "package": "@cloudflare/sandbox",
+      "version": "0.13.0-next.751.1",
+      "profile": "sandbox-next",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxPreviewXterm",
+      "files": [
+        "FSharp.CloudEdge.Runtime.SandboxPreviewXterm.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.SandboxPreviewXterm",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/xterm/index.d.ts",
+        "runtime": "@cloudflare/sandbox/xterm",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "streamreact",
+      "package": "@cloudflare/stream-react",
+      "version": "1.9.3",
+      "profile": "stream-react",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.StreamReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.StreamReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.StreamReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/stream-react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "streamangular",
+      "package": "@cloudflare/stream-angular",
+      "version": "1.0.1",
+      "profile": "stream-angular",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/Angular/FSharp.CloudEdge.Runtime.StreamAngular",
+      "files": [
+        "FSharp.CloudEdge.Runtime.StreamAngular.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.StreamAngular",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "cloudflare-stream-angular.d.ts",
+        "runtime": "@cloudflare/stream-angular",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "turnstilefirebaseappcheck",
+      "package": "@cloudflare/turnstile-firebase-app-check",
+      "version": "0.0.5",
+      "profile": "turnstile-firebase-app-check",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.TurnstileFirebaseAppCheck",
+      "files": [
+        "FSharp.CloudEdge.Runtime.TurnstileFirebaseAppCheck.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.TurnstileFirebaseAppCheck",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "src/index.ts",
+        "runtime": "@cloudflare/turnstile-firebase-app-check",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekit",
+      "package": "@cloudflare/realtimekit",
+      "version": "2.0.2",
+      "profile": "realtimekit",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimeKit",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimeKit.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimeKit",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/realtimekit",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekit--compatible",
+      "package": "@cloudflare/realtimekit",
+      "version": "2.0.2",
+      "profile": "realtimekit",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimeKitCompatible",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimeKitCompatible.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimeKitCompatible",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/realtimekit/compatible",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekit"
+      ]
+    },
+    {
+      "id": "realtimekit--e2ee",
+      "package": "@cloudflare/realtimekit",
+      "version": "2.0.2",
+      "profile": "realtimekit",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimeKitE2ee",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimeKitE2ee.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimeKitE2ee",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/EncryptionManager.d.ts",
+        "runtime": "@cloudflare/realtimekit/e2ee",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekit--compatible"
+      ]
+    },
+    {
+      "id": "realtimekit--inlined",
+      "package": "@cloudflare/realtimekit",
+      "version": "2.0.2",
+      "profile": "realtimekit",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimeKitInlined",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimeKitInlined.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimeKitInlined",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/realtimekit/inlined",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekit--e2ee"
+      ]
+    },
+    {
+      "id": "realtimekit--mock",
+      "package": "@cloudflare/realtimekit",
+      "version": "2.0.2",
+      "profile": "realtimekit",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimeKitMock",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimeKitMock.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimeKitMock",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/ClientMock.d.ts",
+        "runtime": "@cloudflare/realtimekit/mock",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitreact",
+      "package": "@cloudflare/realtimekit-react",
+      "version": "2.0.2",
+      "profile": "realtimekit-react",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitReact",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitReact.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitReact",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-react",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitui",
+      "package": "@cloudflare/realtimekit-ui",
+      "version": "2.0.2",
+      "profile": "realtimekit-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitui--loader",
+      "package": "@cloudflare/realtimekit-ui",
+      "version": "2.0.2",
+      "profile": "realtimekit-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiLoader",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiLoader.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiLoader",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "loader/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui/loader",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekitui"
+      ]
+    },
+    {
+      "id": "realtimekitreactui",
+      "package": "@cloudflare/realtimekit-react-ui",
+      "version": "2.0.2",
+      "profile": "realtimekit-react-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitReactUi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitReactUi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitReactUi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-react-ui",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitreactui--es",
+      "package": "@cloudflare/realtimekit-react-ui",
+      "version": "2.0.2",
+      "profile": "realtimekit-react-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitReactUiEs",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitReactUiEs.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitReactUiEs",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/es/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-react-ui/es",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekitreactui"
+      ]
+    },
+    {
+      "id": "realtimekitangularui",
+      "package": "@cloudflare/realtimekit-angular-ui",
+      "version": "2.0.2",
+      "profile": "realtimekit-angular-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/Angular/FSharp.CloudEdge.Runtime.RealtimekitAngularUi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitAngularUi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitAngularUi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "cloudflare-realtimekit-angular-ui.d.ts",
+        "runtime": "@cloudflare/realtimekit-angular-ui",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitreactnative",
+      "package": "@cloudflare/realtimekit-react-native",
+      "version": "2.0.0",
+      "profile": "realtimekit-react-native",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Mobile/FSharp.CloudEdge.Runtime.RealtimekitReactNative",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitReactNative.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitReactNative",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "lib/typescript/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-react-native",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitreactnativeui",
+      "package": "@cloudflare/realtimekit-react-native-ui",
+      "version": "2.0.0",
+      "profile": "realtimekit-react-native-ui",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Mobile/FSharp.CloudEdge.Runtime.RealtimekitReactNativeUi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitReactNativeUi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitReactNativeUi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "lib/typescript/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-react-native-ui",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "reactnativewebrtc",
+      "package": "@cloudflare/react-native-webrtc",
+      "version": "137.0.1",
+      "profile": "react-native-webrtc",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Mobile/FSharp.CloudEdge.Runtime.ReactNativeWebrtc",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ReactNativeWebrtc.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ReactNativeWebrtc",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "lib/typescript/index.d.ts",
+        "runtime": "@cloudflare/react-native-webrtc",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekitrecordingsdk",
+      "package": "@cloudflare/realtimekit-recording-sdk",
+      "version": "0.0.3",
+      "profile": "realtimekit-recording-sdk",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitRecordingSdk",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitRecordingSdk.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitRecordingSdk",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "types/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-recording-sdk",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekituiaddons--camera-host-control",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCameraHostControl",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCameraHostControl.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCameraHostControl",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/camera-host-control/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/camera-host-control",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "realtimekituiaddons--chat-host-control",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsChatHostControl",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsChatHostControl.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsChatHostControl",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/chat-host-control/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/chat-host-control",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--camera-host-control"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--custom-controlbar-button",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCustomControlbarButton",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCustomControlbarButton.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsCustomControlbarButton",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/custom-controlbar-button/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/custom-controlbar-button",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--chat-host-control"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--hand-raise",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsHandRaise",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsHandRaise.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsHandRaise",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/hand-raise/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/hand-raise",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--custom-controlbar-button"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--mic-host-control",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsMicHostControl",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsMicHostControl.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsMicHostControl",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/mic-host-control/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/mic-host-control",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--hand-raise"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--participant-menu-item",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantMenuItem",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantMenuItem.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantMenuItem",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/participant-menu-item/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/participant-menu-item",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--mic-host-control"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--participant-tile-menu",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantTileMenu",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantTileMenu.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantTileMenu",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/participant-tile-menu/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/participant-tile-menu",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--participant-menu-item"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--participants-tab-action",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabAction",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabAction.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabAction",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/participants-tab-action/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/participants-tab-action",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--participant-tile-menu"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--participants-tab-toggle",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabToggle",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabToggle.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsParticipantsTabToggle",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/participants-tab-toggle/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/participants-tab-toggle",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--participants-tab-action"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--reactions-manager",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsReactionsManager",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsReactionsManager.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsReactionsManager",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/reactions-manager/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/reactions-manager",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--participants-tab-toggle"
+      ]
+    },
+    {
+      "id": "realtimekituiaddons--video-background",
+      "package": "@cloudflare/realtimekit-ui-addons",
+      "version": "0.1.0",
+      "profile": "realtimekit-ui-addons",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitUiAddonsVideoBackground",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsVideoBackground.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitUiAddonsVideoBackground",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/esm/video-background/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-ui-addons/video-background",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "realtimekituiaddons--reactions-manager"
+      ]
+    },
+    {
+      "id": "realtimekitvirtualbackground",
+      "package": "@cloudflare/realtimekit-virtual-background",
+      "version": "0.0.2",
+      "profile": "realtimekit-virtual-background",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Browser/FSharp.CloudEdge.Runtime.RealtimekitVirtualBackground",
+      "files": [
+        "FSharp.CloudEdge.Runtime.RealtimekitVirtualBackground.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.RealtimekitVirtualBackground",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "types/index.d.ts",
+        "runtime": "@cloudflare/realtimekit-virtual-background",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "actors",
+      "package": "@cloudflare/actors",
+      "version": "0.0.1-beta.6",
+      "profile": "actors",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.Actors",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Actors.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Actors",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/core/src/index.d.ts",
+        "runtime": "@cloudflare/actors",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "actors--alarms",
+      "package": "@cloudflare/actors",
+      "version": "0.0.1-beta.6",
+      "profile": "actors",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.ActorsAlarms",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ActorsAlarms.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ActorsAlarms",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/alarms/src/index.d.ts",
+        "runtime": "@cloudflare/actors/alarms",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "actors"
+      ]
+    },
+    {
+      "id": "actors--storage",
+      "package": "@cloudflare/actors",
+      "version": "0.0.1-beta.6",
+      "profile": "actors",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.ActorsStorage",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ActorsStorage.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.ActorsStorage",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/storage/src/index.d.ts",
+        "runtime": "@cloudflare/actors/storage",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "actors--alarms"
+      ]
+    },
+    {
+      "id": "chanfana",
+      "package": "chanfana",
+      "version": "3.4.0",
+      "profile": "chanfana",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.Chanfana",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Chanfana.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Chanfana",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.mts",
+        "runtime": "chanfana",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "cabidela",
+      "package": "@cloudflare/cabidela",
+      "version": "0.2.4",
+      "profile": "cabidela",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.Cabidela",
+      "files": [
+        "FSharp.CloudEdge.Runtime.Cabidela.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.Cabidela",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/cabidela",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "kvassethandler",
+      "package": "@cloudflare/kv-asset-handler",
+      "version": "0.5.0",
+      "profile": "kv-asset-handler",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Services/FSharp.CloudEdge.Runtime.KvAssetHandler",
+      "files": [
+        "FSharp.CloudEdge.Runtime.KvAssetHandler.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.KvAssetHandler",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/kv-asset-handler",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "aigatewaycandidate",
+      "package": "@cloudflare/ai-gateway",
+      "version": "0.0.6",
+      "profile": "ai-gateway",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayCandidate",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayCandidate.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayCandidate",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/interceptor.d.ts",
+        "runtime": "@cloudflare/ai-gateway",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "aigatewaycandidate--experimental",
+      "package": "@cloudflare/ai-gateway",
+      "version": "0.0.6",
+      "profile": "ai-gateway",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayCandidateExperimental",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayCandidateExperimental.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.AIGatewayCandidateExperimental",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/main.d.ts",
+        "runtime": "@cloudflare/ai-gateway/experimental",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "aigatewaycandidate"
+      ]
+    },
+    {
+      "id": "pagesplugincloudflareaccess",
+      "package": "@cloudflare/pages-plugin-cloudflare-access",
+      "version": "1.0.5",
+      "profile": "pages-plugin-cloudflare-access",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-cloudflare-access",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagesplugincloudflareaccess--api",
+      "package": "@cloudflare/pages-plugin-cloudflare-access",
+      "version": "1.0.5",
+      "profile": "pages-plugin-cloudflare-access",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccessApi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccessApi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccessApi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types/api/index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-cloudflare-access/api",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "pagesplugincloudflareaccess"
+      ]
+    },
+    {
+      "id": "pagesplugingooglechat",
+      "package": "@cloudflare/pages-plugin-google-chat",
+      "version": "1.0.4",
+      "profile": "pages-plugin-google-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginGoogleChat",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginGoogleChat.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginGoogleChat",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-google-chat",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagesplugingooglechat--api",
+      "package": "@cloudflare/pages-plugin-google-chat",
+      "version": "1.0.4",
+      "profile": "pages-plugin-google-chat",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginGoogleChatApi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginGoogleChatApi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginGoogleChatApi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types/api/index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-google-chat/api",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "pagesplugingooglechat"
+      ]
+    },
+    {
+      "id": "pagesplugingraphql",
+      "package": "@cloudflare/pages-plugin-graphql",
+      "version": "1.0.4",
+      "profile": "pages-plugin-graphql",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginGraphql",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginGraphql.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginGraphql",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-graphql",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginhcaptcha",
+      "package": "@cloudflare/pages-plugin-hcaptcha",
+      "version": "1.0.4",
+      "profile": "pages-plugin-hcaptcha",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginHcaptcha",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginHcaptcha.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginHcaptcha",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-hcaptcha",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginhoneycomb",
+      "package": "@cloudflare/pages-plugin-honeycomb",
+      "version": "1.0.4",
+      "profile": "pages-plugin-honeycomb",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginHoneycomb",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginHoneycomb.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginHoneycomb",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-honeycomb",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginsentry",
+      "package": "@cloudflare/pages-plugin-sentry",
+      "version": "1.1.4",
+      "profile": "pages-plugin-sentry",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginSentry",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginSentry.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginSentry",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-sentry",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginstaticforms",
+      "package": "@cloudflare/pages-plugin-static-forms",
+      "version": "1.0.3",
+      "profile": "pages-plugin-static-forms",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginStaticForms",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginStaticForms.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginStaticForms",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-static-forms",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginstytch",
+      "package": "@cloudflare/pages-plugin-stytch",
+      "version": "1.0.3",
+      "profile": "pages-plugin-stytch",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginStytch",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginStytch.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginStytch",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-stytch",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginstytch--api",
+      "package": "@cloudflare/pages-plugin-stytch",
+      "version": "1.0.3",
+      "profile": "pages-plugin-stytch",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginStytchApi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginStytchApi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginStytchApi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types/api/index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-stytch/api",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "pagespluginstytch"
+      ]
+    },
+    {
+      "id": "pagespluginturnstile",
+      "package": "@cloudflare/pages-plugin-turnstile",
+      "version": "1.0.2",
+      "profile": "pages-plugin-turnstile",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginTurnstile.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginTurnstile",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-turnstile",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginvercelog",
+      "package": "@cloudflare/pages-plugin-vercel-og",
+      "version": "0.1.2",
+      "profile": "pages-plugin-vercel-og",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginVercelOg",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginVercelOg.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginVercelOg",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-vercel-og",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "pagespluginvercelog--api",
+      "package": "@cloudflare/pages-plugin-vercel-og",
+      "version": "0.1.2",
+      "profile": "pages-plugin-vercel-og",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginVercelOgApi",
+      "files": [
+        "FSharp.CloudEdge.Runtime.PagesPluginVercelOgApi.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.PagesPluginVercelOgApi",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/types/api/index.d.ts",
+        "runtime": "@cloudflare/pages-plugin-vercel-og/api",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [
+          "node"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "pagespluginvercelog"
+      ]
+    },
+    {
+      "id": "voice-assemblyai",
+      "package": "@cloudflare/voice-assemblyai",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceAssemblyAI",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceAssemblyAI.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceAssemblyAI",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-assemblyai",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-deepgram",
+      "package": "@cloudflare/voice-deepgram",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceDeepgram",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceDeepgram.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceDeepgram",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-deepgram",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-elevenlabs",
+      "package": "@cloudflare/voice-elevenlabs",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceElevenLabs",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceElevenLabs.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceElevenLabs",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-elevenlabs",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-plivo",
+      "package": "@cloudflare/voice-plivo",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoicePlivo",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoicePlivo.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoicePlivo",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-plivo",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-telnyx",
+      "package": "@cloudflare/voice-telnyx",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceTelnyx",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceTelnyx.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceTelnyx",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-telnyx",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-telnyx--browser",
+      "package": "@cloudflare/voice-telnyx",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceTelnyxBrowser",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceTelnyxBrowser.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceTelnyxBrowser",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/browser.d.ts",
+        "runtime": "@cloudflare/voice-telnyx/browser",
+        "lib": [
+          "esnext",
+          "dom"
+        ],
+        "types": [],
+        "declarationCatalog": true
+      }
+    },
+    {
+      "id": "voice-telnyx--stt",
+      "package": "@cloudflare/voice-telnyx",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceTelnyxStt",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceTelnyxStt.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceTelnyxStt",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/stt.d.ts",
+        "runtime": "@cloudflare/voice-telnyx/stt",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "voice-telnyx"
+      ]
+    },
+    {
+      "id": "voice-telnyx--tts",
+      "package": "@cloudflare/voice-telnyx",
+      "version": "0.2.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceTelnyxTts",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceTelnyxTts.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceTelnyxTts",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/tts.d.ts",
+        "runtime": "@cloudflare/voice-telnyx/tts",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      },
+      "catalogCandidates": [
+        "voice-telnyx--stt"
+      ]
+    },
+    {
+      "id": "voice-twilio",
+      "package": "@cloudflare/voice-twilio",
+      "version": "0.1.0",
+      "profile": "voice-providers",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/Voice/FSharp.CloudEdge.Runtime.VoiceTwilio",
+      "files": [
+        "FSharp.CloudEdge.Runtime.VoiceTwilio.fs"
+      ],
+      "generator": {
+        "module": "FSharp.CloudEdge.Runtime.VoiceTwilio",
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "entry": "dist/index.d.ts",
+        "runtime": "@cloudflare/voice-twilio",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true
+      }
+    }
+  ],
+  "projectDefaults": {
+    "targetFramework": "net8.0",
+    "packages": {
+      "Fable.Core": "5.2.0",
+      "Xantham.Fable.Core": "0.1.0-local.83b9196820f7e253f211",
+      "Xantham.Fable.Core.TS": "0.1.0-local.2cc2de89eabe31fc35f6"
+    }
+  },
+  "profiles": [
+    {
+      "id": "workers",
+      "directory": "profiles/workers"
+    },
+    {
+      "id": "agents",
+      "directory": "profiles/agents"
+    },
+    {
+      "id": "ai-chat",
+      "directory": "profiles/ai-chat"
+    },
+    {
+      "id": "codemode",
+      "directory": "profiles/codemode"
+    },
+    {
+      "id": "think",
+      "directory": "profiles/think"
+    },
+    {
+      "id": "voice",
+      "directory": "profiles/voice"
+    },
+    {
+      "id": "shell",
+      "directory": "profiles/shell"
+    },
+    {
+      "id": "worker-bundler",
+      "directory": "profiles/worker-bundler"
+    },
+    {
+      "id": "hono-agents",
+      "directory": "profiles/hono-agents"
+    },
+    {
+      "id": "sandbox",
+      "directory": "profiles/sandbox"
+    },
+    {
+      "id": "containers",
+      "directory": "profiles/containers"
+    },
+    {
+      "id": "dynamic-workflows",
+      "directory": "profiles/dynamic-workflows"
+    },
+    {
+      "id": "computer",
+      "directory": "profiles/computer"
+    },
+    {
+      "id": "workers-ai-provider",
+      "directory": "profiles/workers-ai-provider"
+    },
+    {
+      "id": "ai-gateway-provider",
+      "directory": "profiles/ai-gateway-provider"
+    },
+    {
+      "id": "ai-search-provider",
+      "directory": "profiles/ai-search-provider"
+    },
+    {
+      "id": "tanstack-ai",
+      "directory": "profiles/tanstack-ai"
+    },
+    {
+      "id": "ai-utils",
+      "directory": "profiles/ai-utils"
+    },
+    {
+      "id": "playwright",
+      "directory": "profiles/playwright"
+    },
+    {
+      "id": "puppeteer",
+      "directory": "profiles/puppeteer"
+    },
+    {
+      "id": "playwright-mcp",
+      "directory": "profiles/playwright-mcp"
+    },
+    {
+      "id": "workers-oauth-provider",
+      "directory": "profiles/workers-oauth-provider"
+    },
+    {
+      "id": "capnweb",
+      "directory": "profiles/capnweb"
+    },
+    {
+      "id": "flagship",
+      "directory": "profiles/flagship"
+    },
+    {
+      "id": "sandbox-next",
+      "directory": "profiles/sandbox-next"
+    },
+    {
+      "id": "stream-react",
+      "directory": "profiles/stream-react"
+    },
+    {
+      "id": "stream-angular",
+      "directory": "profiles/stream-angular"
+    },
+    {
+      "id": "turnstile-firebase-app-check",
+      "directory": "profiles/turnstile-firebase-app-check"
+    },
+    {
+      "id": "realtimekit",
+      "directory": "profiles/realtimekit"
+    },
+    {
+      "id": "realtimekit-react",
+      "directory": "profiles/realtimekit-react"
+    },
+    {
+      "id": "realtimekit-ui",
+      "directory": "profiles/realtimekit-ui"
+    },
+    {
+      "id": "realtimekit-react-ui",
+      "directory": "profiles/realtimekit-react-ui"
+    },
+    {
+      "id": "realtimekit-angular-ui",
+      "directory": "profiles/realtimekit-angular-ui"
+    },
+    {
+      "id": "realtimekit-react-native",
+      "directory": "profiles/realtimekit-react-native"
+    },
+    {
+      "id": "realtimekit-react-native-ui",
+      "directory": "profiles/realtimekit-react-native-ui"
+    },
+    {
+      "id": "react-native-webrtc",
+      "directory": "profiles/react-native-webrtc"
+    },
+    {
+      "id": "realtimekit-recording-sdk",
+      "directory": "profiles/realtimekit-recording-sdk"
+    },
+    {
+      "id": "realtimekit-ui-addons",
+      "directory": "profiles/realtimekit-ui-addons"
+    },
+    {
+      "id": "realtimekit-virtual-background",
+      "directory": "profiles/realtimekit-virtual-background"
+    },
+    {
+      "id": "actors",
+      "directory": "profiles/actors"
+    },
+    {
+      "id": "chanfana",
+      "directory": "profiles/chanfana"
+    },
+    {
+      "id": "cabidela",
+      "directory": "profiles/cabidela"
+    },
+    {
+      "id": "kv-asset-handler",
+      "directory": "profiles/kv-asset-handler"
+    },
+    {
+      "id": "ai-gateway",
+      "directory": "profiles/ai-gateway"
+    },
+    {
+      "id": "pages-plugin-cloudflare-access",
+      "directory": "profiles/pages-plugin-cloudflare-access"
+    },
+    {
+      "id": "pages-plugin-google-chat",
+      "directory": "profiles/pages-plugin-google-chat"
+    },
+    {
+      "id": "pages-plugin-graphql",
+      "directory": "profiles/pages-plugin-graphql"
+    },
+    {
+      "id": "pages-plugin-hcaptcha",
+      "directory": "profiles/pages-plugin-hcaptcha"
+    },
+    {
+      "id": "pages-plugin-honeycomb",
+      "directory": "profiles/pages-plugin-honeycomb"
+    },
+    {
+      "id": "pages-plugin-sentry",
+      "directory": "profiles/pages-plugin-sentry"
+    },
+    {
+      "id": "pages-plugin-static-forms",
+      "directory": "profiles/pages-plugin-static-forms"
+    },
+    {
+      "id": "pages-plugin-stytch",
+      "directory": "profiles/pages-plugin-stytch"
+    },
+    {
+      "id": "pages-plugin-turnstile",
+      "directory": "profiles/pages-plugin-turnstile"
+    },
+    {
+      "id": "pages-plugin-vercel-og",
+      "directory": "profiles/pages-plugin-vercel-og"
+    },
+    {
+      "id": "voice-providers",
+      "directory": "profiles/voice-providers"
+    }
+  ]
+}

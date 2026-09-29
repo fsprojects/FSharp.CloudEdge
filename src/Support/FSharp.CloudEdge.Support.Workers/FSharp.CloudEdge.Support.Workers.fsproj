@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="DurableObjects.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.83b9196820f7e253f211" />
+    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.2cc2de89eabe31fc35f6" />
+    <ProjectReference Include="../../Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+  </ItemGroup>
+</Project>

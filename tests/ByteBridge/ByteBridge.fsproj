@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <BareWireRoot Condition="'$(BareWireRoot)' == ''">$(MSBuildThisFileDirectory)../../../BAREWire</BareWireRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Bridge.fs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(BareWireRoot)/src/BAREWire.Fable.fsproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "asOf": "2026-09-06",
+  "defaultDisposition": "include",
+  "evidenceSnapshots": [
+    {
+      "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+      "retrievedAt": "2026-09-06",
+      "sha256": "42f7169a701f51928e0361ad2e943c4a8d8fde3bff6fd1586ac5837311c89a88"
+    }
+  ],
+  "operations": [
+    {
+      "method": "get",
+      "path": "/api/v4/health",
+      "operationId": "monolithHealthCheck",
+      "disposition": "exclude-internal",
+      "reason": "The publisher explicitly reserves this infrastructure health route for internal use and excludes it from customer SDK generation.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "method": "post",
+      "path": "/internal/submit",
+      "operationId": "postInternalSubmit",
+      "disposition": "exclude-internal",
+      "reason": "The pinned operation description identifies an internal URL-submission test route.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/top/industry",
+      "operationId": "radar-get-attacks-layer3-top-industries",
+      "disposition": "exclude-retired",
+      "reason": "The publisher assigns this legacy operation an end-of-life date and supplies a replacement summary operation.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2025-09-20"
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer3/top/vertical",
+      "operationId": "radar-get-attacks-layer3-top-verticals",
+      "disposition": "exclude-retired",
+      "reason": "The publisher assigns this legacy operation an end-of-life date and supplies a replacement summary operation.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2025-09-20"
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/top/industry",
+      "operationId": "radar-get-attacks-layer7-top-industries",
+      "disposition": "exclude-retired",
+      "reason": "The publisher assigns this legacy operation an end-of-life date and supplies a replacement summary operation.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2025-09-20"
+    },
+    {
+      "method": "get",
+      "path": "/radar/attacks/layer7/top/vertical",
+      "operationId": "radar-get-attacks-layer7-top-verticals",
+      "disposition": "exclude-retired",
+      "reason": "The publisher assigns this legacy operation an end-of-life date and supplies a replacement summary operation.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2025-09-20"
+    },
+    {
+      "method": "get",
+      "path": "/radar/verified_bots/top/bots",
+      "operationId": "radar-get-verified-bots-top-by-http-requests",
+      "disposition": "exclude-retired",
+      "reason": "The publisher has ended the legacy Verified Bots API in favor of the Bots API.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2026-01-01"
+    },
+    {
+      "method": "get",
+      "path": "/radar/verified_bots/top/categories",
+      "operationId": "radar-get-verified-bots-top-categories-by-http-requests",
+      "disposition": "exclude-retired",
+      "reason": "The publisher has ended the legacy Verified Bots API in favor of the Bots API.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2026-01-01"
+    },
+    {
+      "method": "get",
+      "path": "/signed-url",
+      "operationId": "getSignedUrl",
+      "disposition": "exclude-internal",
+      "reason": "The pinned operation description identifies an internal signed-URL test route.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "method": "get",
+      "path": "/zones/{zone_id}/cache/origin_post_quantum_encryption",
+      "operationId": "zone-cache-settings-get-origin-post-quantum-encryption-setting",
+      "disposition": "exclude-retired",
+      "reason": "The pinned operation metadata explicitly announces removal on this date; automatic origin TLS selection and compliance settings replace this manual setting.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2026-07-19"
+    },
+    {
+      "method": "put",
+      "path": "/zones/{zone_id}/cache/origin_post_quantum_encryption",
+      "operationId": "zone-cache-settings-change-origin-post-quantum-encryption-setting",
+      "disposition": "exclude-retired",
+      "reason": "The pinned operation metadata explicitly announces removal on this date; automatic origin TLS selection and compliance settings replace this manual setting.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ],
+      "retiredAt": "2026-07-19"
+    }
+  ]
+}

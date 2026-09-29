@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "schema": {
+    "url": "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json",
+    "commit": "f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba",
+    "sha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+    "operationCount": 3448
+  },
+  "hawaii": {
+    "tool": "hawaii"
+  },
+  "pipelineInputs": [
+    "generators/hawaii/generate.py",
+    "generators/hawaii/tests/check_grouped_clients.py",
+    "tests/HawaiiApi/HawaiiApi.fsproj",
+    "tests/HawaiiApi/Program.fs",
+    "scripts/tool-packages.mjs"
+  ],
+  "overlays": [
+    "overlays/upload-security-schemes.json",
+    "overlays/uppercase-spectrum-status-classes.json",
+    "overlays/explicit-query-encodings.json",
+    "overlays/tunnel-failure-responses.json"
+  ],
+  "taxonomy": "taxonomy.json",
+  "schemaPolicy": "preserve-json-schemas.json",
+  "operationPolicy": "lifecycle/operation-policy.json"
+}

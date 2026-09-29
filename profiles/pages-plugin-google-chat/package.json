@@ -1,0 +1,11 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-google-chat",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-google-chat": "1.0.4",
+    "@googleapis/chat": "9.0.0",
+    "@types/node": "22.19.19"
+  }
+}

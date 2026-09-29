@@ -1,0 +1,16 @@
+{
+  "name": "fsharp-cloudedge-input-codemode",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/codemode": "0.5.1",
+    "@cloudflare/workers-types": "5.20260906.1",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@tanstack/ai": "0.53.0",
+    "@types/node": "22.19.19",
+    "ai": "7.0.93",
+    "vite": "8.1.0",
+    "zod": "4.5.4"
+  }
+}

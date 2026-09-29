@@ -1,0 +1,637 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "realtimekit-callstats-8.0.0-published-types-alias",
+      "packageName": "@cloudflare/realtimekit-callstats",
+      "packageVersion": "8.0.0",
+      "tarballIntegrity": "sha512-VCQegmEOgCz8uKkVQIR855XCeRr7Y+WU86RRBvcDQlwjMQkSvq/BWIPYOOvYQ8nVh21sThlGERpO1lRHObBHQA==",
+      "evidence": {
+        "metadataUrl": "https://registry.npmjs.org/%40cloudflare%2Frealtimekit-callstats/8.0.0",
+        "tarballSha256": "f4aa72db2dbb72a09c5060e25d2d83a002e0aee599f84927720dbd161e5708a5",
+        "gitHead": "a5b83aa0fe2a6dc1ab5a72e5f88fc1a0eda8acff",
+        "corroboration": "dist/types.d.ts exports ApiHostnames and DyteLogger; dist/events/events.d.ts imports the identical pair from ../types.",
+        "upstreamSourceLimitation": "The publisher supplies no public repository metadata or source tsconfig. The alias interpretation is inferred from matching published declarations, verified against the registry tarball."
+      },
+      "replacements": [
+        {
+          "file": "dist/utils/ipDetails.d.ts",
+          "beforeSha256": "00f72134243eedac1e622d8883b37dadaaccb5d26d795d89376317e5b20551d3",
+          "afterSha256": "43ee6776f192bf889e1a8c4f96ba2c4e0fdd641211137696dd91e91cb84e411c",
+          "search": "import { ApiHostnames, DyteLogger } from '@src/types';",
+          "replace": "import { ApiHostnames, DyteLogger } from '../types';",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "file": "dist/types.d.ts",
+              "sha256": "7fe308a0bc4018052c0ed850033390a5e29eb45db10e5c34612aa4043a4df4b8"
+            },
+            {
+              "file": "dist/events/events.d.ts",
+              "sha256": "c475532fe54e023c24561689c692def3f52fe6ffd84307ecb2ced2fff02c690c"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "openai-agents-openai-0.3.9-public-tracing-types",
+      "packageName": "@openai/agents-openai",
+      "packageVersion": "0.3.9",
+      "tarballIntegrity": "sha512-duXUt0xU6K/+c7ae4m8BrJIUzZal6Pzln8V0frnJfNyfYO4SvHMV4qwPRzVDvv/ANj4DQXWI2L1JdPxKJeSHkw==",
+      "evidence": {
+        "tarballUrl": "https://registry.npmjs.org/@openai/agents-openai/-/agents-openai-0.3.9.tgz",
+        "tarballSha256": "055b386c1f50bfa9eadbd173fa9c3a1068e6a155b7c8f8ec82054213eb02e51f",
+        "corroboration": "agents-core package exports exposes its root. Its dist/index.d.ts re-exports ./tracing; tracing/index.d.ts exports the same Span and Trace declarations from ./spans and ./traces. The original private package subpaths are blocked by exports. Redirecting type-only imports through that public chain preserves their declaration identity."
+      },
+      "replacements": [
+        {
+          "file": "dist/openaiTracingExporter.d.ts",
+          "beforeSha256": "2ee01ecdfcec78bfb704495f9e748785967a5382d3d6e26cb00d5fa33dd1efab",
+          "afterSha256": "609a95a9278987a6bcfcc131f6c2e1f0eccbbfc2fdbd583136d015c7960db4c7",
+          "search": "import type { Span } from '@openai/agents-core/dist/tracing/spans';\nimport type { Trace } from '@openai/agents-core/dist/tracing/traces';",
+          "replace": "import type { Span, Trace } from '@openai/agents-core';",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@openai/agents-core",
+              "packageVersion": "0.3.9",
+              "tarballIntegrity": "sha512-6Fr/VkA3lMaTT9EV2+OsmkMX9Yx+/PeWtlmaWNKDRG8D15IWuK13NOC9eFklTsa7otbuwbw/Xmjes+h4Z+CwSQ==",
+              "file": "package.json",
+              "sha256": "6d33a35cc51b141b8ca1633079848f3f5192df88650f8d505ad4862400f52f4e"
+            },
+            {
+              "packageName": "@openai/agents-core",
+              "packageVersion": "0.3.9",
+              "tarballIntegrity": "sha512-6Fr/VkA3lMaTT9EV2+OsmkMX9Yx+/PeWtlmaWNKDRG8D15IWuK13NOC9eFklTsa7otbuwbw/Xmjes+h4Z+CwSQ==",
+              "file": "dist/index.d.ts",
+              "sha256": "1245824e0f3365d01c835be4b2114a1d62ebd3dd16b963020460cb75e9bbcf0c"
+            },
+            {
+              "packageName": "@openai/agents-core",
+              "packageVersion": "0.3.9",
+              "tarballIntegrity": "sha512-6Fr/VkA3lMaTT9EV2+OsmkMX9Yx+/PeWtlmaWNKDRG8D15IWuK13NOC9eFklTsa7otbuwbw/Xmjes+h4Z+CwSQ==",
+              "file": "dist/tracing/index.d.ts",
+              "sha256": "0f69a9124b78b64984ce3572694ceadcfbcb6286200a9971a5513a2ef53e100b"
+            },
+            {
+              "packageName": "@openai/agents-core",
+              "packageVersion": "0.3.9",
+              "tarballIntegrity": "sha512-6Fr/VkA3lMaTT9EV2+OsmkMX9Yx+/PeWtlmaWNKDRG8D15IWuK13NOC9eFklTsa7otbuwbw/Xmjes+h4Z+CwSQ==",
+              "file": "dist/tracing/spans.d.ts",
+              "sha256": "9e8b4739b19fbf8ce416146e70ad0ce1a32d3621e8aaff30d5bcb0f33587cd37"
+            },
+            {
+              "packageName": "@openai/agents-core",
+              "packageVersion": "0.3.9",
+              "tarballIntegrity": "sha512-6Fr/VkA3lMaTT9EV2+OsmkMX9Yx+/PeWtlmaWNKDRG8D15IWuK13NOC9eFklTsa7otbuwbw/Xmjes+h4Z+CwSQ==",
+              "file": "dist/tracing/traces.d.ts",
+              "sha256": "911d31f8d61b45f5ddf43e33d66ccfacc5e75ce6e483663529c3f37a6406af89"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "realtimekit-ui-addons-0.1.0-exact-declaration-subpath",
+      "packageName": "@cloudflare/realtimekit-ui-addons",
+      "packageVersion": "0.1.0",
+      "tarballIntegrity": "sha512-e7qi+1Z6P3Yb+oeZD573IZn9s55EI1tHOEIqVMuuo61uoKexbFdwYbrBxlkIk4gkZd4LZlXlT23nFeZNo4m7RA==",
+      "evidence": {
+        "tarballUrl": "https://registry.npmjs.org/@cloudflare/realtimekit-ui-addons/-/realtimekit-ui-addons-0.1.0.tgz",
+        "tarballSha256": "4a8ea97616113ee462c5617e7317f157e53e27342b6c459ce96aa5d9182e0d00",
+        "corroboration": "UI2.0.2 exports ./dist/* with an exact ./dist/* types target. The addons extensionless rtk-client specifier does not resolve under the generator module-resolution mode. Appending .d.ts selects the already shipped identical declaration file through that public wildcard; no declared type, member or runtime JavaScript is replaced."
+      },
+      "replacements": [
+        {
+          "file": "dist/cjs/camera-host-control/index.d.ts",
+          "beforeSha256": "c5424d0823afecf0671943618524705809624bfd022d33ebf39fe097e0ea4a69",
+          "afterSha256": "8181d3ff3f2af58c41b042dc54aa5d3ddde2541402d55857295bedfe1d5328f4",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/chat-host-control/index.d.ts",
+          "beforeSha256": "13f641a05cd1de7107412bb7c4226b74701954d6c85141232868cdefee8db5e7",
+          "afterSha256": "b0e2936ff8d771c8b1efbef46daecb6726532fc4f2dbcea1340e196afa88074e",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/custom-controlbar-button/index.d.ts",
+          "beforeSha256": "1eb3b0277173462bbaf6f0c4f0b32a450061deb90d946d7bcf1dce4158cade53",
+          "afterSha256": "e00ed750b7e0c7e7a863ad646f1dd395c6aa7e4184f1330a1b1f4e2ece35d4fc",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/hand-raise/index.d.ts",
+          "beforeSha256": "2b5f7f6df45d44dec8136c8ac2e6dc76024442a086588f9f3ce57e3e32d5fdd2",
+          "afterSha256": "1f72427a64b3f676ae4492c9480030ee9ddfcb226de46ff1aee9613adb09630c",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/mic-host-control/index.d.ts",
+          "beforeSha256": "aed304b8d785db0b25ef10e53497ee41ce6ee651645426afe095d61f842cd251",
+          "afterSha256": "fe52ba2804366a97057a3d290e9c0d413a9186db7e24fddc98d3b18c3faef021",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/participant-menu-item/index.d.ts",
+          "beforeSha256": "51446878736690cd7d1a133e85d6445d3da80cc1f61f8fe6e37d5ad2c30cbb3b",
+          "afterSha256": "c35fc4406ff25d78dd341b16cfc1f2513284797ab02e3bd0675756a5df7a4aad",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/participant-tile-menu/index.d.ts",
+          "beforeSha256": "a8689365dc3a692c6512ce38f11cb0bd3ba23f4af74a691bfc571b588e367e93",
+          "afterSha256": "e4d20dab64b7b841b6d9c017b00b8a008ea47d472b3b9ad072f347c9311142e5",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/participants-tab-action/index.d.ts",
+          "beforeSha256": "8b6f12b3af6f9a445d39c642690f41d9053796dd753e926876bfbc0aef35be5b",
+          "afterSha256": "31cebc6cffe992a02fc1e18936152c2d4744d7300e23dd1fc1f600a019cdc093",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/participants-tab-toggle/index.d.ts",
+          "beforeSha256": "538645b1c41b44e22202dfce5901e29c065544bb03624ee32ab2d66ab0145ea4",
+          "afterSha256": "322500eb0adc586b91c7cacb1d7be5818ace5fe05d7c1ffd6d097665720ebf32",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/reactions-manager/index.d.ts",
+          "beforeSha256": "bb83e7ab85390866845a0d707b420a22ed8b3ba688d6bbe8dfeb21f3ca8f5479",
+          "afterSha256": "3d25c3500991ae8820ba527764ce54e0dd040fe14aff81816d2fb317de990a89",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/cjs/video-background/index.d.ts",
+          "beforeSha256": "f22c814c46ed42c58179f99113df28b2dcbea961174fc2b82529de19beea2938",
+          "afterSha256": "18aaf32b17815db30cad190b2bef6406cb613c7931c10888c7e2cce5e17cc696",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/camera-host-control/index.d.ts",
+          "beforeSha256": "c5424d0823afecf0671943618524705809624bfd022d33ebf39fe097e0ea4a69",
+          "afterSha256": "8181d3ff3f2af58c41b042dc54aa5d3ddde2541402d55857295bedfe1d5328f4",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/chat-host-control/index.d.ts",
+          "beforeSha256": "13f641a05cd1de7107412bb7c4226b74701954d6c85141232868cdefee8db5e7",
+          "afterSha256": "b0e2936ff8d771c8b1efbef46daecb6726532fc4f2dbcea1340e196afa88074e",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/custom-controlbar-button/index.d.ts",
+          "beforeSha256": "1eb3b0277173462bbaf6f0c4f0b32a450061deb90d946d7bcf1dce4158cade53",
+          "afterSha256": "e00ed750b7e0c7e7a863ad646f1dd395c6aa7e4184f1330a1b1f4e2ece35d4fc",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/hand-raise/index.d.ts",
+          "beforeSha256": "2b5f7f6df45d44dec8136c8ac2e6dc76024442a086588f9f3ce57e3e32d5fdd2",
+          "afterSha256": "1f72427a64b3f676ae4492c9480030ee9ddfcb226de46ff1aee9613adb09630c",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/mic-host-control/index.d.ts",
+          "beforeSha256": "aed304b8d785db0b25ef10e53497ee41ce6ee651645426afe095d61f842cd251",
+          "afterSha256": "fe52ba2804366a97057a3d290e9c0d413a9186db7e24fddc98d3b18c3faef021",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/participant-menu-item/index.d.ts",
+          "beforeSha256": "51446878736690cd7d1a133e85d6445d3da80cc1f61f8fe6e37d5ad2c30cbb3b",
+          "afterSha256": "c35fc4406ff25d78dd341b16cfc1f2513284797ab02e3bd0675756a5df7a4aad",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/participant-tile-menu/index.d.ts",
+          "beforeSha256": "a8689365dc3a692c6512ce38f11cb0bd3ba23f4af74a691bfc571b588e367e93",
+          "afterSha256": "e4d20dab64b7b841b6d9c017b00b8a008ea47d472b3b9ad072f347c9311142e5",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/participants-tab-action/index.d.ts",
+          "beforeSha256": "8b6f12b3af6f9a445d39c642690f41d9053796dd753e926876bfbc0aef35be5b",
+          "afterSha256": "31cebc6cffe992a02fc1e18936152c2d4744d7300e23dd1fc1f600a019cdc093",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/participants-tab-toggle/index.d.ts",
+          "beforeSha256": "538645b1c41b44e22202dfce5901e29c065544bb03624ee32ab2d66ab0145ea4",
+          "afterSha256": "322500eb0adc586b91c7cacb1d7be5818ace5fe05d7c1ffd6d097665720ebf32",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/reactions-manager/index.d.ts",
+          "beforeSha256": "bb83e7ab85390866845a0d707b420a22ed8b3ba688d6bbe8dfeb21f3ca8f5479",
+          "afterSha256": "3d25c3500991ae8820ba527764ce54e0dd040fe14aff81816d2fb317de990a89",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        },
+        {
+          "file": "dist/esm/video-background/index.d.ts",
+          "beforeSha256": "f22c814c46ed42c58179f99113df28b2dcbea961174fc2b82529de19beea2938",
+          "afterSha256": "18aaf32b17815db30cad190b2bef6406cb613c7931c10888c7e2cce5e17cc696",
+          "search": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client",
+          "replace": "@cloudflare/realtimekit-ui/dist/types/types/rtk-client.d.ts",
+          "occurrences": 1,
+          "corroboratingFiles": [
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "package.json",
+              "sha256": "a3712acf04a153639268c6a360c3881484d6c5612cb1130633121d6cf4213edd"
+            },
+            {
+              "packageName": "@cloudflare/realtimekit-ui",
+              "packageVersion": "2.0.2",
+              "tarballIntegrity": "sha512-C/YgKh07FBbeMMa/uhRrMGNmJw1g2kzPEYMsfgnq52yd1wWWeecQZFMJ9o+xRtpnhJmnRgPOUc8vOCMf+C/ohQ==",
+              "file": "dist/types/types/rtk-client.d.ts",
+              "sha256": "339db568be2da8d6df33244e7f53bfa7588400466c8fc81267bf0af2c495e2dd"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

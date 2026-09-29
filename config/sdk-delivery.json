@@ -1,0 +1,555 @@
+{
+  "schemaVersion": 1,
+  "name": "server-resources",
+  "description": "Selected first-party server-side resource SDKs. Management is generated separately from OpenAPI by Hawaii. Complete inventory is retained for community extensions.",
+  "libraries": [
+    {
+      "partition": "workers",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "agents",
+      "excludeInputs": {
+        "./chat/transport": "Web-client chat transport; server agent APIs are selected independently."
+      },
+      "publicInputs": [
+        ".",
+        "./agent-tools",
+        "./chat",
+        "./chat-sdk",
+        "./lifecycle",
+        "./mcp",
+        "./observability",
+        "./skills",
+        "./workflows",
+        "./experimental/memory/session",
+        "./experimental/memory/utils"
+      ]
+    },
+    {
+      "partition": "agents--ai-chat-agent",
+      "excludeInputs": {
+        "./vite": "Browser WebMCP or Vite development tooling is outside the server SDK delivery.",
+        "./experimental/webmcp": "Browser WebMCP or Vite development tooling is outside the server SDK delivery."
+      },
+      "publicInputs": [
+        "./ai-chat-agent",
+        "./ai-chat-v5-migration",
+        "./ai-types",
+        "./email",
+        "./schedule",
+        "./schedules",
+        "./types",
+        "./x402",
+        "./codemode/ai",
+        "./mcp/do-oauth-client-provider",
+        "./mcp/server",
+        "./observability/ai",
+        "./schedules/parser",
+        "./skills/compile"
+      ]
+    },
+    {
+      "partition": "agents--browser",
+      "id": "agents-mcp-client",
+      "module": "FSharp.CloudEdge.Runtime.AgentsMcpClient",
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient",
+      "excludeInputs": {
+        "./browser": "Browser/client/framework adapter; server MCP client is selected independently.",
+        "./client": "Browser/client/framework adapter; server MCP client is selected independently.",
+        "./react": "Browser/client/framework adapter; server MCP client is selected independently.",
+        "./browser/ai": "Browser/client/framework adapter; server MCP client is selected independently.",
+        "./browser/tanstack-ai": "Browser/client/framework adapter; server MCP client is selected independently."
+      },
+      "publicInputs": [
+        "./mcp/client"
+      ]
+    },
+    {
+      "partition": "aichat",
+      "publicInputs": [
+        ".",
+        "./ai-chat-v5-migration",
+        "./types"
+      ]
+    },
+    {
+      "partition": "codemode",
+      "excludeInputs": {
+        "./tanstack-ai": "Optional TanStack adapter remains available for community demand."
+      },
+      "publicInputs": [
+        ".",
+        "./ai",
+        "./mcp"
+      ]
+    },
+    {
+      "partition": "shell",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "shell--git",
+      "publicInputs": [
+        "./git",
+        "./workers"
+      ]
+    },
+    {
+      "partition": "voice",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "voice--errors",
+      "publicInputs": [
+        "./errors"
+      ]
+    },
+    {
+      "partition": "computer",
+      "publicInputs": [
+        ".",
+        "./git",
+        "./tools",
+        "./backends/container",
+        "./backends/worker-javascript",
+        "./backends/worker-shell"
+      ]
+    },
+    {
+      "partition": "computer--artifacts",
+      "publicInputs": [
+        "./artifacts",
+        "./assets",
+        "./observe/cloudflare",
+        "./shell/core",
+        "./shell/curl",
+        "./shell/file",
+        "./shell/html-to-markdown",
+        "./shell/jq",
+        "./shell/js-exec",
+        "./shell/python",
+        "./shell/sqlite",
+        "./shell/xan",
+        "./shell/yq"
+      ]
+    },
+    {
+      "partition": "sandbox",
+      "publicInputs": [
+        ".",
+        "./opencode"
+      ]
+    },
+    {
+      "partition": "sandbox--bridge",
+      "publicInputs": [
+        "./bridge",
+        "./openai"
+      ]
+    },
+    {
+      "partition": "containers",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "actors",
+      "publicInputs": [
+        ".",
+        "./alarms",
+        "./storage"
+      ]
+    },
+    {
+      "partition": "cabidela",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "dynamicworkflows",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "workersoauthprovider",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "kvassethandler",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "chanfana",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "capnweb",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "aigatewayprovider",
+      "publicInputs": [
+        ".",
+        "./providers/amazon-bedrock",
+        "./providers/anthropic",
+        "./providers/azure",
+        "./providers/cerebras",
+        "./providers/cohere",
+        "./providers/deepgram",
+        "./providers/deepseek",
+        "./providers/elevenlabs",
+        "./providers/fireworks",
+        "./providers/google",
+        "./providers/google-vertex",
+        "./providers/groq",
+        "./providers/mistral",
+        "./providers/openai",
+        "./providers/openrouter",
+        "./providers/perplexity",
+        "./providers/unified",
+        "./providers/xai"
+      ]
+    },
+    {
+      "partition": "workersaiprovider",
+      "publicInputs": [
+        ".",
+        "./anthropic",
+        "./gateway",
+        "./google",
+        "./openai"
+      ]
+    },
+    {
+      "partition": "aisearchprovider",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "aiutils",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "think",
+      "excludeInputs": {
+        "./messengers/telegram": "Provider-specific Telegram integration remains available for community demand."
+      },
+      "publicInputs": [
+        ".",
+        "./extensions",
+        "./messengers",
+        "./workflows",
+        "./tools/execute",
+        "./tools/extensions",
+        "./tools/fetch",
+        "./tools/sandbox",
+        "./tools/workspace"
+      ]
+    },
+    {
+      "partition": "flagship",
+      "excludeInputs": {
+        "./web": "Web-client feature flag adapter; general and server APIs are selected."
+      },
+      "publicInputs": [
+        ".",
+        "./server"
+      ]
+    },
+    {
+      "partition": "pagesplugincloudflareaccess",
+      "publicInputs": [
+        ".",
+        "./api"
+      ]
+    },
+    {
+      "partition": "pagespluginturnstile",
+      "publicInputs": [
+        "."
+      ]
+    },
+    {
+      "partition": "pagespluginstaticforms",
+      "publicInputs": [
+        "."
+      ]
+    }
+  ],
+  "deferred": [
+    {
+      "partitions": [
+        "agents--ai-react",
+        "agents--chat-react",
+        "aichat--react",
+        "codemode--browser",
+        "reactnativewebrtc",
+        "realtimekit",
+        "realtimekit--mock",
+        "realtimekitangularui",
+        "realtimekitreact",
+        "realtimekitreactnative",
+        "realtimekitreactnativeui",
+        "realtimekitreactui",
+        "realtimekitrecordingsdk",
+        "realtimekitui",
+        "realtimekituiaddons--camera-host-control",
+        "realtimekitvirtualbackground",
+        "sandbox--xterm",
+        "streamangular",
+        "streamreact",
+        "think--react"
+      ],
+      "reason": "Browser, UI, mobile or client adapter is outside the server-side delivery."
+    },
+    {
+      "partitions": [
+        "aigatewaycandidate"
+      ],
+      "reason": "AI Gateway delivery uses ai-gateway-provider; alternate package investigation is shelved."
+    },
+    {
+      "partitions": [
+        "codemode--vite",
+        "workerbundler"
+      ],
+      "reason": "Development tooling is outside the runtime binding delivery."
+    },
+    {
+      "partitions": [
+        "honoagents",
+        "pagesplugingooglechat",
+        "pagesplugingraphql",
+        "pagespluginhcaptcha",
+        "pagespluginhoneycomb",
+        "pagespluginsentry",
+        "pagespluginstytch",
+        "pagespluginvercelog",
+        "tanstackai",
+        "tanstackai--adapters-grok",
+        "turnstilefirebaseappcheck",
+        "voice--client",
+        "voice-assemblyai",
+        "voice-deepgram",
+        "voice-elevenlabs",
+        "voice-plivo",
+        "voice-telnyx",
+        "voice-telnyx--browser",
+        "voice-twilio"
+      ],
+      "reason": "Optional integration remains available for community demand and is outside delivery acceptance."
+    },
+    {
+      "partitions": [
+        "playwright",
+        "playwrightmcp",
+        "puppeteer",
+        "think--tools-browser"
+      ],
+      "reason": "Browser automation SDK work awaits a concrete application requirement."
+    },
+    {
+      "partitions": [
+        "sandboxpreview",
+        "sandboxpreview--bridge",
+        "sandboxpreview--xterm",
+        "workers--experimental"
+      ],
+      "reason": "Alternative platform/preview surface remains opt-in; stable retained pin is selected."
+    }
+  ],
+  "supportTargets": [
+    {
+      "id": "ai-provider-v4",
+      "package": "@ai-sdk/provider",
+      "version": "4.0.10",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider",
+      "files": [
+        "FSharp.CloudEdge.Support.AI.V4.Provider.fs"
+      ],
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V4.Provider",
+        "namespace": "FSharp.CloudEdge.Support.AI.V4",
+        "entry": "dist/index.d.ts",
+        "runtime": "@ai-sdk/provider",
+        "groups": {
+          "@ai-sdk/provider": "ship",
+          "@ai-sdk/openai-compatible": "ship"
+        }
+      }
+    },
+    {
+      "id": "ai-provider-v3",
+      "package": "@ai-sdk/provider",
+      "version": "3.0.15",
+      "profile": "ai-search-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider",
+      "files": [
+        "FSharp.CloudEdge.Support.AI.V3.Provider.fs"
+      ],
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V3.Provider",
+        "namespace": "FSharp.CloudEdge.Support.AI.V3",
+        "entry": "dist/index.d.ts",
+        "runtime": "@ai-sdk/provider",
+        "groups": {
+          "@ai-sdk/provider": "ship"
+        }
+      }
+    },
+    {
+      "id": "ai-openai-compatible-v4",
+      "package": "@ai-sdk/openai-compatible",
+      "version": "3.0.44",
+      "profile": "ai-gateway-provider",
+      "dependencies": [],
+      "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible",
+      "files": [
+        "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fs"
+      ],
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible",
+        "namespace": "FSharp.CloudEdge.Support.AI.V4",
+        "entry": "dist/index.d.ts",
+        "runtime": "@ai-sdk/openai-compatible",
+        "groups": {
+          "@ai-sdk/provider": "ship",
+          "@ai-sdk/openai-compatible": "ship"
+        }
+      }
+    }
+  ],
+  "catalogImports": {
+    "ai-openai-compatible-v4": [
+      "ai-provider-v4"
+    ],
+    "aigatewayprovider": [
+      "ai-provider-v4",
+      "ai-openai-compatible-v4"
+    ],
+    "workersaiprovider": [
+      "ai-provider-v4"
+    ],
+    "aisearchprovider": [
+      "ai-provider-v3"
+    ],
+    "containers": [
+      "workers"
+    ]
+  },
+  "targetOverrides": {
+    "aigatewayprovider": {
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "groups": {
+          "@ai-sdk/provider": "ship",
+          "@ai-sdk/openai-compatible": "ship"
+        }
+      }
+    },
+    "workersaiprovider": {
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "groups": {
+          "@ai-sdk/provider": "ship",
+          "@ai-sdk/openai-compatible": "ship"
+        }
+      }
+    },
+    "aisearchprovider": {
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "groups": {
+          "@ai-sdk/provider": "ship"
+        }
+      }
+    },
+    "workers": {
+      "profile": "containers",
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "groups": {
+          "@cloudflare/workers-types": "ship"
+        }
+      }
+    },
+    "containers": {
+      "generator": {
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "groups": {
+          "@cloudflare/workers-types": "ship"
+        }
+      }
+    }
+  }
+}

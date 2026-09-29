@@ -1,0 +1,1209 @@
+{
+  "schemaVersion": 1,
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "cases": [
+    {
+      "id": "compute.create-native",
+      "operationId": "createApplication",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/containers/applications",
+      "requestPath": "/accounts/account-fixture/containers/applications",
+      "responseStatus": 201,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "native-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "scheduling_policy": "durable_object",
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "requestBody": {
+        "name": "conclave-native",
+        "scheduling_policy": "durable_object",
+        "durable_objects": {
+          "namespace_id": "scope-native-services"
+        }
+      },
+      "regression": "Hawaii previously emitted this inline allOf response object as string. The fixture requires the generated typed envelope to decode the original object response."
+    },
+    {
+      "id": "compute.get-native",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "native-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "scheduling_policy": "durable_object",
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "regression": "Hawaii previously emitted this inline allOf response object as string. The fixture requires the generated typed envelope to decode the original object response."
+    },
+    {
+      "id": "compute.get-scheduled",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/scheduled-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "scheduled-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-scheduled",
+          "scheduling_policy": "default",
+          "version": 2,
+          "instances": 3,
+          "configuration": {
+            "image": "registry.example/conclave@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          }
+        }
+      },
+      "regression": "Scheduled applications must select the scheduled union branch and retain the required version, instances, and deployment configuration."
+    },
+    {
+      "id": "compute.application-missing-discriminator",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "native-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "negativeFixture": true,
+      "negativeSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "oneOf"
+        }
+      ]
+    },
+    {
+      "id": "compute.application-unknown-discriminator",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "native-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "scheduling_policy": "future-policy",
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "negativeFixture": true,
+      "negativeSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "oneOf"
+        }
+      ]
+    },
+    {
+      "id": "compute.application-null-discriminator",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "native-application",
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "scheduling_policy": null,
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "negativeFixture": true,
+      "negativeSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "oneOf"
+        }
+      ]
+    },
+    {
+      "id": "compute.application-missing-id",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "account_id": "account-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "updated_at": "2026-09-13T00:00:00Z",
+          "name": "conclave-native",
+          "scheduling_policy": "durable_object",
+          "durable_objects": {
+            "namespace_id": "scope-native-services"
+          }
+        }
+      },
+      "negativeFixture": true,
+      "negativeSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "oneOf"
+        }
+      ]
+    },
+    {
+      "id": "compute.application-null-result",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": null
+      },
+      "negativeFixture": true,
+      "negativeSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "oneOf"
+        }
+      ]
+    },
+    {
+      "id": "compute.rollout-scheduled",
+      "operationId": "createApplicationRollout",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}/rollouts",
+      "requestPath": "/accounts/account-fixture/containers/applications/scheduled-application/rollouts",
+      "responseStatus": 201,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "rollout-fixture",
+          "created_at": "2026-09-13T00:00:00Z",
+          "last_updated_at": "2026-09-13T00:00:00Z",
+          "description": "Clef service image",
+          "kind": "full_auto",
+          "strategy": "rolling",
+          "current_version": 1,
+          "target_version": 2,
+          "current_configuration": {},
+          "target_configuration": {
+            "image": "registry.example/conclave@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          "status": "pending",
+          "health": {
+            "instances": {
+              "active": 0,
+              "assigned": 0
+            },
+            "errors": []
+          }
+        }
+      },
+      "requestBody": {
+        "description": "Clef service image",
+        "strategy": "rolling",
+        "step_percentage": 25,
+        "target_configuration": {
+          "image": "registry.example/conclave@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        }
+      },
+      "regression": "Hawaii previously emitted this inline allOf response object as string. The fixture requires the generated typed envelope to decode the original object response."
+    },
+    {
+      "id": "compute.forbidden",
+      "operationId": "createApplication",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/containers/applications",
+      "requestPath": "/accounts/account-fixture/containers/applications",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 10000,
+            "message": "fixture denied"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "requestBody": {
+        "name": "conclave-native",
+        "scheduling_policy": "durable_object",
+        "durable_objects": {
+          "namespace_id": "scope-native-services"
+        }
+      }
+    },
+    {
+      "id": "compute.delete-native",
+      "operationId": "deleteApplication",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "message": "Application deletion started"
+        }
+      },
+      "regression": "Hawaii previously emitted this inline allOf response object as string. The fixture requires the generated typed envelope to decode the original object response."
+    },
+    {
+      "id": "compute.deleted-native",
+      "operationId": "getApplication",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/containers/applications/{application_id}",
+      "requestPath": "/accounts/account-fixture/containers/applications/native-application",
+      "responseStatus": 404,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 10000,
+            "message": "fixture absent"
+          }
+        ],
+        "messages": [],
+        "result": null
+      }
+    },
+    {
+      "id": "compute.delete-worker",
+      "operationId": "worker-script-delete-worker",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/workers/scripts/{script_name}",
+      "requestPath": "/accounts/account-fixture/workers/scripts/ce-it-owned-fixture?force=false",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": null
+      }
+    },
+    {
+      "id": "tunnel.create",
+      "operationId": "cloudflare-tunnel-create-a-cloudflare-tunnel",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Conclave IoT & WREN",
+          "config_src": "cloudflare",
+          "created_at": "2026-09-13T00:00:00Z",
+          "status": "inactive"
+        }
+      },
+      "requestBody": {
+        "name": "Conclave IoT & WREN",
+        "config_src": "cloudflare"
+      }
+    },
+    {
+      "id": "tunnel.list-filter",
+      "operationId": "cloudflare-tunnel-list-cloudflare-tunnels",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel?name=Conclave%20IoT%20%26%20WREN&is_deleted=false&per_page=10&page=2",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": [
+          {
+            "id": "11111111-1111-4111-8111-111111111111",
+            "name": "Conclave IoT & WREN",
+            "config_src": "cloudflare",
+            "created_at": "2026-09-13T00:00:00Z",
+            "status": "inactive"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tunnel.configure",
+      "operationId": "cloudflare-tunnel-configuration-put-configuration",
+      "method": "PUT",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111/configurations",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "tunnel_id": "11111111-1111-4111-8111-111111111111",
+          "config": {
+            "ingress": [
+              {
+                "hostname": "conclave.example",
+                "service": "http://127.0.0.1:8787"
+              },
+              {
+                "hostname": "*",
+                "service": "http_status:404"
+              }
+            ],
+            "warp-routing": {
+              "enabled": true
+            }
+          },
+          "version": 7,
+          "source": "cloudflare",
+          "created_at": "2026-09-13T00:00:00Z"
+        }
+      },
+      "requestBody": {
+        "config": {
+          "ingress": [
+            {
+              "hostname": "conclave.example",
+              "service": "http://127.0.0.1:8787"
+            },
+            {
+              "hostname": "*",
+              "service": "http_status:404"
+            }
+          ],
+          "warp-routing": {
+            "enabled": true
+          }
+        }
+      }
+    },
+    {
+      "id": "tunnel.read-configuration",
+      "operationId": "cloudflare-tunnel-configuration-get-configuration",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/configurations",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111/configurations",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "tunnel_id": "11111111-1111-4111-8111-111111111111",
+          "config": {
+            "ingress": [
+              {
+                "hostname": "conclave.example",
+                "service": "http://127.0.0.1:8787"
+              },
+              {
+                "hostname": "*",
+                "service": "http_status:404"
+              }
+            ],
+            "warp-routing": {
+              "enabled": true
+            }
+          },
+          "version": 7,
+          "source": "cloudflare",
+          "created_at": "2026-09-13T00:00:00Z"
+        }
+      }
+    },
+    {
+      "id": "tunnel.route-create",
+      "operationId": "tunnel-route-create-a-tunnel-route",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/teamnet/routes",
+      "requestPath": "/accounts/account-fixture/teamnet/routes",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "route-fixture",
+          "network": "fd00:1234::/48",
+          "tunnel_id": "11111111-1111-4111-8111-111111111111",
+          "comment": "Clef native IoT subnet"
+        }
+      },
+      "requestBody": {
+        "network": "fd00:1234::/48",
+        "tunnel_id": "11111111-1111-4111-8111-111111111111",
+        "comment": "Clef native IoT subnet"
+      }
+    },
+    {
+      "id": "tunnel.route-delete",
+      "operationId": "tunnel-route-delete-a-tunnel-route",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/teamnet/routes/{route_id}",
+      "requestPath": "/accounts/account-fixture/teamnet/routes/route-fixture",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "route-fixture",
+          "network": "fd00:1234::/48",
+          "tunnel_id": "11111111-1111-4111-8111-111111111111",
+          "comment": "Clef native IoT subnet"
+        }
+      }
+    },
+    {
+      "id": "tunnel.delete",
+      "operationId": "cloudflare-tunnel-delete-a-cloudflare-tunnel",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "11111111-1111-4111-8111-111111111111",
+          "name": "Conclave IoT & WREN",
+          "config_src": "cloudflare",
+          "created_at": "2026-09-13T00:00:00Z",
+          "status": "inactive"
+        }
+      }
+    },
+    {
+      "id": "tunnel.rate-limit",
+      "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111",
+      "responseStatus": 429,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Rate limit exceeded (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "responseHeaders": {
+        "Retry-After": "3"
+      },
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.forbidden",
+      "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Access denied (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.multiple-errors",
+      "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/cfd_tunnel/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/cfd_tunnel/11111111-1111-4111-8111-111111111111",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Access denied (synthetic fixture)"
+          },
+          {
+            "code": 19998,
+            "message": "Secondary route constraint (synthetic fixture): Δ"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "warp.rate-limit",
+      "operationId": "cloudflare-tunnel-get-a-warp-connector-tunnel",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/warp_connector/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/warp_connector/22222222-2222-4222-8222-222222222222",
+      "responseStatus": 429,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Rate limit exceeded (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "responseHeaders": {
+        "Retry-After": "3"
+      },
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.route-forbidden",
+      "operationId": "tunnel-route-get-tunnel-route",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/teamnet/routes/{route_id}",
+      "requestPath": "/accounts/account-fixture/teamnet/routes/route-fixture",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Access denied (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.virtual-network-rate-limit",
+      "operationId": "tunnel-virtual-network-list-virtual-networks",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/teamnet/virtual_networks",
+      "requestPath": "/accounts/account-fixture/teamnet/virtual_networks",
+      "responseStatus": 429,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Rate limit exceeded (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "responseHeaders": {
+        "Retry-After": "3"
+      },
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.all-forbidden",
+      "operationId": "cloudflare-tunnel-list-all-tunnels",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/tunnels",
+      "requestPath": "/accounts/account-fixture/tunnels",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Access denied (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.hostname-route-rate-limit",
+      "operationId": "zero-trust-networks-route-hostname-get",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/zerotrust/routes/hostname/{hostname_route_id}",
+      "requestPath": "/accounts/account-fixture/zerotrust/routes/hostname/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 429,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Rate limit exceeded (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "responseHeaders": {
+        "Retry-After": "3"
+      },
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "tunnel.warp-subnet-forbidden",
+      "operationId": "zero-trust-networks-subnet-get-warp",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/zerotrust/subnets/warp/{subnet_id}",
+      "requestPath": "/accounts/account-fixture/zerotrust/subnets/warp/44444444-4444-4444-8444-444444444444",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 19999,
+            "message": "Access denied (synthetic fixture)"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "expectedSchemaErrors": [
+        {
+          "path": "result",
+          "validator": "anyOf"
+        },
+        {
+          "path": "result",
+          "validator": "type"
+        },
+        {
+          "path": "success",
+          "validator": "enum"
+        }
+      ],
+      "regression": "A 4XX failure envelope must decode through the canonical failure schema and retain the actual HTTP status, error details and null result.",
+      "fixtureNote": "Error code 19999 is synthetic. HTTP status is the tested classification, not a claimed Cloudflare product-specific numeric code.",
+      "schemaCorrection": "generators/hawaii/overlays/tunnel-failure-responses.json"
+    },
+    {
+      "id": "warp.create",
+      "operationId": "cloudflare-tunnel-create-a-warp-connector-tunnel",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/warp_connector",
+      "requestPath": "/accounts/account-fixture/warp_connector",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "name": "conclave-branch",
+          "created_at": "2026-09-13T00:00:00Z",
+          "status": "inactive"
+        }
+      },
+      "requestBody": {
+        "name": "conclave-branch",
+        "ha": true
+      }
+    },
+    {
+      "id": "warp.configure",
+      "operationId": "cloudflare-tunnel-configuration-update-warp-connector-configuration",
+      "method": "PUT",
+      "pathTemplate": "/accounts/{account_id}/warp_connector/{tunnel_id}/configurations",
+      "requestPath": "/accounts/account-fixture/warp_connector/22222222-2222-4222-8222-222222222222/configurations",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "tunnel_id": "22222222-2222-4222-8222-222222222222",
+          "created_at": "2026-09-13T00:00:00Z",
+          "configuration_version": 3,
+          "ha_mode": "local",
+          "config": {
+            "vips": [
+              {
+                "address": "10.99.0.1"
+              },
+              {
+                "address": "fd00:1234::1"
+              }
+            ]
+          }
+        }
+      },
+      "requestBody": {
+        "ha_mode": "local",
+        "config": {
+          "vips": [
+            {
+              "address": "10.99.0.1"
+            },
+            {
+              "address": "fd00:1234::1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "warp.read-configuration",
+      "operationId": "cloudflare-tunnel-configuration-get-warp-connector-configuration",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/warp_connector/{tunnel_id}/configurations",
+      "requestPath": "/accounts/account-fixture/warp_connector/22222222-2222-4222-8222-222222222222/configurations",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "tunnel_id": "22222222-2222-4222-8222-222222222222",
+          "created_at": "2026-09-13T00:00:00Z",
+          "configuration_version": 3,
+          "ha_mode": "local",
+          "config": {
+            "vips": [
+              {
+                "address": "10.99.0.1"
+              },
+              {
+                "address": "fd00:1234::1"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "warp.delete",
+      "operationId": "cloudflare-tunnel-delete-a-warp-connector-tunnel",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/warp_connector/{tunnel_id}",
+      "requestPath": "/accounts/account-fixture/warp_connector/22222222-2222-4222-8222-222222222222",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "22222222-2222-4222-8222-222222222222",
+          "name": "conclave-branch",
+          "created_at": "2026-09-13T00:00:00Z",
+          "status": "inactive"
+        }
+      }
+    },
+    {
+      "id": "access.create-policy",
+      "operationId": "access-policies-create-an-access-policy",
+      "method": "POST",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies",
+      "responseStatus": 201,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "name": "Conclave WREN operators",
+          "decision": "allow",
+          "include": [
+            {
+              "email": {
+                "email": "operator@example.test"
+              }
+            }
+          ],
+          "require": [
+            {
+              "device_posture": {
+                "integration_uid": "55555555-5555-4555-8555-555555555555"
+              }
+            }
+          ],
+          "session_duration": "1h",
+          "precedence": 1
+        }
+      },
+      "requestBody": {
+        "name": "Conclave WREN operators",
+        "decision": "allow",
+        "include": [
+          {
+            "email": {
+              "email": "operator@example.test"
+            }
+          }
+        ],
+        "require": [
+          {
+            "device_posture": {
+              "integration_uid": "55555555-5555-4555-8555-555555555555"
+            }
+          }
+        ],
+        "session_duration": "1h",
+        "precedence": 1
+      }
+    },
+    {
+      "id": "access.read-policy",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "name": "Conclave WREN operators",
+          "decision": "allow",
+          "include": [
+            {
+              "email": {
+                "email": "operator@example.test"
+              }
+            }
+          ],
+          "require": [
+            {
+              "device_posture": {
+                "integration_uid": "55555555-5555-4555-8555-555555555555"
+              }
+            }
+          ],
+          "session_duration": "1h",
+          "precedence": 1
+        }
+      }
+    },
+    {
+      "id": "access.delete-policy",
+      "operationId": "access-policies-delete-an-access-policy",
+      "method": "DELETE",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 202,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "33333333-3333-4333-8333-333333333333"
+        }
+      }
+    },
+    {
+      "id": "access.forbidden",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 403,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 10000,
+            "message": "fixture denied"
+          }
+        ],
+        "messages": [],
+        "result": null
+      }
+    },
+    {
+      "id": "access.rate-limit",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 429,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 10000,
+            "message": "fixture denied"
+          }
+        ],
+        "messages": [],
+        "result": null
+      }
+    },
+    {
+      "id": "access.undeclared-status",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 599,
+      "responseBody": {
+        "success": false,
+        "errors": [
+          {
+            "code": 10000,
+            "message": "fixture denied"
+          }
+        ],
+        "messages": [],
+        "result": null
+      },
+      "negativeFixture": "Undeclared status must be rejected"
+    },
+    {
+      "id": "access.malformed-response",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 200,
+      "responseBody": null,
+      "responseRaw": "{broken",
+      "negativeFixture": "Malformed JSON must be rejected"
+    },
+    {
+      "id": "access.cancel-inflight",
+      "operationId": "access-policies-get-an-access-policy",
+      "method": "GET",
+      "pathTemplate": "/accounts/{account_id}/access/apps/{app_id}/policies/{policy_id}",
+      "requestPath": "/accounts/account-fixture/access/apps/44444444-4444-4444-8444-444444444444/policies/33333333-3333-4333-8333-333333333333",
+      "responseStatus": 200,
+      "responseBody": {
+        "success": true,
+        "errors": [],
+        "messages": [],
+        "result": {
+          "id": "33333333-3333-4333-8333-333333333333",
+          "name": "Conclave WREN operators",
+          "decision": "allow",
+          "include": [
+            {
+              "email": {
+                "email": "operator@example.test"
+              }
+            }
+          ],
+          "require": [
+            {
+              "device_posture": {
+                "integration_uid": "55555555-5555-4555-8555-555555555555"
+              }
+            }
+          ],
+          "session_duration": "1h",
+          "precedence": 1
+        }
+      },
+      "holdResponse": true,
+      "negativeFixture": "Cancellation must abort an outstanding HTTP request"
+    }
+  ]
+}

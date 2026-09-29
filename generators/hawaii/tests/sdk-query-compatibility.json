@@ -1,0 +1,113 @@
+{
+  "package": "cloudflare",
+  "version": "7.1.0",
+  "gitCommit": "faaaf89ed8064a9fb54de538ec3e89487f1302b0",
+  "source": "https://registry.npmjs.org/cloudflare/-/cloudflare-7.1.0.tgz",
+  "files": {
+    "internal/utils/query.js": "6446674fc5ca26279f85d614e8e6f4692514306ab34b726cd948a1f489c05054",
+    "internal/qs/stringify.js": "af8ce512f0c56e60ead2ea05afa70de4ae5cf6fbed5499e6511622726cee37aa",
+    "internal/qs/utils.js": "b9fb2753afa6a66ff35c9ad7729277f753a10917dc58d8b56d8756a97e5e5eeb",
+    "internal/qs/formats.js": "2cabe417d3e7a3429ef3028514bba726185844ca630c4db419659acf043317d7"
+  },
+  "limitation": "Dotted repeated keys lose element boundaries; null and empty string have equal transport text. These fixtures check SDK compatibility, not injectivity.",
+  "cases": [
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "model",
+            "operator": "eq",
+            "value": [
+              "a",
+              "b"
+            ]
+          },
+          {
+            "key": "success",
+            "operator": "eq",
+            "value": [
+              true
+            ]
+          }
+        ]
+      },
+      "expected": "filters.key=model&filters.operator=eq&filters.value=a&filters.value=b&filters.key=success&filters.operator=eq&filters.value=true"
+    },
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "model",
+            "operator": "eq",
+            "value": [
+              null
+            ]
+          }
+        ]
+      },
+      "expected": "filters.key=model&filters.operator=eq&filters.value="
+    },
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "model",
+            "operator": "eq",
+            "value": [
+              ""
+            ]
+          }
+        ]
+      },
+      "expected": "filters.key=model&filters.operator=eq&filters.value="
+    },
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "metadata.key",
+            "operator": "eq",
+            "value": [
+              "a b",
+              "x&y",
+              "x/y",
+              "a+b",
+              "λ"
+            ]
+          }
+        ]
+      },
+      "expected": "filters.key=metadata.key&filters.operator=eq&filters.value=a%20b&filters.value=x%26y&filters.value=x%2Fy&filters.value=a%2Bb&filters.value=%CE%BB"
+    },
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "a"
+          },
+          {
+            "operator": "eq"
+          }
+        ]
+      },
+      "expected": "filters.key=a&filters.operator=eq"
+    },
+    {
+      "input": {
+        "filters": [
+          {
+            "key": "a",
+            "operator": "eq"
+          }
+        ]
+      },
+      "expected": "filters.key=a&filters.operator=eq"
+    },
+    {
+      "input": {
+        "filters": []
+      },
+      "expected": ""
+    }
+  ]
+}

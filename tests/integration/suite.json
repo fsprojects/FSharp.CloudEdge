@@ -1,0 +1,855 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    "sdk-local",
+    "conclave-local",
+    "local",
+    "cloudflare",
+    "conclave-cloudflare",
+    "release"
+  ],
+  "acceptance": "Local profiles are diagnostics. Hosted acceptance requires compile, deploy, staged assertions, evidence and verified teardown. Missing fixtures or cleanup are failures to establish acceptance.",
+  "cases": [
+    {
+      "implementation": "implemented",
+      "id": "sdk.contracts",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Authenticate selected delivery and require review of every API, input or schema change",
+      "profiles": [
+        "sdk-local",
+        "local",
+        "conclave-local"
+      ],
+      "steps": [
+        {
+          "root": "sdk",
+          "command": "node",
+          "args": [
+            "scripts/integration/contracts.mjs",
+            "check"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.tooling",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Generation, support package, delivery and Hawaii pipeline regressions",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "steps": [
+        {
+          "root": "sdk",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:tooling"
+          ]
+        },
+        {
+          "root": "sdk",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:hawaii-tooling"
+          ]
+        },
+        {
+          "root": "sdk",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:integration-tooling"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.build",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Full selected library build and cross-library F# composition",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "sdk",
+          "command": "npm",
+          "args": [
+            "run",
+            "build",
+            "--",
+            "--resume"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.bytebridge",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Generated Workers byte views through Fable and BAREWire",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "sdk",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:bridge"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.management-loopback",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Actual generated HTTP clients against schema-shaped Compute, Networking and Security responses; local diagnostic",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "sdk",
+          "command": "node",
+          "args": [
+            "scripts/integration/management.mjs"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.durable-local",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Direct F# DO subclass, transactions, alarms and local runtime restart",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "validation",
+          "command": "node",
+          "args": [
+            "scripts/build-durable-objects.mjs",
+            "--run"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "sdk.agents-local",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Fable SDK calls through retained JS Agent subclass adapter, state and local restart",
+      "profiles": [
+        "sdk-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "validation",
+          "command": "npm",
+          "args": [
+            "run",
+            "build:agents"
+          ]
+        },
+        {
+          "root": "validation",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:agents"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.edge-build",
+      "owner": "Conclave",
+      "contract": "Compile and bundle actual Fable consumer against selected SDK",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "npm",
+          "args": [
+            "run",
+            "build:edge"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.edge-local",
+      "owner": "Conclave",
+      "contract": "Mailbox, supervisor, Access JWT and bounded byte boundary regressions",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "dependsOn": [
+        "conclave.edge-build"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:edge"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.wire-local",
+      "owner": "Conclave",
+      "contract": "Application wire framing and BAREWire consumer contract on .NET",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "dotnet",
+          "args": [
+            "run",
+            "--project",
+            "src/Wire/Conclave.Wire.Tests/Conclave.Wire.Tests.fsproj",
+            "-c",
+            "Release"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.deploy-loopback",
+      "owner": "Conclave",
+      "contract": "Deployment profile, immutable native image and resumable management behavior against loopback",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "dotnet",
+          "args": [
+            "run",
+            "--project",
+            "src/Tooling/Conclave.Deploy.Tests/Conclave.Deploy.Tests.fsproj",
+            "-c",
+            "Release"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.native-local",
+      "owner": "Conclave",
+      "contract": "Build real Clef service and verify native bridge boundaries",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "npm",
+          "args": [
+            "run",
+            "build:native"
+          ]
+        },
+        {
+          "root": "conclave",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:native"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.runtime-local",
+      "owner": "Conclave",
+      "contract": "Actual workerd gateway, durable scope and Clef subprocess over BAREWire/HTTP",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "dependsOn": [
+        "conclave.edge-build",
+        "conclave.native-local"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "npm",
+          "args": [
+            "run",
+            "test:runtime"
+          ]
+        }
+      ]
+    },
+    {
+      "implementation": "implemented",
+      "id": "conclave.prospero-local",
+      "owner": "Conclave",
+      "contract": "Actual Facets and Loader fan-out, lifecycle fences and durable partition join in local workerd",
+      "profiles": [
+        "conclave-local",
+        "local"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "steps": [
+        {
+          "root": "conclave",
+          "command": "node",
+          "args": [
+            "scripts/build-prospero-parallel.mjs"
+          ]
+        },
+        {
+          "root": "conclave",
+          "command": "node",
+          "args": [
+            "scripts/test-prospero-parallel.mjs",
+            "--no-build"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "sdk.live.workers",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Request/Response, streams, cryptography, sockets and Service Binding behavior",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "workers"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.durable-loader",
+      "owner": "FSharp.CloudEdge",
+      "contract": "DO storage and alarms, hosted lifecycle, Loader props/egress, Facet storage and invalidation",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "workers",
+        "actors"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.workflows",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Static and Dynamic Workflows, durable steps, retries, events and versioned recovery",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "workers",
+        "dynamicworkflows"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.storage",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Worker bindings to KV, R2, D1, Queues and selected resource services using disposable data",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "workers",
+        "kvassethandler"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.agents",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Agents state/lifecycle, MCP client and chat protocols with bounded service fixtures",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "agents",
+        "agents--ai-chat-agent",
+        "agents--browser",
+        "aichat"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.tools",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Code Mode, Shell/Git, Computer/artifacts and Cabidela admitted execution and cleanup",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "codemode",
+        "shell",
+        "shell--git",
+        "computer",
+        "computer--artifacts",
+        "cabidela"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.voice",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Voice session and error handling with bounded protocol fixture",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "voice",
+        "voice--errors"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.containers",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Real image startup, network policy, restart and removal for Containers/Sandbox/Bridge",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "containers",
+        "sandbox",
+        "sandbox--bridge"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.ai",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Gateway and Workers AI provider v4, AI Search provider v3, exact supported request/response and bounded inference",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "aigatewayprovider",
+        "workersaiprovider",
+        "aisearchprovider"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.http-rpc",
+      "owner": "FSharp.CloudEdge",
+      "contract": "OAuth provider, Chanfana and Capnweb runtime requests, failures and peer protocol compatibility",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "workersoauthprovider",
+        "chanfana",
+        "capnweb"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.utilities",
+      "owner": "FSharp.CloudEdge",
+      "contract": "AI utilities, Think and Flagship application-independent provider contracts",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "aiutils",
+        "think",
+        "flagship"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.live.pages",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Cloudflare Access, Turnstile and Static Forms plugin behavior in hosted request routing",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "libraries": [
+        "pagesplugincloudflareaccess",
+        "pagespluginturnstile",
+        "pagespluginstaticforms"
+      ],
+      "dependsOn": [
+        "sdk.contracts",
+        "sdk.build"
+      ],
+      "reason": "Requires product fixture adapter: compile, journal intended resources, deploy, exercise, collect, destroy and verify absence in a dedicated Cloudflare test profile."
+    },
+    {
+      "id": "sdk.management-live.compute",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Compute generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.storage",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Storage generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.ai",
+      "owner": "FSharp.CloudEdge",
+      "contract": "AI generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.security",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Security generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.networking",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Networking generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.observability",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Observability generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.media",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Media generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.messaging",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Messaging generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.contentdelivery",
+      "owner": "FSharp.CloudEdge",
+      "contract": "ContentDelivery generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.browser",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Browser generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "sdk.management-live.tenancy",
+      "owner": "FSharp.CloudEdge",
+      "contract": "Tenancy generated management operations: representative owned-resource lifecycle, pagination, errors and response decoding",
+      "implementation": "planned",
+      "profiles": [
+        "cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires operation-family coverage mapping and ephemeral account-capability profile. Loopback serialization is a diagnostic prerequisite, not hosted acceptance."
+    },
+    {
+      "id": "conclave.live.prospero",
+      "owner": "Conclave",
+      "contract": "Spawn real children, overlap admitted operations, bound fan-out, recover selected siblings, join logical partitions once and preserve the declared result",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.authority",
+      "owner": "Conclave",
+      "contract": "Access admission, tenant/scope isolation, child capability projection, egress refusal and revocation during work",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.workflow-mcp",
+      "owner": "Conclave",
+      "contract": "Admitted MCP contracts and typed workflow publication/execution through the Conclave actor topology",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.native",
+      "owner": "Conclave",
+      "contract": "Immutable Clef container deployment, BAREWire round trips, recovery and effect-boundary idempotency",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.iot",
+      "owner": "Conclave",
+      "contract": "BAREWire device/gateway/Worker path, disconnection, replay, bounded frames and target-specific native evidence",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.wren",
+      "owner": "Conclave",
+      "contract": "WREN native host and reactive client, authenticated loopback bridge, cancellation and stale-view refusal",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.protocols",
+      "owner": "Conclave",
+      "contract": "HTTPS and WebSocket first; each admitted additional transport has its own framing, authentication, backpressure and latency assertions",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.one-warp",
+      "owner": "Conclave",
+      "contract": "Owned Tunnel/WARP/One route and policy lifecycle with enrolled test runner, positive and negative network paths, identity and payload continuity",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    },
+    {
+      "id": "conclave.live.performance",
+      "owner": "Conclave",
+      "contract": "Measure fan-out degree, arrival order, useful work, latency, throughput, coordination traffic and resource cost under declared thresholds",
+      "implementation": "planned",
+      "profiles": [
+        "conclave-cloudflare"
+      ],
+      "dependsOn": [
+        "sdk.contracts"
+      ],
+      "reason": "Requires Conclave scenario adapter on the shared ephemeral lifecycle. Named device/client/network prerequisites and verified remote cleanup must be supplied; no local result closes this case."
+    }
+  ]
+}

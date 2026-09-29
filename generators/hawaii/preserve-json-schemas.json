@@ -1,0 +1,1020 @@
+{
+  "schemaVersion": 1,
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "inventorySha256": "646b59251e83a2623d27f8eaeba76870a73ee199d42975c456726c9b3329bc2d",
+  "schemaIds": [
+    "InlineUnion_0888091a32d176e4a8e88c6c",
+    "InlineUnion_0a644ca808edbb583c912a52",
+    "InlineUnion_0aa1ba48bfe5292f91790d3a",
+    "InlineUnion_0e1573bd5fabb12c47e4dddb",
+    "InlineUnion_0e9135cbdb7e3988462b4d6d",
+    "InlineUnion_123523f068b20a60e74b0999",
+    "InlineUnion_138890d107228fb17f3273ec",
+    "InlineUnion_197512965461cfb72e154a5c",
+    "InlineUnion_19a79c9dd839931b48bcd690",
+    "InlineUnion_1b5bf626ff0ffd5c0a4be117",
+    "InlineUnion_1bc503c8b61073036826d896",
+    "InlineUnion_2032bf50969e70b5120a4811",
+    "InlineUnion_203ef5cdeb33b7d35e73eb82",
+    "InlineUnion_230fd61930b56380b4f656d5",
+    "InlineUnion_238c0f85c1cf54ddecc1c91c",
+    "InlineUnion_247fce26b6225f1515cee129",
+    "InlineUnion_28f6977b2a2cbf756536fe37",
+    "InlineUnion_296b3428d2b44c41c103dc4c",
+    "InlineUnion_2a61a17cba694136c2f1579c",
+    "InlineUnion_2a92669980b76834982b9588",
+    "InlineUnion_2dc86cf1adae8c71f843c75c",
+    "InlineUnion_2df0627403a42737936c0185",
+    "InlineUnion_2fd9d7f99006892037d57e2a",
+    "InlineUnion_34007d569551e381620045ec",
+    "InlineUnion_3414dcbf76597c5745d7130f",
+    "InlineUnion_3948ceaacdb6e71e6de5dee3",
+    "InlineUnion_3d380f2e4fab1e33e61fc863",
+    "InlineUnion_3d7d07c4f4bc61ecec00d24f",
+    "InlineUnion_3e407f5198d828a72350ca51",
+    "InlineUnion_3e729608ab0a833b65ef0de2",
+    "InlineUnion_41b11381e561132f71bc1dd0",
+    "InlineUnion_42a7b3cf9f91f6e4f44203b4",
+    "InlineUnion_4692d74a6897b802f7ec9666",
+    "InlineUnion_46a9fdabf56b76eb326d4730",
+    "InlineUnion_4755ea2cdcb74dad3789bc1b",
+    "InlineUnion_48a80e290bb7f3f1c6cdd2eb",
+    "InlineUnion_4b20bdb75a0b4016c3953491",
+    "InlineUnion_4c27131ddce9c92607ecd7ea",
+    "InlineUnion_4d2f1c5b4f494c44435a6ac0",
+    "InlineUnion_50269da2c9e23ae7923e7c00",
+    "InlineUnion_52d65436919945cab7d1682a",
+    "InlineUnion_57313af0e98224f0948ea31d",
+    "InlineUnion_59ee057be05171c6f49d5144",
+    "InlineUnion_59ffe69d4c2f1905e4d4fb01",
+    "InlineUnion_5c2d22d159419a7d46a2dd9e",
+    "InlineUnion_5c74324a382ef03c3c9df29f",
+    "InlineUnion_5cfb0234cd4ff5204c41cb22",
+    "InlineUnion_5df02cff582b9a6331579d65",
+    "InlineUnion_5e5461fb7868dc7f0b9d1201",
+    "InlineUnion_63bd2111941424cc79f82e4f",
+    "InlineUnion_64fffcd4e067c320d22043e2",
+    "InlineUnion_67b9c47821ba3c28b391c2fd",
+    "InlineUnion_697e528a359593e7de740da9",
+    "InlineUnion_6a465a774ef3197daf2b2b7b",
+    "InlineUnion_6b6d7fec2af875781b3ec691",
+    "InlineUnion_6b8db8ae327155823e15341d",
+    "InlineUnion_6d1f4c0ad648bee34a92f0d2",
+    "InlineUnion_71302d4b25d066e2d0a8706a",
+    "InlineUnion_716abe9ddbc1640d0ec0c094",
+    "InlineUnion_736b8a656017ccae439e9961",
+    "InlineUnion_7453bdc2baf2ded6b5185928",
+    "InlineUnion_789e8c731edb2f2bd04d64be",
+    "InlineUnion_78a8fd6c85fdcce464712cb3",
+    "InlineUnion_7dbab936d1f060babb82fe0a",
+    "InlineUnion_81aef760b0dc53840fcd7a49",
+    "InlineUnion_843aadba48cc6029c726e77b",
+    "InlineUnion_84f40b027476b6dd90ade672",
+    "InlineUnion_8ee6565c74e29c6aa9fee60c",
+    "InlineUnion_96dd0b3e2bc6f4d7d0183513",
+    "InlineUnion_9a191a90e352f560123ce344",
+    "InlineUnion_9a6adabcd10359309a4f8db7",
+    "InlineUnion_9cb0e041b0dc12d6aebee581",
+    "InlineUnion_9efd8424a0e61e695ceec0c8",
+    "InlineUnion_a9e731e8fc9c178bfa562499",
+    "InlineUnion_aaf6a514188a27c6c2782537",
+    "InlineUnion_abbe240a4a6a32aa2cdafd2b",
+    "InlineUnion_ac319c6c09546720684ce158",
+    "InlineUnion_b06930d234bc1196a771a2fa",
+    "InlineUnion_b1b13f5409e083e2f2481933",
+    "InlineUnion_b334583f85603a435ad6bc85",
+    "InlineUnion_b532e7041ff2b7147a71989e",
+    "InlineUnion_b862450358793a692286b733",
+    "InlineUnion_be10f3bc1b712c5b9809a775",
+    "InlineUnion_bf9bd547d728bd702d6446e0",
+    "InlineUnion_c1b2f85669a87d7a36e8a0a9",
+    "InlineUnion_c340f0c2fffe0992abcc5938",
+    "InlineUnion_c38b51fa6e14600e8e348391",
+    "InlineUnion_c99555c2c75b2d92a06b742c",
+    "InlineUnion_ce301c56020e6ff393e2f5af",
+    "InlineUnion_d0958637f3a437f24b53dc9c",
+    "InlineUnion_d604a5d38b6c9f6c1efeed70",
+    "InlineUnion_d98709e43202d0f1aa48f674",
+    "InlineUnion_dfb3e0073874bd8a1b3cb962",
+    "InlineUnion_dfe1c652bd4bb70d0c5a99a4",
+    "InlineUnion_e49e8e00c2b33ed69444195e",
+    "InlineUnion_e57365e42052518078507b55",
+    "InlineUnion_e5ec9cb0416832a28aad47d0",
+    "InlineUnion_eaddc8b2f11ad4f7e90d8381",
+    "InlineUnion_eb4eeff4236ff2d395d43fdf",
+    "InlineUnion_eb8e62559c6504daf56fb6e8",
+    "InlineUnion_ee61723ea7ffeb599bec6cd1",
+    "InlineUnion_eefdeba68cafd7b731e99db2",
+    "InlineUnion_f5dd374bc2be6d2ff06e2ac5",
+    "InlineUnion_f6c4bddb855234d6b220075b",
+    "InlineUnion_fbcf308911f5b2ba20e626e6",
+    "InlineUnion_fe3b5cfdacaee2e8369c45c3",
+    "aaa_audit_logs_response_collection",
+    "abuse-reports_ErrorCode",
+    "abuse-reports_MitigationAppealRequest",
+    "abuse-reports_UnauthorizedErrorResponse",
+    "access_app_id",
+    "access_app_policy_result",
+    "access_app_policy_write_request",
+    "access_app_request",
+    "access_app_response",
+    "access_apps",
+    "access_destinations",
+    "access_identity-providers",
+    "access_identity-providers-2",
+    "access_rule",
+    "api-shield_auth_id_characteristics",
+    "api-shield_operation_features",
+    "api-shield_position",
+    "api-shield_token_sources",
+    "bot-management_config_single",
+    "builds_CreateBuildRequest",
+    "cc_DurableObjectsConfiguration",
+    "cloudflare-pipelines_SourceField",
+    "d1_batch-query",
+    "digital-experience-monitoring_warp_events_response",
+    "dlp_EntryOfNewProfile",
+    "dlp_EntryUpdate",
+    "dlp_EntryWithSharedProfiles",
+    "dlp_EntryWithUploadStatus",
+    "dlp_NewDatasetColumn",
+    "dlp_ProfileEntryUpdate",
+    "dns-firewall_dns_firewall_ips",
+    "dns-firewall_upstream_ips",
+    "dns-records_dns-record-batch-patch",
+    "dns-records_dns-record-batch-put",
+    "dns-records_dns-record-patch",
+    "dns-records_dns-record-post",
+    "dns-records_dns-record-response",
+    "dns-records_dns-record-with-data",
+    "dns-records_dns-record-without-data",
+    "dns-records_ttl",
+    "email_update_sending_subdomain_properties",
+    "firewall_configuration",
+    "firewall_configurations",
+    "firewall_package",
+    "firewall_package_response_collection",
+    "firewall_package_response_single",
+    "hyperdrive_hyperdrive-caching",
+    "hyperdrive_hyperdrive-origin",
+    "iam_resources",
+    "images_image_variants",
+    "infra_ServiceConfig",
+    "infra_ServiceHost",
+    "intel_ip",
+    "lists_item",
+    "lists_items-update-request-collection",
+    "logpush_max_upload_bytes",
+    "logpush_max_upload_interval_seconds",
+    "logpush_max_upload_records",
+    "magic-visibility-pcaps_pcaps_request_pcap",
+    "magic_acl-subnet",
+    "magic_app",
+    "magic_app_add_single_request",
+    "magic_app_config",
+    "magic_app_config_add_single_request",
+    "magic_app_update_request",
+    "magic_cf1_site_ramp",
+    "mq_consumer-response",
+    "mq_event-source",
+    "mq_producer",
+    "mq_queue-message",
+    "nsc_Interconnect",
+    "nsc_InterconnectCreate",
+    "realtimekit_StorageConfig",
+    "resource-tagging_delete_tags_request_account_level",
+    "resource-tagging_delete_tags_request_zone_level",
+    "resource-tagging_set_tags_request_account_level",
+    "resource-tagging_set_tags_request_zone_level",
+    "rulesets_RequestRule",
+    "rulesets_ResponseRule",
+    "rulesets_RewriteUri",
+    "rulesets_SetCacheControlDirective",
+    "rulesets_SetCacheControlDirectiveWithQualifiers",
+    "rulesets_SetCacheControlDirectiveWithValue",
+    "security-center_newScanRequest",
+    "spectrum-config_edge_ips",
+    "spectrum-config_update_app_config",
+    "stream_video_copy_request",
+    "stream_webhook_request",
+    "teams-devices_config_request",
+    "teams-devices_input",
+    "teams-devices_split_tunnel",
+    "teams-devices_split_tunnel_include",
+    "tls-certificates-and-hostnames_value",
+    "vectorize_index-configuration",
+    "waf-managed-rules_rule",
+    "waitingroom_rule_position",
+    "workers-kv_any",
+    "workers-kv_value",
+    "workers-observability_filter_node",
+    "workers_durable_object_export_variants",
+    "workers_export_config",
+    "workers_placement_info",
+    "workers_placement_info_no_status",
+    "workers_placement_target",
+    "zero-trust-gateway_app-types",
+    "zero-trust-gateway_proxy-endpoints",
+    "zones_actions",
+    "zones_multiple_settings",
+    "zones_setting",
+    "zones_setting_value",
+    "zones_zone_settings_single_request"
+  ],
+  "reason": "Preserve named JSON payloads while union-alternative membership remains unresolved; do not infer an arbitrary discriminated-union branch. The generated fidelity report retains each source composition. Array item union precision will be upgraded as exact mappings become available.",
+  "discriminatorExceptions": [
+    {
+      "schemaId": "hyperdrive_hyperdrive-caching",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "mq_consumer-response",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "nsc_Interconnect",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "nsc_InterconnectCreate",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "rulesets_RequestRule",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "workers_export_config",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "zero-trust-gateway_proxy-endpoints",
+      "reason": "The discriminator mapping does not establish required, disjoint literal tags across all source alternatives; retain the canonical JSON payload without selecting a branch."
+    },
+    {
+      "schemaId": "infra_ServiceConfig",
+      "reason": "Inherited branch fields do not establish disjoint required literal tags; discriminator mapping alone is not an exclusivity proof."
+    },
+    {
+      "schemaId": "resource-tagging_delete_tags_request_account_level",
+      "reason": "A specialized allOf alternative requires a resource_type value excluded by its inherited base enum (worker_version for account requests, access_application_policy for zone requests). The source constraints intersect to the empty set; preserve wire data without claiming schema membership.",
+      "evidencePointers": [
+        "#/components/schemas/resource-tagging_delete_tags_request_account_level",
+        "#/components/schemas/resource-tagging_account_resource_type_base_enum"
+      ]
+    },
+    {
+      "schemaId": "resource-tagging_delete_tags_request_zone_level",
+      "reason": "A specialized allOf alternative requires a resource_type value excluded by its inherited base enum (worker_version for account requests, access_application_policy for zone requests). The source constraints intersect to the empty set; preserve wire data without claiming schema membership.",
+      "evidencePointers": [
+        "#/components/schemas/resource-tagging_delete_tags_request_zone_level",
+        "#/components/schemas/resource-tagging_zone_resource_type_base_enum"
+      ]
+    },
+    {
+      "schemaId": "resource-tagging_set_tags_request_account_level",
+      "reason": "A specialized allOf alternative requires a resource_type value excluded by its inherited base enum (worker_version for account requests, access_application_policy for zone requests). The source constraints intersect to the empty set; preserve wire data without claiming schema membership.",
+      "evidencePointers": [
+        "#/components/schemas/resource-tagging_set_tags_request_account_level",
+        "#/components/schemas/resource-tagging_account_resource_type_base_enum"
+      ]
+    },
+    {
+      "schemaId": "resource-tagging_set_tags_request_zone_level",
+      "reason": "A specialized allOf alternative requires a resource_type value excluded by its inherited base enum (worker_version for account requests, access_application_policy for zone requests). The source constraints intersect to the empty set; preserve wire data without claiming schema membership.",
+      "evidencePointers": [
+        "#/components/schemas/resource-tagging_set_tags_request_zone_level",
+        "#/components/schemas/resource-tagging_zone_resource_type_base_enum"
+      ]
+    }
+  ],
+  "inlineExceptions": [
+    {
+      "schemaId": "InlineUnion_d0958637f3a437f24b53dc9c",
+      "sourcePointer": "#/components/schemas/access_app_req_embedded_policies/properties/policies/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_abbe240a4a6a32aa2cdafd2b",
+      "sourcePointer": "#/components/schemas/access_response_collection/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3d380f2e4fab1e33e61fc863",
+      "sourcePointer": "#/components/schemas/access_response_collection-17/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_736b8a656017ccae439e9961",
+      "sourcePointer": "#/components/schemas/access_saas_props/properties/saas_app",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3948ceaacdb6e71e6de5dee3",
+      "sourcePointer": "#/components/schemas/access_saas_props-2/properties/saas_app",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_dfe1c652bd4bb70d0c5a99a4",
+      "sourcePointer": "#/components/schemas/art_Filter/properties/values/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_843aadba48cc6029c726e77b",
+      "sourcePointer": "#/components/schemas/cloudflare-pipelines_workers-pipelines-pipeline/properties/source/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_59ffe69d4c2f1905e4d4fb01",
+      "sourcePointer": "#/components/schemas/flagship_Flag/properties/rules/items/properties/conditions/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_b862450358793a692286b733",
+      "sourcePointer": "#/components/schemas/flagship_FlagDefinitions/properties/flags/additionalProperties/properties/rules/items/properties/conditions/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_e5ec9cb0416832a28aad47d0",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-config/properties/origin",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_fe3b5cfdacaee2e8369c45c3",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-config-patch/properties/origin",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_c340f0c2fffe0992abcc5938",
+      "sourcePointer": "#/components/schemas/magic-visibility-pcaps_pcaps_collection_response/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_b06930d234bc1196a771a2fa",
+      "sourcePointer": "#/components/schemas/mcn_list_item/properties/list/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_9cb0e041b0dc12d6aebee581",
+      "sourcePointer": "#/components/schemas/mcn_provider_initial_setup_response/allOf/1/properties/result",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_b334583f85603a435ad6bc85",
+      "sourcePointer": "#/components/schemas/mcn_resource_details_section_item/properties/value",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_6d1f4c0ad648bee34a92f0d2",
+      "sourcePointer": "#/components/schemas/pages_deployment_config_values_request/properties/env_vars/additionalProperties",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_2fd9d7f99006892037d57e2a",
+      "sourcePointer": "#/components/schemas/pages_env_vars/additionalProperties",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_ee61723ea7ffeb599bec6cd1",
+      "sourcePointer": "#/components/schemas/rulesets_RewriteHeaders/additionalProperties",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_c1b2f85669a87d7a36e8a0a9",
+      "sourcePointer": "#/components/schemas/tunnel_mesh_configuration_request_body/properties/config",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_4692d74a6897b802f7ec9666",
+      "sourcePointer": "#/components/schemas/tunnel_mesh_configuration_response/properties/config",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_6b6d7fec2af875781b3ec691",
+      "sourcePointer": "#/components/schemas/tunnel_tunnel-response-collection/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_59ee057be05171c6f49d5144",
+      "sourcePointer": "#/components/schemas/web3_api-response-single/allOf/1/properties/result_info",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_2dc86cf1adae8c71f843c75c",
+      "sourcePointer": "#/components/schemas/zaraz_zaraz-config-base/properties/triggers/additionalProperties/properties/excludeRules/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_230fd61930b56380b4f656d5",
+      "sourcePointer": "#/components/schemas/zaraz_zaraz-config-base/properties/triggers/additionalProperties/properties/loadRules/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3e729608ab0a833b65ef0de2",
+      "sourcePointer": "#/components/schemas/zones_zone_settings_response_collection/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_84f40b027476b6dd90ade672",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1ai-gateway~1gateways~1{gateway_id}~1logs/get/parameters/22/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_eaddc8b2f11ad4f7e90d8381",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1ai~1models~1search/get/responses/200/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_bf9bd547d728bd702d6446e0",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1ai~1run~1{model_name}/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_2a61a17cba694136c2f1579c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1ai~1run~1{model_name}/post/responses/200/content/application~1json/schema/properties/result",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_247fce26b6225f1515cee129",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1audit_logs/get/parameters/6/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_63bd2111941424cc79f82e4f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1audit_logs/get/parameters/7/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_9a191a90e352f560123ce344",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1accessibilityTree/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_78a8fd6c85fdcce464712cb3",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1content/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_f5dd374bc2be6d2ff06e2ac5",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1crawl/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_9a6adabcd10359309a4f8db7",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1json/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_67b9c47821ba3c28b391c2fd",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1links/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3e407f5198d828a72350ca51",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1markdown/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_138890d107228fb17f3273ec",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1pdf/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_eefdeba68cafd7b731e99db2",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1scrape/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_0aa1ba48bfe5292f91790d3a",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1screenshot/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_5c2d22d159419a7d46a2dd9e",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1browser-rendering~1snapshot/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_b532e7041ff2b7147a71989e",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1events/get/parameters/2/schema/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_716abe9ddbc1640d0ec0c094",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators~1aggregate/get/parameters/5/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3d7d07c4f4bc61ecec00d24f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1events~1indicators~1aggregate/get/parameters/6/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_b1b13f5409e083e2f2481933",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1v2~1collections/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_7dbab936d1f060babb82fe0a",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1v2~1collections~1{collection_id}~1items/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_0e9135cbdb7e3988462b4d6d",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1v2~1collections~1{collection_id}~1items/post/responses/201/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_46a9fdabf56b76eb326d4730",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1v2~1collections~1{collection_id}~1search/post/requestBody/content/application~1json/schema/properties/filter",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_1b5bf626ff0ffd5c0a4be117",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1cloudforce-one~1v2~1threat-signals~1feeds~1poll/post/parameters/1/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_81aef760b0dc53840fcd7a49",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1d1~1database~1{database_id}/get/parameters/1/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_d98709e43202d0f1aa48f674",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1dex~1commands/post/requestBody/content/application~1json/schema/properties/commands/items/properties/args",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_19a79c9dd839931b48bcd690",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1flagship~1apps~1{app_id}~1flags/post/requestBody/content/application~1json/schema/properties/rules/items/properties/conditions/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_6a465a774ef3197daf2b2b7b",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1flagship~1apps~1{app_id}~1flags~1{flag_key}/put/requestBody/content/application~1json/schema/properties/rules/items/properties/conditions/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_4b20bdb75a0b4016c3953491",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1gateway~1proxy_endpoints/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_be10f3bc1b712c5b9809a775",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1members/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_2df0627403a42737936c0185",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1members~1{member_id}/put/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_d604a5d38b6c9f6c1efeed70",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps/get/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_aaf6a514188a27c6c2782537",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps/post/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_5cfb0234cd4ff5204c41cb22",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps~1ownership/get/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_4d2f1c5b4f494c44435a6ac0",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps~1ownership/post/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_e49e8e00c2b33ed69444195e",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps~1ownership~1validate/post/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_c99555c2c75b2d92a06b742c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pcaps~1{pcap_id}/get/responses/default/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_fbcf308911f5b2ba20e626e6",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pipelines/post/requestBody/content/application~1json/schema/properties/source/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_5e5461fb7868dc7f0b9d1201",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1pipelines~1{pipeline_name}/put/requestBody/content/application~1json/schema/properties/source/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_9efd8424a0e61e695ceec0c8",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1r2~1buckets~1{bucket_name}~1sippy/put/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_3414dcbf76597c5745d7130f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1dispatch~1namespaces~1{dispatch_namespace}~1scripts~1{script_name}~1settings/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_57313af0e98224f0948ea31d",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1metricsexport/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_296b3428d2b44c41c103dc4c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1scripts~1{script_name}/put/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_7453bdc2baf2ded6b5185928",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1scripts~1{script_name}~1script-settings/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_71302d4b25d066e2d0a8706a",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1scripts~1{script_name}~1settings/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_eb8e62559c6504daf56fb6e8",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1scripts~1{script_name}~1versions/post/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_4c27131ddce9c92607ecd7ea",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1services~1{service_name}~1environments~1{environment_name}~1settings/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_eb4eeff4236ff2d395d43fdf",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers/post/responses/400/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_28f6977b2a2cbf756536fe37",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers/post/responses/403/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_197512965461cfb72e154a5c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}/patch/responses/400/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_123523f068b20a60e74b0999",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}/patch/responses/403/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_48a80e290bb7f3f1c6cdd2eb",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}/put/responses/400/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_2a92669980b76834982b9588",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}/put/responses/403/content/application~1json/schema/allOf/1/properties/errors/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_ce301c56020e6ff393e2f5af",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}~1versions/post/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_5df02cff582b9a6331579d65",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1workers~1{worker_id}~1versions~1latest/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_34007d569551e381620045ec",
+      "sourcePointer": "#/paths/~1memberships/get/responses/200/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_789e8c731edb2f2bd04d64be",
+      "sourcePointer": "#/paths/~1user~1audit_logs/get/parameters/5/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_96dd0b3e2bc6f4d7d0183513",
+      "sourcePointer": "#/paths/~1user~1audit_logs/get/parameters/6/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_6b8db8ae327155823e15341d",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1api_gateway~1user_schemas~1{schema_id}~1operations/get/responses/200/content/application~1json/schema/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_0e1573bd5fabb12c47e4dddb",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1environments~1{environment_id}~1purge_cache/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_41b11381e561132f71bc1dd0",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1purge_cache/post/requestBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_238c0f85c1cf54ddecc1c91c",
+      "sourcePointer": "#/components/parameters/organizations-api_OrganizationListFiltersParentId/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_1bc503c8b61073036826d896",
+      "sourcePointer": "#/components/requestBodies/realtimekit_KickParticipantsBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_52d65436919945cab7d1682a",
+      "sourcePointer": "#/components/requestBodies/realtimekit_MuteParticipantsBody/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_c38b51fa6e14600e8e348391",
+      "sourcePointer": "#/components/responses/api-shield_schemas_extract_operations_get_success/content/application~1json/schema/allOf/1/properties/result/items",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    },
+    {
+      "schemaId": "InlineUnion_50269da2c9e23ae7923e7c00",
+      "sourcePointer": "#/components/responses/workers_4XX/content/application~1json/schema",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative."
+    }
+  ],
+  "composedUnionExceptions": [
+    {
+      "schemaId": "cloudflare-pipelines_SourceField",
+      "sourcePointer": "#/components/schemas/cloudflare-pipelines_SourceField",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryUpdate",
+      "sourcePointer": "#/components/schemas/dlp_EntryUpdate",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryWithSharedProfiles",
+      "sourcePointer": "#/components/schemas/dlp_EntryWithSharedProfiles",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryWithUploadStatus",
+      "sourcePointer": "#/components/schemas/dlp_EntryWithUploadStatus",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_NewDatasetColumn",
+      "sourcePointer": "#/components/schemas/dlp_NewDatasetColumn",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-patch",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-batch-patch",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-put",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-batch-put",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-response",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-response",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "hyperdrive_hyperdrive-origin",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-origin",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "magic_app_config",
+      "sourcePointer": "#/components/schemas/magic_app_config",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "magic_app_config_add_single_request",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "mq_queue-message",
+      "sourcePointer": "#/components/schemas/mq_queue-message",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "rulesets_ResponseRule",
+      "sourcePointer": "#/components/schemas/rulesets_ResponseRule",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "rulesets_RewriteUri",
+      "sourcePointer": "#/components/schemas/rulesets_RewriteUri",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "workers_placement_info",
+      "sourcePointer": "#/components/schemas/workers_placement_info",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_203ef5cdeb33b7d35e73eb82",
+      "sourcePointer": "#/components/requestBodies/rulesets_Rule/content/application~1json/schema",
+      "operations": [
+        {
+          "path": "/accounts/{account_id}/rulesets/{ruleset_id}/rules",
+          "method": "post",
+          "operationId": "createAccountRulesetRule"
+        },
+        {
+          "path": "/accounts/{account_id}/rulesets/{ruleset_id}/rules/{rule_id}",
+          "method": "patch",
+          "operationId": "updateAccountRulesetRule"
+        },
+        {
+          "path": "/zones/{zone_id}/rulesets/{ruleset_id}/rules",
+          "method": "post",
+          "operationId": "createZoneRulesetRule"
+        },
+        {
+          "path": "/zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}",
+          "method": "patch",
+          "operationId": "updateZoneRulesetRule"
+        }
+      ],
+      "reason": "A ruleset union payload and its positional refinement share one JSON object; retain both in a canonical composed-union wrapper shared by every operation referencing this request body."
+    },
+    {
+      "schemaId": "InlineUnion_f6c4bddb855234d6b220075b",
+      "sourcePointer": "#/components/schemas/workers_secret-patch-request/properties/secrets/additionalProperties",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_ac319c6c09546720684ce158",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1audit_logs/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_697e528a359593e7de740da9",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1dlp~1datasets~1{dataset_id}~1versions~1{version}/post/requestBody/content/application~1json/schema/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_0888091a32d176e4a8e88c6c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1images~1v1~1{image_id}~1blob/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_0a644ca808edbb583c912a52",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1shared~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_5c74324a382ef03c3c9df29f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1keys/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_dfb3e0073874bd8a1b3cb962",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1live-tail/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_64fffcd4e067c320d22043e2",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_42a7b3cf9f91f6e4f44203b4",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1values/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_a9e731e8fc9c178bfa562499",
+      "sourcePointer": "#/paths/~1user~1audit_logs/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_4755ea2cdcb74dad3789bc1b",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_2032bf50969e70b5120a4811",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_e57365e42052518078507b55",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/patch/responses/200/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_8ee6565c74e29c6aa9fee60c",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    }
+  ],
+  "inlineSitesCoveredByComposedParents": [
+    {
+      "schemaId": "InlineUnion_49065d79d39306206652f437",
+      "sourcePointer": "#/components/schemas/dlp_NewDatasetColumn/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "dlp_NewDatasetColumn"
+    },
+    {
+      "schemaId": "InlineUnion_10fa6a4281752c6c6fdbc582",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-response/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "dns-records_dns-record-response"
+    },
+    {
+      "schemaId": "InlineUnion_6bff3bc9b634cbc14507f907",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-origin/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "hyperdrive_hyperdrive-origin"
+    },
+    {
+      "schemaId": "InlineUnion_8257c2284311cd17eb643ff2",
+      "sourcePointer": "#/components/schemas/magic_app_config/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config"
+    },
+    {
+      "schemaId": "InlineUnion_13c79b218cc79d866c998ac1",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config_add_single_request"
+    },
+    {
+      "schemaId": "InlineUnion_80e7b8c9e81e146d677cd7c3",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config_add_single_request"
+    },
+    {
+      "schemaId": "InlineUnion_d6ffda055ad9bd2b358ed6a7",
+      "sourcePointer": "#/components/schemas/mq_queue-message/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "mq_queue-message"
+    },
+    {
+      "schemaId": "InlineUnion_3bfb75c29bffe79164a2a0de",
+      "sourcePointer": "#/components/schemas/rulesets_RewriteUri/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "rulesets_RewriteUri"
+    },
+    {
+      "schemaId": "InlineUnion_79bb36529ae0405b957cc225",
+      "sourcePointer": "#/components/schemas/workers_placement_info/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "workers_placement_info"
+    },
+    {
+      "schemaId": "InlineUnion_3158c3f854dd6f7f1b104e1c",
+      "sourcePointer": "#/components/schemas/rulesets_ServeErrorRule/allOf/1/properties/action_parameters/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedByExistingJsonField": "#/components/schemas/rulesets_ServeErrorRule/allOf/1/properties/action_parameters"
+    },
+    {
+      "schemaId": "InlineUnion_f4a4c3fa8f32f9eaba527fcc",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1dlp~1datasets~1{dataset_id}~1versions~1{version}/post/requestBody/content/application~1json/schema/items/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_697e528a359593e7de740da9"
+    },
+    {
+      "schemaId": "InlineUnion_02869d7abcbe1da216b651ec",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1shared~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_0a644ca808edbb583c912a52"
+    },
+    {
+      "schemaId": "InlineUnion_e361cff26955c1060b7107d9",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1keys/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_5c74324a382ef03c3c9df29f"
+    },
+    {
+      "schemaId": "InlineUnion_501ccace0dab734ab0f1ae0a",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1live-tail/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_dfb3e0073874bd8a1b3cb962"
+    },
+    {
+      "schemaId": "InlineUnion_00cd698986ebcab01726580f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_64fffcd4e067c320d22043e2"
+    },
+    {
+      "schemaId": "InlineUnion_ad2826aba01ffa133d19be56",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1values/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_42a7b3cf9f91f6e4f44203b4"
+    }
+  ]
+}

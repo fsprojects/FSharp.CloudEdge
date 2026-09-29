@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-dynamic-workflows",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/dynamic-workflows": "0.1.1",
+    "@cloudflare/workers-types": "5.20260906.1"
+  }
+}

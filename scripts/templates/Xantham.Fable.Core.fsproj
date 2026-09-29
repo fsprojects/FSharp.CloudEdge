@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net8.0</TargetFrameworks>
+    <PackageId>Xantham.Fable.Core</PackageId>
+    <Version>{{version}}</Version>
+    <AssemblyVersion>0.0.0.0</AssemblyVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>Shayan Habibi</Authors>
+    <Description>Erased Fable support types and helpers for Xantham-generated bindings.</Description>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/shayanhabibi/Xantham</RepositoryUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+    <Compile Include="Helpers.fs" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+    <Content Include="Library.fs;Helpers.fs;Xantham.Fable.Core.fsproj" Pack="true" PackagePath="fable/" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+  </ItemGroup>
+</Project>

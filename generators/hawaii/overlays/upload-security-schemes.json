@@ -1,0 +1,22 @@
+[
+  {
+    "op": "add",
+    "path": "/components/securitySchemes/assets_jwt",
+    "value": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+      "description": "Temporary Workers asset-upload session JWT returned by assets-upload-session. Supply this token for asset upload; it is distinct from the account API token."
+    }
+  },
+  {
+    "op": "add",
+    "path": "/components/securitySchemes/pages_upload_token",
+    "value": {
+      "type": "http",
+      "scheme": "bearer",
+      "bearerFormat": "JWT",
+      "description": "Temporary Pages upload JWT returned by /accounts/{account_id}/pages/projects/{project_name}/upload-token. Supply this token to the Pages assets endpoints; it is distinct from the account API token."
+    }
+  }
+]

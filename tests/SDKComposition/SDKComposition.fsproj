@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.83b9196820f7e253f211" />
+    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.2cc2de89eabe31fc35f6" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="../../src/Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" />
+    <ProjectReference Include="../../src/Runtime/Services/FSharp.CloudEdge.Runtime.Containers/FSharp.CloudEdge.Runtime.Containers.fsproj" />
+    <ProjectReference Include="../../src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+    <ProjectReference Include="../../src/Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" />
+    <ProjectReference Include="../../src/Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" />
+    <ProjectReference Include="../../src/Runtime/AI/FSharp.CloudEdge.Runtime.AIGatewayProvider/FSharp.CloudEdge.Runtime.AIGatewayProvider.fsproj" />
+    <ProjectReference Include="../../src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
+    <ProjectReference Include="../../src/Runtime/AI/FSharp.CloudEdge.Runtime.AISearchProvider/FSharp.CloudEdge.Runtime.AISearchProvider.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Native.fs" />
+    <Compile Include="DurableObjects.fs" />
+    <Compile Include="AI.fs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-turnstile-firebase-app-check",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/turnstile-firebase-app-check": "0.0.5"
+  }
+}

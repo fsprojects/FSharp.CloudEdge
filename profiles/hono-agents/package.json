@@ -1,0 +1,13 @@
+{
+  "name": "fsharp-cloudedge-input-hono-agents",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/workers-types": "5.20260906.1",
+    "@types/json-schema": "7.0.15",
+    "@types/node": "22.20.1",
+    "ai": "7.0.93",
+    "hono-agents": "3.0.12"
+  }
+}

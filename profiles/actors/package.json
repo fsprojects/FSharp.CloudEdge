@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-actors",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/actors": "0.0.1-beta.6",
+    "@cloudflare/workers-types": "5.20260906.1"
+  }
+}

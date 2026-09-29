@@ -1,0 +1,17 @@
+[
+  {
+    "op": "move",
+    "from": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1aggregate~1current/get/responses/4xx",
+    "path": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1aggregate~1current/get/responses/4XX"
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1events~1bytime/get/responses/4xx",
+    "path": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1events~1bytime/get/responses/4XX"
+  },
+  {
+    "op": "move",
+    "from": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1events~1summary/get/responses/4xx",
+    "path": "/paths/~1zones~1{zone_id}~1spectrum~1analytics~1events~1summary/get/responses/4XX"
+  }
+]

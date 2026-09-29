@@ -1,0 +1,13 @@
+{
+  "name": "fsharp-cloudedge-input-realtimekit-virtual-background",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/realtimekit": "2.0.2",
+    "@cloudflare/realtimekit-callstats": "8.0.0",
+    "@cloudflare/realtimekit-utils": "1.0.0",
+    "@cloudflare/realtimekit-virtual-background": "0.0.2",
+    "@types/node": "16.18.126"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-hcaptcha",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-hcaptcha": "1.0.4"
+  }
+}

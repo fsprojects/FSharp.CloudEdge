@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-honeycomb",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-honeycomb": "1.0.4",
+    "@cloudflare/workers-honeycomb-logger": "2.3.3"
+  }
+}

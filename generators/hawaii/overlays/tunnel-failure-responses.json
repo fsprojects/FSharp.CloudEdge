@@ -1,0 +1,1319 @@
+[
+  {
+    "op": "test",
+    "path": "/components/schemas/tunnel_api-response-common",
+    "value": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "$ref": "#/components/schemas/tunnel_messages"
+        },
+        "messages": {
+          "$ref": "#/components/schemas/tunnel_messages"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "type": "object"
+            },
+            {
+              "items": {},
+              "type": "array"
+            },
+            {
+              "type": "string"
+            }
+          ]
+        },
+        "success": {
+          "description": "Whether the API call was successful",
+          "type": "boolean",
+          "example": true,
+          "enum": [
+            true
+          ]
+        }
+      },
+      "required": [
+        "success",
+        "errors",
+        "messages",
+        "result"
+      ]
+    }
+  },
+  {
+    "op": "test",
+    "path": "/components/schemas/tunnel_api-response-common-failure",
+    "value": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "example": [
+            {
+              "code": 7003,
+              "message": "No route for the URI"
+            }
+          ],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/tunnel_messages"
+            }
+          ],
+          "minLength": 1
+        },
+        "messages": {
+          "example": [],
+          "allOf": [
+            {
+              "$ref": "#/components/schemas/tunnel_messages"
+            }
+          ]
+        },
+        "result": {
+          "type": "object",
+          "enum": [
+            null
+          ],
+          "nullable": true
+        },
+        "success": {
+          "description": "Whether the API call was successful",
+          "type": "boolean",
+          "example": false,
+          "enum": [
+            false
+          ]
+        }
+      },
+      "required": [
+        "success",
+        "errors",
+        "messages",
+        "result"
+      ]
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/get/operationId",
+    "value": "cloudflare-tunnel-list-cloudflare-tunnels"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/post/operationId",
+    "value": "cloudflare-tunnel-create-a-cloudflare-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/delete/operationId",
+    "value": "cloudflare-tunnel-delete-a-cloudflare-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/get/operationId",
+    "value": "cloudflare-tunnel-get-a-cloudflare-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/patch/operationId",
+    "value": "cloudflare-tunnel-update-a-cloudflare-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/delete/operationId",
+    "value": "cloudflare-tunnel-clean-up-cloudflare-tunnel-connections"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_empty_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/get/operationId",
+    "value": "cloudflare-tunnel-list-cloudflare-tunnel-connections"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_connections_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connections/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connectors~1{connector_id}/get/operationId",
+    "value": "cloudflare-tunnel-get-cloudflare-tunnel-connector"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connectors~1{connector_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_client_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1connectors~1{connector_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1management/post/operationId",
+    "value": "cloudflare-tunnel-get-a-cloudflare-tunnel-management-token"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1management/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1management/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1token/get/operationId",
+    "value": "cloudflare-tunnel-get-a-cloudflare-tunnel-token"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1token/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1cfd_tunnel~1{tunnel_id}~1token/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/get/operationId",
+    "value": "tunnel-route-list-tunnel-routes"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_teamnet_response_collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/post/operationId",
+    "value": "tunnel-route-create-a-tunnel-route"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1ip~1{ip}/get/operationId",
+    "value": "tunnel-route-get-tunnel-route-by-ip"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1ip~1{ip}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_teamnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1ip~1{ip}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/delete/operationId",
+    "value": "tunnel-route-delete-a-tunnel-route-with-cidr"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/patch/operationId",
+    "value": "tunnel-route-update-a-tunnel-route-with-cidr"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/post/operationId",
+    "value": "tunnel-route-create-a-tunnel-route-with-cidr"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1network~1{ip_network_encoded}/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/delete/operationId",
+    "value": "tunnel-route-delete-a-tunnel-route"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/get/operationId",
+    "value": "tunnel-route-get-tunnel-route"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/patch/operationId",
+    "value": "tunnel-route-update-a-tunnel-route"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1routes~1{route_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/get/operationId",
+    "value": "tunnel-virtual-network-list-virtual-networks"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_vnet_response_collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/post/operationId",
+    "value": "tunnel-virtual-network-create-a-virtual-network"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_vnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/delete/operationId",
+    "value": "tunnel-virtual-network-delete"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_vnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/get/operationId",
+    "value": "tunnel-virtual-network-get"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_vnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/patch/operationId",
+    "value": "tunnel-virtual-network-update"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_vnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1teamnet~1virtual_networks~1{virtual_network_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1tunnels/get/operationId",
+    "value": "cloudflare-tunnel-list-all-tunnels"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1tunnels/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel-response-collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1tunnels/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/get/operationId",
+    "value": "cloudflare-tunnel-list-warp-connector-tunnels"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_warp-connector-response-collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/post/operationId",
+    "value": "cloudflare-tunnel-create-a-warp-connector-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/delete/operationId",
+    "value": "cloudflare-tunnel-delete-a-warp-connector-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/get/operationId",
+    "value": "cloudflare-tunnel-get-a-warp-connector-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/patch/operationId",
+    "value": "cloudflare-tunnel-update-a-warp-connector-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connections/get/operationId",
+    "value": "cloudflare-tunnel-list-warp-connector-tunnel-connections"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connections/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_connections_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connections/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connectors~1{connector_id}/get/operationId",
+    "value": "cloudflare-tunnel-get-warp-connector-tunnel-connector"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connectors~1{connector_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_client_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1connectors~1{connector_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1failover/put/operationId",
+    "value": "cloudflare-tunnel-manual-failover-warp-connector-tunnel"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1failover/put/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_empty_response"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1failover/put/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1token/get/operationId",
+    "value": "cloudflare-tunnel-get-a-warp-connector-tunnel-token"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1token/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1warp_connector~1{tunnel_id}~1token/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/get/operationId",
+    "value": "zero-trust-networks-route-hostname-list"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_hostname_route_response_collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/post/operationId",
+    "value": "zero-trust-networks-route-hostname-create"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/delete/operationId",
+    "value": "zero-trust-networks-route-hostname-delete"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/get/operationId",
+    "value": "zero-trust-networks-route-hostname-get"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/patch/operationId",
+    "value": "zero-trust-networks-route-hostname-update"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1routes~1hostname~1{hostname_route_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets/get/operationId",
+    "value": "zero-trust-networks-subnets-list"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_collection"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1cloudflare_source~1{address_family}/patch/operationId",
+    "value": "zero-trust-networks-subnet-update-cloudflare-source"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1cloudflare_source~1{address_family}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1cloudflare_source~1{address_family}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/get/operationId",
+    "value": "zero-trust-networks-subnet-get-initial-resolved-ip"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/put/operationId",
+    "value": "zero-trust-networks-subnet-update-initial-resolved-ip"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/put/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1initial_resolved_ip~1{address_family}/put/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp/post/operationId",
+    "value": "zero-trust-networks-subnet-create-warp"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp/post/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/delete/operationId",
+    "value": "zero-trust-networks-subnet-delete-warp"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single_nullable"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/delete/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/get/operationId",
+    "value": "zero-trust-networks-subnet-get-warp"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/get/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/patch/operationId",
+    "value": "zero-trust-networks-subnet-update-warp"
+  },
+  {
+    "op": "test",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "allOf": [
+        {
+          "$ref": "#/components/schemas/tunnel_subnet_response_single"
+        },
+        {
+          "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+        }
+      ]
+    }
+  },
+  {
+    "op": "replace",
+    "path": "/paths/~1accounts~1{account_id}~1zerotrust~1subnets~1warp~1{subnet_id}/patch/responses/4XX/content/application~1json/schema",
+    "value": {
+      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+    }
+  }
+]

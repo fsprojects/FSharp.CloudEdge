@@ -1,0 +1,5943 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "description": "Welcome to Cloudflare's API documentation site. We are experimenting with an updated version of our API documentation - check out [developers.cloudflare.com/api-next/](https://developers.cloudflare.com/api-next/) to test out the new experience.\n\nTo get started using Cloudflare's products and services via the API, refer to [how to interact with Cloudflare](https://developers.cloudflare.com/fundamentals/basic-tasks/interact-with-cloudflare/), which covers using tools like [Terraform](https://developers.cloudflare.com/terraform/#cloudflare-terraform) and the [official SDKs](https://developers.cloudflare.com/fundamentals/api/reference/sdks/) to maintain your Cloudflare resources.\n\nUsing the Cloudflare API requires authentication so that Cloudflare knows who is making requests and what permissions you have. Create an API token to grant access to the API to perform actions. You can also authenticate with [API keys](https://developers.cloudflare.com/fundamentals/api/get-started/keys/), but these keys have [several limitations](https://developers.cloudflare.com/fundamentals/api/get-started/keys/#limitations) that make them less secure than API tokens. Whenever possible, use API tokens to interact with the Cloudflare API.\n\nTo create an API token, from the Cloudflare dashboard, go to My Profile > API Tokens and select Create Token. For more information on how to create and troubleshoot API tokens, refer to\nour [API fundamentals](https://developers.cloudflare.com/fundamentals/api/).\n\nFor information regarding rate limits, refer to our [API Rate Limits](https://developers.cloudflare.com/cloudflare-for-platforms/workers-for-platforms/platform/limits/#api-rate-limits).\n\nTotally new to Cloudflare? [Start here](https://developers.cloudflare.com/fundamentals/get-started/).",
+    "license": {
+      "name": "BSD-3-Clause",
+      "url": "https://opensource.org/licenses/BSD-3-Clause"
+    },
+    "title": "Cloudflare API",
+    "version": "4.0.0"
+  },
+  "paths": {
+    "/accounts/{account_id}/cfd_tunnel": {
+      "get": {
+        "operationId": "cloudflare-tunnel-list-cloudflare-tunnels",
+        "summary": "List Cloudflare Tunnels",
+        "description": "Lists and filters Cloudflare Tunnels in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_name"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted tunnels. If `false`, exclude deleted tunnels. If empty, all tunnels will be included.",
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "was_active_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "was_inactive_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "include_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "exclude_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_status"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List Cloudflare Tunnels response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List Cloudflare Tunnels response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare One Connector: cloudflared Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      },
+      "post": {
+        "operationId": "cloudflare-tunnel-create-a-cloudflare-tunnel",
+        "summary": "Create a Cloudflare Tunnel",
+        "description": "Creates a remotely or locally managed Cloudflare Tunnel in an account. After creation, retrieve its token and run cloudflared to establish the connector connection.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "config_src": {
+                    "$ref": "#/components/schemas/tunnel_config_src"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_name"
+                  },
+                  "tunnel_secret": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_secret"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a Cloudflare Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create a Cloudflare Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "config_src": {
+            "flagName": "config-source"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/cfd_tunnel/{tunnel_id}": {
+      "delete": {
+        "operationId": "cloudflare-tunnel-delete-a-cloudflare-tunnel",
+        "summary": "Delete a Cloudflare Tunnel",
+        "description": "Permanently deletes a Cloudflare Tunnel from an account. The tunnel must have no active connections.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a Cloudflare Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete a Cloudflare Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation permanently deletes a Cloudflare Tunnel."
+      },
+      "get": {
+        "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel",
+        "summary": "Get a Cloudflare Tunnel",
+        "description": "Fetches a single Cloudflare Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a Cloudflare Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get a Cloudflare Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare One Connector: cloudflared Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "patch": {
+        "operationId": "cloudflare-tunnel-update-a-cloudflare-tunnel",
+        "summary": "Update a Cloudflare Tunnel",
+        "description": "Updates the name or secret of an existing Cloudflare Tunnel.",
+        "parameters": [
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_name"
+                  },
+                  "tunnel_secret": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_secret"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a Cloudflare Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update a Cloudflare Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd-tunnel-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/connections": {
+      "delete": {
+        "operationId": "cloudflare-tunnel-clean-up-cloudflare-tunnel-connections",
+        "summary": "Clean up Cloudflare Tunnel connections",
+        "description": "Removes a connection (aka Cloudflare Tunnel Connector) from a Cloudflare Tunnel independently of its current state. If no connector id (client_id) is provided all connectors will be removed. We recommend running this command after rotating tokens.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_client_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clean up Cloudflare Tunnel connections response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_empty_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Clean up Cloudflare Tunnel connections response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_empty_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel.connections",
+        "x-fern-sdk-method-name": "cleanup",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation removes Cloudflare Tunnel connections."
+      },
+      "get": {
+        "operationId": "cloudflare-tunnel-list-cloudflare-tunnel-connections",
+        "summary": "List Cloudflare Tunnel connections",
+        "description": "Lists the connections for a Cloudflare Tunnel, including connector IDs, cloudflared versions, and Cloudflare locations.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List Cloudflare Tunnel connections response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_connections_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List Cloudflare Tunnel connections response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_connections_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare One Connector: cloudflared Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel.connections",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/connectors/{connector_id}": {
+      "get": {
+        "operationId": "cloudflare-tunnel-get-cloudflare-tunnel-connector",
+        "summary": "Get Cloudflare Tunnel connector",
+        "description": "Retrieves a connector and its connection details for a Cloudflare Tunnel, including its cloudflared version, architecture, and connected Cloudflare locations.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "connector_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_client_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get Cloudflare Tunnel connector response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_client_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get Cloudflare Tunnel connector response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_client_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare One Connector: cloudflared Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel.connectors",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/management": {
+      "post": {
+        "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel-management-token",
+        "summary": "Get a Cloudflare Tunnel management token",
+        "description": "Creates a short-lived management token for the requested Tunnel management resources, such as streaming logs. Treat the token as a secret.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "resources": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/tunnel_management-resources"
+                    }
+                  }
+                },
+                "required": [
+                  "resources"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Get a Cloudflare Tunnel management token response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Cloudflare API response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel.management.token",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/cfd_tunnel/{tunnel_id}/token": {
+      "get": {
+        "operationId": "cloudflare-tunnel-get-a-cloudflare-tunnel-token",
+        "summary": "Get a Cloudflare Tunnel token",
+        "description": "Retrieves the token used to run cloudflared and associate it with a specific Cloudflare Tunnel. Treat the token as a secret.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a Cloudflare Tunnel token response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get a Cloudflare Tunnel token response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnel.token",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/teamnet/routes": {
+      "get": {
+        "operationId": "tunnel-route-list-tunnel-routes",
+        "summary": "List tunnel routes",
+        "description": "Lists and filters private network routes in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_route_comment"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted routes. If `false`, exclude deleted routes. If empty, all routes will be included.",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "network_subset",
+            "in": "query",
+            "schema": {
+              "description": "If set, only list routes that are contained within this IP range.",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/tunnel_ip_network"
+                }
+              ]
+            }
+          },
+          {
+            "name": "network_superset",
+            "in": "query",
+            "schema": {
+              "description": "If set, only list routes that contain this IP range.",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/tunnel_ip_network"
+                }
+              ]
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_route_id"
+            }
+          },
+          {
+            "name": "tun_types",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_types"
+            }
+          },
+          {
+            "name": "virtual_network_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List tunnel routes response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_teamnet_response_collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List tunnel routes response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_teamnet_response_collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      },
+      "post": {
+        "operationId": "tunnel-route-create-a-tunnel-route",
+        "summary": "Create a tunnel route",
+        "description": "Routes a private network through a Cloudflare Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_route_comment"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_ip_network"
+                  },
+                  "tunnel_id": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_id"
+                  },
+                  "virtual_network_id": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_id_computed_optional"
+                  }
+                },
+                "required": [
+                  "network",
+                  "tunnel_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/teamnet/routes/ip/{ip}": {
+      "get": {
+        "operationId": "tunnel-route-get-tunnel-route-by-ip",
+        "summary": "Get tunnel route by IP",
+        "description": "Fetches routes that contain the given IP address.",
+        "parameters": [
+          {
+            "name": "ip",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_ip"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "virtual_network_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          },
+          {
+            "name": "default_virtual_network_fallback",
+            "in": "query",
+            "description": "When the virtual_network_id parameter is not provided the request filter will default search routes that are in the default virtual network for the account. If this parameter is set to false, the search will include routes that do not have a virtual network.",
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get tunnel route by IP response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_teamnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get tunnel route by IP response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_teamnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes",
+        "x-fern-sdk-method-name": "resolve",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/teamnet/routes/network/{ip_network_encoded}": {
+      "delete": {
+        "operationId": "tunnel-route-delete-a-tunnel-route-with-cidr",
+        "summary": "Delete a tunnel route (CIDR Endpoint)",
+        "description": "Deletes a private network route from an account. The CIDR in `ip_network_encoded` must be written in URL-encoded format. If no virtual_network_id is provided it will delete the route from the default vnet. If no tun_type is provided it will fetch the type from the tunnel_id or if that is missing it will assume Cloudflare Tunnel as default. If tunnel_id is provided it will delete the route from that tunnel, otherwise it will delete the route based on the vnet and tun_type.\n",
+        "parameters": [
+          {
+            "name": "ip_network_encoded",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_ip_network_encoded"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "virtual_network_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          },
+          {
+            "name": "tun_type",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_type"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-ignore": true,
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "delete",
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      },
+      "patch": {
+        "operationId": "tunnel-route-update-a-tunnel-route-with-cidr",
+        "summary": "Update a tunnel route (CIDR Endpoint)",
+        "description": "Updates an existing private network route in an account. The CIDR in `ip_network_encoded` must be written in URL-encoded format.",
+        "parameters": [
+          {
+            "name": "ip_network_encoded",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_ip_network_encoded"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Update a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-ignore": true,
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "edit",
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      },
+      "post": {
+        "operationId": "tunnel-route-create-a-tunnel-route-with-cidr",
+        "summary": "Create a tunnel route (CIDR Endpoint)",
+        "description": "Routes a private network through a Cloudflare Tunnel. The CIDR in `ip_network_encoded` must be written in URL-encoded format.",
+        "parameters": [
+          {
+            "name": "ip_network_encoded",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_ip_network_encoded"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_route_comment"
+                  },
+                  "tunnel_id": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_id"
+                  },
+                  "virtual_network_id": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_id"
+                  }
+                },
+                "required": [
+                  "tunnel_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "deprecated": true,
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-ignore": true,
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "create",
+        "x-stainless-deprecation-message": "This endpoint and its related APIs are deprecated in favor of the equivalent Tunnel Route (without CIDR) APIs."
+      }
+    },
+    "/accounts/{account_id}/teamnet/routes/{route_id}": {
+      "delete": {
+        "operationId": "tunnel-route-delete-a-tunnel-route",
+        "summary": "Delete a tunnel route",
+        "description": "Deletes a private network route from an account.\n",
+        "parameters": [
+          {
+            "name": "route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_route_id"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation permanently deletes a private network route."
+      },
+      "get": {
+        "operationId": "tunnel-route-get-tunnel-route",
+        "summary": "Get tunnel route",
+        "description": "Get a private network route in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_route_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "patch": {
+        "operationId": "tunnel-route-update-a-tunnel-route",
+        "summary": "Update a tunnel route",
+        "description": "Updates an existing private network route in an account. The fields that are meant to be updated should be provided in the body of the request.",
+        "parameters": [
+          {
+            "name": "route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_route_id"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_route_comment"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_ip_network"
+                  },
+                  "tunnel_id": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_id"
+                  },
+                  "virtual_network_id": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_id_computed_optional"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a tunnel route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update a tunnel route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Routing"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.cidr",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/teamnet/virtual_networks": {
+      "get": {
+        "operationId": "tunnel-virtual-network-list-virtual-networks",
+        "summary": "List virtual networks",
+        "description": "Lists and filters virtual networks in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_name"
+            }
+          },
+          {
+            "name": "is_default",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include the default virtual network. If `false`, exclude the default virtual network. If empty, all virtual networks will be included.",
+              "type": "boolean"
+            },
+            "deprecated": true,
+            "x-stainless-deprecation-message": "Use the is_default_network property instead.",
+            "x-stainless-ignore": true
+          },
+          {
+            "name": "is_default_network",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include the default virtual network. If `false`, exclude the default virtual network. If empty, all virtual networks will be included.",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted virtual networks. If `false`, exclude deleted virtual networks. If empty, all virtual networks will be included.",
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List virtual networks response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_vnet_response_collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List virtual networks response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_vnet_response_collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Virtual Network"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.virtual-networks",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      },
+      "post": {
+        "operationId": "tunnel-virtual-network-create-a-virtual-network",
+        "summary": "Create a virtual network",
+        "description": "Adds a new virtual network to an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_comment"
+                  },
+                  "is_default": {
+                    "description": "If `true`, this virtual network is the default for the account.",
+                    "type": "boolean",
+                    "example": true,
+                    "deprecated": true,
+                    "x-auditable": true,
+                    "x-stainless-deprecation-message": "Use the is_default_network property instead.",
+                    "x-stainless-ignore": true
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_is_default_network_optional"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_name"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a virtual network response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create a virtual network response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Virtual Network"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.virtual-networks",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/teamnet/virtual_networks/{virtual_network_id}": {
+      "delete": {
+        "operationId": "tunnel-virtual-network-delete",
+        "summary": "Delete a virtual network",
+        "description": "Deletes an existing virtual network.",
+        "parameters": [
+          {
+            "name": "virtual_network_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          },
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a virtual network response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete a virtual network response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Virtual Network"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.virtual-networks",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation permanently deletes a virtual network."
+      },
+      "get": {
+        "operationId": "tunnel-virtual-network-get",
+        "summary": "Get a virtual network",
+        "description": "Get a virtual network.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "virtual_network_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_comment"
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_is_default_network"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "A virtual network response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "A virtual network response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Virtual Network"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.virtual-networks",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "patch": {
+        "operationId": "tunnel-virtual-network-update",
+        "summary": "Update a virtual network",
+        "description": "Updates an existing virtual network.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "virtual_network_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_virtual_network_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_comment"
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_is_default_network_optional"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_virtual_network_name"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a virtual network response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update a virtual network response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_vnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Tunnel Virtual Network"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.virtual-networks",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/tunnels": {
+      "get": {
+        "operationId": "cloudflare-tunnel-list-all-tunnels",
+        "summary": "List All Tunnels",
+        "description": "Lists and filters all types of Tunnels in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "description": "A user-friendly name for the tunnel.",
+              "type": "string",
+              "example": "blog"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted tunnels. If `false`, exclude deleted tunnels. If empty, all tunnels will be included.",
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "was_active_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "was_inactive_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "include_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "exclude_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "tun_types",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_types"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_status"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List Tunnels response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel-response-collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List Tunnels response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel-response-collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare One Connector: cloudflared Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "tunnels",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/warp_connector": {
+      "get": {
+        "operationId": "cloudflare-tunnel-list-warp-connector-tunnels",
+        "summary": "List Warp Connector Tunnels",
+        "description": "Lists and filters Warp Connector Tunnels in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "schema": {
+              "description": "A user-friendly name for the tunnel.",
+              "type": "string",
+              "example": "blog"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted tunnels. If `false`, exclude deleted tunnels. If empty, all tunnels will be included.",
+              "type": "boolean",
+              "example": true
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "uuid",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "was_active_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "was_inactive_at",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date-time",
+              "example": "2009-11-10T23:00:00Z"
+            }
+          },
+          {
+            "name": "include_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "exclude_prefix",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "example": "vpc1-"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_status"
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List Warp Connector Tunnels response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_warp-connector-response-collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List Warp Connector Tunnels response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp-connector-response-collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: WARP Write",
+          "Cloudflare One Connector: WARP Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      },
+      "post": {
+        "operationId": "cloudflare-tunnel-create-a-warp-connector-tunnel",
+        "summary": "Create a Warp Connector Tunnel",
+        "description": "Creates a new Warp Connector Tunnel in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "ha": {
+                    "description": "Indicates that the tunnel will be created to be highly available. If omitted, defaults to false.",
+                    "type": "boolean",
+                    "default": false
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_name"
+                  }
+                },
+                "required": [
+                  "name"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create a Warp Connector Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create a Warp Connector Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: WARP Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/warp_connector/{tunnel_id}": {
+      "delete": {
+        "operationId": "cloudflare-tunnel-delete-a-warp-connector-tunnel",
+        "summary": "Delete a Warp Connector Tunnel",
+        "description": "Deletes a Warp Connector Tunnel from an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete a Warp Connector Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete a Warp Connector Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: WARP Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        },
+        "x-forge-require-confirmation": "This operation permanently deletes a Mesh node (Warp Connector Tunnel)."
+      },
+      "get": {
+        "operationId": "cloudflare-tunnel-get-a-warp-connector-tunnel",
+        "summary": "Get a Warp Connector Tunnel",
+        "description": "Fetches a single Warp Connector Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a Warp Connector Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get a Warp Connector Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: WARP Write",
+          "Cloudflare One Connector: WARP Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        }
+      },
+      "patch": {
+        "operationId": "cloudflare-tunnel-update-a-warp-connector-tunnel",
+        "summary": "Update a Warp Connector Tunnel",
+        "description": "Updates an existing Warp Connector Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_name"
+                  },
+                  "tunnel_secret": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_secret"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update a Warp Connector Tunnel response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update a Warp Connector Tunnel response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp-connector-response-single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: WARP Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/warp_connector/{tunnel_id}/connections": {
+      "get": {
+        "operationId": "cloudflare-tunnel-list-warp-connector-tunnel-connections",
+        "summary": "List WARP Connector Tunnel connections",
+        "description": "Fetches connection details for a WARP Connector Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List WARP Connector Tunnel connections response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_connections_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List WARP Connector connections response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_connections_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: WARP Write",
+          "Cloudflare One Connector: WARP Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes.connections",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/warp_connector/{tunnel_id}/connectors/{connector_id}": {
+      "get": {
+        "operationId": "cloudflare-tunnel-get-warp-connector-tunnel-connector",
+        "summary": "Get WARP Connector Tunnel connector",
+        "description": "Fetches connector and connection details for a WARP Connector Tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          },
+          {
+            "name": "connector_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_client_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get WARP Connector Tunnel connector response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_client_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get WARP Connector Tunnel connector response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_client_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connectors Read",
+          "Cloudflare One Connector: WARP Write",
+          "Cloudflare One Connector: WARP Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes.connectors",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/warp_connector/{tunnel_id}/failover": {
+      "put": {
+        "operationId": "cloudflare-tunnel-manual-failover-warp-connector-tunnel",
+        "summary": "Trigger a manual failover for a WARP Connector Tunnel",
+        "description": "Triggers a manual failover for a specific WARP Connector Tunnel, setting the specified client as the active connector. The tunnel must be configured for high availability (HA) and the client must be linked to the tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "client_id": {
+                    "$ref": "#/components/schemas/tunnel_client_id_input"
+                  }
+                },
+                "required": [
+                  "client_id"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Manual failover response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_empty_response"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Manual failover response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_empty_response"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: WARP Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes",
+        "x-fern-sdk-method-name": "failover",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "client_id": {
+            "flagName": "connector-id"
+          },
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        },
+        "x-forge-require-confirmation": "This operation triggers a manual failover, changing the active connector for a Mesh node."
+      }
+    },
+    "/accounts/{account_id}/warp_connector/{tunnel_id}/token": {
+      "get": {
+        "operationId": "cloudflare-tunnel-get-a-warp-connector-tunnel-token",
+        "summary": "Get a Warp Connector Tunnel token",
+        "description": "Gets the token used to associate warp device with a specific Warp Connector tunnel.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get a Warp Connector Tunnel token response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get a Warp Connector Tunnel token response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_tunnel_response_token"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Cloudflare Tunnel"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Connectors Write",
+          "Cloudflare One Connector: cloudflared Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "mesh.nodes.token",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true,
+        "x-forge-params": {
+          "tunnel_id": {
+            "flagName": "node-id"
+          }
+        }
+      }
+    },
+    "/accounts/{account_id}/zerotrust/routes/hostname": {
+      "get": {
+        "operationId": "zero-trust-networks-route-hostname-list",
+        "summary": "List hostname routes",
+        "description": "Lists and filters hostname routes in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "id",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname_route_id"
+            }
+          },
+          {
+            "name": "hostname",
+            "in": "query",
+            "description": "If set, only list hostname routes that contain a substring of the given value, the filter is case-insensitive.",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname"
+            }
+          },
+          {
+            "name": "tunnel_id",
+            "in": "query",
+            "description": "If set, only list hostname routes that point to a specific tunnel.",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_tunnel_id-3"
+            }
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname_query_comment"
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only return deleted hostname routes. If `false`, exclude deleted hostname routes.",
+              "type": "boolean",
+              "example": true,
+              "default": false
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List hostname routes response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route_response_collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List hostname routes failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_hostname_route_response_collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Hostname Route"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.hostname",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      },
+      "post": {
+        "operationId": "zero-trust-networks-route-hostname-create",
+        "summary": "Create hostname route",
+        "description": "Create a hostname route.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_hostname_comment"
+                  },
+                  "hostname": {
+                    "$ref": "#/components/schemas/tunnel_hostname"
+                  },
+                  "tunnel_id": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_id-3"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create hostname route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create hostname route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Hostname Route"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.hostname",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/routes/hostname/{hostname_route_id}": {
+      "delete": {
+        "operationId": "zero-trust-networks-route-hostname-delete",
+        "summary": "Delete hostname route",
+        "description": "Delete a hostname route.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "hostname_route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname_route_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete hostname route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete hostname route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Hostname Route"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.hostname",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation permanently deletes a hostname route."
+      },
+      "get": {
+        "operationId": "zero-trust-networks-route-hostname-get",
+        "summary": "Get hostname route",
+        "description": "Get a hostname route.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "hostname_route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname_route_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get hostname route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get hostname route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Hostname Route"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read",
+          "Cloudflare Tunnel Write",
+          "Cloudflare Tunnel Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.hostname",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "patch": {
+        "operationId": "zero-trust-networks-route-hostname-update",
+        "summary": "Update hostname route",
+        "description": "Updates a hostname route.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "hostname_route_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_hostname_route_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_hostname_comment"
+                  },
+                  "hostname": {
+                    "$ref": "#/components/schemas/tunnel_hostname"
+                  },
+                  "tunnel_id": {
+                    "$ref": "#/components/schemas/tunnel_tunnel_id-3"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update hostname route response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update hostname route response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_hostname_route_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Hostname Route"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare Tunnel Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.routes.hostname",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/subnets": {
+      "get": {
+        "operationId": "zero-trust-networks-subnets-list",
+        "summary": "List Subnets",
+        "description": "Lists and filters subnets in an account.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "description": "If set, only list subnets with the given name",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_subnet_query_name"
+            }
+          },
+          {
+            "name": "comment",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_subnet_query_comment"
+            }
+          },
+          {
+            "name": "network",
+            "in": "query",
+            "schema": {
+              "description": "If set, only list the subnet whose network exactly matches the given CIDR.",
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/tunnel_ip_network_encoded"
+                }
+              ]
+            }
+          },
+          {
+            "name": "existed_at",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_existed_at"
+            }
+          },
+          {
+            "name": "address_family",
+            "in": "query",
+            "description": "If set, only include subnets in the given address family - `v4` or `v6`",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_address_family"
+            }
+          },
+          {
+            "name": "is_default_network",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include default subnets. If `false`, exclude default subnets subnets. If not set, all subnets will be included.",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "is_deleted",
+            "in": "query",
+            "schema": {
+              "description": "If `true`, only include deleted subnets. If `false`, exclude deleted subnets. If not set, all subnets will be included.",
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "schema": {
+              "description": "Sort order of the results. `asc` means oldest to newest, `desc` means newest to oldest. If not set, they will not be in any particular order.",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "subnet_types",
+            "in": "query",
+            "schema": {
+              "description": "If set, the types of subnets to include, separated by comma.",
+              "type": "string",
+              "example": "cloudflare_source,warp",
+              "enum": [
+                "cloudflare_source",
+                "initial_resolved_ip",
+                "warp"
+              ]
+            }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_per_page"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_page_number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List subnets response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_collection"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "List subnets response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_collection"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets",
+        "x-fern-sdk-method-name": "list",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/subnets/cloudflare_source/{address_family}": {
+      "patch": {
+        "operationId": "zero-trust-networks-subnet-update-cloudflare-source",
+        "summary": "Update Cloudflare Source Subnet",
+        "description": "Updates the Cloudflare Source subnet of the given address family",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "address_family",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_address_family"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_subnet_comment"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_subnet_name"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.cloudflare-source",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/subnets/initial_resolved_ip/{address_family}": {
+      "get": {
+        "operationId": "zero-trust-networks-subnet-get-initial-resolved-ip",
+        "summary": "Get Initial Resolved IP Subnet",
+        "description": "Returns the account's default Initial Resolved IP Subnet for the given address family.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "address_family",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_address_family"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get Initial Resolved IP Subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get Initial Resolved IP Subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.initial-resolved-ip",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "put": {
+        "operationId": "zero-trust-networks-subnet-update-initial-resolved-ip",
+        "summary": "Update Initial Resolved IP Subnet",
+        "description": "Updates the CIDR for the account's default Initial Resolved IP Subnet of the given address\nfamily. The new CIDR must not conflict with existing private routes in the account.\n",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "address_family",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_address_family"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_subnet_comment"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_subnet_name"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update Initial Resolved IP Subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update Initial Resolved IP Subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.initial-resolved-ip",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/subnets/warp": {
+      "post": {
+        "operationId": "zero-trust-networks-subnet-create-warp",
+        "summary": "Create WARP IP subnet",
+        "description": "Create a WARP IP assignment subnet. Currently, only IPv4 subnets can be created.\n\n**Network constraints:**\n- The network must be within one of the following private IP ranges:\n  - `10.0.0.0/8` (RFC 1918)\n  - `172.16.0.0/12` (RFC 1918)\n  - `192.168.0.0/16` (RFC 1918)\n  - `100.64.0.0/10` (RFC 6598 - CGNAT)\n- The subnet must have a prefix length of `/24` or larger (e.g., `/16`, `/20`, `/24` are valid; `/25`, `/28` are not)\n",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_subnet_comment"
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_is_default_network"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_subnet_name"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+                  }
+                },
+                "required": [
+                  "name",
+                  "network"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Create subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Create subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.warp",
+        "x-fern-sdk-method-name": "create",
+        "x-forge-hidden": true
+      }
+    },
+    "/accounts/{account_id}/zerotrust/subnets/warp/{subnet_id}": {
+      "delete": {
+        "operationId": "zero-trust-networks-subnet-delete-warp",
+        "summary": "Delete WARP IP subnet",
+        "description": "Delete a WARP IP assignment subnet. This operation is idempotent - deleting an already-deleted or non-existent subnet will return success with a null result.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "subnet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_subnet_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Delete subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single_nullable"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Delete subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single_nullable"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.warp",
+        "x-fern-sdk-method-name": "delete",
+        "x-forge-hidden": true,
+        "x-forge-require-confirmation": "This operation permanently deletes a WARP IP subnet."
+      },
+      "get": {
+        "operationId": "zero-trust-networks-subnet-get-warp",
+        "summary": "Get WARP IP subnet",
+        "description": "Get a WARP IP assignment subnet.",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "subnet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_subnet_id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Get subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write",
+          "Cloudflare One Networks Read"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.warp",
+        "x-fern-sdk-method-name": "get",
+        "x-forge-hidden": true
+      },
+      "patch": {
+        "operationId": "zero-trust-networks-subnet-update-warp",
+        "summary": "Update WARP IP subnet",
+        "description": "Updates a WARP IP assignment subnet.\n\n**Update constraints:**\n- The `network` field cannot be modified for WARP subnets. Only `name`, `comment`, and `is_default_network` can be updated.\n- IPv6 subnets cannot be updated\n",
+        "parameters": [
+          {
+            "name": "account_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_account_id"
+            }
+          },
+          {
+            "name": "subnet_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/tunnel_subnet_id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_subnet_comment"
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_is_default_network"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_subnet_name"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Update subnet response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                }
+              }
+            }
+          },
+          "4XX": {
+            "description": "Update subnet response failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_subnet_response_single"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_api-response-common-failure"
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api_email": [],
+            "api_key": []
+          },
+          {
+            "api_token": []
+          },
+          {
+            "user_service_key": []
+          }
+        ],
+        "tags": [
+          "Zero Trust Subnets"
+        ],
+        "x-api-token-group": [
+          "Cloudflare One Networks Write"
+        ],
+        "x-fern-availability": "generally-available",
+        "x-fern-sdk-group-name": "network.subnets.warp",
+        "x-fern-sdk-method-name": "edit",
+        "x-forge-hidden": true
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "tunnel_api-response-common-failure": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "example": [
+              {
+                "code": 7003,
+                "message": "No route for the URI"
+              }
+            ],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tunnel_messages"
+              }
+            ],
+            "minLength": 1
+          },
+          "messages": {
+            "example": [],
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tunnel_messages"
+              }
+            ]
+          },
+          "result": {
+            "type": "object",
+            "enum": [
+              null
+            ],
+            "nullable": true
+          },
+          "success": {
+            "description": "Whether the API call was successful",
+            "type": "boolean",
+            "example": false,
+            "enum": [
+              false
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "errors",
+          "messages",
+          "result"
+        ]
+      },
+      "tunnel_messages": {
+        "type": "array",
+        "items": {
+          "properties": {
+            "code": {
+              "type": "integer",
+              "minimum": 1000
+            },
+            "message": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code",
+            "message"
+          ],
+          "type": "object",
+          "uniqueItems": true
+        },
+        "example": []
+      },
+      "tunnel_subnet_response_single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_subnet"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_subnet": {
+        "type": "object",
+        "properties": {
+          "capacity": {
+            "$ref": "#/components/schemas/tunnel_subnet_capacity"
+          },
+          "comment": {
+            "$ref": "#/components/schemas/tunnel_subnet_comment"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_subnet_id"
+          },
+          "is_default_network": {
+            "$ref": "#/components/schemas/tunnel_subnet_is_default_network"
+          },
+          "name": {
+            "$ref": "#/components/schemas/tunnel_subnet_name"
+          },
+          "network": {
+            "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+          },
+          "subnet_type": {
+            "$ref": "#/components/schemas/tunnel_subnet_type"
+          }
+        }
+      },
+      "tunnel_subnet_type": {
+        "description": "The type of subnet.",
+        "type": "string",
+        "example": "cloudflare_source",
+        "enum": [
+          "cloudflare_source",
+          "initial_resolved_ip",
+          "warp"
+        ],
+        "x-auditable": true
+      },
+      "tunnel_subnet_ip_network": {
+        "description": "The private IPv4 or IPv6 range defining the subnet, in CIDR notation.",
+        "type": "string",
+        "example": "100.64.0.0/12",
+        "x-auditable": true
+      },
+      "tunnel_subnet_name": {
+        "description": "A user-friendly name for the subnet.",
+        "type": "string",
+        "example": "IPv4 Cloudflare Source IPs",
+        "x-auditable": true
+      },
+      "tunnel_subnet_is_default_network": {
+        "description": "If `true`, this is the default subnet for the account. There can only be one default subnet per account.",
+        "type": "boolean",
+        "default": false,
+        "x-auditable": true,
+        "x-stainless-terraform-configurability": "computed_optional"
+      },
+      "tunnel_subnet_id": {
+        "description": "The UUID of the subnet.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "x-auditable": true
+      },
+      "tunnel_deleted_at": {
+        "description": "Timestamp of when the resource was deleted. If `null`, the resource has not been deleted.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2009-11-10T23:00:00Z",
+        "readOnly": true
+      },
+      "tunnel_created_at": {
+        "description": "Timestamp of when the resource was created.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2021-01-25T18:22:34.317854Z",
+        "readOnly": true
+      },
+      "tunnel_subnet_comment": {
+        "description": "An optional description of the subnet.",
+        "type": "string",
+        "example": "example comment",
+        "default": "",
+        "x-auditable": true,
+        "x-stainless-terraform-configurability": "computed_optional"
+      },
+      "tunnel_subnet_capacity": {
+        "description": "IP capacity information for the subnet.",
+        "type": "object",
+        "properties": {
+          "total": {
+            "description": "Total number of assignable IPs in the subnet.",
+            "type": "integer",
+            "example": 254
+          },
+          "used": {
+            "description": "Number of assigned IPs in the subnet.",
+            "type": "integer",
+            "example": 42
+          }
+        }
+      },
+      "tunnel_api-response-common": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "$ref": "#/components/schemas/tunnel_messages"
+          },
+          "messages": {
+            "$ref": "#/components/schemas/tunnel_messages"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "success": {
+            "description": "Whether the API call was successful",
+            "type": "boolean",
+            "example": true,
+            "enum": [
+              true
+            ]
+          }
+        },
+        "required": [
+          "success",
+          "errors",
+          "messages",
+          "result"
+        ]
+      },
+      "tunnel_account_id": {
+        "description": "Cloudflare account ID",
+        "type": "string",
+        "example": "699d98642c564d2e855e9661899b7252",
+        "maxLength": 32,
+        "readOnly": true,
+        "x-auditable": true
+      },
+      "tunnel_subnet_response_single_nullable": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "object",
+                "nullable": true,
+                "properties": {
+                  "capacity": {
+                    "$ref": "#/components/schemas/tunnel_subnet_capacity"
+                  },
+                  "comment": {
+                    "$ref": "#/components/schemas/tunnel_subnet_comment"
+                  },
+                  "created_at": {
+                    "$ref": "#/components/schemas/tunnel_created_at"
+                  },
+                  "deleted_at": {
+                    "$ref": "#/components/schemas/tunnel_deleted_at"
+                  },
+                  "id": {
+                    "$ref": "#/components/schemas/tunnel_subnet_id"
+                  },
+                  "is_default_network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_is_default_network"
+                  },
+                  "name": {
+                    "$ref": "#/components/schemas/tunnel_subnet_name"
+                  },
+                  "network": {
+                    "$ref": "#/components/schemas/tunnel_subnet_ip_network"
+                  },
+                  "subnet_type": {
+                    "$ref": "#/components/schemas/tunnel_subnet_type"
+                  }
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_address_family": {
+        "description": "IP address family, either `v4` (IPv4) or `v6` (IPv6)",
+        "type": "string",
+        "example": "v4",
+        "enum": [
+          "v4",
+          "v6"
+        ]
+      },
+      "tunnel_subnet_response_collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_subnet"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_api-response-collection": {
+        "type": "object",
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {},
+                "nullable": true
+              },
+              "result_info": {
+                "$ref": "#/components/schemas/tunnel_result_info"
+              }
+            }
+          }
+        ]
+      },
+      "tunnel_result_info": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "description": "Total number of results for the requested service",
+            "type": "number",
+            "example": 1
+          },
+          "page": {
+            "description": "Current page within paginated list of results",
+            "type": "number",
+            "example": 1
+          },
+          "per_page": {
+            "description": "Number of results per page of results",
+            "type": "number",
+            "example": 20
+          },
+          "total_count": {
+            "description": "Total results available without any search parameters",
+            "type": "number",
+            "example": 2000
+          }
+        }
+      },
+      "tunnel_page_number": {
+        "description": "Page number of paginated results.",
+        "type": "number",
+        "default": 1,
+        "minimum": 1
+      },
+      "tunnel_per_page": {
+        "description": "Number of results to display.",
+        "type": "number",
+        "maximum": 1000,
+        "minimum": 1
+      },
+      "tunnel_existed_at": {
+        "description": "If provided, include only resources that were created (and not deleted) before this time. URL encoded.",
+        "type": "string",
+        "format": "url-encoded-date-time",
+        "example": "2019-10-12T07%3A20%3A50.52Z"
+      },
+      "tunnel_ip_network_encoded": {
+        "description": "IP/CIDR range in URL-encoded format",
+        "type": "string",
+        "example": "172.16.0.0%2F16"
+      },
+      "tunnel_subnet_query_comment": {
+        "description": "If set, only list subnets with the given comment.",
+        "type": "string",
+        "example": "example%20comment"
+      },
+      "tunnel_subnet_query_name": {
+        "description": "If set, only list subnets with the given name",
+        "type": "string",
+        "example": "IPv4%20Cloudflare%20Source%20IPs"
+      },
+      "tunnel_hostname_route_response_single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_hostname_route"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_hostname_route": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/tunnel_hostname_comment"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "hostname": {
+            "$ref": "#/components/schemas/tunnel_hostname"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_hostname_route_id"
+          },
+          "tun_type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tunnel_tunnel_type"
+              },
+              {
+                "enum": [
+                  "cfd_tunnel",
+                  "warp_connector"
+                ],
+                "type": "string"
+              }
+            ]
+          },
+          "tunnel_id": {
+            "$ref": "#/components/schemas/tunnel_tunnel_id-3"
+          },
+          "tunnel_name": {
+            "$ref": "#/components/schemas/tunnel_tunnel_name-2"
+          }
+        }
+      },
+      "tunnel_tunnel_name-2": {
+        "description": "A user-friendly name for a tunnel.",
+        "type": "string",
+        "example": "api-tunnel"
+      },
+      "tunnel_tunnel_id-3": {
+        "description": "UUID of the tunnel.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "maxLength": 36,
+        "x-auditable": true
+      },
+      "tunnel_tunnel_type": {
+        "description": "The type of tunnel.",
+        "type": "string",
+        "example": "cfd_tunnel",
+        "enum": [
+          "cfd_tunnel",
+          "warp_connector",
+          "warp",
+          "magic",
+          "ip_sec",
+          "gre",
+          "cni"
+        ],
+        "x-auditable": true
+      },
+      "tunnel_hostname_route_id": {
+        "description": "The hostname route ID.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "x-auditable": true
+      },
+      "tunnel_hostname": {
+        "description": "The hostname of the route.",
+        "type": "string",
+        "example": "office-1.local",
+        "x-auditable": true
+      },
+      "tunnel_hostname_comment": {
+        "description": "An optional description of the hostname route.",
+        "type": "string",
+        "example": "example comment",
+        "x-auditable": true
+      },
+      "tunnel_hostname_route_response_collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_hostname_route"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_hostname_query_comment": {
+        "description": "If set, only list hostname routes with the given comment.",
+        "type": "string",
+        "example": "example%20comment"
+      },
+      "tunnel_tunnel_response_token": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_tunnel_token"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_tunnel_token": {
+        "description": "The Tunnel Token is used as a mechanism to authenticate the operation of a tunnel.",
+        "type": "string",
+        "example": "eyJhIjoiNWFiNGU5Z...",
+        "readOnly": true,
+        "x-sensitive": true
+      },
+      "tunnel_tunnel_id": {
+        "description": "UUID of the tunnel.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "maxLength": 36,
+        "readOnly": true,
+        "x-auditable": true
+      },
+      "tunnel_empty_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "object",
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_client_id_input": {
+        "description": "UUID of the Cloudflare Tunnel connector.",
+        "type": "string",
+        "format": "uuid",
+        "example": "1bedc50d-42b3-473c-b108-ff3d10c0d925",
+        "maxLength": 36,
+        "x-auditable": true
+      },
+      "tunnel_tunnel_warp_connector_client_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_client"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_tunnel_warp_connector_client": {
+        "description": "A WARP Connector client that maintains a connection to a Cloudflare data center.",
+        "type": "object",
+        "properties": {
+          "arch": {
+            "$ref": "#/components/schemas/tunnel_arch"
+          },
+          "conns": {
+            "$ref": "#/components/schemas/tunnel_warp_connector_connections"
+          },
+          "features": {
+            "$ref": "#/components/schemas/tunnel_features"
+          },
+          "ha_status": {
+            "$ref": "#/components/schemas/tunnel_ha_status"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_client_id"
+          },
+          "run_at": {
+            "$ref": "#/components/schemas/tunnel_run_at"
+          },
+          "version": {
+            "$ref": "#/components/schemas/tunnel_version"
+          }
+        }
+      },
+      "tunnel_version": {
+        "description": "The cloudflared version used to establish this connection.",
+        "type": "string",
+        "example": "2022.7.1"
+      },
+      "tunnel_run_at": {
+        "description": "Timestamp of when the tunnel connection was started.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2009-11-10T23:00:00Z"
+      },
+      "tunnel_client_id": {
+        "description": "UUID of the Cloudflare Tunnel connector.",
+        "type": "string",
+        "format": "uuid",
+        "example": "1bedc50d-42b3-473c-b108-ff3d10c0d925",
+        "maxLength": 36,
+        "readOnly": true,
+        "x-auditable": true
+      },
+      "tunnel_ha_status": {
+        "description": "The HA status of a WARP Connector client.",
+        "type": "string",
+        "enum": [
+          "offline",
+          "passive",
+          "active"
+        ],
+        "x-auditable": true
+      },
+      "tunnel_features": {
+        "description": "Features enabled for the Cloudflare Tunnel.",
+        "type": "array",
+        "items": {
+          "example": "ha-origin",
+          "type": "string"
+        }
+      },
+      "tunnel_warp_connector_connections": {
+        "description": "The WARP Connector Tunnel connections between your origin and Cloudflare's edge.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/tunnel_schemas-warp-connector-connection"
+        }
+      },
+      "tunnel_schemas-warp-connector-connection": {
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/tunnel_client_id"
+          },
+          "client_version": {
+            "$ref": "#/components/schemas/tunnel_version"
+          },
+          "colo_name": {
+            "$ref": "#/components/schemas/tunnel_colo_name"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_connection_id"
+          },
+          "opened_at": {
+            "description": "Timestamp of when the connection was established.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2021-01-25T18:22:34.317854Z"
+          },
+          "origin_ip": {
+            "description": "The public IP address of the host running WARP Connector.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tunnel_ip"
+              }
+            ]
+          }
+        }
+      },
+      "tunnel_ip": {
+        "type": "string",
+        "example": "10.1.0.137"
+      },
+      "tunnel_connection_id": {
+        "description": "UUID of the Cloudflare Tunnel connection.",
+        "type": "string",
+        "format": "uuid",
+        "example": "1bedc50d-42b3-473c-b108-ff3d10c0d925",
+        "maxLength": 36,
+        "readOnly": true,
+        "x-auditable": true
+      },
+      "tunnel_colo_name": {
+        "description": "The Cloudflare data center used for this connection.",
+        "type": "string",
+        "example": "DFW"
+      },
+      "tunnel_arch": {
+        "description": "The cloudflared OS architecture used to establish this connection.",
+        "type": "string",
+        "example": "linux_amd64"
+      },
+      "tunnel_tunnel_warp_connector_connections_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_warp_connector_client"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_warp-connector-response-single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_warp_connector_tunnel"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_warp_connector_tunnel": {
+        "description": "A Warp Connector Tunnel that connects your origin to Cloudflare's edge.",
+        "type": "object",
+        "properties": {
+          "account_tag": {
+            "$ref": "#/components/schemas/tunnel_account_id"
+          },
+          "connections": {
+            "$ref": "#/components/schemas/tunnel_connections_deprecated"
+          },
+          "conns_active_at": {
+            "$ref": "#/components/schemas/tunnel_conns_active_at"
+          },
+          "conns_inactive_at": {
+            "$ref": "#/components/schemas/tunnel_conns_inactive_at"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_tunnel_id"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/tunnel_metadata"
+          },
+          "name": {
+            "$ref": "#/components/schemas/tunnel_tunnel_name"
+          },
+          "status": {
+            "$ref": "#/components/schemas/tunnel_status"
+          },
+          "tun_type": {
+            "$ref": "#/components/schemas/tunnel_tunnel_type"
+          }
+        }
+      },
+      "tunnel_status": {
+        "description": "The status of the tunnel. Valid values are `inactive` (tunnel has never been run), `degraded` (tunnel is active and able to serve traffic but in an unhealthy state), `healthy` (tunnel is active and able to serve traffic), or `down` (tunnel can not serve traffic as it has no connections to the Cloudflare Edge).",
+        "type": "string",
+        "example": "healthy",
+        "enum": [
+          "inactive",
+          "degraded",
+          "healthy",
+          "down"
+        ]
+      },
+      "tunnel_tunnel_name": {
+        "description": "A user-friendly name for a tunnel.",
+        "type": "string",
+        "example": "blog"
+      },
+      "tunnel_metadata": {
+        "description": "Metadata associated with the tunnel.",
+        "type": "object",
+        "example": {}
+      },
+      "tunnel_conns_inactive_at": {
+        "description": "Timestamp of when the tunnel became inactive (no connections to Cloudflare's edge). If `null`, the tunnel is active.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2009-11-10T23:00:00Z"
+      },
+      "tunnel_conns_active_at": {
+        "description": "Timestamp of when the tunnel established at least one connection to Cloudflare's edge. If `null`, the tunnel is inactive.",
+        "type": "string",
+        "format": "date-time",
+        "example": "2009-11-10T23:00:00Z"
+      },
+      "tunnel_connections_deprecated": {
+        "description": "The Cloudflare Tunnel connections between your origin and Cloudflare's edge.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/tunnel_schemas-connection"
+        },
+        "deprecated": true,
+        "x-stainless-deprecation-message": "This field will start returning an empty array. To fetch the connections of a given tunnel, please use the dedicated endpoint `/accounts/{account_id}/{tunnel_type}/{tunnel_id}/connections`"
+      },
+      "tunnel_schemas-connection": {
+        "properties": {
+          "client_id": {
+            "$ref": "#/components/schemas/tunnel_client_id"
+          },
+          "client_version": {
+            "$ref": "#/components/schemas/tunnel_version"
+          },
+          "colo_name": {
+            "$ref": "#/components/schemas/tunnel_colo_name"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_connection_id"
+          },
+          "is_pending_reconnect": {
+            "$ref": "#/components/schemas/tunnel_is_pending_reconnect"
+          },
+          "opened_at": {
+            "description": "Timestamp of when the connection was established.",
+            "type": "string",
+            "format": "date-time",
+            "example": "2021-01-25T18:22:34.317854Z"
+          },
+          "origin_ip": {
+            "description": "The public IP address of the host running cloudflared.",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/tunnel_ip"
+              }
+            ]
+          },
+          "uuid": {
+            "$ref": "#/components/schemas/tunnel_connection_id"
+          }
+        }
+      },
+      "tunnel_is_pending_reconnect": {
+        "description": "Cloudflare continues to track connections for several minutes after they disconnect. This is an optimization to improve latency and reliability of reconnecting.  If `true`, the connection has disconnected but is still being tracked. If `false`, the connection is actively serving traffic.",
+        "type": "boolean",
+        "example": false,
+        "deprecated": true,
+        "x-fern-ignore": true,
+        "x-stainless-deprecation-message": "This functionality has been removed. The is_pending_reconnect field will now always report false."
+      },
+      "tunnel_tunnel_secret": {
+        "description": "Sets the password required to run a locally-managed tunnel. Must be at least 32 bytes and encoded as a base64 string.",
+        "type": "string",
+        "example": "AQIDBAUGBwgBAgMEBQYHCAECAwQFBgcIAQIDBAUGBwg=",
+        "x-sensitive": true
+      },
+      "tunnel_warp-connector-response-collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_warp_connector_tunnel"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_tunnel-response-collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "$ref": "#/components/schemas/tunnel_cfd_tunnel"
+                    },
+                    {
+                      "$ref": "#/components/schemas/tunnel_warp_connector_tunnel"
+                    }
+                  ]
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_cfd_tunnel": {
+        "description": "A Cloudflare Tunnel that connects your origin to Cloudflare's edge.",
+        "type": "object",
+        "properties": {
+          "account_tag": {
+            "$ref": "#/components/schemas/tunnel_account_id"
+          },
+          "config_src": {
+            "$ref": "#/components/schemas/tunnel_config_src"
+          },
+          "connections": {
+            "$ref": "#/components/schemas/tunnel_connections_deprecated"
+          },
+          "conns_active_at": {
+            "$ref": "#/components/schemas/tunnel_conns_active_at"
+          },
+          "conns_inactive_at": {
+            "$ref": "#/components/schemas/tunnel_conns_inactive_at"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_tunnel_id"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/tunnel_metadata"
+          },
+          "name": {
+            "$ref": "#/components/schemas/tunnel_tunnel_name"
+          },
+          "remote_config": {
+            "$ref": "#/components/schemas/tunnel_remote_config"
+          },
+          "status": {
+            "$ref": "#/components/schemas/tunnel_status"
+          },
+          "tun_type": {
+            "$ref": "#/components/schemas/tunnel_tunnel_type"
+          }
+        }
+      },
+      "tunnel_remote_config": {
+        "description": "If `true`, the tunnel can be configured remotely from the Zero Trust dashboard. If `false`, the tunnel must be configured locally on the origin machine.",
+        "type": "boolean",
+        "example": true,
+        "deprecated": true,
+        "x-auditable": true,
+        "x-stainless-deprecation-message": "Use the config_src field instead.",
+        "x-stainless-ignore": true
+      },
+      "tunnel_config_src": {
+        "description": "Indicates if this is a locally or remotely configured tunnel. If `local`, manage the tunnel using a YAML file on the origin machine. If `cloudflare`, manage the tunnel on the Zero Trust dashboard.",
+        "type": "string",
+        "example": "cloudflare",
+        "default": "local",
+        "enum": [
+          "local",
+          "cloudflare"
+        ]
+      },
+      "tunnel_tunnel_types": {
+        "description": "The types of tunnels to filter by, separated by commas.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/tunnel_tunnel_type"
+        },
+        "example": "cfd_tunnel,warp_connector"
+      },
+      "tunnel_vnet_response_single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_virtual-network"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_virtual-network": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_comment"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_id"
+          },
+          "is_default_network": {
+            "$ref": "#/components/schemas/tunnel_is_default_network"
+          },
+          "name": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_name"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "is_default_network",
+          "comment",
+          "created_at"
+        ]
+      },
+      "tunnel_virtual_network_name": {
+        "description": "A user-friendly name for the virtual network.",
+        "type": "string",
+        "example": "us-east-1-vpc",
+        "maxLength": 256,
+        "x-auditable": true
+      },
+      "tunnel_is_default_network": {
+        "description": "If `true`, this virtual network is the default for the account.",
+        "type": "boolean",
+        "example": true,
+        "x-auditable": true,
+        "x-stainless-terraform-configurability": "computed_optional"
+      },
+      "tunnel_virtual_network_id": {
+        "description": "UUID of the virtual network.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "x-auditable": true
+      },
+      "tunnel_virtual_network_comment": {
+        "description": "Optional remark describing the virtual network.",
+        "type": "string",
+        "example": "Staging VPC for data science",
+        "default": "",
+        "maxLength": 256,
+        "x-auditable": true
+      },
+      "tunnel_is_default_network_optional": {
+        "description": "If `true`, this virtual network is the default for the account.",
+        "type": "boolean",
+        "example": false,
+        "default": false,
+        "x-auditable": true,
+        "x-stainless-terraform-configurability": "computed_optional"
+      },
+      "tunnel_vnet_response_collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_virtual-network"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_route_response_single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_route"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_route": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/tunnel_route_comment"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_route_id"
+          },
+          "network": {
+            "$ref": "#/components/schemas/tunnel_ip_network"
+          },
+          "tunnel_id": {
+            "$ref": "#/components/schemas/tunnel_tunnel_id"
+          },
+          "virtual_network_id": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_id"
+          }
+        }
+      },
+      "tunnel_ip_network": {
+        "description": "The private IPv4 or IPv6 range connected by the route, in CIDR notation.",
+        "type": "string",
+        "example": "172.16.0.0/16",
+        "x-auditable": true
+      },
+      "tunnel_route_id": {
+        "description": "UUID of the route.",
+        "type": "string",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "maxLength": 36,
+        "readOnly": true
+      },
+      "tunnel_route_comment": {
+        "description": "Optional remark describing the route.",
+        "type": "string",
+        "example": "Example comment for this route.",
+        "default": "",
+        "maxLength": 100,
+        "x-auditable": true
+      },
+      "tunnel_virtual_network_id_computed_optional": {
+        "description": "UUID of the virtual network.",
+        "type": "string",
+        "format": "uuid",
+        "example": "f70ff985-a4ef-4643-bbbc-4a0ed4fc8415",
+        "x-auditable": true,
+        "x-stainless-terraform-configurability": "computed_optional"
+      },
+      "tunnel_teamnet_response_single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_teamnet"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_teamnet": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "$ref": "#/components/schemas/tunnel_route_comment"
+          },
+          "created_at": {
+            "$ref": "#/components/schemas/tunnel_created_at"
+          },
+          "deleted_at": {
+            "$ref": "#/components/schemas/tunnel_deleted_at"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_route_id"
+          },
+          "network": {
+            "$ref": "#/components/schemas/tunnel_ip_network"
+          },
+          "tun_type": {
+            "$ref": "#/components/schemas/tunnel_tunnel_type"
+          },
+          "tunnel_id": {
+            "$ref": "#/components/schemas/tunnel_tunnel_id"
+          },
+          "tunnel_name": {
+            "$ref": "#/components/schemas/tunnel_tunnel_name"
+          },
+          "virtual_network_id": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_id_computed_optional"
+          },
+          "virtual_network_name": {
+            "$ref": "#/components/schemas/tunnel_virtual_network_name"
+          }
+        }
+      },
+      "tunnel_teamnet_response_collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_teamnet"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_management-resources": {
+        "description": "Management resources the token will have access to.",
+        "type": "string",
+        "example": "logs",
+        "enum": [
+          "logs"
+        ]
+      },
+      "tunnel_tunnel_client_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_tunnel_client"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_tunnel_client": {
+        "description": "A client (typically cloudflared) that maintains connections to a Cloudflare data center.",
+        "type": "object",
+        "properties": {
+          "arch": {
+            "$ref": "#/components/schemas/tunnel_arch"
+          },
+          "config_version": {
+            "$ref": "#/components/schemas/tunnel_config_version"
+          },
+          "conns": {
+            "$ref": "#/components/schemas/tunnel_connections"
+          },
+          "features": {
+            "$ref": "#/components/schemas/tunnel_features"
+          },
+          "id": {
+            "$ref": "#/components/schemas/tunnel_connection_id"
+          },
+          "run_at": {
+            "$ref": "#/components/schemas/tunnel_run_at"
+          },
+          "version": {
+            "$ref": "#/components/schemas/tunnel_version"
+          }
+        }
+      },
+      "tunnel_connections": {
+        "description": "The Cloudflare Tunnel connections between your origin and Cloudflare's edge.",
+        "type": "array",
+        "items": {
+          "$ref": "#/components/schemas/tunnel_schemas-connection"
+        }
+      },
+      "tunnel_config_version": {
+        "description": "The version of the remote tunnel configuration. Used internally to sync cloudflared with the Zero Trust dashboard.",
+        "type": "integer"
+      },
+      "tunnel_tunnel_connections_response": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_tunnel_client"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_cfd-tunnel-response-single": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-common"
+          },
+          {
+            "properties": {
+              "result": {
+                "$ref": "#/components/schemas/tunnel_cfd_tunnel"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
+      "tunnel_cfd-tunnel-response-collection": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/tunnel_api-response-collection"
+          },
+          {
+            "properties": {
+              "result": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/tunnel_cfd_tunnel"
+                }
+              }
+            },
+            "type": "object"
+          }
+        ]
+      }
+    }
+  },
+  "x-fixture-source": {
+    "url": "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json",
+    "commit": "f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba",
+    "sha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+    "projection": "Complete operation objects whose JSON 4XX allOf references tunnel_api-response-common-failure, plus their complete local schema-reference closure. No operation or schema fields are rewritten."
+  }
+}

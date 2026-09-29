@@ -1,0 +1,353 @@
+{
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "namedComposedSchemas": [
+    {
+      "schemaId": "cloudflare-pipelines_SourceField",
+      "alias": false
+    },
+    {
+      "schemaId": "dlp_EntryUpdate",
+      "alias": false
+    },
+    {
+      "schemaId": "dlp_EntryWithSharedProfiles",
+      "alias": false
+    },
+    {
+      "schemaId": "dlp_EntryWithUploadStatus",
+      "alias": false
+    },
+    {
+      "schemaId": "dlp_NewDatasetColumn",
+      "alias": false
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-patch",
+      "alias": false
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-post",
+      "alias": true
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-put",
+      "alias": false
+    },
+    {
+      "schemaId": "dns-records_dns-record-response",
+      "alias": false
+    },
+    {
+      "schemaId": "dns-records_dns-record-scan-batch-accept",
+      "alias": true
+    },
+    {
+      "schemaId": "hyperdrive_hyperdrive-origin",
+      "alias": false
+    },
+    {
+      "schemaId": "magic_app_config",
+      "alias": false
+    },
+    {
+      "schemaId": "magic_app_config_add_single_request",
+      "alias": false
+    },
+    {
+      "schemaId": "mq_queue-message",
+      "alias": false
+    },
+    {
+      "schemaId": "rulesets_ResponseRule",
+      "alias": false
+    },
+    {
+      "schemaId": "rulesets_RewriteUri",
+      "alias": false
+    },
+    {
+      "schemaId": "workers-kv_list_metadata",
+      "alias": true
+    },
+    {
+      "schemaId": "workers-kv_metadata",
+      "alias": true
+    },
+    {
+      "schemaId": "workers_placement_info",
+      "alias": false
+    }
+  ],
+  "preserved": [
+    {
+      "schemaId": "cloudflare-pipelines_SourceField",
+      "sourcePointer": "#/components/schemas/cloudflare-pipelines_SourceField",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryUpdate",
+      "sourcePointer": "#/components/schemas/dlp_EntryUpdate",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryWithSharedProfiles",
+      "sourcePointer": "#/components/schemas/dlp_EntryWithSharedProfiles",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_EntryWithUploadStatus",
+      "sourcePointer": "#/components/schemas/dlp_EntryWithUploadStatus",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dlp_NewDatasetColumn",
+      "sourcePointer": "#/components/schemas/dlp_NewDatasetColumn",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-patch",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-batch-patch",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-batch-put",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-batch-put",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "dns-records_dns-record-response",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-response",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "hyperdrive_hyperdrive-origin",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-origin",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "magic_app_config",
+      "sourcePointer": "#/components/schemas/magic_app_config",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "magic_app_config_add_single_request",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "mq_queue-message",
+      "sourcePointer": "#/components/schemas/mq_queue-message",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "rulesets_ResponseRule",
+      "sourcePointer": "#/components/schemas/rulesets_ResponseRule",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "rulesets_RewriteUri",
+      "sourcePointer": "#/components/schemas/rulesets_RewriteUri",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "workers_placement_info",
+      "sourcePointer": "#/components/schemas/workers_placement_info",
+      "reason": "The allOf intersection contains a union operand; flattening Properties omits that operand payload. Preserve the whole JSON value without asserting intersection validity or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_203ef5cdeb33b7d35e73eb82",
+      "sourcePointer": "#/components/requestBodies/rulesets_Rule/content/application~1json/schema",
+      "operations": [
+        {
+          "path": "/accounts/{account_id}/rulesets/{ruleset_id}/rules",
+          "method": "post",
+          "operationId": "createAccountRulesetRule"
+        },
+        {
+          "path": "/accounts/{account_id}/rulesets/{ruleset_id}/rules/{rule_id}",
+          "method": "patch",
+          "operationId": "updateAccountRulesetRule"
+        },
+        {
+          "path": "/zones/{zone_id}/rulesets/{ruleset_id}/rules",
+          "method": "post",
+          "operationId": "createZoneRulesetRule"
+        },
+        {
+          "path": "/zones/{zone_id}/rulesets/{ruleset_id}/rules/{rule_id}",
+          "method": "patch",
+          "operationId": "updateZoneRulesetRule"
+        }
+      ],
+      "reason": "A ruleset union payload and its positional refinement share one JSON object; retain both in a canonical composed-union wrapper shared by every operation referencing this request body."
+    },
+    {
+      "schemaId": "InlineUnion_f6c4bddb855234d6b220075b",
+      "sourcePointer": "#/components/schemas/workers_secret-patch-request/properties/secrets/additionalProperties",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_ac319c6c09546720684ce158",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1audit_logs/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_697e528a359593e7de740da9",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1dlp~1datasets~1{dataset_id}~1versions~1{version}/post/requestBody/content/application~1json/schema/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_0888091a32d176e4a8e88c6c",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1images~1v1~1{image_id}~1blob/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_0a644ca808edbb583c912a52",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1shared~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_5c74324a382ef03c3c9df29f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1keys/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_dfb3e0073874bd8a1b3cb962",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1live-tail/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_64fffcd4e067c320d22043e2",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_42a7b3cf9f91f6e4f44203b4",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1values/post/requestBody/content/application~1json/schema/properties/filters/items",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_a9e731e8fc9c178bfa562499",
+      "sourcePointer": "#/paths/~1user~1audit_logs/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_4755ea2cdcb74dad3789bc1b",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_2032bf50969e70b5120a4811",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/get/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_e57365e42052518078507b55",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/patch/responses/200/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    },
+    {
+      "schemaId": "InlineUnion_8ee6565c74e29c6aa9fee60c",
+      "sourcePointer": "#/paths/~1zones~1{zone_id}~1firewall~1waf~1packages~1{package_id}/patch/responses/4XX/content/application~1json/schema",
+      "reason": "The allOf intersection contains a union operand; collecting only record properties loses an alternative payload. Preserve the complete JSON value, without asserting intersection constraints or union membership."
+    }
+  ],
+  "coveredDescendants": [
+    {
+      "schemaId": "InlineUnion_49065d79d39306206652f437",
+      "sourcePointer": "#/components/schemas/dlp_NewDatasetColumn/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "dlp_NewDatasetColumn"
+    },
+    {
+      "schemaId": "InlineUnion_10fa6a4281752c6c6fdbc582",
+      "sourcePointer": "#/components/schemas/dns-records_dns-record-response/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "dns-records_dns-record-response"
+    },
+    {
+      "schemaId": "InlineUnion_6bff3bc9b634cbc14507f907",
+      "sourcePointer": "#/components/schemas/hyperdrive_hyperdrive-origin/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "hyperdrive_hyperdrive-origin"
+    },
+    {
+      "schemaId": "InlineUnion_8257c2284311cd17eb643ff2",
+      "sourcePointer": "#/components/schemas/magic_app_config/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config"
+    },
+    {
+      "schemaId": "InlineUnion_13c79b218cc79d866c998ac1",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config_add_single_request"
+    },
+    {
+      "schemaId": "InlineUnion_80e7b8c9e81e146d677cd7c3",
+      "sourcePointer": "#/components/schemas/magic_app_config_add_single_request/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "magic_app_config_add_single_request"
+    },
+    {
+      "schemaId": "InlineUnion_d6ffda055ad9bd2b358ed6a7",
+      "sourcePointer": "#/components/schemas/mq_queue-message/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "mq_queue-message"
+    },
+    {
+      "schemaId": "InlineUnion_3bfb75c29bffe79164a2a0de",
+      "sourcePointer": "#/components/schemas/rulesets_RewriteUri/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "rulesets_RewriteUri"
+    },
+    {
+      "schemaId": "InlineUnion_79bb36529ae0405b957cc225",
+      "sourcePointer": "#/components/schemas/workers_placement_info/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "workers_placement_info"
+    },
+    {
+      "schemaId": "InlineUnion_3158c3f854dd6f7f1b104e1c",
+      "sourcePointer": "#/components/schemas/rulesets_ServeErrorRule/allOf/1/properties/action_parameters/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedByExistingJsonField": "#/components/schemas/rulesets_ServeErrorRule/allOf/1/properties/action_parameters"
+    },
+    {
+      "schemaId": "InlineUnion_f4a4c3fa8f32f9eaba527fcc",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1dlp~1datasets~1{dataset_id}~1versions~1{version}/post/requestBody/content/application~1json/schema/items/allOf/0",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_697e528a359593e7de740da9"
+    },
+    {
+      "schemaId": "InlineUnion_02869d7abcbe1da216b651ec",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1shared~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_0a644ca808edbb583c912a52"
+    },
+    {
+      "schemaId": "InlineUnion_e361cff26955c1060b7107d9",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1keys/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_5c74324a382ef03c3c9df29f"
+    },
+    {
+      "schemaId": "InlineUnion_501ccace0dab734ab0f1ae0a",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1live-tail/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_dfb3e0073874bd8a1b3cb962"
+    },
+    {
+      "schemaId": "InlineUnion_00cd698986ebcab01726580f",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1query/post/requestBody/content/application~1json/schema/properties/parameters/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_64fffcd4e067c320d22043e2"
+    },
+    {
+      "schemaId": "InlineUnion_ad2826aba01ffa133d19be56",
+      "sourcePointer": "#/paths/~1accounts~1{account_id}~1workers~1observability~1telemetry~1values/post/requestBody/content/application~1json/schema/properties/filters/items/allOf/1",
+      "reason": "The promoted source union has no established disjoint wire dispatch; retain its JSON payload without selecting or validating an alternative.",
+      "preservedBy": "InlineUnion_42a7b3cf9f91f6e4f44203b4"
+    }
+  ]
+}

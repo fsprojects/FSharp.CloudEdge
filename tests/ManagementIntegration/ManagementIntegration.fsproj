@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <HawaiiBindingsRoot Condition="'$(HawaiiBindingsRoot)' == ''">$(MSBuildThisFileDirectory)../..</HawaiiBindingsRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="$(HawaiiBindingsRoot)/src/Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+    <ProjectReference Include="$(HawaiiBindingsRoot)/src/Management/FSharp.CloudEdge.Management.Networking/FSharp.CloudEdge.Management.Networking.fsproj" />
+    <ProjectReference Include="$(HawaiiBindingsRoot)/src/Management/FSharp.CloudEdge.Management.Security/FSharp.CloudEdge.Management.Security.fsproj" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+</Project>

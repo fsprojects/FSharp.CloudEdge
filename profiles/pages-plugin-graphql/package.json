@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-graphql",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-graphql": "1.0.4",
+    "graphql": "16.14.2"
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "asOf": "2026-09-06",
+  "evidenceSnapshots": [
+    {
+      "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/6fa8f72fbcacefb88d988f4673ca1e6e899fa4ea/src/content/release-notes/api-deprecations.yaml",
+      "retrievedAt": "2026-09-06",
+      "sha256": "42f7169a701f51928e0361ad2e943c4a8d8fde3bff6fd1586ac5837311c89a88"
+    }
+  ],
+  "reviews": [
+    {
+      "subject": "Legacy Access Bookmarks, User Organizations, and Zone Analytics",
+      "decision": "retain",
+      "reason": "The schema eol dates overlap older deprecation notices; those dates alone do not establish endpoint withdrawal. Keep the deprecated APIs until stronger evidence supports exclusion.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "Legacy Zero Trust Devices",
+      "decision": "retain-pending-scope-review",
+      "reason": "The register lists an elapsed EOL, but both the notice and pinned schema qualify the restriction by account multi-user mode. Preserve the five legacy operations until unconditional retirement is established.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "Radar fixed-dimension summaries and timeseries groups",
+      "decision": "retain-pending-canonical-alias-design",
+      "reason": "The notice retires SDK forms while explicitly preserving direct API calls. These routes are not classified as retired services. A future canonical client may expose them through the parameterized operation after equivalence checks.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "Legacy Registrar, Workers KV, route CIDR forms, DNS analytics, zone-settings batch, origin cloud regions v1",
+      "decision": "retain-future-retirements",
+      "reason": "The announced endpoint withdrawal dates follow this review. Review again against updated publisher notices; do not use the machine clock to change a pinned generation.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "Foundation DNS flag, Gateway audit_ssh action, DNS record type updates, Radar magnitude, Mirage rule settings",
+      "decision": "retain-containing-operations",
+      "reason": "These notices retire fields or behaviors. The remaining operation surface must remain callable; schema corrections require a separate field-level compatibility review.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/"
+      ]
+    },
+    {
+      "subject": "AMP/SXG setting, dedicated Mirage settings, legacy Privacy Pass setting",
+      "decision": "already-absent-from-pinned-paths",
+      "reason": "The dedicated operations named by retirement notices are absent from this pinned schema. Do not fabricate exclusions or remove broader settings and rules APIs.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "SDK-ignore and hidden flags; /live and /ready",
+      "decision": "retain-unless-individually-reviewed",
+      "reason": "Ignored and hidden operations include current customer APIs. The two health routes lack the explicit internal-only description used for the three reviewed exposure exclusions.",
+      "sources": [
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    },
+    {
+      "subject": "Vectorize v1, Firewall Rules/Filters, WAF packages, legacy rate limits",
+      "decision": "retain-deprecated",
+      "reason": "Replacement guidance does not by itself establish endpoint retirement. Preserve the declared source surface and deprecation metadata.",
+      "sources": [
+        "https://developers.cloudflare.com/fundamentals/api/reference/deprecations/",
+        "https://raw.githubusercontent.com/cloudflare/api-schemas/f2df0ca75c0fec9047e91a34c20dd666c2dcd1ba/openapi.json"
+      ]
+    }
+  ]
+}

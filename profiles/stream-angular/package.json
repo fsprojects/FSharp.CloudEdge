@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-stream-angular",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/stream-angular": "1.0.1"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "fsharp-cloudedge-input-ai-gateway",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/ai-gateway": "0.0.6"
+  }
+}

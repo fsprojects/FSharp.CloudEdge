@@ -1,0 +1,12 @@
+{
+  "name": "fsharp-cloudedge-input-realtimekit-recording-sdk",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/realtimekit-callstats": "8.0.0",
+    "@cloudflare/realtimekit-recording-sdk": "0.0.3",
+    "@cloudflare/realtimekit-utils": "1.0.0",
+    "@types/node": "16.18.126"
+  }
+}

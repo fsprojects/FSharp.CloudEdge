@@ -1,0 +1,12 @@
+{
+  "name": "fsharp-cloudedge-input-tanstack-ai",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/tanstack-ai": "0.2.1",
+    "@cloudflare/workers-types": "5.20260906.1",
+    "@modelcontextprotocol/sdk": "1.30.0",
+    "@types/node": "26.4.1"
+  }
+}

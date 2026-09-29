@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "fable": {
+      "version": "5.13.0",
+      "commands": [
+        "fable"
+      ],
+      "rollForward": false
+    },
+    "hawaii.unofficial": {
+      "version": "1.0.0-local.8b77c5534f22eccbbb0f",
+      "commands": [
+        "hawaii-unofficial"
+      ],
+      "rollForward": false
+    },
+    "xantham": {
+      "version": "0.1.0-local.8e4c7b11b0ac90236c25",
+      "commands": [
+        "xantham"
+      ],
+      "rollForward": false
+    }
+  }
+}

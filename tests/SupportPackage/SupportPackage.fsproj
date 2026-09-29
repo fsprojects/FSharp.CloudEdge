@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <XanthamFableCoreVersion Condition="'$(XanthamFableCoreVersion)' == ''">0.1.0-alpha.1</XanthamFableCoreVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Smoke.fs" />
+    <Compile Include="UpstreamHelpers.fs" />
+    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Xantham.Fable.Core" Version="$(XanthamFableCoreVersion)" />
+  </ItemGroup>
+</Project>

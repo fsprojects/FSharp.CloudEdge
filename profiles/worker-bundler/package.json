@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-worker-bundler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/worker-bundler": "0.2.3",
+    "@cloudflare/workers-types": "5.20260906.1"
+  }
+}

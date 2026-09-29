@@ -1,0 +1,11 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-sentry",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-sentry": "1.1.4",
+    "@cloudflare/workers-types": "5.20260906.1",
+    "toucan-js": "3.4.0"
+  }
+}

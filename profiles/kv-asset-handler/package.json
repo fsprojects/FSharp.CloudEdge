@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-kv-asset-handler",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/kv-asset-handler": "0.5.0",
+    "@cloudflare/workers-types": "5.20260906.1"
+  }
+}

@@ -1,0 +1,993 @@
+{
+  "schemaSha256": "c575728584bc32600e9e2bf231e0147d894abe9ad92dd604af50d349afa88e9d",
+  "taxonomySha256": "34fbf7a2516efd74954f9ffdaa016b434bd960b34e1b5024361bc54a5915e145",
+  "totalOperations": 3448,
+  "unclassifiedOperations": [],
+  "ownership": [
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "agent-memory",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "ai",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "ai-audit",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "ai-gateway",
+      "operationCount": 66
+    },
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "ai-search",
+      "operationCount": 49
+    },
+    {
+      "area": "Management",
+      "purpose": "AI",
+      "family": "autorag",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Browser",
+      "family": "browser-extension",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "browser-rendering",
+      "operationCount": 28
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "builds",
+      "operationCount": 31
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "containers",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "flagship",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "pages",
+      "operationCount": 26
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "pipelines",
+      "operationCount": 19
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "queues",
+      "operationCount": 23
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "snippets",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "triggers",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "workers",
+      "operationCount": 114
+    },
+    {
+      "area": "Management",
+      "purpose": "Compute",
+      "family": "workflows",
+      "operationCount": 23
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "cache",
+      "operationCount": 23
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "environments",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "pagerules",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "pay-per-crawl",
+      "operationCount": 17
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "smart-shield",
+      "operationCount": 10
+    },
+    {
+      "area": "Management",
+      "purpose": "ContentDelivery",
+      "family": "url-normalization",
+      "operationCount": 3
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "calls",
+      "operationCount": 10
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "images",
+      "operationCount": 44
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "media",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "moq",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "realtime",
+      "operationCount": 61
+    },
+    {
+      "area": "Management",
+      "purpose": "Media",
+      "family": "stream",
+      "operationCount": 50
+    },
+    {
+      "area": "Management",
+      "purpose": "Messaging",
+      "family": "alerting",
+      "operationCount": 25
+    },
+    {
+      "area": "Management",
+      "purpose": "Messaging",
+      "family": "email",
+      "operationCount": 64
+    },
+    {
+      "area": "Management",
+      "purpose": "Messaging",
+      "family": "event-notifications",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Messaging",
+      "family": "event-subscriptions",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "addressing",
+      "operationCount": 41
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "argo",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "cache",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "cfd-tunnel",
+      "operationCount": 12
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "cloud-connector",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "cni",
+      "operationCount": 16
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "connectivity",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "custom-ns",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "custom-pages",
+      "operationCount": 18
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "data-localization",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "dns-analytics",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "dns-firewall",
+      "operationCount": 9
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "dns-records",
+      "operationCount": 15
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "dns-settings",
+      "operationCount": 9
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "dnssec",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "healthchecks",
+      "operationCount": 9
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "hostnames",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "ips",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "load-balancers",
+      "operationCount": 42
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "magic",
+      "operationCount": 177
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "mnm",
+      "operationCount": 16
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "origin",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "secondary-dns",
+      "operationCount": 28
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "spectrum",
+      "operationCount": 9
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "teamnet",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "tunnels",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "waiting-rooms",
+      "operationCount": 24
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "warp-connector",
+      "operationCount": 11
+    },
+    {
+      "area": "Management",
+      "purpose": "Networking",
+      "family": "web3",
+      "operationCount": 12
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "analytics",
+      "operationCount": 10
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "analytics-engine",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "api-health",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "audit-logs",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "diagnostics",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "logpush",
+      "operationCount": 34
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "logs",
+      "operationCount": 29
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "radar",
+      "operationCount": 279
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "rate-limit-analytics",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "reporting",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "request-tracer",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "rum",
+      "operationCount": 13
+    },
+    {
+      "area": "Management",
+      "purpose": "Observability",
+      "family": "speed-api",
+      "operationCount": 10
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "abuse-reports",
+      "operationCount": 10
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "access",
+      "operationCount": 165
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "advanced-certificates",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "ai-security",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "api-gateway",
+      "operationCount": 44
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "bot-management",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "botnet-feed",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "brand-protection",
+      "operationCount": 43
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "certificate-authorities",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "certificates",
+      "operationCount": 4
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "challenges",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "client-certificates",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "cloudforce-one",
+      "operationCount": 231
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "content-upload-scan",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "ct",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "custom-certificates",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "custom-csrs",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "custom-hostnames",
+      "operationCount": 11
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "data-security",
+      "operationCount": 36
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "dcv-delegation",
+      "operationCount": 1
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "devices",
+      "operationCount": 70
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "dex",
+      "operationCount": 31
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "dlp",
+      "operationCount": 93
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "email-security",
+      "operationCount": 73
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "filters",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "firewall",
+      "operationCount": 42
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "fraud-detection",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "gateway",
+      "operationCount": 57
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "infrastructure",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "intel",
+      "operationCount": 39
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "keyless-certificates",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "leaked-credential-checks",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "managed-headers",
+      "operationCount": 3
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "mtls-certificates",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "oauth-clients",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "one",
+      "operationCount": 11
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "origin-tls-client-auth",
+      "operationCount": 13
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "page-shield",
+      "operationCount": 13
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "pcaps",
+      "operationCount": 9
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "precursor",
+      "operationCount": 2
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "rate-limits",
+      "operationCount": 5
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "rules",
+      "operationCount": 11
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "rulesets",
+      "operationCount": 32
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "schema-validation",
+      "operationCount": 15
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "scim",
+      "operationCount": 16
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "security-center",
+      "operationCount": 26
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "ssl",
+      "operationCount": 12
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "sso-connectors",
+      "operationCount": 6
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "token-validation",
+      "operationCount": 15
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "urlscanner",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "vuln-scanner",
+      "operationCount": 22
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "zerotrust",
+      "operationCount": 15
+    },
+    {
+      "area": "Management",
+      "purpose": "Security",
+      "family": "zt-risk-scoring",
+      "operationCount": 11
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "artifacts",
+      "operationCount": 17
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "d1",
+      "operationCount": 12
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "hyperdrive",
+      "operationCount": 8
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "r2",
+      "operationCount": 46
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "r2-catalog",
+      "operationCount": 13
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "resource-library",
+      "operationCount": 7
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "secrets-store",
+      "operationCount": 12
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "storage",
+      "operationCount": 14
+    },
+    {
+      "area": "Management",
+      "purpose": "Storage",
+      "family": "vectorize",
+      "operationCount": 24
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "accounts",
+      "operationCount": 7
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "billing",
+      "operationCount": 18
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "entitlements",
+      "operationCount": 2
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "iam",
+      "operationCount": 17
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "invoices",
+      "operationCount": 1
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "members",
+      "operationCount": 5
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "memberships",
+      "operationCount": 4
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "oauth",
+      "operationCount": 1
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "organizations",
+      "operationCount": 18
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "pay-bad-debt",
+      "operationCount": 1
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "pay-invoice",
+      "operationCount": 1
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "payment-methods",
+      "operationCount": 6
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "profile",
+      "operationCount": 2
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "receipts",
+      "operationCount": 1
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "registrar",
+      "operationCount": 13
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "registrar-sandbox",
+      "operationCount": 10
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "roles",
+      "operationCount": 2
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "settings",
+      "operationCount": 57
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "shares",
+      "operationCount": 20
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "subscription",
+      "operationCount": 4
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "subscriptions",
+      "operationCount": 13
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "tags",
+      "operationCount": 10
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "tenants",
+      "operationCount": 8
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "tokens",
+      "operationCount": 8
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "user",
+      "operationCount": 55
+    },
+    {
+      "area": "Tenancy",
+      "purpose": "Tenancy",
+      "family": "zones",
+      "operationCount": 16
+    }
+  ],
+  "note": "Family ownership accounts for the entire pinned schema. SDK eligibility, internal exposure and lifecycle are separate selection decisions; this report does not endorse internal routes for public use."
+}

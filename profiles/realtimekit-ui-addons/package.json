@@ -1,0 +1,14 @@
+{
+  "name": "fsharp-cloudedge-input-realtimekit-ui-addons",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/realtimekit-callstats": "8.0.0",
+    "@cloudflare/realtimekit-ui-addons": "0.1.0",
+    "@cloudflare/realtimekit-utils": "1.0.0",
+    "@stencil/core": "4.43.5",
+    "@stencil/store": "2.2.2",
+    "@types/node": "16.18.126"
+  }
+}

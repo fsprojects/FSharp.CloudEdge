@@ -1,0 +1,13 @@
+node_modules/
+**/bin/
+**/obj/
+**/__pycache__/
+
+# Reproducible generator reports and temporary output. Generated F# source stays reviewable.
+artifacts/
+
+# Fable test output; consumer source and test inputs stay reviewable.
+**/fable_modules/
+**/fable-out/
+tests/**/js/
+*.user

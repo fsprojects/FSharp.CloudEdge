@@ -1,0 +1,13 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-vercel-og",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-vercel-og": "0.1.2",
+    "@types/node": "18.19.130",
+    "@types/react": "18.3.31",
+    "@types/yoga-layout": "1.9.4",
+    "@vercel/og": "0.4.1"
+  }
+}

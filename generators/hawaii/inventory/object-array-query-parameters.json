@@ -1,0 +1,92 @@
+[
+  {
+    "path": "/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/logs",
+    "method": "delete",
+    "parameterIndex": 4,
+    "name": "filters",
+    "operationId": "aig-config-delete-gateway-logs",
+    "description": "",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/ai-gateway/gateways/{gateway_id}/logs",
+    "method": "get",
+    "parameterIndex": 7,
+    "name": "filters",
+    "operationId": "aig-config-list-gateway-logs",
+    "description": "",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/indicators/{indicator_id}/relationships",
+    "method": "get",
+    "parameterIndex": 3,
+    "name": "search",
+    "operationId": "get_IndicatorRelationshipsList",
+    "description": "JSON array of {field, op, value} filters, AND-combined. Fields: entityType (other-end type), type (relationship type), confidence (0\u2013100), metadata.<key>. Example: [{\"field\":\"type\",\"op\":\"equals\",\"value\":\"appears_in\"},{\"field\":\"confidence\",\"op\":\"gte\",\"value\":50}]",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/dataset/{dataset_id}/tags/{tag_uuid}/indicators",
+    "method": "get",
+    "parameterIndex": 7,
+    "name": "search",
+    "operationId": "get_DatasetTagIndicatorsList",
+    "description": "Structured search as a JSON array of {field, op, value} objects. Searchable fields: value, indicatorType. Multiple conditions are AND'd together. Max 10 conditions per request.",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/indicators",
+    "method": "get",
+    "parameterIndex": 4,
+    "name": "search",
+    "operationId": "get_IndicatorList",
+    "description": "Structured search as a JSON array of {field, op, value} objects. Searchable fields: value, indicatorType, uuid. Supports operators: equals, not, contains, startsWith, endsWith, gt, lt, gte, lte, like, in, find. Use the 'in' operator with an array value to bulk-check up to 100 indicators in a single request, e.g. search=[{\"field\":\"value\",\"op\":\"in\",\"value\":[\"evil.com\",\"bad.org\"]}]. Multiple conditions are AND'd together. Max 10 conditions per request.",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/indicators",
+    "method": "get",
+    "parameterIndex": 9,
+    "name": "tagSearch",
+    "operationId": "get_IndicatorList",
+    "description": "Structured tag-metadata filter as a JSON array of {field, op, value} objects. Operates against the per-dataset IndicatorTag mirror so you can find indicators by tag attributes (origin country, motive, sophistication, priority, etc.) without a separate Tags lookup. Common dashboard usage: drill from a country into indicators, e.g. tagSearch=[{\"field\":\"originCountryISO\",\"op\":\"in\",\"value\":[\"IR\",\"CN\"]}]. Country values may be passed as alpha-2, alpha-3, name, or alias (e.g. \"iran\"). Operators: equals, not, gt/gte/lt/lte (numeric only), contains/like/find/startsWith/endsWith (string only), in. AND-joined across entries; combined with `tags`, a matching tag must satisfy both. Max 10 entries per request, max 100 values per 'in'. Performance notes: `originCountryISO` uses its B-tree index for equals/not/in. `priority` uses its B-tree index for numeric comparisons. Other string columns (`actorCategory`, `motive`, etc.) are case-insensitive and unindexed; current catalog size makes this a non-issue. `endsWith` and `aliasGroupNames` contains/like are leading-wildcard scans and slow on large result sets. `aliasGroupNames` matches on the JSON-encoded text, so substrings can cross alias boundaries (\"apt28\" also matches \"apt280\" when both appear in the same tag's alias list).",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/tags",
+    "method": "get",
+    "parameterIndex": 5,
+    "name": "filters",
+    "operationId": "get_TagList",
+    "description": "Structured filters as a JSON array of {field, op, value} objects. Searchable fields: uuid, value, categoryName, description, dateOfDiscovery, tlp, confidence, actorCategory, motive, attributionOrganization, originCountryISO, aliases, externalReferences, opsecLevel, sophisticationLevel, activeDuration, priority, lastSeen, aliasGroupNames. Operators: equals, not, contains, startsWith, endsWith, gt, lt, gte, lte, like, in, find. Use 'in' for bulk OR within a single field, e.g. filters=[{\"field\":\"originCountryISO\",\"op\":\"in\",\"value\":[\"IR\",\"CN\"]}]. Multiple entries are AND-joined. Max 10 entries per request, max 100 values per 'in'. Per-field notes: `uuid` accepts only 'equals' and 'in' (other operators throw ValidationError) \u2014 matched against the canonical lowercase storage but callers may pass either case (the server lowercases before comparison); index-backed by the column's UNIQUE constraint and intended for batched UUID \u2192 tag resolution. `originCountryISO` uses its B-tree index for equals/not/in. `priority` uses its B-tree index for numeric comparisons. Other string columns (`actorCategory`, `motive`, etc.) are case-insensitive and unindexed; current catalog size makes this a non-issue. `endsWith` and `aliasGroupNames` contains/like are leading-wildcard scans and slow on large result sets. `aliasGroupNames` matches on the JSON-encoded text, so substrings can cross alias boundaries (a search for \"apt28\" will also match \"apt280\" if both appear in the same tag's alias list).",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/tags/{tag_uuid}/indicators",
+    "method": "get",
+    "parameterIndex": 7,
+    "name": "search",
+    "operationId": "get_TagIndicatorsList",
+    "description": "Structured search as a JSON array of {field, op, value} objects. Searchable fields: value, indicatorType. Multiple conditions are AND'd together. Max 10 conditions per request.",
+    "style": null,
+    "explode": null
+  },
+  {
+    "path": "/accounts/{account_id}/cloudforce-one/events/tags/{tag_uuid}/relationships",
+    "method": "get",
+    "parameterIndex": 3,
+    "name": "search",
+    "operationId": "get_TagRelationshipsList",
+    "description": "JSON array of {field, op, value} filters (same as indicator list search).",
+    "style": null,
+    "explode": null
+  }
+]

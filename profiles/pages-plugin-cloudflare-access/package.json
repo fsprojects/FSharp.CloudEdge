@@ -1,0 +1,10 @@
+{
+  "name": "fsharp-cloudedge-input-pages-plugin-cloudflare-access",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "@cloudflare/pages-plugin-cloudflare-access": "1.0.5",
+    "@cloudflare/workers-types": "5.20260906.1"
+  }
+}
