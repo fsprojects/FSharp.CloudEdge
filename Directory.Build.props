@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <_CloudEdgeSourceTree>$([MSBuild]::NormalizeDirectory('$(MSBuildThisFileDirectory)', 'src'))</_CloudEdgeSourceTree>
+    <_CloudEdgeProjectDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)'))</_CloudEdgeProjectDirectory>
+  </PropertyGroup>
+
+  <!-- Release 0.1.0 for every assembly and package built from src/. AssemblyVersion and FileVersion follow as 0.1.0.0. -->
+  <PropertyGroup Condition="$(_CloudEdgeProjectDirectory.StartsWith('$(_CloudEdgeSourceTree)'))">
+    <Version>0.1.0</Version>
+  </PropertyGroup>
+</Project>
