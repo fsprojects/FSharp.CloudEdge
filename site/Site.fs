@@ -115,6 +115,43 @@ let private darkByDefault =
                 "(()=>{try{if(localStorage.getItem('nacara-theme'))return}catch{}const r=document.documentElement;r.dataset.theme='dark';r.dataset.themeSetting='dark';addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('[data-nacara-theme]').forEach(s=>{s.value='dark'})})})();"
         ]
 
+let private nativeThemes =
+    let metadata =
+        Render.htmlView
+            [
+                Html.meta [ prop.name "darkreader-lock" ]
+                Html.meta [ prop.name "color-scheme"; prop.content "light dark" ]
+            ]
+
+    let addMetadata (html: string) =
+        if html.Contains("<head>" + metadata) then html
+        else html.Replace("<head>", "<head>" + metadata)
+
+    { new IPlugin with
+        member _.Name = "cloudedge.native-themes"
+
+        member _.Configure registry =
+            // Build hooks write the default 404 directly, bypassing asset transforms.
+            { registry with
+                BuildCompleteHooks =
+                    registry.BuildCompleteHooks
+                    |> List.map (fun hook context ->
+                        hook
+                            { context with
+                                Write = fun path content ->
+                                    let html = if Path.GetExtension path = ".html" then addMetadata content else content
+                                    context.Write path html
+                            })
+            }
+            |> Registry.assetTransform
+                {
+                    Name = "native-theme-metadata"
+                    Extensions = [ ".html" ]
+                    // Theme.headExtra comes after CSS; Dark Reader must see the lock before loading styles.
+                    Transform = fun context -> addMetadata context.Content
+                }
+    }
+
 let theme =
     Theme.defaults
     |> Theme.navbar
@@ -218,6 +255,7 @@ let site =
     |> Sitemap.register
     |> LinkValidator.register
     |> Theme.register theme
+    |> Site.plugin nativeThemes
     |> Site.collection (Theme.docs theme "content")
 
 [<EntryPoint>]

@@ -1,6 +1,6 @@
 ---
 title: FSharp.CloudEdge
-description: Build web products on Cloudflare, in F#.
+description: Build web products on Cloudflare with F#.
 layout: splash
 ---
 
@@ -9,8 +9,8 @@ layout: splash
 <span class="ce-chip"><b>0.1.0</b> MIT licensed</span>
 <h1 class="ce-wordmark">FSharp<span class="ce-dot">.</span>CloudEdge</h1>
 <p class="ce-line">Build web products on Cloudflare, in F#.</p>
-<p class="ce-why">F# developers deserve a first-class experience for building on Cloudflare. And Cloudflare deserves a first-class functional language that can honor its contracts and make the Fable Compiler's original promise of “<a href="https://fable.io">JavaScript you can be proud of</a>” part of the integrity their platform could offer.</p>
-<p class="ce-sub">Cloudflare runs your code close to your users and provides the services a web product needs beside it, with a free plan that covers 100,000 Worker requests a day. FSharp.CloudEdge puts all of it in F#, from the code that answers requests to the code that sets up the account.</p>
+<p class="ce-why">F# developers deserve a first-class experience for building on Cloudflare. And Cloudflare gets a first-class functional language that can honor its contracts and make the Fable Compiler's original promise of “<a href="https://fable.io">JavaScript you can be proud of</a>” a new level of integrity.</p>
+<p class="ce-sub">Cloudflare runs your code <i>at cloud's edge,</i> close to your users, and provides modern, responsive agentic tools. You can start with a free plan that covers 100,000 Worker requests per day. FSharp.CloudEdge makes the full array of Cloudflare products and services available in F#, from dynamic web pages to agentic AI capabilities.</p>
 <div class="ce-actions">
 <a class="ce-btn ce-btn--primary" href="#building-blocks">See what you can build <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
 <a class="ce-btn ce-btn--secondary" href="/FSharp.CloudEdge/libraries/">Library line-up</a>
