@@ -4,13 +4,11 @@
 [![F# → JavaScript: Fable 5.13](https://img.shields.io/badge/F%23%20%E2%86%92%20JavaScript-Fable%205.13-378BBA?logo=fsharp&logoColor=white)](https://fable.io)
 [![.NET SDK: 10.0](https://img.shields.io/badge/.NET%20SDK-10.0-512BD4?logo=dotnet&logoColor=white)](global.json)
 [![targets: net8.0 · netstandard2.0](https://img.shields.io/badge/targets-net8.0%20%C2%B7%20netstandard2.0-512BD4?logo=dotnet&logoColor=white)](FSharp.CloudEdge.slnx)
-[![fsprojects: community](https://img.shields.io/badge/fsprojects-community-181717?logo=github&logoColor=white)](https://github.com/fsprojects)
+
 [![license: MIT](https://img.shields.io/badge/license-MIT-3DA639)](LICENSE)
 
 [![Xantham: TypeScript 7](https://img.shields.io/badge/Xantham-TypeScript%207-6E40C9)](https://github.com/shayanhabibi/Xantham)
 [![Hawaii: OpenAPI](https://img.shields.io/badge/Hawaii-OpenAPI-0E7C86)](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support)
-[![inputs: pinned & hashed](https://img.shields.io/badge/inputs-pinned%20%26%20hashed-2E7D32)](generators/hawaii/pins.json)
-[![generated F#: no hand edits](https://img.shields.io/badge/generated%20F%23-no%20hand%20edits-455A64)](docs/SDK-LIBRARY.md)
 
 For the purposes of this project, we consider Cloudflare publishing its platform in two different forms: in TypeScript declarations for the code that runs inside a Worker, and in an OpenAPI document for the API that provisions and deploys it. FSharp.CloudEdge is F# generated from both, so a Cloudflare application can be written in one language from its request handlers to its deployment.
 
