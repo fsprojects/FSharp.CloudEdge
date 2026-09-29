@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Containers/FSharp.CloudEdge.Runtime.Containers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Actors/FSharp.CloudEdge.Runtime.Actors.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.WorkersOauthProvider/FSharp.CloudEdge.Runtime.WorkersOauthProvider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.KvAssetHandler/FSharp.CloudEdge.Runtime.KvAssetHandler.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Cabidela/FSharp.CloudEdge.Runtime.Cabidela.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Chanfana/FSharp.CloudEdge.Runtime.Chanfana.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ImageResizer.fs" />
+    <Compile Include="EventRsvp.fs" />
+    <Compile Include="AccountApi.fs" />
+    <Compile Include="ConsentPage.fs" />
+    <Compile Include="SinglePageApp.fs" />
+    <Compile Include="SignupCheck.fs" />
+    <Compile Include="ApiReference.fs" />
+  </ItemGroup>
+</Project>

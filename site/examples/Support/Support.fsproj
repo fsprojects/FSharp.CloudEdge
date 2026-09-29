@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ModelSwitch.fs" />
+    <Compile Include="UsageMeter.fs" />
+    <Compile Include="RoomStatus.fs" />
+    <Compile Include="RegionalRoom.fs" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/FSharp.CloudEdge.Runtime.PagesPluginTurnstile.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="StaffArea.fs" />
+    <Compile Include="StaffProfile.fs" />
+    <Compile Include="SignOut.fs" />
+    <Compile Include="SignupForm.fs" />
+  </ItemGroup>
+</Project>

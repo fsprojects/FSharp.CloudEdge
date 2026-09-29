@@ -14,10 +14,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
         fetch = fun request env _ ->
             async {
                 let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, "playground")
-                let! source = request.text () |> Async.AwaitPromise
-                let! _ = sandbox.writeFile("/workspace/main.py", source) |> Async.AwaitPromise
-                let! run = sandbox.exec "python3 /workspace/main.py" |> Async.AwaitPromise
-                return Workers.Exports.Response.json {| output = run.stdout; errors = run.stderr; exitCode = run.exitCode |}
+                let! code = request.text () |> Async.AwaitPromise
+                let! run = sandbox.runCode code |> Async.AwaitPromise
+                return Workers.Exports.Response.json {| output = run.logs.stdout; errors = run.logs.stderr |}
             }
             |> Async.StartAsPromise
             |> U2.Case1

@@ -15,12 +15,15 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
         fetch = fun request env _ ->
             async {
                 let! article = request.text () |> Async.AwaitPromise
-                let workersai = WorkersAI.Exports.createWorkersAI (U2.Case1(WorkersAI.WorkersAISettings2.Create(binding = env.AI)))
+                let settings = WorkersAI.WorkersAISettings2.Create(binding = env.AI)
+                let workersai = WorkersAI.Exports.createWorkersAI (U2.Case1 settings)
                 let model = workersai.chat<string> (U2.Case1 "@cf/zai-org/glm-4.7-flash")
+                let articlePart = V4.LanguageModelV4Message3.Content.Item.Text(article, None)
                 let prompt =
-                    [| V4.LanguageModelV4Message.System("Summarize the article in two sentences.", None)
-                       V4.LanguageModelV4Message.User([| V4.LanguageModelV4Message3.Content.Item.Text(article, None) |], None) |]
-                let! result = model.doGenerate (V4.LanguageModelV4CallOptions.Create prompt) |> Async.AwaitPromise
+                    [| V4.LanguageModelV4Message.System("Summarize in two sentences.", None)
+                       V4.LanguageModelV4Message.User([| articlePart |], None) |]
+                let options = V4.LanguageModelV4CallOptions.Create prompt
+                let! result = model.doGenerate options |> Async.AwaitPromise
                 let summary =
                     result.content
                     |> Array.choose (function

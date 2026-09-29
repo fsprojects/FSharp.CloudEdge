@@ -13,5 +13,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Summarizer.fs" />
+    <Compile Include="DuplicateDetector.fs" />
+    <Compile Include="HelpCenterAnswers.fs" />
+    <Compile Include="ShopAssistant.fs" />
+    <Compile Include="ModelFallback.fs" />
+    <Compile Include="MarkdownConverter.fs" />
+    <Compile Include="ChatHistoryUpgrade.fs" />
   </ItemGroup>
 </Project>

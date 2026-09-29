@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DarkMode.fs" />
+    <Compile Include="StorefrontSettings.fs" />
+    <Compile Include="FlagInspector.fs" />
+  </ItemGroup>
+</Project>

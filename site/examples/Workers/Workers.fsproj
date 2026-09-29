@@ -6,8 +6,8 @@
   <ItemGroup>
     <Compile Include="HealthCheck.fs" />
     <Compile Include="ApiRouter.fs" />
-    <Compile Include="ApiProxy.fs" />
     <Compile Include="VisitorGreeting.fs" />
+    <Compile Include="ApiProxy.fs" />
     <Compile Include="AnnouncementBanner.fs" />
     <Compile Include="PageCache.fs" />
   </ItemGroup>

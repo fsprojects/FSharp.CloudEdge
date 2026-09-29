@@ -119,6 +119,7 @@ let theme =
     Theme.defaults
     |> Theme.navbar
         [
+            NavbarSection ("Start here", "guide", "/guide/")
             NavbarDropdown (
                 "Libraries",
                 [
@@ -128,6 +129,7 @@ let theme =
                     NavbarDescribed ("Background Work", "Queues and Workflows", "/libraries/platform/background-work/")
                     NavbarDescribed ("Agents", "Agents SDK, Code Mode, Shell and Voice", "/libraries/agents/")
                     NavbarDescribed ("AI", "Workers AI, AI Gateway and AI Search", "/libraries/ai/")
+                    NavbarDescribed ("Hybrid Search", "Keyword and vector search, indexed incrementally", "/libraries/hybrid-search/")
                     NavbarDescribed ("Compute", "Sandbox and Computer", "/libraries/compute/")
                     NavbarDescribed ("Services", "Containers, Actors, OAuth and more", "/libraries/services/")
                     NavbarDescribed ("RPC", "Cap'n Web", "/libraries/rpc/")
@@ -138,6 +140,19 @@ let theme =
             )
             NavbarSection ("Line-up", "libraries", "/libraries/")
             NavbarLink ("Control plane", "/libraries/control-plane/")
+        ]
+    |> Theme.menu
+        "guide"
+        [
+            Menu.section
+                "Start Here"
+                [
+                    Menu.page "guide/index.md"
+                    Menu.page "guide/credentials.md"
+                    Menu.page "guide/local-build.md"
+                    Menu.page "guide/first-worker.md"
+                    Menu.page "guide/first-deploy.md"
+                ]
         ]
     |> Theme.menu
         "libraries"
@@ -155,6 +170,7 @@ let theme =
                         ]
                     Menu.page "libraries/agents.md"
                     Menu.page "libraries/ai.md"
+                    Menu.page "libraries/hybrid-search.md"
                     Menu.page "libraries/compute.md"
                     Menu.page "libraries/services.md"
                     Menu.page "libraries/rpc.md"
@@ -166,8 +182,10 @@ let theme =
                 "Control plane"
                 [
                     Menu.page "libraries/control-plane/index.md"
+                    Menu.link "Credentials" "/FSharp.CloudEdge/guide/credentials/"
                     Menu.page "libraries/control-plane/account-setup.md"
                     Menu.page "libraries/control-plane/worker-upload.md"
+                    Menu.page "libraries/control-plane/asset-uploads.md"
                     Menu.page "libraries/control-plane/clients.md"
                 ]
         ]

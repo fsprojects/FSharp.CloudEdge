@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExampleKind>DotNet</ExampleKind>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Credentials/ClientSetup.fs" />
+    <Compile Include="FileHash.fs" />
+    <Compile Include="Manifest.fs" />
+    <Compile Include="MissingFiles.fs" />
+    <Compile Include="BatchedUpload.fs" />
+    <Compile Include="Deployment.fs" />
+    <Compile Include="CodeOnlyRedeploy.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+</Project>

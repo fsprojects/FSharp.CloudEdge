@@ -1,0 +1,46 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ExampleKind>DotNet</ExampleKind>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.AI/FSharp.CloudEdge.Management.AI.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.ContentDelivery/FSharp.CloudEdge.Management.ContentDelivery.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Media/FSharp.CloudEdge.Management.Media.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Messaging/FSharp.CloudEdge.Management.Messaging.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Networking/FSharp.CloudEdge.Management.Networking.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Observability/FSharp.CloudEdge.Management.Observability.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Security/FSharp.CloudEdge.Management.Security.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Storage/FSharp.CloudEdge.Management.Storage.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Tenancy/FSharp.CloudEdge.Tenancy/FSharp.CloudEdge.Tenancy.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ApiClient.fs" />
+    <Compile Include="TokenCheck.fs" />
+    <Compile Include="AccountLookup.fs" />
+    <Compile Include="GuestbookDatabase.fs" />
+    <Compile Include="PhotoBucket.fs" />
+    <Compile Include="SessionStore.fs" />
+    <Compile Include="OrderQueue.fs" />
+    <Compile Include="BucketList.fs" />
+    <Compile Include="ResourceList.fs" />
+    <Compile Include="HelloWorker.fs" />
+    <Compile Include="GuestbookWorker.fs" />
+    <Compile Include="ChatRoomWorker.fs" />
+    <Compile Include="ApiKeySecret.fs" />
+    <Compile Include="NightlyCleanup.fs" />
+    <Compile Include="PublicUrl.fs" />
+    <Compile Include="OrderConsumer.fs" />
+    <Compile Include="SignupWidget.fs" />
+    <Compile Include="ChatbotGateway.fs" />
+    <Compile Include="AvatarUpload.fs" />
+    <Compile Include="PageViewReport.fs" />
+    <Compile Include="ContactAddress.fs" />
+    <Compile Include="TieredCache.fs" />
+    <Compile Include="ShopRecord.fs" />
+    <Compile Include="SetupProgram.fs" />
+  </ItemGroup>
+</Project>

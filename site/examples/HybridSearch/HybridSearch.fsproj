@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="KeywordQuery.fs" />
+    <Compile Include="VectorQuery.fs" />
+    <Compile Include="RankFusion.fs" />
+    <Compile Include="ChunkHash.fs" />
+    <Compile Include="ChangedChunks.fs" />
+    <Compile Include="IndexUpdate.fs" />
+    <Compile Include="SearchEndpoint.fs" />
+  </ItemGroup>
+</Project>

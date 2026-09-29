@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../Examples.props" />
+  <ItemGroup>
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode/FSharp.CloudEdge.Runtime.CodeMode.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Shell/FSharp.CloudEdge.Runtime.Shell.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GameLobby.fs" />
+    <Compile Include="TeamChannel.fs" />
+    <Compile Include="SnippetRunner.fs" />
+    <Compile Include="DraftsFolder.fs" />
+    <Compile Include="AudioPreview.fs" />
+    <Compile Include="SupportInbox.fs" />
+  </ItemGroup>
+</Project>

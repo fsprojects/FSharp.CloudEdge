@@ -8,5 +8,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeRunner.fs" />
+    <Compile Include="WorkspaceFiles.fs" />
+    <Compile Include="Notebook.fs" />
+    <Compile Include="TestRunner.fs" />
+    <Compile Include="TextSearch.fs" />
+    <Compile Include="TeamRepositories.fs" />
   </ItemGroup>
 </Project>

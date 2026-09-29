@@ -14,3 +14,8 @@ tests/**/js/
 
 # Nacara site output
 site/output/
+
+# Local credentials: copy .env.template to .env. Git ignores .env and keeps the template.
+.env
+.env.*
+!.env.template
