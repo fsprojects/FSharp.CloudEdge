@@ -32,7 +32,7 @@ dotnet build site/examples/Compute/Compute.fsproj --nologo
 dotnet build site/examples/Services/Services.fsproj --nologo
 ```
 
-Run these builds sequentially. They restore `0.1.0` packages by default; they do not deploy a Worker or prove that a service call succeeds. For contributor source builds, add `-c Release -p:CloudEdgeUseSource=true`. Before publication, use the candidate checks described on [Packages](packages.md). Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
+Run these builds sequentially. They restore `0.1.*` packages by default; they do not deploy a Worker or prove that a service call succeeds. For contributor source builds, add `-c Release -p:CloudEdgeUseSource=true`. Before publication, use the candidate checks described on [Packages](packages.md). Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
 
 The documentation excerpt check is separate:
 

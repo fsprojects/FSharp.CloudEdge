@@ -16,7 +16,9 @@ dotnet run --project tools/NuGetRelease -- support
 
 The probe uses `tests/SupportPackage/Smoke.fs` and `UpstreamHelpers.fs`. Its staged project, isolated package cache, and logs are under `artifacts/nuget-release/0.1.0/public-support/`. The release workflow requires this check to pass before publishing.
 
-The upstream maintainer needs to publish corrected support packages containing the project and source assets required by [Fable library packaging](https://fable.io/docs/your-fable-project/author-a-fable-library.html). Once available, update `publicDependencies` in `config/nuget-release.json` to those versions and rerun all candidate checks. Existing NuGet versions cannot be replaced. CloudEdge's intended first release remains 0.1.0.
+The upstream packaging correction includes the project and source assets required by [Fable library packaging](https://fable.io/docs/your-fable-project/author-a-fable-library.html). `publicDependencies` in `config/nuget-release.json` now selects **0.1.1** for both support packages. Locally packed corrected packages pass the helper compilation probe; the upstream maintainer still needs to publish them before the public check can pass. Existing NuGet versions cannot be replaced. CloudEdge's intended first release remains 0.1.0.
+
+To test an upstream packaging fix before publication, pass `--support-feed /absolute/path/to/packages` to `support`, `pack`, and `examples --fable`. These commands map the two Xantham package IDs to that explicit local feed and use isolated caches. This is local evidence only: the GitHub workflow uses public support packages, and `examples --public` rejects a local support feed.
 
 ## Restore account access
 
@@ -70,6 +72,8 @@ The F# release tool reads the selected solution, orders packages by dependency, 
 
 `config/nuget-release.json` pins the release and public support dependency versions. Release consumers must not restore `0.1.0-local.*` dependencies. Candidate packages contain license and README metadata; Fable packages also contain their project and source files under `fable/`.
 
+Sample projects use `0.1.*` so they can adopt stable patches. Published CloudEdge dependencies permit `[0.1.0,0.2.0)`; Xantham support dependencies permit `[0.1.1,0.2.0)`. Release validation replaces sample floats with exact candidate references and pins both support packages to the configured versions. Each consumer's `resolved-packages/*.json` report records the actual dependency versions and is retained in the workflow artifact.
+
 From the repository root:
 
 ```bash
@@ -91,6 +95,8 @@ Inspect the README, license, dependency versions, source assets, and emitted imp
 ## Publish and verify the public feed
 
 Run the **NuGet** workflow on `main` with **publish disabled** first. It builds candidates, checks consumers, and uploads the packages and verification evidence as an artifact. Fix failures before requesting the actual release.
+
+After committing and merging fixes into `main`, use **Actions → NuGet → Run workflow**, choose `main`, and leave **publish** unchecked. The equivalent command is `gh workflow run publish.yml --ref main -f publish=false`. Here `publish.yml` is the workflow filename and `-f publish=false` supplies its boolean input. Rerunning the old tag's job uses the old commit; dispatching on `main` picks up the merged fixes without changing the package version or moving the tag. Enable **publish** only when ready to upload.
 
 GitHub runs the public support-helper probe in a separate job alongside package validation, so upstream failures appear early. The publication job requires both jobs to succeed. Package compilation uses two MSBuild processes on the standard runner; uploads remain ordered by dependency.
 

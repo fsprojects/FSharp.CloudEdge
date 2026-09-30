@@ -1,7 +1,7 @@
 <Project>
   <!--
     Shared settings for the site's example projects. Every F# block on the site is an excerpt of a file
-    compiled here, and the F# NuGetRelease tool verifies that. Examples consume NuGet 0.1.0 by default.
+    compiled here, and the F# NuGetRelease tool verifies that. Examples consume NuGet 0.1.* by default.
     Before publication, use the candidate feed produced by tools/NuGetRelease.
     Contributors may set CloudEdgeUseSource=true after building the bindings from source.
   -->

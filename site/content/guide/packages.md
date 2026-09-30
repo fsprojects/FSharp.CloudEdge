@@ -8,7 +8,7 @@ Application projects reference the FSharp.CloudEdge libraries by NuGet package I
 
 ## Release availability
 
-The first `0.1.0` release is being prepared. Package links and examples name the intended public versions; they do not assert that publication has completed. Public Xantham support packages currently need a packaging correction for Fable inline helpers; see the [release blocker and reproduction](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/nuget-release.md#current-release-blocker). Until that is resolved, use the [contributor source build](local-build.md). Locally packed candidates are for release testing and share this upstream limitation.
+The first `0.1.0` release is being prepared. Package links and examples name the intended public versions; they do not assert that publication has completed. The release requires corrected Xantham support packages at `0.1.1` containing Fable source assets; see the [release blocker and reproduction](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/nuget-release.md#current-release-blocker). Until those dependencies are published and public validation passes, use the [contributor source build](local-build.md).
 
 The release order is: validate candidate packages and consumers, publish dependencies before their consumers, confirm every `0.1.0` package restores from nuget.org, then announce availability. A package page appearing in search is separate from a clean restore succeeding.
 
@@ -17,16 +17,18 @@ The release order is: validate candidate packages and consumers, publish depende
 For a Worker:
 
 ```bash
-dotnet add package FSharp.CloudEdge.Runtime.Workers --version 0.1.0
+dotnet add package FSharp.CloudEdge.Runtime.Workers --version '0.1.*'
 ```
 
 For a .NET program that manages Workers:
 
 ```bash
-dotnet add package FSharp.CloudEdge.Management.Compute --version 0.1.0
+dotnet add package FSharp.CloudEdge.Management.Compute --version '0.1.*'
 ```
 
 The latter brings in `FSharp.CloudEdge.Core.Api` transitively. You can list it explicitly when your project uses its types. [First Worker](first-worker.md) and [First Deploy](first-deploy.md) show complete project files.
+
+Samples use `0.1.*` to accept stable patches in the `0.1` series without moving to `0.2`. Catalog links identify the concrete `0.1.0` release. For repeatable application builds, commit a NuGet lock file and use locked restore in CI; deliberately refresh it when adopting a patch. Release validation pins the candidate and support versions exactly and records every resolved package.
 
 The NuGet feed is `https://api.nuget.org/v3/index.json`. A package page such as `https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0` is for browsing; it is not a package source URL.
 

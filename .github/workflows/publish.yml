@@ -63,6 +63,7 @@ jobs:
             artifacts/nuget-release/0.1.0/manifest.json
             artifacts/nuget-release/0.1.0/consumers-candidate/results.json
             artifacts/nuget-release/0.1.0/consumers-candidate/logs/
+            artifacts/nuget-release/0.1.0/consumers-candidate/resolved-packages/
             artifacts/nuget-release/0.1.0/pack-logs/
 
   publish:

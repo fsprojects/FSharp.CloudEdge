@@ -14,7 +14,7 @@ order: 4
 
 ## Project Folder
 
-Create the application anywhere convenient. It restores `FSharp.CloudEdge.Runtime.Workers` version `0.1.0` from NuGet; no sibling library checkout is required. See [Packages](packages.md) for release availability and candidate-feed testing.
+Create the application anywhere convenient. It restores `FSharp.CloudEdge.Runtime.Workers` from the `0.1.*` patch series on NuGet; no sibling library checkout is required. See [Packages](packages.md) for release availability and candidate-feed testing.
 
 1. Open a terminal in the folder where you keep your projects.
 2. Create `hello-worker` and enter it.
@@ -28,7 +28,7 @@ Stay in `hello-worker` for the remaining commands.
 
 ## Project File
 
-Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the Workers package at version `0.1.0`.
+Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the Workers package from the `0.1.*` patch series.
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -42,7 +42,7 @@ Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the
     <PackageReference Include="Fable.Core" Version="5.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" />
   </ItemGroup>
 </Project>
 ```

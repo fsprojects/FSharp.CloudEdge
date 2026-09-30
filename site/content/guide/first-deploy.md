@@ -15,7 +15,7 @@ order: 5
 
 ## Project Folder
 
-The upload program is a .NET console project in a `deploy` folder inside hello-worker. It references two NuGet packages at version `0.1.0`: `Core.Api` for the request and response types, and `Management.Compute` for `ComputeClient`.
+The upload program is a .NET console project in a `deploy` folder inside hello-worker. It references two NuGet packages from the `0.1.*` patch series: `Core.Api` for the request and response types, and `Management.Compute` for `ComputeClient`.
 
 1. From your hello-worker folder, create `deploy`.
 
@@ -44,8 +44,8 @@ The upload program is a .NET console project in a `deploy` folder inside hello-w
      </ItemGroup>
 
      <ItemGroup>
-       <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.0" />
-       <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.0" />
+       <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.*" />
+       <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.*" />
      </ItemGroup>
 
    </Project>
