@@ -18,6 +18,8 @@
     <PackageReference Include="Nacara.Plugin.LinkValidator" Version="1.0.0-beta.2" />
     <!-- Partas.Nacara.Theme is built with the .NET 11 SDK and needs FSharp.Core 11. -->
     <PackageReference Include="FSharp.Core" Version="11.0.101-rc1.26425.128" />
+    <PackageReference Include="Partas.Nacara.Plugins.AgentFriendly" Version="0.1.0" />
+    <PackageReference Include="Partas.Nacara.Plugins.OgImage" Version="0.1.0" />
     <PackageReference Include="Partas.Nacara.Theme" Version="0.2.0" />
   </ItemGroup>
 </Project>

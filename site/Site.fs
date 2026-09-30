@@ -288,6 +288,14 @@ let theme =
             ]
     )
 
+let private ogImages (options: OgImageOptions) =
+    options
+    |> OgImage.defaultImage (
+        OgImage.image "/images/social-preview.png"
+        |> OgImage.withAlt "FSharp.CloudEdge: Build applications and agents across CloudFlare's platform, in F#."
+        |> OgImage.withSize 1200 630
+        )
+
 let site =
     Site.create "FSharp.CloudEdge"
     |> Site.baseUrl baseUrl
@@ -296,8 +304,17 @@ let site =
     |> Site.staticFiles "static"
     |> Markdown.register
     |> TreeSitter.register
+    |> OgImage.registerWith ogImages
+    |> AgentFriendly.registerWith (
+        AgentFriendly.summary "Build applications and agents across CloudFlare's platform, in F#."
+        )
     |> Sitemap.register
-    |> LinkValidator.register
+    |> LinkValidator.registerWith (
+        LinkValidator.ignoring [
+            //language=regexp
+            "https:\/\/www.npmjs.*"
+        ]
+        )
     |> Theme.register theme
     |> Site.plugin nativeThemes
     |> Site.collection (Theme.docs theme "content")
