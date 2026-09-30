@@ -12,6 +12,8 @@ let runChecks () =
     if not (isNull gitRef) && gitRef.StartsWith "refs/tags/" then
         ensure (gitRef = "refs/tags/v" + config.Version) $"Release tag must be v{config.Version}; received {gitRef}"
     let projects = inventory ()
+    ensure (sampleVersion = "0.1.*") "Samples must follow the current patch line"
+    ensure (patchRange "0.1.1" = "[0.1.1,0.2.0)") "Patch dependency range is incorrect"
     ensure (projects.Length = 47 && (projects |> Array.filter _.Fable |> Array.length) = 35) "Unexpected release scope"
     let mutable seen = Set.empty
     for project in projects do
@@ -19,6 +21,20 @@ let runChecks () =
         ensure (project.External |> Map.values |> Seq.forall (fun v -> not (v.Contains "-local."))) "Local dependency survived release planning"
         seen <- seen.Add project.Id
     let fixture: Package = { Id = "FSharp.CloudEdge.Test"; Path = ""; Framework = "net8.0"; Fable = true; Sources = [|"Test.fs"|]; Dependencies = Map.empty; External = Map.ofList ["Xantham.Fable.Core", "0.1.0"] }
+    let left = { fixture with Id = "Left" }
+    let right = { fixture with Id = "Right" }
+    let joined = { fixture with Id = "Joined"; Dependencies = Map.ofList [left.Id, config.Version; right.Id, config.Version] }
+    let leaf = { fixture with Id = "Leaf"; Dependencies = Map.ofList [joined.Id, config.Version] }
+    let layers = packBatches [|leaf; joined; right; left|]
+    ensure (layers |> Array.map Array.length = [|2; 1; 1|]) "Independent packages must share a batch; consumers must wait"
+    ensure (layers.[1].[0].Id = joined.Id && layers.[2].[0].Id = leaf.Id) "Dependency layers are out of order"
+    let batches = packBatches projects
+    ensure (batches[0].Length = 1 && batches.[0].[0].Id = "FSharp.CloudEdge.Core.Api") "The large API assembly must build alone"
+    let mutable packed = Set.empty
+    for batch in batches do
+        ensure (batch |> Array.forall (fun p -> p.Dependencies |> Map.keys |> Seq.forall packed.Contains)) "A package would restore before its dependency was packed"
+        packed <- Set.union packed (batch |> Array.map _.Id |> Set.ofArray)
+    ensure (packed.Count = projects.Length) "Package batching omitted projects"
     let directory = Path.Combine(Path.GetTempPath(), "cloudedge-release-tests-" + Guid.NewGuid().ToString("N"))
     mkdir directory
     let expectFailure action =
@@ -35,12 +51,14 @@ let runChecks () =
         for name in ["README.md"; "LICENSE"; "lib/net8.0/Test.dll"; "fable/" + fixture.Id + ".fsproj"] do add name "fixture"
         if source then add "fable/Test.fs" "module Test"
     try
-        create "[0.1.0]" true
+        create "[0.1.0,0.2.0)" true
         let entry = inspectPackage directory fixture
         ensure (entry.Sha256.Length = 64) "Missing package hash"
         create "0.1.0-local.test" true
         expectFailure (fun () -> inspectPackage directory fixture |> ignore)
-        create "[0.1.0]" false
+        create "[0.1.0]" true
+        expectFailure (fun () -> inspectPackage directory fixture |> ignore)
+        create "[0.1.0,0.2.0)" false
         expectFailure (fun () -> inspectPackage directory fixture |> ignore)
         expectFailure (fun () -> order [| { fixture with Dependencies = Map.ofList [fixture.Id, config.Version] } |] |> ignore)
         ensure (isExcerpt "  let x = 1\n  let y = 2" "module Test\nlet x = 1\nlet y = 2\n") "Uniform snippet indentation rejected"

@@ -5,27 +5,27 @@
   </PropertyGroup>
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.AI" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.AI" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.AI/FSharp.CloudEdge.Management.AI.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.ContentDelivery" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.ContentDelivery" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.ContentDelivery/FSharp.CloudEdge.Management.ContentDelivery.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Media" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Media" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Media/FSharp.CloudEdge.Management.Media.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Messaging" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Messaging" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Messaging/FSharp.CloudEdge.Management.Messaging.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Networking" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Networking" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Networking/FSharp.CloudEdge.Management.Networking.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Observability" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Observability" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Observability/FSharp.CloudEdge.Management.Observability.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Security" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Security" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Security/FSharp.CloudEdge.Management.Security.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Management.Storage" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Storage" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Storage/FSharp.CloudEdge.Management.Storage.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Tenancy" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Tenancy" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Tenancy/FSharp.CloudEdge.Tenancy/FSharp.CloudEdge.Tenancy.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

@@ -1,17 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Support.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Support.AI.V4.Provider" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.AI.V4.Provider" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Support.AI.V4.OpenAICompatible" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.AI.V4.OpenAICompatible" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Support.AI.V3.Provider" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.AI.V3.Provider" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.WorkersAIProvider" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.WorkersAIProvider" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

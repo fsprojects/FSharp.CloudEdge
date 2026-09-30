@@ -28,6 +28,26 @@ let order (projects: Package array) =
     byId |> Map.iter (fun name _ -> visit name)
     ordered.ToArray()
 
+// Staged projects consume dependencies as NuGet packages. Finish each dependency
+// layer before restoring the next, then let MSBuild parallelize independent projects.
+let packBatches (projects: Package array) =
+    let mutable remaining = order projects
+    let mutable completed = Set.empty
+    let batches = ResizeArray<Package array>()
+    while remaining.Length > 0 do
+        let ready = remaining |> Array.filter (fun p -> p.Dependencies |> Map.keys |> Seq.forall completed.Contains)
+        ensure (ready.Length > 0) "No package is ready to build"
+        // This generated assembly uses several GB during compilation. Give it the
+        // runner's memory before starting concurrent builds of the smaller projects.
+        let batch =
+            match ready |> Array.tryFind (fun p -> p.Id = "FSharp.CloudEdge.Core.Api") with
+            | Some core -> [|core|]
+            | None -> ready
+        batches.Add batch
+        completed <- Set.union completed (batch |> Array.map _.Id |> Set.ofArray)
+        remaining <- remaining |> Array.filter (fun p -> not (completed.Contains p.Id))
+    batches.ToArray()
+
 let inventory () =
     XDocument.Load(Path.Combine(root, config.Solution))
     |> elements "Project"
@@ -51,6 +71,10 @@ let inventory () =
 
 let packageUrl name = $"https://www.nuget.org/packages/{name}/{config.Version}"
 let dependencies (project: Package) = Map.fold (fun all key value -> Map.add key value all) project.Dependencies project.External
+
+let dependencyRange (id: string) version =
+    if id.StartsWith("FSharp.CloudEdge.") || config.PublicDependencies.ContainsKey id then patchRange version
+    else version
 
 let stage commit (project: Package) =
     let directory = Path.Combine(output, "staged", project.Id)
@@ -80,7 +104,7 @@ let stage commit (project: Package) =
     xml "Project" ["Sdk", "Microsoft.NET.Sdk"] [
         xml "PropertyGroup" [] (properties |> List.map (fun (name, value) -> valueElement name value))
         xml "ItemGroup" [] (project.Sources |> Array.map (fun source -> xml "Compile" ["Include", source] []) |> Array.toList)
-        xml "ItemGroup" [] (dependencies project |> Map.toList |> List.map (fun (id, version) -> xml "PackageReference" ["Include", id; "Version", $"[{version}]"] []))
+        xml "ItemGroup" [] (dependencies project |> Map.toList |> List.map (fun (id, version) -> xml "PackageReference" ["Include", id; "Version", dependencyRange id version] []))
         xml "ItemGroup" [] assets
     ] |> saveXml file
     let readme = $"# {project.Id}\n\nFSharp.CloudEdge {config.Version}.\n\n[Documentation]({config.ProjectUrl}) · [Source]({config.Repository})\n\nConsult the documentation for pinned upstream SDK versions, setup, binding limitations, and runtime verification status. "
@@ -109,7 +133,9 @@ let inspectPackage folder (project: Package) =
     for KeyValue(name, version) in dependencies project do
         ensure (deps.ContainsKey name) $"Missing dependency {name}: {file}"
         let actual = deps[name].Replace(" ", "")
-        ensure (actual = $"[{version}]" || actual = $"[{version},{version}]") $"Wrong dependency {name} {actual}: {file}"
+        let expected = dependencyRange name version
+        let matches = actual = expected || (expected = version && actual = $"[{version},)")
+        ensure matches $"Wrong dependency {name} {actual}; expected {expected}: {file}"
     if project.Fable then
         for source in Array.append project.Sources [|project.Id + ".fsproj"|] do
             ensure (names.Contains("fable/" + source.Replace('\\', '/'))) $"Missing Fable source {source}: {file}"
@@ -122,18 +148,29 @@ let verify (projects: Package array) =
     Array.iter2 (fun a b -> ensure (a.Id = b.Id && a.Version = b.Version && a.File = b.File && a.Sha256 = b.Sha256) $"Candidate differs from manifest: {a.Id}") actual expected
     printfn "Verified %d packages and manifest hashes" actual.Length
 
-let pack (projects: Package array) =
+let pack jobs supportFeed (projects: Package array) =
+    ensure (jobs > 0) "The build process count must be positive"
     mkdir feed
     let restoreConfig = Path.Combine(output, "NuGet.Config")
-    writeNuGetConfig restoreConfig (Path.Combine(output, "cache")) true
+    writeNuGetConfig restoreConfig (Path.Combine(output, "cache")) true supportFeed
     for project in projects do
         let cached = Path.Combine(output, "cache", project.Id.ToLowerInvariant(), config.Version)
         if Directory.Exists cached then Directory.Delete(cached, true)
     let commit = capture "git" ["rev-parse"; "HEAD"]
-    for index, project in Array.indexed projects do
-        printfn "[%d/%d] Packing %s %s" (index + 1) projects.Length project.Id config.Version
-        let file = stage commit project
-        run "dotnet" ["pack"; file; "-c"; "Release"; "-o"; feed; $"-p:RestoreConfigFile={restoreConfig}"; "--nologo"] (Path.Combine(Path.GetDirectoryName file, "pack.log"))
+    let logDirectory = Path.Combine(output, "pack-logs")
+    mkdir logDirectory
+    let batches = packBatches projects
+    for index, batch in Array.indexed batches do
+        printfn "[Batch %d/%d] Packing %d packages with up to %d MSBuild processes: %s" (index + 1) batches.Length batch.Length jobs (batch |> Array.map _.Id |> String.concat ", ")
+        let solution = Path.Combine(logDirectory, $"batch-{index + 1}.slnx")
+        let binaryLog = Path.Combine(logDirectory, $"batch-{index + 1}.binlog")
+        let paths = batch |> Array.map (stage commit)
+        xml "Solution" [] (paths |> Array.map (fun path -> xml "Project" ["Path", Path.GetRelativePath(logDirectory, path).Replace('\\', '/')] []) |> Array.toList)
+        |> saveXml solution
+        run "dotnet" ["pack"; solution; "-c"; "Release"; $"-p:PackageOutputPath={feed}";
+                      $"-p:RestoreConfigFile={restoreConfig}"; $"-maxcpucount:{jobs}"; "-p:BuildInParallel=true";
+                      $"-bl:{binaryLog}"; "--verbosity"; "normal"; "--nologo"]
+            (Path.Combine(logDirectory, $"batch-{index + 1}.log"))
     writeJson (Path.Combine(output, "manifest.json")) (projects |> Array.map (inspectPackage feed))
     verify projects
 

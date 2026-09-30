@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.PagesPluginTurnstile" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.PagesPluginTurnstile" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Pages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/FSharp.CloudEdge.Runtime.PagesPluginTurnstile.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

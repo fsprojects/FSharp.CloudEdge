@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Agents" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Agents" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.AgentsAiChatAgent" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.AgentsAiChatAgent" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.CodeMode" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.CodeMode" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode/FSharp.CloudEdge.Runtime.CodeMode.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Shell" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Shell" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Shell/FSharp.CloudEdge.Runtime.Shell.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.ShellGit" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.ShellGit" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.AgentsMcpClient" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.AgentsMcpClient" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient/FSharp.CloudEdge.Runtime.AgentsMcpClient.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Voice" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Voice" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.VoiceErrors" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.VoiceErrors" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

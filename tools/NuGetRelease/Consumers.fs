@@ -26,7 +26,7 @@ let audit packages =
         ensure (refs |> Array.map (attr "Include") |> Set.ofArray = (sources |> Map.keys |> Set.ofSeq)) $"Package/source references differ: {project}"
         for node in refs do
             let id = attr "Include" node
-            ensure (ids.Contains id && attr "Version" node = config.Version) $"Unexpected package or version: {id} in {project}"
+            ensure (ids.Contains id && attr "Version" node = sampleVersion) $"Unexpected package or version: {id} in {project}; expected {sampleVersion}"
             ensure (attr "Condition" node = "'$(CloudEdgeUseSource)' != 'true'") $"Package must be the default: {id}"
             ensure (attr "Condition" sources[id] = "'$(CloudEdgeUseSource)' == 'true'") $"Source must be opt-in: {id}"
             count <- count + 1
@@ -41,12 +41,13 @@ let audit packages =
 let installFable directory =
     let tool = Path.Combine(directory, "tools", if OperatingSystem.IsWindows() then "fable.exe" else "fable")
     let source = Path.Combine(directory, "Tools.NuGet.Config")
-    writeNuGetConfig source (Path.Combine(directory, "tool-cache")) false
+    writeNuGetConfig source (Path.Combine(directory, "tool-cache")) false None
     if not (File.Exists tool) then
         run "dotnet" ["tool"; "install"; "fable"; "--version"; "5.13.0"; "--tool-path"; Path.GetDirectoryName tool; "--configfile"; source] (Path.Combine(directory, "logs/fable-install.log"))
     tool
 
-let prepareConsumerDirectory publicFeed =
+let prepareConsumerDirectory publicFeed supportFeed =
+    ensure (not publicFeed || Option.isNone supportFeed) "Public-feed validation cannot use a local support feed"
     let mode = if publicFeed then "public" else "candidate"
     let directory = Path.Combine(output, "consumers-" + mode)
     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -56,7 +57,10 @@ let prepareConsumerDirectory publicFeed =
     for project in Directory.GetFiles(examples, "*.fsproj", SearchOption.AllDirectories) do
         let doc = XDocument.Load project
         elements "ProjectReference" doc |> Array.iter _.Remove()
-        elements "PackageReference" doc |> Array.iter (fun n -> n.SetAttributeValue(xn "Condition", null))
+        elements "PackageReference" doc |> Array.iter (fun n ->
+            n.SetAttributeValue(xn "Condition", null)
+            if (attr "Include" n).StartsWith "FSharp.CloudEdge." then
+                n.SetAttributeValue(xn "Version", $"[{config.Version}]"))
         doc.Save project
     let props = Path.Combine(examples, "Examples.props")
     let doc = XDocument.Load props
@@ -65,11 +69,33 @@ let prepareConsumerDirectory publicFeed =
     |> Seq.filter (fun n -> n.Name.LocalName.Contains "CloudEdge" || n.Name.LocalName = "BuildProjectReferences" || n.Name.LocalName = "RestoreAdditionalProjectSources" || n.Attribute(xn "Condition") <> null)
     |> Seq.toArray |> Array.iter _.Remove()
     doc.Save props
-    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) (not publicFeed)
+    let supportPins = xml "ItemGroup" [] [
+        for KeyValue(id, version) in config.PublicDependencies do
+            xml "PackageReference" ["Include", id; "Version", $"[{version}]"; "Condition", "'$(ExampleKind)' != 'DotNet'"] []
+    ]
+    doc.Root.Add supportPins
+    doc.Save props
+    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) (not publicFeed) supportFeed
     mode, directory
 
-let buildExamples (projects: string array) publicFeed emit =
-    let mode, directory = prepareConsumerDirectory publicFeed
+let recordResolvedPackages directory name project =
+    use assets = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(Path.GetDirectoryName(project: string), "obj/project.assets.json")))
+    let packages = assets.RootElement.GetProperty("libraries").EnumerateObject()
+                   |> Seq.filter (fun p -> p.Value.GetProperty("type").GetString() = "package")
+                   |> Seq.map _.Name |> Seq.sort |> Seq.toArray
+    for package in packages do
+        let parts = package.Split('/')
+        let id, version = parts[0], parts[1]
+        if id.StartsWith "FSharp.CloudEdge." then ensure (version = config.Version) $"Consumer resolved {package}; expected {config.Version}"
+        match config.PublicDependencies.TryGetValue id with
+        | true, expected -> ensure (version = expected) $"Consumer resolved {package}; expected {expected}"
+        | _ -> ()
+    let destination = Path.Combine(directory, "resolved-packages")
+    mkdir destination
+    writeJson (Path.Combine(destination, name + ".json")) packages
+
+let buildExamples (projects: string array) publicFeed emit supportFeed =
+    let mode, directory = prepareConsumerDirectory publicFeed supportFeed
     let tool = if emit then installFable directory else ""
     let results = ResizeArray<ConsumerResult>()
     for index, original in Array.indexed projects do
@@ -81,6 +107,7 @@ let buildExamples (projects: string array) publicFeed emit =
         let mutable error = ""
         try
             run "dotnet" ["build"; project; "-c"; "Release"; "--nologo"] (Path.Combine(directory, "logs", name + "-build.log"))
+            recordResolvedPackages directory name project
             built <- true
             let kind = elements "ExampleKind" (XDocument.Load project) |> Array.tryHead
             if emit && (kind |> Option.forall (fun n -> n.Value <> "DotNet")) then
@@ -96,14 +123,17 @@ let buildExamples (projects: string array) publicFeed emit =
 
 // Public dependency regression: an erased binding can compile even when a package
 // omits the source Fable needs for ordinary inline helpers. Test that separately.
-let checkSupport () =
-    let directory = Path.Combine(output, "public-support")
+let checkSupport supportFeed =
+    let label = if Option.isSome supportFeed then "candidate-support" else "public-support"
+    let directory = Path.Combine(output, label)
+    if Directory.Exists directory then Directory.Delete(directory, true)
     mkdir directory
-    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) false
+    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) false supportFeed
     let tool = installFable directory
     for file in ["Smoke.fs"; "UpstreamHelpers.fs"] do
         copyFile (Path.Combine(root, "tests/SupportPackage", file)) (Path.Combine(directory, file))
     let version = config.PublicDependencies["Xantham.Fable.Core"]
+    let tsVersion = config.PublicDependencies["Xantham.Fable.Core.TS"]
     let project = Path.Combine(directory, "PublicSupport.fsproj")
     xml "Project" ["Sdk", "Microsoft.NET.Sdk"] [
         xml "PropertyGroup" [] [valueElement "TargetFramework" "net8.0"]
@@ -112,11 +142,12 @@ let checkSupport () =
             xml "Compile" ["Include", "UpstreamHelpers.fs"] []
             xml "PackageReference" ["Include", "Fable.Core"; "Version", "5.2.0"] []
             xml "PackageReference" ["Include", "Xantham.Fable.Core"; "Version", $"[{version}]"] []
+            xml "PackageReference" ["Include", "Xantham.Fable.Core.TS"; "Version", $"[{tsVersion}]"] []
         ]
     ] |> saveXml project
     run "dotnet" ["build"; project; "--nologo"] (Path.Combine(directory, "logs/build.log"))
     run tool [project; "--outDir"; Path.Combine(directory, "js")] (Path.Combine(directory, "logs/fable.log"))
-    printfn "Public Xantham support %s builds and emits through Fable" version
+    printfn "%s %s builds and emits through Fable" label version
 
 let normalized (text: string) =
     text.Replace("\r\n", "\n").Split('\n') |> Array.map _.TrimEnd() |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev

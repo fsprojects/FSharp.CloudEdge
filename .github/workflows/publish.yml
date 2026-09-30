@@ -20,6 +20,23 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  support:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Check public Fable support helpers
+        run: dotnet run --project tools/NuGetRelease -- support
+      - name: Retain support verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-support-check
+          path: artifacts/nuget-release/0.1.0/public-support/logs/
+
   validate:
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
@@ -31,13 +48,11 @@ jobs:
       - name: Check release tooling
         run: dotnet run --project tools/NuGetRelease -- check
       - name: Pack selected libraries
-        run: dotnet run --project tools/NuGetRelease -- pack
+        run: dotnet run --project tools/NuGetRelease -- pack --jobs 2
       - name: Compile package-only consumers
         run: dotnet run --project tools/NuGetRelease -- examples --fable
       - name: Check documentation excerpts
         run: dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
-      - name: Check public Fable support helpers
-        run: dotnet run --project tools/NuGetRelease -- support
       - name: Retain candidates and verification evidence
         if: always()
         uses: actions/upload-artifact@v7
@@ -48,12 +63,11 @@ jobs:
             artifacts/nuget-release/0.1.0/manifest.json
             artifacts/nuget-release/0.1.0/consumers-candidate/results.json
             artifacts/nuget-release/0.1.0/consumers-candidate/logs/
-            artifacts/nuget-release/0.1.0/staged/**/pack.log
-            artifacts/nuget-release/0.1.0/public-support/logs/
+            artifacts/nuget-release/0.1.0/pack-logs/
 
   publish:
     if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.publish)
-    needs: validate
+    needs: [validate, support]
     runs-on: ubuntu-latest
     environment: production
     permissions:

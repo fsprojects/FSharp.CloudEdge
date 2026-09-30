@@ -41,6 +41,12 @@ let jsonOptions = JsonSerializerOptions(PropertyNamingPolicy = JsonNamingPolicy.
 let readJson<'T> path = JsonSerializer.Deserialize<'T>(File.ReadAllText path, jsonOptions)
 let writeJson path value = File.WriteAllText(path, JsonSerializer.Serialize(value, jsonOptions) + "\n")
 let config = readJson<ReleaseConfig> (Path.Combine(root, "config/nuget-release.json"))
+let sampleVersion =
+    let version = Version.Parse config.Version
+    $"{version.Major}.{version.Minor}.*"
+let patchRange (version: string) =
+    let parsed = Version.Parse version
+    $"[{version},{parsed.Major}.{parsed.Minor + 1}.0)"
 let output = Path.Combine(root, "artifacts/nuget-release", config.Version)
 let feed = Path.Combine(output, "packages")
 let ensure condition message = if not condition then failwith message
@@ -83,11 +89,14 @@ let capture executable arguments =
     ensure (proc.ExitCode = 0) $"{executable} failed"
     result.Trim()
 
-let writeNuGetConfig path cache candidate =
+let writeNuGetConfig path cache candidate supportFeed =
     let source name url = xml "add" ["key", name; "value", url] []
     let sources = [
         xml "clear" [] []
         if candidate then source "candidate" feed
+        match supportFeed with
+        | Some directory -> source "support-candidate" (Path.GetFullPath directory)
+        | None -> ()
         source "nuget.org" "https://api.nuget.org/v3/index.json"
     ]
     let mapping name pattern = xml "packageSource" ["key", name] [xml "package" ["pattern", pattern] []]
@@ -96,6 +105,10 @@ let writeNuGetConfig path cache candidate =
         xml "packageSources" [] sources
         xml "packageSourceMapping" [] [
             if candidate then mapping "candidate" "FSharp.CloudEdge.*"
+            if Option.isSome supportFeed then
+                xml "packageSource" ["key", "support-candidate"] [
+                    for id in config.PublicDependencies.Keys do xml "package" ["pattern", id] []
+                ]
             mapping "nuget.org" "*"
         ]
     ] |> saveXml path

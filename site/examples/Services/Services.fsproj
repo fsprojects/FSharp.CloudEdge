@@ -1,21 +1,21 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Support.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.Workers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Containers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Containers" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Containers/FSharp.CloudEdge.Runtime.Containers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Actors" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Actors" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Actors/FSharp.CloudEdge.Runtime.Actors.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.WorkersOauthProvider" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.WorkersOauthProvider" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.WorkersOauthProvider/FSharp.CloudEdge.Runtime.WorkersOauthProvider.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.KvAssetHandler" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.KvAssetHandler" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.KvAssetHandler/FSharp.CloudEdge.Runtime.KvAssetHandler.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Cabidela" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Cabidela" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Cabidela/FSharp.CloudEdge.Runtime.Cabidela.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="FSharp.CloudEdge.Runtime.Chanfana" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Chanfana" Version="0.1.*" Condition="'$(CloudEdgeUseSource)' != 'true'" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Services/FSharp.CloudEdge.Runtime.Chanfana/FSharp.CloudEdge.Runtime.Chanfana.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>

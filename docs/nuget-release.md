@@ -75,20 +75,24 @@ From the repository root:
 ```bash
 dotnet run --project tools/NuGetRelease -- plan
 dotnet run --project tools/NuGetRelease -- check
-dotnet run --project tools/NuGetRelease -- pack
+dotnet run --project tools/NuGetRelease -- pack --jobs 2
 dotnet run --project tools/NuGetRelease -- verify
 dotnet run --project tools/NuGetRelease -- examples --fable
 dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
 dotnet run --project tools/NuGetRelease -- support
 ```
 
-The pack step compiles the large shared API assembly and can take several minutes. Outputs are under `artifacts/nuget-release/0.1.0`. `manifest.json` records package hashes and dependency order. Consumer validation stages all 19 site projects with package references only, uses a fresh package cache, builds them, and compiles Worker examples through Fable. Logs and partial results remain available if a check fails. This validates packaging and compilation, not hosted Cloudflare service behavior.
+The pack step compiles the large shared API assembly and can take several minutes. It builds that assembly alone, then groups independent projects into temporary solutions and invokes native MSBuild with `-maxcpucount:2`. Each group finishes packing before its dependents restore. `--jobs N` adjusts the process limit; the default is at most two processes. Use `--jobs 1` for serial builds or a larger value on a machine with enough CPU and memory.
+
+Outputs are under `artifacts/nuget-release/0.1.0`. `pack-logs/` contains the generated solutions, text logs, and MSBuild binary logs. `manifest.json` records package hashes and dependency order. Consumer validation stages all 19 site projects with package references only, uses a fresh package cache, builds them, and compiles Worker examples through Fable. Logs and partial results remain available if a check fails. This validates packaging and compilation, not hosted Cloudflare service behavior.
 
 Inspect the README, license, dependency versions, source assets, and emitted imports before publishing. The Xantham support packages are owned upstream; use their public packages and report reproducible compatibility failures to their maintainer instead of publishing replacements under those IDs.
 
 ## Publish and verify the public feed
 
 Run the **NuGet** workflow on `main` with **publish disabled** first. It builds candidates, checks consumers, and uploads the packages and verification evidence as an artifact. Fix failures before requesting the actual release.
+
+GitHub runs the public support-helper probe in a separate job alongside package validation, so upstream failures appear early. The publication job requires both jobs to succeed. Package compilation uses two MSBuild processes on the standard runner; uploads remain ordered by dependency.
 
 When account ownership, the Trusted Publishing policy, and candidate checks are complete, push the release tag **`v0.1.0`**, or run the workflow manually with **publish enabled**. GitHub repeats validation, obtains temporary credentials, then uploads packages in the manifest's dependency order. A partial upload is possible: NuGet publication is not a transaction across 47 packages. The workflow stops on an upload error rather than silently skipping an existing version. Inspect ownership, versions, and package contents before deciding how to resume.
 
