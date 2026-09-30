@@ -8,7 +8,7 @@ layout: splash
 <div class="ce-hero__copy">
 <span class="ce-chip"><b>0.1.0</b> MIT licensed</span>
 <h1 class="ce-wordmark">FSharp<span class="ce-dot">.</span>CloudEdge</h1>
-<p class="ce-line">Build web products on Cloudflare, in F#.</p>
+<p class="ce-line">Build intelligent products on Cloudflare with F#.</p>
 <p class="ce-why">F# developers deserve a first-class experience for building on Cloudflare. And Cloudflare gets a first-class functional language that can honor its contracts and make the Fable Compiler's original promise of “<a href="https://fable.io">JavaScript you can be proud of</a>” a new level of integrity.</p>
 <p class="ce-sub">Cloudflare runs your code <i>at cloud's edge,</i> close to your users, and provides modern, responsive agentic tools. You can start with a free plan that covers 100,000 Worker requests per day. FSharp.CloudEdge makes the full array of Cloudflare products and services available in F#, from dynamic web pages to agentic AI capabilities.</p>
 <div class="ce-actions">
