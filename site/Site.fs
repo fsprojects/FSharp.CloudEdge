@@ -8,6 +8,8 @@ open Partas.Nacara.Theme
 
 let baseUrl = "/FSharp.CloudEdge/"
 
+let private nugetUrl = "https://www.nuget.org/packages?q=FSharp.CloudEdge"
+
 let private themeCss name =
     File.ReadAllText (Path.Combine (__SOURCE_DIRECTORY__, "theme", name))
 
@@ -262,7 +264,11 @@ let theme =
                     Menu.page "libraries/control-plane/clients.md"
                 ]
         ]
-    |> Theme.navbarEnd [ NavbarIcon ("GitHub", "https://github.com/fsprojects/FSharp.CloudEdge", Icons.github) ]
+    |> Theme.navbarEnd
+        [
+            NavbarLink ("NuGet", nugetUrl)
+            NavbarIcon ("GitHub", "https://github.com/fsprojects/FSharp.CloudEdge", Icons.github)
+        ]
     |> Theme.editUrl "https://github.com/fsprojects/FSharp.CloudEdge/edit/main/site"
     |> Theme.lightTokens lightColours
     |> Theme.darkTokens darkColours
@@ -275,6 +281,8 @@ let theme =
         Html.p
             [
                 Html.text "FSharp.CloudEdge · MIT · "
+                Html.a [ prop.href nugetUrl; prop.text "NuGet" ]
+                Html.text " · "
                 Html.a [ prop.href "https://github.com/fsprojects/FSharp.CloudEdge"; prop.text "GitHub" ]
                 Html.text " · Built with Nacara"
             ]

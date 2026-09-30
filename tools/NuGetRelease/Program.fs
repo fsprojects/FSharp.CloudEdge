@@ -24,7 +24,12 @@ let main args =
             let jobs = count |> Option.map Int32.Parse |> Option.defaultValue (max 1 (min 2 Environment.ProcessorCount))
             Packages.inventory () |> Packages.pack jobs
         | ["verify"] -> Packages.inventory () |> Packages.verify
-        | ["availability"] -> Packages.inventory () |> Packages.availability
+        | "availability" :: options ->
+            let duration, unknown = takeOption "--wait-minutes" options
+            ensure (List.isEmpty unknown) "Usage: availability [--wait-minutes N]"
+            let minutes = duration |> Option.map Int32.Parse |> Option.defaultValue 0
+            ensure (minutes >= 0) "The availability wait cannot be negative"
+            Packages.inventory () |> Packages.availability minutes
         | ["audit"] -> Packages.inventory () |> Consumers.audit |> ignore
         | ["check"] -> Checks.runChecks ()
         | ["support"] -> Consumers.checkSupport ()
@@ -35,7 +40,7 @@ let main args =
             Consumers.buildExamples projects (List.contains "--public" options) (List.contains "--fable" options)
         | ["snippets"] -> Consumers.checkSnippets None
         | ["snippets"; "--js-root"; path] -> Consumers.checkSnippets (Some(Path.GetFullPath path))
-        | _ -> failwith "Commands: plan | pack [--jobs N] | verify | availability | audit | check | support | examples [--public] [--fable] | snippets [--js-root PATH] | publish --confirm VERSION"
+        | _ -> failwith "Commands: plan | pack [--jobs N] | verify | availability [--wait-minutes N] | audit | check | support | examples [--public] [--fable] | snippets [--js-root PATH] | publish --confirm VERSION"
         0
     with ex ->
         eprintfn "%s" ex.Message

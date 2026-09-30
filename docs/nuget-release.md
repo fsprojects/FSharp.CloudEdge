@@ -1,6 +1,6 @@
 # NuGet release and publisher setup
 
-FSharp.CloudEdge's first release targets **0.1.0** for the 47 projects selected in `FSharp.CloudEdge.Bindings.slnx`. **GitHub Actions builds, validates, and publishes the packages.** Like Furnace, the workflow supports `v*` release tags and manual dispatch. A `v0.1.0` tag must match the configured package version. Local commands below reproduce the checks when investigating a failure; maintainers do not need to upload packages manually.
+FSharp.CloudEdge **0.1.0** is published for the 47 projects selected in `FSharp.CloudEdge.Bindings.slnx`. [Browse the packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). **GitHub Actions builds, validates, and publishes the packages.** Like Furnace, the workflow supports `v*` release tags and manual dispatch. A release tag must match the configured package version. Local commands below reproduce the checks when investigating a failure; maintainers do not need to upload packages manually.
 
 NuGet account ownership and publishing authorization are setup tasks independent of GitHub repository administration. This workflow uses **NuGet Trusted Publishing** with GitHub OIDC. GitHub obtains temporary publishing credentials for each run.
 
@@ -8,7 +8,7 @@ NuGet account ownership and publishing authorization are setup tasks independent
 
 The release uses the published **0.1.0** versions of `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` from nuget.org. `publicDependencies` in `config/nuget-release.json` records those versions. Publishing CloudEdge does not require publishing or modifying Xantham.
 
-Release validation builds the 19 site example projects against the candidate CloudEdge packages and public external dependencies, then compiles the Fable examples and checks the site's code snippets. Isolated package caches and resolved-package reports make those checks reproducible. The intended first CloudEdge release remains **0.1.0** until its packages have been published successfully.
+Release validation builds the 19 site example projects against the candidate CloudEdge packages and public external dependencies, then compiles the Fable examples and checks the site's code snippets. Isolated package caches and resolved-package reports make those checks reproducible. Verification of the published **0.1.0** release uses the same consumers with nuget.org as their only source.
 
 The `support` check restores both public Xantham packages, compiles `tests/SupportPackage/Smoke.fs` with .NET and Fable, and executes its key-value and indexer checks in JavaScript. This covers the support bindings used by CloudEdge; upstream inline helper functions are outside this release gate.
 
@@ -48,7 +48,7 @@ Sign into NuGet.org as **houstonhaynes** and create a **Trusted Publishing** pol
 | Scope | Push new packages and package versions |
 | Glob Patterns and Packages | `FSharp.CloudEdge.*` |
 
-Enter the filename only, without `.github/workflows/`. Enter `FSharp.CloudEdge.*` as one line in **Glob Patterns and Packages**. The first release creates 47 new package IDs, so the policy must permit new packages as well as new versions. [NuGet Trusted Publishing setup](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing).
+Enter the filename only, without `.github/workflows/`. Enter `FSharp.CloudEdge.*` as one line in **Glob Patterns and Packages**. The policy covers all 47 package IDs and permits new packages as well as new versions. [NuGet Trusted Publishing setup](https://learn.microsoft.com/en-us/nuget/nuget-org/trusted-publishing).
 
 In **fsprojects/FSharp.CloudEdge → Settings → Environments**, create the **`production` environment**, matching the policy and publication job. Configure environment branch/tag rules to permit `main` and `v*` release tags as appropriate. The repository owner is `fsprojects`; the NuGet package owner and login user are `houstonhaynes`. These fields identify different things.
 
@@ -86,13 +86,15 @@ Inspect the README, license, dependency versions, source assets, and emitted imp
 
 ## Publish and verify the public feed
 
+**0.1.0 has already been uploaded.** Use **verify_only** to check that release again. The upload instructions below apply to a new, unpublished release version.
+
 Run the **NuGet** workflow on `main` with **publish disabled** first. It builds candidates, checks consumers, and uploads the packages and verification evidence as an artifact. Fix failures before requesting the actual release.
 
 After committing and merging fixes into `main`, use **Actions → NuGet → Run workflow**, choose `main`, and leave **publish** unchecked. The equivalent command is `gh workflow run publish.yml --ref main -f publish=false`. Here `publish.yml` is the workflow filename and `-f publish=false` supplies its boolean input. Rerunning the old tag's job uses the old commit; dispatching on `main` picks up the merged fixes without changing the package version or moving the tag. Enable **publish** only when ready to upload.
 
 GitHub runs the public support binding check alongside candidate package and consumer validation. The publication job requires both jobs to succeed. Package compilation uses two MSBuild processes on the standard runner; uploads remain ordered by dependency.
 
-When account ownership, the Trusted Publishing policy, and candidate checks are complete, push the release tag **`v0.1.0`**, or run the workflow manually with **publish enabled**. GitHub repeats validation, obtains temporary credentials, then uploads packages in the manifest's dependency order. A partial upload is possible: NuGet publication is not a transaction across 47 packages. The workflow stops on an upload error rather than silently skipping an existing version. Inspect ownership, versions, and package contents before deciding how to resume.
+For a new release, when account ownership, the Trusted Publishing policy, and candidate checks are complete, push the matching **`v*` release tag**, or run the workflow manually with **publish enabled**. GitHub repeats validation, obtains temporary credentials, then uploads packages in the manifest's dependency order. A partial upload is possible: NuGet publication is not a transaction across 47 packages. The workflow stops on an upload error rather than silently skipping an existing version. Inspect ownership, versions, and package contents before deciding how to resume.
 
 NuGet package versions are immutable. Do not publish a placeholder `0.1.0` as a test. If an uploaded version is wrong, unlisting does not free that version for replacement; publish a corrected version. [NuGet publication behavior](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/publish-nuget-package).
 
@@ -103,6 +105,8 @@ dotnet run --project tools/NuGetRelease -- availability
 dotnet run --project tools/NuGetRelease -- examples --fable --public
 ```
 
-The workflow performs these public checks after pushing. A processing delay can make the checks fail even after an upload succeeds. Resolve public availability and repeat the checks before announcing success; do not republish different bytes with the same version.
+The workflow performs these public checks in a separate `verify-public` job after pushing. Availability checks wait up to 60 minutes for NuGet processing, retrying pending packages and temporary network/server failures every 30 seconds. `availability` alone checks once; `availability --wait-minutes 60` enables the same wait locally. NuGet validation and indexing are asynchronous after a successful upload. [NuGet processing](https://learn.microsoft.com/en-us/nuget/nuget-org/publish-a-package#package-validation-and-indexing).
 
-Finally, update the release-availability paragraph in `site/content/guide/packages.md`, deploy the site, and announce the release. Package IDs, `0.1.0` references, and NuGet URLs can be prepared beforehand with that pending-release notice. The beginner path should not claim public installation works until the public consumer checks pass.
+If public verification times out after successful uploads, rerun only the failed verification job. To verify packages from a previous run, dispatch the workflow on `main` with **verify_only** checked; that mode skips candidate builds, authentication, and uploads, even if **publish** is also checked. The command is `gh workflow run publish.yml --ref main -f verify_only=true`. Publication logs and public consumer results are retained as separate artifacts. A verification failure does not undo an upload or require a version bump; do not repeat the upload of an existing version.
+
+For future releases, update the availability paragraph in `site/content/guide/packages.md` and the catalog's versioned NuGet links after public verification, then deploy the site and announce the release.

@@ -173,21 +173,67 @@ let pack jobs (projects: Package array) =
     writeJson (Path.Combine(output, "manifest.json")) (projects |> Array.map (inspectPackage feed))
     verify projects
 
-let availability (projects: Package array) =
-    use client = new HttpClient(Timeout = TimeSpan.FromSeconds 30.)
-    let mutable missing = 0
-    for project in projects do
-        let url = $"https://api.nuget.org/v3-flatcontainer/{project.Id.ToLowerInvariant()}/index.json"
-        use response = client.GetAsync(url).Result
-        let found =
-            if response.StatusCode = HttpStatusCode.NotFound then false
+type PackageAvailability = Available | Pending of string
+
+let retryAvailabilityStatus (status: HttpStatusCode) =
+    status = HttpStatusCode.NotFound || status = HttpStatusCode.RequestTimeout ||
+    int status = 429 || (int status >= 500 && int status <= 599)
+
+// The clock and probe are injected so deadline handling can be checked without
+// network requests or real delays. Packages already visible need no more polling.
+let waitForAvailability waitDuration now pause probe report (ids: string array) =
+    ensure (waitDuration >= TimeSpan.Zero) "The availability wait must not be negative"
+    let interval = TimeSpan.FromSeconds 30.
+    let started = now ()
+    let elapsed () = now () - started
+    let remaining () = waitDuration - elapsed ()
+    let mutable pending = ids |> Array.map (fun id -> id, "not checked before the deadline")
+    let mutable finished = false
+    while not finished do
+        pending <- pending |> Array.choose (fun (id, reason) ->
+            let budget = remaining ()
+            if waitDuration > TimeSpan.Zero && budget <= TimeSpan.Zero then Some (id, reason)
+            else
+                let timeout = if waitDuration = TimeSpan.Zero then interval else min interval budget
+                match probe id timeout with
+                | Available -> None
+                | Pending detail -> Some (id, detail))
+        report (elapsed ()) pending
+        finished <- pending.Length = 0 || waitDuration = TimeSpan.Zero || remaining () <= TimeSpan.Zero
+        if not finished then
+            let delay = min interval (remaining ())
+            if delay > TimeSpan.Zero then pause delay
+    pending
+
+let availability waitMinutes (projects: Package array) =
+    ensure (waitMinutes >= 0) "The availability wait must not be negative"
+    use client = new HttpClient(Timeout = Threading.Timeout.InfiniteTimeSpan)
+    let probe (id: string) timeout =
+        let url = $"https://api.nuget.org/v3-flatcontainer/{id.ToLowerInvariant()}/index.json"
+        use cancellation = new Threading.CancellationTokenSource(timeout: TimeSpan)
+        try
+            use response = client.GetAsync(url, cancellation.Token).GetAwaiter().GetResult()
+            if retryAvailabilityStatus response.StatusCode then
+                Pending $"HTTP {int response.StatusCode}"
             else
                 response.EnsureSuccessStatusCode() |> ignore
-                use doc = JsonDocument.Parse(response.Content.ReadAsStringAsync().Result)
-                doc.RootElement.GetProperty("versions").EnumerateArray() |> Seq.exists (fun v -> v.GetString() = config.Version)
-        printfn "%s %s %s" (if found then "available" else "MISSING") project.Id config.Version
-        if not found then missing <- missing + 1
-    ensure (missing = 0) $"{missing} packages are not available on nuget.org"
+                use doc = JsonDocument.Parse(response.Content.ReadAsStringAsync(cancellation.Token).GetAwaiter().GetResult())
+                if doc.RootElement.GetProperty("versions").EnumerateArray() |> Seq.exists (fun v -> v.GetString() = config.Version) then
+                    printfn "available %s %s" id config.Version
+                    Available
+                else Pending "version not yet in the public index"
+        with
+        | :? OperationCanceledException -> Pending "request timed out"
+        | :? HttpRequestException as error when not error.StatusCode.HasValue -> Pending $"network error: {error.Message}"
+    let clock = Diagnostics.Stopwatch.StartNew()
+    let report (elapsed: TimeSpan) pending =
+        printfn "%d/%d packages available after %.0f seconds; %d pending" (projects.Length - Array.length pending) projects.Length elapsed.TotalSeconds (Array.length pending)
+    let pending =
+        waitForAvailability (TimeSpan.FromMinutes(float waitMinutes)) (fun () -> clock.Elapsed)
+            (fun duration -> Threading.Thread.Sleep(duration: TimeSpan)) probe report (projects |> Array.map _.Id)
+    for id, reason in pending do printfn "PENDING %s %s: %s" id config.Version reason
+    ensure (pending.Length = 0)
+        $"{pending.Length} packages were not confirmed available on nuget.org within {waitMinutes} minute(s). Uploads may already have succeeded; do not republish or bump the version. Retry the availability check, then public-consumer verification."
 
 let publish (projects: Package array) confirmedVersion =
     ensure (confirmedVersion = config.Version) "Publication confirmation must match the configured release version"

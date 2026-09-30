@@ -11,6 +11,11 @@ on:
         type: boolean
         default: false
         required: true
+      verify_only:
+        description: Verify existing public packages without rebuilding or uploading
+        type: boolean
+        default: false
+        required: true
 
 permissions:
   contents: read
@@ -21,7 +26,7 @@ concurrency:
 
 jobs:
   support:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    if: ${{ !inputs.verify_only && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -38,7 +43,7 @@ jobs:
           path: artifacts/nuget-release/0.1.0/public-support/logs/
 
   validate:
-    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    if: ${{ !inputs.verify_only && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -67,7 +72,7 @@ jobs:
             artifacts/nuget-release/0.1.0/pack-logs/
 
   publish:
-    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.publish)
+    if: ${{ !inputs.verify_only && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.publish)) }}
     needs: [validate, support]
     runs-on: ubuntu-latest
     environment: production
@@ -94,7 +99,36 @@ jobs:
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: dotnet run --project tools/NuGetRelease -- publish --confirm 0.1.0
+      - name: Retain publication logs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-publication-logs
+          path: artifacts/nuget-release/0.1.0/publish-logs/
+
+  verify-public:
+    if: >-
+      always() && !cancelled() &&
+      (needs.publish.result == 'success' ||
+       (github.event_name == 'workflow_dispatch' && inputs.verify_only && github.ref == 'refs/heads/main'))
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
       - name: Confirm public availability
-        run: dotnet run --project tools/NuGetRelease -- availability
+        timeout-minutes: 65
+        run: dotnet run --project tools/NuGetRelease -- availability --wait-minutes 60
       - name: Compile against NuGet.org alone
         run: dotnet run --project tools/NuGetRelease -- examples --fable --public
+      - name: Retain public consumer evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-public-consumers
+          path: |
+            artifacts/nuget-release/0.1.0/consumers-public/results.json
+            artifacts/nuget-release/0.1.0/consumers-public/logs/
+            artifacts/nuget-release/0.1.0/consumers-public/resolved-packages/

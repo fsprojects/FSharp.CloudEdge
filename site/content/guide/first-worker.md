@@ -14,7 +14,7 @@ order: 4
 
 ## Project Folder
 
-Create the application anywhere convenient. It restores `FSharp.CloudEdge.Runtime.Workers` from the `0.1.*` patch series on NuGet; no sibling library checkout is required. See [Packages](packages.md) for release availability and candidate-feed testing.
+Create the application anywhere convenient. It restores [`FSharp.CloudEdge.Runtime.Workers`](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers) from the `0.1.*` patch series on NuGet; no sibling library checkout is required. See [Packages](packages.md) for installation guidance and links to the full package family.
 
 1. Open a terminal in the folder where you keep your projects.
 2. Create `hello-worker` and enter it.

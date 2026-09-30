@@ -3,11 +3,63 @@ module NuGetRelease.Checks
 open System
 open System.IO
 open System.IO.Compression
+open System.Net
 open NuGetRelease.Common
 open NuGetRelease.Packages
 open NuGetRelease.Consumers
 
+let checkAvailabilityPolling () =
+    let seconds (value: float) = TimeSpan.FromSeconds value
+    let mutable elapsed = TimeSpan.Zero
+    let now () = elapsed
+    let pauses = ResizeArray<TimeSpan>()
+    let pause duration = pauses.Add duration; elapsed <- elapsed + duration
+    let ignoreReport _ _ = ()
+    let calls = ResizeArray<string>()
+    let eventual id _ =
+        calls.Add id
+        if id = "First" || elapsed >= seconds 30. then Available else Pending "indexing"
+    let pending = waitForAvailability (seconds 90.) now pause eventual ignoreReport [|"First"; "Second"|]
+    ensure (pending.Length = 0 && calls.ToArray() = [|"First"; "Second"; "Second"|]) "Availability must retry pending packages and stop checking available packages"
+    ensure (pauses.ToArray() = [|seconds 30.|]) "Availability must stop waiting as soon as all packages are visible"
+
+    elapsed <- TimeSpan.Zero
+    pauses.Clear()
+    calls.Clear()
+    let absent id _ = calls.Add id; Pending "indexing"
+    let pending = waitForAvailability (seconds 45.) now pause absent ignoreReport [|"First"|]
+    ensure (pending = [|"First", "indexing"|] && calls.Count = 2) "Availability must retain pending packages at the deadline"
+    ensure (elapsed = seconds 45. && pauses.ToArray() = [|seconds 30.; seconds 15.|]) "Availability polling exceeded its time budget"
+
+    elapsed <- TimeSpan.Zero
+    pauses.Clear()
+    calls.Clear()
+    let pending = waitForAvailability TimeSpan.Zero now pause absent ignoreReport [|"First"; "Second"|]
+    ensure (pending.Length = 2 && calls.Count = 2 && pauses.Count = 0) "Zero wait must check every package once without sleeping"
+
+    elapsed <- TimeSpan.Zero
+    calls.Clear()
+    let slow id timeout =
+        calls.Add id
+        ensure (timeout = seconds 5.) "Request timeout must fit within the remaining availability budget"
+        elapsed <- elapsed + timeout
+        Pending "request timed out"
+    let pending = waitForAvailability (seconds 5.) now pause slow ignoreReport [|"First"; "Second"|]
+    ensure (pending.Length = 2 && calls.ToArray() = [|"First"|] && elapsed = seconds 5.) "Requests must not continue after the availability deadline"
+
+    for status in [HttpStatusCode.NotFound; HttpStatusCode.RequestTimeout; HttpStatusCode.TooManyRequests; HttpStatusCode.InternalServerError; HttpStatusCode.ServiceUnavailable] do
+        ensure (retryAvailabilityStatus status) $"Availability should retry HTTP {int status}"
+    for status in [HttpStatusCode.OK; HttpStatusCode.BadRequest; HttpStatusCode.Unauthorized; HttpStatusCode.Forbidden] do
+        ensure (not (retryAvailabilityStatus status)) $"Availability should not retry HTTP {int status}"
+    pauses.Clear()
+    let mutable permanentFailure = false
+    try
+        waitForAvailability (seconds 90.) now pause (fun _ _ -> invalidOp "HTTP 403") ignoreReport [|"First"|] |> ignore
+    with :? InvalidOperationException as error -> permanentFailure <- error.Message = "HTTP 403"
+    ensure (permanentFailure && pauses.Count = 0) "Permanent availability failures must propagate immediately"
+
 let runChecks () =
+    checkAvailabilityPolling ()
     let gitRef = Environment.GetEnvironmentVariable "GITHUB_REF"
     if not (isNull gitRef) && gitRef.StartsWith "refs/tags/" then
         ensure (gitRef = "refs/tags/v" + config.Version) $"Release tag must be v{config.Version}; received {gitRef}"
@@ -63,6 +115,6 @@ let runChecks () =
         expectFailure (fun () -> order [| { fixture with Dependencies = Map.ofList [fixture.Id, config.Version] } |] |> ignore)
         ensure (isExcerpt "  let x = 1\n  let y = 2" "module Test\nlet x = 1\nlet y = 2\n") "Uniform snippet indentation rejected"
         ensure (not (isExcerpt "let x = 1\n    let y = 2" "let x = 1\nlet y = 2")) "Broken snippet indentation accepted"
-        printfn "Release graph, package rejection, hash and snippet checks passed"
+        printfn "Release graph, package rejection, hash, snippet and availability checks passed"
     finally
         Directory.Delete(directory, true)

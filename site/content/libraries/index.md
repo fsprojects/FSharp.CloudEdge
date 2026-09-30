@@ -30,4 +30,4 @@ The capability pages describe integration boundaries and areas that need runtime
 
 See [installation and release availability](../guide/packages.md).
 
-The [NuGet package catalog](packages.md) lists every package ID and its versioned `0.1.0` URL.
+[Browse all FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). The [package catalog](packages.md) lists every package ID and its versioned `0.1.0` URL.

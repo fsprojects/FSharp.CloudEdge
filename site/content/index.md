@@ -14,6 +14,7 @@ layout: splash
 <div class="ce-actions">
 <a class="ce-btn ce-btn--primary" href="#building-blocks">See what you can build <svg aria-hidden="true" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m19 12-7 7-7-7"/></svg></a>
 <a class="ce-btn ce-btn--secondary" href="/FSharp.CloudEdge/libraries/">Library line-up</a>
+<a class="ce-btn ce-btn--secondary" href="https://www.nuget.org/packages?q=FSharp.CloudEdge">Browse packages on NuGet</a>
 </div>
 </div>
 <figure class="ce-code" aria-label="A Durable Object that counts requests, written in F#">

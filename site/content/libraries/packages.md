@@ -3,7 +3,9 @@ title: NuGet Package Catalog
 description: Versioned package IDs and links for the FSharp.CloudEdge 0.1.0 release.
 ---
 
-The selected release contains **47 packages**, all version **0.1.0**: 31 runtime bindings, three AI contract libraries, one Workers support library, shared API models, and eleven control-plane clients. These links name the intended public package versions. Check [release availability](../guide/packages.md#release-availability) before restoring the first release.
+The **0.1.0** release contains **47 published packages**: 31 runtime bindings, three AI contract libraries, one Workers support library, shared API models, and eleven control-plane clients.
+
+[Browse all FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). The links below open each package's **0.1.0** page; the [installation guide](../guide/packages.md) shows how to add them to your project.
 
 | Package ID | Version | Target | Consumer |
 | --- | --- | --- | --- |

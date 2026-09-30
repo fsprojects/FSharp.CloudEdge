@@ -101,6 +101,7 @@ let writeNuGetConfig path cache candidate =
         xml "config" [] [source "globalPackagesFolder" cache]
         xml "packageSources" [] sources
         xml "packageSourceMapping" [] [
+            xml "clear" [] []
             if candidate then mapping "candidate" "FSharp.CloudEdge.*"
             mapping "nuget.org" "*"
         ]
