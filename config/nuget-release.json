@@ -5,7 +5,7 @@
   "projectUrl": "https://fsprojects.github.io/FSharp.CloudEdge/",
   "authors": "FSharp.CloudEdge Contributors",
   "publicDependencies": {
-    "Xantham.Fable.Core": "0.1.1",
-    "Xantham.Fable.Core.TS": "0.1.1"
+    "Xantham.Fable.Core": "0.1.0",
+    "Xantham.Fable.Core.TS": "0.1.0"
   }
 }

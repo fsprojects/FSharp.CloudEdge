@@ -89,14 +89,11 @@ let capture executable arguments =
     ensure (proc.ExitCode = 0) $"{executable} failed"
     result.Trim()
 
-let writeNuGetConfig path cache candidate supportFeed =
+let writeNuGetConfig path cache candidate =
     let source name url = xml "add" ["key", name; "value", url] []
     let sources = [
         xml "clear" [] []
         if candidate then source "candidate" feed
-        match supportFeed with
-        | Some directory -> source "support-candidate" (Path.GetFullPath directory)
-        | None -> ()
         source "nuget.org" "https://api.nuget.org/v3/index.json"
     ]
     let mapping name pattern = xml "packageSource" ["key", name] [xml "package" ["pattern", pattern] []]
@@ -105,10 +102,6 @@ let writeNuGetConfig path cache candidate supportFeed =
         xml "packageSources" [] sources
         xml "packageSourceMapping" [] [
             if candidate then mapping "candidate" "FSharp.CloudEdge.*"
-            if Option.isSome supportFeed then
-                xml "packageSource" ["key", "support-candidate"] [
-                    for id in config.PublicDependencies.Keys do xml "package" ["pattern", id] []
-                ]
             mapping "nuget.org" "*"
         ]
     ] |> saveXml path

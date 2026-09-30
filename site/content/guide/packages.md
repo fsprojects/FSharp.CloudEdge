@@ -8,7 +8,7 @@ Application projects reference the FSharp.CloudEdge libraries by NuGet package I
 
 ## Release availability
 
-The first `0.1.0` release is being prepared. Package links and examples name the intended public versions; they do not assert that publication has completed. The release requires corrected Xantham support packages at `0.1.1` containing Fable source assets; see the [release blocker and reproduction](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/nuget-release.md#current-release-blocker). Until those dependencies are published and public validation passes, use the [contributor source build](local-build.md).
+The first `0.1.0` release is being prepared. Package links and examples name the intended public versions; they do not assert that publication has completed. The release uses the published `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` **0.1.0** packages from nuget.org. Until CloudEdge publication and public validation are complete, use the [contributor source build](local-build.md).
 
 The release order is: validate candidate packages and consumers, publish dependencies before their consumers, confirm every `0.1.0` package restores from nuget.org, then announce availability. A package page appearing in search is separate from a clean restore succeeding.
 
@@ -34,7 +34,7 @@ The NuGet feed is `https://api.nuget.org/v3/index.json`. A package page such as 
 
 ## Fable and npm dependencies
 
-CloudEdge's runtime and Fable support candidates contain their F# source as well as .NET assemblies. Fable uses that source when compiling the application to JavaScript. The Xantham support dependencies are restored by NuGet and also need those source assets; their current packaging issue is described above. Application developers do not run the binding generators.
+CloudEdge's runtime and Fable support candidates contain their F# source as well as .NET assemblies. Fable uses that source when compiling the application to JavaScript. NuGet restores the published Xantham support dependencies transitively. Release validation compiles the site's actual examples against this package combination. Application developers do not run the binding generators.
 
 NuGet does not install the upstream JavaScript SDKs. Where an example imports an npm SDK, install the exact package version shown on its library page. Worker-native APIs such as `Request`, D1, and R2 are supplied by the Workers runtime. The platform type declarations describe those APIs; they are not a JavaScript runtime implementation to bundle.
 

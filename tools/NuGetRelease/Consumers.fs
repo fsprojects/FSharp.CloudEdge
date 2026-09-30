@@ -41,13 +41,12 @@ let audit packages =
 let installFable directory =
     let tool = Path.Combine(directory, "tools", if OperatingSystem.IsWindows() then "fable.exe" else "fable")
     let source = Path.Combine(directory, "Tools.NuGet.Config")
-    writeNuGetConfig source (Path.Combine(directory, "tool-cache")) false None
+    writeNuGetConfig source (Path.Combine(directory, "tool-cache")) false
     if not (File.Exists tool) then
         run "dotnet" ["tool"; "install"; "fable"; "--version"; "5.13.0"; "--tool-path"; Path.GetDirectoryName tool; "--configfile"; source] (Path.Combine(directory, "logs/fable-install.log"))
     tool
 
-let prepareConsumerDirectory publicFeed supportFeed =
-    ensure (not publicFeed || Option.isNone supportFeed) "Public-feed validation cannot use a local support feed"
+let prepareConsumerDirectory publicFeed =
     let mode = if publicFeed then "public" else "candidate"
     let directory = Path.Combine(output, "consumers-" + mode)
     if Directory.Exists directory then Directory.Delete(directory, true)
@@ -75,7 +74,7 @@ let prepareConsumerDirectory publicFeed supportFeed =
     ]
     doc.Root.Add supportPins
     doc.Save props
-    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) (not publicFeed) supportFeed
+    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) (not publicFeed)
     mode, directory
 
 let recordResolvedPackages directory name project =
@@ -94,8 +93,8 @@ let recordResolvedPackages directory name project =
     mkdir destination
     writeJson (Path.Combine(destination, name + ".json")) packages
 
-let buildExamples (projects: string array) publicFeed emit supportFeed =
-    let mode, directory = prepareConsumerDirectory publicFeed supportFeed
+let buildExamples (projects: string array) publicFeed emit =
+    let mode, directory = prepareConsumerDirectory publicFeed
     let tool = if emit then installFable directory else ""
     let results = ResizeArray<ConsumerResult>()
     for index, original in Array.indexed projects do
@@ -121,16 +120,15 @@ let buildExamples (projects: string array) publicFeed emit supportFeed =
     ensure (failures = 0) $"{failures} package consumers failed; see {directory}/results.json"
     printfn "Passed %d isolated %s consumers" results.Count mode
 
-// Public dependency regression: an erased binding can compile even when a package
-// omits the source Fable needs for ordinary inline helpers. Test that separately.
-let checkSupport supportFeed =
-    let label = if Option.isSome supportFeed then "candidate-support" else "public-support"
-    let directory = Path.Combine(output, label)
+// Exercise the erased keys and indexers consumed by CloudEdge bindings. The
+// separate upstream-helper repro covers APIs these bindings do not call.
+let checkSupport () =
+    let directory = Path.Combine(output, "public-support")
     if Directory.Exists directory then Directory.Delete(directory, true)
     mkdir directory
-    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) false supportFeed
+    writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) false
     let tool = installFable directory
-    for file in ["Smoke.fs"; "UpstreamHelpers.fs"] do
+    for file in ["Smoke.fs"; "check.mjs"] do
         copyFile (Path.Combine(root, "tests/SupportPackage", file)) (Path.Combine(directory, file))
     let version = config.PublicDependencies["Xantham.Fable.Core"]
     let tsVersion = config.PublicDependencies["Xantham.Fable.Core.TS"]
@@ -139,15 +137,15 @@ let checkSupport supportFeed =
         xml "PropertyGroup" [] [valueElement "TargetFramework" "net8.0"]
         xml "ItemGroup" [] [
             xml "Compile" ["Include", "Smoke.fs"] []
-            xml "Compile" ["Include", "UpstreamHelpers.fs"] []
             xml "PackageReference" ["Include", "Fable.Core"; "Version", "5.2.0"] []
             xml "PackageReference" ["Include", "Xantham.Fable.Core"; "Version", $"[{version}]"] []
             xml "PackageReference" ["Include", "Xantham.Fable.Core.TS"; "Version", $"[{tsVersion}]"] []
         ]
     ] |> saveXml project
     run "dotnet" ["build"; project; "--nologo"] (Path.Combine(directory, "logs/build.log"))
-    run tool [project; "--outDir"; Path.Combine(directory, "js")] (Path.Combine(directory, "logs/fable.log"))
-    printfn "%s %s builds and emits through Fable" label version
+    run tool [project; "--outDir"; Path.Combine(directory, "fable-out")] (Path.Combine(directory, "logs/fable.log"))
+    run "node" [Path.Combine(directory, "check.mjs")] (Path.Combine(directory, "logs/runtime.log"))
+    printfn "Public support %s builds, emits through Fable and passes binding runtime assertions" version
 
 let normalized (text: string) =
     text.Replace("\r\n", "\n").Split('\n') |> Array.map _.TrimEnd() |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev

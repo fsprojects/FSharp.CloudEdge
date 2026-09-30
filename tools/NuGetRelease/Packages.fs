@@ -148,14 +148,13 @@ let verify (projects: Package array) =
     Array.iter2 (fun a b -> ensure (a.Id = b.Id && a.Version = b.Version && a.File = b.File && a.Sha256 = b.Sha256) $"Candidate differs from manifest: {a.Id}") actual expected
     printfn "Verified %d packages and manifest hashes" actual.Length
 
-let pack jobs supportFeed (projects: Package array) =
+let pack jobs (projects: Package array) =
     ensure (jobs > 0) "The build process count must be positive"
     mkdir feed
     let restoreConfig = Path.Combine(output, "NuGet.Config")
-    writeNuGetConfig restoreConfig (Path.Combine(output, "cache")) true supportFeed
-    for project in projects do
-        let cached = Path.Combine(output, "cache", project.Id.ToLowerInvariant(), config.Version)
-        if Directory.Exists cached then Directory.Delete(cached, true)
+    let cache = Path.Combine(output, "cache")
+    if Directory.Exists cache then Directory.Delete(cache, true)
+    writeNuGetConfig restoreConfig cache true
     let commit = capture "git" ["rev-parse"; "HEAD"]
     let logDirectory = Path.Combine(output, "pack-logs")
     mkdir logDirectory
