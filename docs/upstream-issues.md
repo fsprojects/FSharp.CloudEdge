@@ -1,10 +1,9 @@
 # Upstream issues
 
-CloudEdge consumes the peer generators and support library through locally packed NuGet
-packages. Bootstrap copies support source unchanged into an isolated staging directory; the
-package includes ordinary .NET assemblies plus its Fable project and source. Generated
-projects reference the support package by an exact version. Publishing community packages
-remains a maintainer action.
+These notes describe generator development and retained regression tests. Contributor
+builds use locally packed tools through [bootstrap](local-tools.md); published CloudEdge
+packages use the public Xantham support dependencies listed in
+[`config/nuget-release.json`](../config/nuget-release.json).
 
 ## Xantham support module helpers
 
@@ -55,6 +54,5 @@ those bindings and package transport; the helper regression checks the four affe
 
 Ordinary inferred helper calls keep their spelling. Explicit `keyof<Settings>` calls become
 `keyof<Settings, _>` so Fable retains the lambda's return type during property-name inference.
-Qualified helper names use `XanthamFableCore` and compiled callers must be rebuilt. These
-checks cover the named helpers and tested erased properties/indexers; further support-library
-members require their own runtime coverage.
+Qualified helper names use `XanthamFableCore`; rebuild callers when updating the support
+library.

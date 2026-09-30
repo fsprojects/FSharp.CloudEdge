@@ -19,11 +19,11 @@ npm run build:sdk -- workers containers
 npm run build:sdk -- --all --plan
 ```
 
-The default is the 112-input, 31-library server selection in
+The default is the server selection in
 [`config/sdk-delivery.json`](../config/sdk-delivery.json), plus its explicit support owners.
 It includes Agents, Sandbox, Containers, AI Gateway, Workers AI, AI Search and the selected
 server helpers. React/web-client behavior and optional integration work remain outside the
-delivery. Management stays OpenAPI → Hawaii.
+default build. Management stays OpenAPI → Hawaii.
 
 Each library selects exact public subpaths from the pinned compiler partition. Inputs left
 out require a reason; newly inventoried inputs require an explicit disposition. Included
@@ -34,7 +34,7 @@ The command retains canonical inventory metadata in `config/targets.json`. It sa
 materialized configuration in `artifacts/sdk-build/targets.json`, complete disposition
 accounting in `artifacts/sdk-build/scope.json`, and the broad partition plan in
 `artifacts/sdk-build/partitions.json`. `SDK.Partitions.slnx` contains the requested selected
-libraries and their support dependencies. A later default build restores the full delivery
+libraries and their support dependencies. A later default build restores the full server
 selection after a narrower explicit build.
 
 `artifacts/sdk-build/latest.json` distinguishes SDK inputs, support projects, generation and
@@ -43,7 +43,7 @@ the compiler, tool payload, profile, input overlays, catalog references and sour
 before reusing generation. Compilation still runs against the entire selected solution.
 
 `--all` deliberately attempts the broad inventory, including deferred integrations and
-known incomplete declaration surfaces. That command does not apply delivery-specific
+known incomplete declaration surfaces. That command does not apply the default selection's
 support injection. It is available for deliberate inventory work and does not define
-acceptance of the scoped library. The [completeness scope](CLOUDFLARE-COMPLETENESS-SCOPE-20260913.md)
-retains discovery and historical validation evidence.
+the default build. The [scope table](SDK-DELIVERY-SCOPE.md) lists the selected libraries
+and versions; `config/sdk-delivery.json` records reasons for excluded inputs.

@@ -95,11 +95,11 @@ The pinned package's [source and usage guide](https://github.com/cloudflare/agen
 - [Git tool providers](git.md)
 - [MCP tool discovery](mcp.md)
 
-## Help verify these bindings
+## Testing and feedback
 
-The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include provider type compatibility, argument and result marshalling, execution failures, and cancellation.
+Useful test cases include provider compatibility, argument and result marshalling, execution failures, and cancellation.
 
-See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+[Verify bindings](../../guide/verify-bindings.md) explains how to run checks and [report an issue](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include a small reproduction and the package versions used; working examples are welcome too.
 
 ## NuGet packages
 

@@ -88,11 +88,11 @@ Use repository-scoped tokens for Git operations. Give a reader read access and a
 - [Git tools inside a workspace](git.md)
 - [Persistent Computer workspaces](computer.md)
 
-## Help verify these bindings
+## Testing and feedback
 
-The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include repository response shapes, namespace and session naming, scoped tokens, and interoperability with a standard Git client.
+Useful test cases include repository response shapes, namespace and session naming, scoped tokens, and interoperability with a standard Git client.
 
-See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+[Verify bindings](../../guide/verify-bindings.md) explains how to run checks and [report an issue](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include a small reproduction and the package versions used; working examples are welcome too.
 
 ## NuGet packages
 

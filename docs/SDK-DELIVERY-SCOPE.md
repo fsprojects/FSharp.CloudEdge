@@ -7,7 +7,7 @@ Versions retain the installed package pins. The tables describe the selection; s
 generation and compilation are recorded separately in `artifacts/library-build/latest.json`.
 
 Management is generated separately from the pinned Cloudflare OpenAPI specification by Hawaii.
-Its accepted selection contains 3,437 operations across 12 projects, including shared models.
+The management selection contains 3,437 operations across 12 projects, including shared models.
 
 ## Runtime libraries
 

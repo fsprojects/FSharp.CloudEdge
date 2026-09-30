@@ -67,11 +67,11 @@ Shell supplies state backends and Code Mode providers. [Computer](computer.md) p
 - [Git tools](git.md)
 - [Computer workspaces](computer.md)
 
-## Help verify these bindings
+## Testing and feedback
 
-The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include persistence across Durable Object restarts, file metadata, filesystem adapters, and state-tool arguments and results.
+Useful test cases include persistence across Durable Object restarts, file metadata, filesystem adapters, and state-tool arguments and results.
 
-See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+[Verify bindings](../../guide/verify-bindings.md) explains how to run checks and [report an issue](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include a small reproduction and the package versions used; working examples are welcome too.
 
 ## NuGet packages
 

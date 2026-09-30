@@ -17,11 +17,11 @@ An agent needs somewhere to keep its state, tools it can call, an environment in
 | Speech providers and audio output | [Voice](agents/voice.md) |
 | Inbound email events | [Email agents](agents/email.md) |
 
-## Verification and contribution
+## Testing and contribution
 
-These pages describe the selected bindings and their current boundaries. Upstream feature availability, F# compilation, Fable output, local execution, and hosted acceptance are different kinds of evidence. Several upstream packages are experimental or preview, and some imported base classes cannot yet be subclassed directly from F#.
+Several upstream packages are experimental or preview, and some imported base classes cannot yet be subclassed directly from F#. Each capability page describes its current limitations.
 
-Community testing can help establish which workflows work and isolate binding defects. [Verify bindings](../guide/verify-bindings.md) explains how to reproduce a problem, share a successful runtime check, and file an issue with the versions and evidence needed to act on it.
+Try the examples in your application and share what you find. [Verify bindings](../guide/verify-bindings.md) explains how to run checks and report a reproducible problem or a working integration.
 
 ## Give it a working environment
 
@@ -40,7 +40,7 @@ The [execution environments guide](compute.md) compares the runtime choices. Art
 
 Create an agent identity for the task, give it a branch or repository for its work, and make those files available in a workspace or sandbox. Expose the tools the task needs. After execution, inspect the diff and test results, publish the chosen revision, and save its identity with the task result. The [Artifacts workflow](agents/artifacts.md#a-versioned-agent-workflow) walks through those boundaries.
 
-## Examples from the original page
+## Examples
 
 - <span id="game-lobby"></span>[Game Lobby — Agents SDK](agents/sdk.md#game-lobby)
 - <span id="team-channel"></span>[Team Channel — Agents SDK](agents/sdk.md#team-channel)

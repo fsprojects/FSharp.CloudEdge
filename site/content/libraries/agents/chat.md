@@ -76,11 +76,11 @@ Treat persisted conversation history as application data with a version. When up
 - [MCP connections](mcp.md)
 - [Voice](voice.md)
 
-## Help verify these bindings
+## Testing and feedback
 
-The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include the imported-class binding gap, helper compatibility with stored messages, and chat lifecycle behavior through any adapter used.
+Useful test cases include history migration with stored messages and chat lifecycle behavior through your JavaScript adapter.
 
-See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+[Verify bindings](../../guide/verify-bindings.md) explains how to run checks and [report an issue](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include a small reproduction and the package versions used; working examples are welcome too.
 
 ## NuGet packages
 

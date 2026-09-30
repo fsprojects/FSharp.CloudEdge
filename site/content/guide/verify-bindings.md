@@ -4,11 +4,11 @@ description: Help establish which Cloudflare workflows work from F#, and report 
 order: 6
 ---
 
-Cloudflare's newer execution and agent APIs open up useful possibilities for F# applications. These bindings need community testing to establish where that promise holds in practice. A small reproducible failure, a documented workaround, or a successful runtime check can all help mature the implementation.
+Help improve the bindings by trying them in your application. Share a small reproduction when something fails, a workaround that helps, or a working example others can run.
 
-## What the evidence establishes
+## Choose the check for your change
 
-| Check | What it establishes |
+| Check | What it covers |
 | --- | --- |
 | F# compilation | The selected types and calls compose in the checked consumer |
 | Fable output inspection | Imports, arguments, and emitted calls have the expected shape |
@@ -16,9 +16,9 @@ Cloudflare's newer execution and agent APIs open up useful possibilities for F# 
 | Hosted execution | The exercised behavior works with the recorded Cloudflare configuration |
 | Lifecycle verification | Creation, readiness, recovery, and cleanup work for the tested scenario |
 
-A passing check applies to the scenario and versions recorded. It does not establish coverage of the whole SDK. The [integration acceptance record](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/INTEGRATION-ACCEPTANCE.md) describes existing local evidence and the hosted lifecycle work still needed. The [suite catalog](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/tests/integration/suite.json) distinguishes implemented checks from planned coverage.
+The [integration test guide](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/integration-testing.md) explains how to run local and hosted tests. The [suite catalog](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/tests/integration/suite.json) lists implemented checks and planned coverage. Compilation checks types and emitted calls; hosted tests exercise the service itself.
 
-Known boundaries include direct F# subclassing of `Container`, and imported interfaces such as `AIChatAgent` and `Think` that cannot serve as F# base classes. Read the capability page and the [delivery acceptance record](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/SDK-DELIVERY-ACCEPTANCE-20260913.md) before choosing a fixture. Upstream preview status and binding implementation status are separate concerns.
+Some imported types have known limitations: F# cannot directly subclass `Container`, `AIChatAgent`, or `Think`. The [Containers](../libraries/containers.md) and [Chat agents](../libraries/agents/chat.md) pages describe the available integration patterns.
 
 ## Start with one behavior
 
@@ -32,7 +32,7 @@ dotnet build site/examples/Compute/Compute.fsproj --nologo
 dotnet build site/examples/Services/Services.fsproj --nologo
 ```
 
-Run these builds sequentially. They restore `0.1.*` packages by default; they do not deploy a Worker or prove that a service call succeeds. For contributor source builds, add `-c Release -p:CloudEdgeUseSource=true`. Before publication, use the candidate checks described on [Packages](packages.md). Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
+Run these builds sequentially. They restore `0.1.*` packages by default. For contributor source builds, add `-c Release -p:CloudEdgeUseSource=true`. Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
 
 The documentation excerpt check is separate:
 
@@ -52,7 +52,7 @@ For example, emit the Agents consumer with the repository's pinned Fable tool:
 dotnet fable site/examples/Agents/Agents.fsproj --outDir artifacts/site-examples/Agents
 ```
 
-Use the matching project and output directory for Compute, Services, or Storage. Inspect the relevant generated file before moving on to runtime checks. Emission is a separate check from executing that JavaScript.
+Use the matching project and output directory for Compute, Services, or Storage. Inspect the relevant generated file before moving on to runtime checks.
 
 ## Exercise the runtime boundary
 
@@ -72,4 +72,4 @@ Use the [binding report form](https://github.com/fsprojects/FSharp.CloudEdge/iss
 - Runtime environment and the checks actually performed.
 - Any equivalent upstream example, workaround, or cleanup result.
 
-Check [existing issues](https://github.com/fsprojects/FSharp.CloudEdge/issues) and the [upstream issue notes](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/upstream-issues.md) for related work. If you contribute a fix, retain a focused regression fixture that demonstrates the behavior. Successful reports with reproducible fixtures can help turn planned coverage into repeatable checks.
+Check [existing issues](https://github.com/fsprojects/FSharp.CloudEdge/issues) and the [upstream issue notes](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/upstream-issues.md) for related work. Include a regression test with a fix so the behavior stays covered.

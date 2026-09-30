@@ -1,6 +1,8 @@
 # FSharp.CloudEdge
 
-[![for: Cloudflare Workers · API](https://img.shields.io/badge/for-Cloudflare%20Workers%20%C2%B7%20API-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
+**Build applications and agents across Cloudflare's platform, in F#.**
+
+[![for: Cloudflare Platform](https://img.shields.io/badge/for-Cloudflare%20Platform-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/)
 [![F# → JavaScript: Fable 5.13](https://img.shields.io/badge/F%23%20%E2%86%92%20JavaScript-Fable%205.13-378BBA?logo=fsharp&logoColor=white)](https://fable.io)
 [![.NET SDK: 10.0](https://img.shields.io/badge/.NET%20SDK-10.0-512BD4?logo=dotnet&logoColor=white)](global.json)
 [![targets: net8.0 · netstandard2.0](https://img.shields.io/badge/targets-net8.0%20%C2%B7%20netstandard2.0-512BD4?logo=dotnet&logoColor=white)](FSharp.CloudEdge.slnx)
@@ -10,11 +12,15 @@
 [![Xantham: TypeScript 7](https://img.shields.io/badge/Xantham-TypeScript%207-6E40C9)](https://github.com/shayanhabibi/Xantham)
 [![Hawaii: OpenAPI](https://img.shields.io/badge/Hawaii-OpenAPI-0E7C86)](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support)
 
-For the purposes of this project, we consider Cloudflare publishing its platform in two different forms: in TypeScript declarations for the code that runs inside a Worker, and in an OpenAPI document for the API that provisions and deploys it. FSharp.CloudEdge is F# generated from both, so a Cloudflare application can be written in one language from its request handlers to its deployment.
+FSharp.CloudEdge brings F# to Cloudflare's application and AI platform: stateful agents, model inference, data and search, sandboxes and containers, and the APIs that provision and manage those resources.
 
-On the Worker side, F# code compiles to JavaScript with [Fable](https://fable.io) and imports the npm packages a TypeScript Worker imports, under the names Cloudflare's documentation uses. On the account side, generated .NET clients call Cloudflare's REST API directly. A Worker upload through those clients includes the Worker's bindings in the JSON metadata that Cloudflare documents, so the Worker's configuration can be F# code kept in the same repository as the Worker.
+The opportunity is in composing those capabilities. Give an agent tools through MCP, connect it to data in D1 and R2 or search in Vectorize, and run its tasks in a Sandbox. Use Containers for services that need their own runtime, and Git and Artifacts for versioned work. These capabilities sit alongside queues, workflows, real-time coordination, analytics and the wider control plane.
 
-A new Cloudflare release takes a pin change and a regeneration, reviewed against a contract baseline.
+Runtime code compiles from F# to JavaScript with [Fable](https://fable.io), using Cloudflare's SDKs and native bindings. Generated .NET clients handle the REST API, so application logic, resource provisioning and deployment can share a language. The bindings follow pinned TypeScript declarations and OpenAPI contracts; generator provenance and compatibility checks are documented below.
+
+The **0.1.0** release is a foundation for community testing, especially across the expanding agent and compute APIs. Help [verify real workflows](https://fsprojects.github.io/FSharp.CloudEdge/guide/verify-bindings/), contribute examples, and [report binding issues](https://github.com/fsprojects/FSharp.CloudEdge/issues) so the implementation matures through use.
+
+[Explore the platform guides](https://fsprojects.github.io/FSharp.CloudEdge/libraries/) · [Browse the 47 NuGet packages](https://www.nuget.org/packages?q=FSharp.CloudEdge) · [Get started](https://fsprojects.github.io/FSharp.CloudEdge/guide/packages/)
 
 ## Upstream Foundations
 
@@ -33,14 +39,14 @@ flowchart LR
 
 [Xantham](https://github.com/shayanhabibi/Xantham) is the TypeScript-to-F# bindings generator by Shayan Habibi and contributors. It runs the TypeScript 7 compiler as an API server (`tsc --api`) and loads the declaration files Cloudflare publishes in its npm packages through that compiler. The root npm manifest pins the compiler build, `typescript` `7.1.0-dev.20260902.1`. Xantham assigns each generated symbol one of the four grades below and lists every widened or escaped symbol in a manifest beside the generated source.
 
-| Grade | Xantham's definition | Occurrences at acceptance |
-| --- | --- | ---: |
-| Exact | The F# type accepts and rejects exactly what TypeScript does. | 1,444 |
-| Ergonomic | Meaning preserved, spelling made idiomatic. | 3,366 |
-| Widened | Information TypeScript had was dropped. | 3,713 |
-| Escape | The construct is not represented. | 790 |
+| Grade | Xantham's definition |
+| --- | --- |
+| Exact | The F# type accepts and rejects exactly what TypeScript does. |
+| Ergonomic | Meaning preserved, spelling made idiomatic. |
+| Widened | Information TypeScript had was dropped. |
+| Escape | The construct is not represented. |
 
-The counts come from the September 13, 2026 acceptance audit and include repeated dependencies across targets. For this library, Xantham generated the 31 runtime libraries from 112 selected npm entry points, together with the three AI SDK contract libraries they share. The pinned build is `xantham` `0.1.0-local.8e4c7b11b0ac90236c25`, packed from Xantham commit [`c7e2fa0`](https://github.com/shayanhabibi/Xantham/commit/c7e2fa0daa2ed3ec662cd453ae4c287a6a28673b).
+Xantham generates the 31 runtime libraries from 112 selected npm entry points, together with the three AI SDK contract libraries they share. The generator version and build hashes are recorded in [`config/tool-packages.json`](config/tool-packages.json).
 
 ### Hawaii
 
@@ -60,11 +66,13 @@ The 31 runtime libraries bind the Cloudflare SDKs below, and 11 control-plane cl
 
 | Area | Cloudflare SDKs |
 | --- | --- |
+| Agents | Agents SDK, MCP, Code Mode, chat, Think, Shell, Git, Voice and email |
+| AI | AI Utils, and the AI Gateway, Workers AI and AI Search providers |
+| Data and analytics | D1, R2, KV, Vectorize and Analytics Engine through native bindings and management clients |
+| Compute | Containers, Sandbox, Computer |
+| Versioned repositories | Artifacts through the Workers runtime binding |
 | Workers platform | Workers runtime types and native bindings |
-| Agents | Agents SDK, Code Mode, Shell, Voice |
-| AI | AI Chat, Think, AI Utils, and the AI Gateway, Workers AI and AI Search providers |
-| Compute | Computer, Sandbox |
-| Services | Containers, Actors, Dynamic Workflows, Workers OAuth Provider, KV Asset Handler, Cabidela, Chanfana |
+| Services | Actors, Dynamic Workflows, Workers OAuth Provider, KV Asset Handler, Cabidela, Chanfana |
 | RPC | Cap'n Web |
 | Feature flags | Flagship |
 | Pages | Cloudflare Access, Turnstile and Static Forms plugins |
@@ -153,18 +161,19 @@ npm run build
 npm run test:bridge
 ```
 
-[`docs/local-tools.md`](docs/local-tools.md) covers the tool bootstrap, and [`docs/sdk-build.md`](docs/sdk-build.md) covers generation, resumable builds and the recorded evidence.
+[`docs/local-tools.md`](docs/local-tools.md) covers the tool bootstrap, and [`docs/sdk-build.md`](docs/sdk-build.md) covers generation, resumable builds and build reports.
 
-## Acceptance Evidence
+## Testing
 
-The [September 13 acceptance record](docs/SDK-DELIVERY-ACCEPTANCE-20260913.md) documents the accepted delivery. Its evidence comes from local runs:
+The tests cover package consumption, library composition, HTTP contracts and runtime behavior:
 
-- The solution builds in Release with every generated library, and [`tests/SDKComposition`](tests/SDKComposition/README.md) compiles cross-library consumers against it.
+- The [site examples](site/examples) compile against NuGet packages through the [release tooling](docs/nuget-release.md).
+- [`tests/SDKComposition`](tests/SDKComposition/README.md) checks that types from different libraries work together.
 - [`tests/HawaiiApi`](tests/HawaiiApi/README.md) runs the Tenancy and Compute clients against a loopback server.
-- [`tests/ByteBridge`](tests/ByteBridge/README.md) runs Fable-compiled Workers body bindings under Node, and its 13 checks pass.
-- The [Durable Object acceptance](docs/DURABLE-OBJECTS-ACCEPTANCE.md) runs a local workerd lifecycle with verified cleanup.
+- [`tests/ByteBridge`](tests/ByteBridge/README.md) runs Fable-compiled Workers body bindings under Node.
+- The [Durable Object testing guide](docs/durable-objects-testing.md) covers storage, alarms, restarts and cleanup.
 
-All of these runs are local. The [integration acceptance architecture](docs/INTEGRATION-ACCEPTANCE.md) specifies hosted test families that deploy real resources and confirm their cleanup.
+The [integration testing guide](docs/integration-testing.md) covers fixture setup, execution and cleanup. To contribute a scenario or report a binding problem, start with [Verify bindings](https://fsprojects.github.io/FSharp.CloudEdge/guide/verify-bindings/).
 
 ## Community Maintenance
 

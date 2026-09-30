@@ -84,11 +84,9 @@ export default worker;
 
 The current bindings let F# consumers use container interfaces and helpers such as `switchPort`. They do not support deriving an F# class directly from the imported `Container` class. The example therefore calls an existing container-backed Durable Object whose class is implemented in JavaScript.
 
-This is a known binding limitation, documented in the [delivery acceptance record](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/SDK-DELIVERY-ACCEPTANCE-20260913.md). A compiling fetch consumer establishes type composition; it does not verify image deployment, readiness, routing, or recovery on Cloudflare.
+## Test your container integration
 
-## What needs runtime verification
-
-A useful container fixture pins the image, starts the instance, waits for readiness, sends a request through the F# consumer, observes restart or version-change behavior, and removes its resources. Record the response and the cleanup outcome separately. The [integration acceptance plan](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/INTEGRATION-ACCEPTANCE.md) lists the hosted evidence still needed.
+A container test should pin the image, start the instance, wait for readiness, send a request through the F# consumer, exercise restart or version changes, and remove its resources. Hosted coverage for this lifecycle is still planned; the [integration test guide](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/integration-testing.md) describes the test setup.
 
 ## Related Pages
 
@@ -97,9 +95,9 @@ A useful container fixture pins the image, starts the instance, waits for readin
 - [Computer workspaces](agents/computer.md)
 - [Worker deployment and bindings](control-plane/worker-upload.md)
 
-## Help verify these bindings
+## Testing and feedback
 
-Contributions that reproduce a type mismatch, incorrect emitted call, or a hosted lifecycle result help mature this binding. See [Verify bindings](../guide/verify-bindings.md) for the evidence to collect and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml).
+Share a working container example or [report a binding issue](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml) with a small reproduction and the package versions used. [Verify bindings](../guide/verify-bindings.md) explains how to run the checks.
 
 ## NuGet packages
 

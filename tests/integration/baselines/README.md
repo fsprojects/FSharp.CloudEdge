@@ -1,30 +1,13 @@
-# Selected delivery contracts
+# SDK contract baseline
 
-`server-resources-20260913.json` captures the standing selected delivery from
-`docs/SDK-DELIVERY-ACCEPTANCE-20260913.md`. It tracks 31 server SDK libraries,
-112 public inputs, three generated support libraries, the handwritten Workers
-support sources, 7,794 owned catalog declarations and 3,437 management operations.
-It also records the explicit dispositions of deferred public inputs.
+`server-resources-20260913.json` is the declaration baseline for the
+[selected SDK scope](../../../docs/SDK-DELIVERY-SCOPE.md). It records public inputs,
+shared type ownership, Workers support sources, management operations and deferred
+inputs. The dated filename identifies the baseline used by the comparison tools.
 
-The reviewed Hawaii delivery uses `1.0.0-local.8b77c5534f22eccbbb0f`.
-The final [comparison](../../../artifacts/integration/hawaii-complete-contracts-diff.json)
-and [review](../../../artifacts/integration/hawaii-complete-contracts-review.json)
-account for the tool identity, hashes of `Core.Api/Types.fs` and `OpenApiHttp.fs`,
-and 47 operation fingerprints matching the guarded Tunnel failure overlay.
-The pristine upstream schema and Xantham SDK delivery are unchanged. The original
-snapshot remains under `artifacts/integration/hawaii-inline-response-before/`.
-
-The initial source review identified 1,393 response cases across 1,264 methods
-corrected from strings to typed envelopes. The final generator corrections retain
-145 canonical error-list fields and restore required-string rejection. The
-management diagnostics now pass all 41 cases, including the corrected Tunnel
-failures and deliberately malformed container responses. See the
-[management diagnostics and evidence](../../ManagementIntegration/README.md).
-
-This is declaration inventory. It does not establish that every declaration has
-a runtime test or that every management operation has been called. Behavioral
-integration results remain separate, including Conclave actor orchestration,
-native transports and live Cloudflare environments.
+The [management diagnostics](../../ManagementIntegration/README.md) exercise response
+envelopes, error parsing and required fields. Use the upgrade process below when a
+schema or generator change alters those contracts.
 
 Run from the repository root:
 
