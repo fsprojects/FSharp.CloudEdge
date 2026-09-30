@@ -100,3 +100,9 @@ Useful checks include vector dimensions, metadata filters, result shapes, mutati
 - [Data & Analytics](index.md)
 - [Account setup](../control-plane/account-setup.md)
 - [Worker bindings](../control-plane/worker-upload.md)
+
+## NuGet packages
+
+[Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

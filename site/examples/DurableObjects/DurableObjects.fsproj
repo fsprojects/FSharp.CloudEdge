@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
-    <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Support.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChatRoom.fs" />

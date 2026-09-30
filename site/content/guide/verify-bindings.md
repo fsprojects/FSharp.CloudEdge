@@ -24,7 +24,7 @@ Known boundaries include direct F# subclassing of `Container`, and imported inte
 
 Choose a small operation: a container request after startup, a Sandbox command with a failing exit code, a workspace file read after wake-up, an Artifacts fork and push, or MCP discovery after reconnect. State the expected result before running it.
 
-Follow [Local Build](local-build.md) to prepare the pinned libraries and tools. From the repository root, compile the relevant site example project. For example:
+Follow [Packages](packages.md) to prepare package consumption, or [Local Build](local-build.md) when testing changes to generated source. From the repository root, compile the relevant site example project. For example:
 
 ```bash
 dotnet build site/examples/Agents/Agents.fsproj --nologo
@@ -32,15 +32,19 @@ dotnet build site/examples/Compute/Compute.fsproj --nologo
 dotnet build site/examples/Services/Services.fsproj --nologo
 ```
 
-Run these builds sequentially. They use existing binding build outputs; they do not deploy a Worker or prove that a service call succeeds. Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
+Run these builds sequentially. They restore `0.1.0` packages by default; they do not deploy a Worker or prove that a service call succeeds. For contributor source builds, add `-c Release -p:CloudEdgeUseSource=true`. Before publication, use the candidate checks described on [Packages](packages.md). Agents contains the SDK and tool examples, Compute contains workspace and Sandbox examples, and Services contains the Containers consumer.
 
 The documentation excerpt check is separate:
 
 ```bash
-python3 site/scripts/check-examples.py
+dotnet run --project tools/NuGetRelease -- snippets
 ```
 
-It compares the site's F# snippets with source files under `site/examples`; it does not compile or execute them. After producing Fable output under `artifacts/site-examples`, `--js` also compares the displayed JavaScript with that output.
+It compares the site's F# snippets with source files under `site/examples`; it does not compile or execute them. After running the package consumer checks, compare the displayed JavaScript with their Fable output:
+
+```bash
+dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
+```
 
 For example, emit the Agents consumer with the repository's pinned Fable tool:
 

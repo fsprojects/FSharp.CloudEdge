@@ -170,3 +170,9 @@ let listQueues (compute: ComputeClient) accountId =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/background-work/"><strong>Background Work</strong><span>Queue messages in a Worker</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/"><strong>Control Plane</strong><span>Clients and the API token</span></a>
 </div>
+
+## NuGet packages
+
+[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0), [Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0), [Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

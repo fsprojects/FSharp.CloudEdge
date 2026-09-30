@@ -337,3 +337,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/asset-uploads/"><strong>Asset Uploads</strong><span>Only the files that changed</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>A Worker and its bindings</span></a>
 </div>
+
+## NuGet packages
+
+[Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

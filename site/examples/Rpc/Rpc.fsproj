@@ -1,8 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
-    <ProjectReference Include="$(CloudEdgeSrc)Runtime/RPC/FSharp.CloudEdge.Runtime.Capnweb/FSharp.CloudEdge.Runtime.Capnweb.fsproj" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Capnweb" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/RPC/FSharp.CloudEdge.Runtime.Capnweb/FSharp.CloudEdge.Runtime.Capnweb.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="PricingApi.fs" />

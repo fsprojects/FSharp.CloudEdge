@@ -150,3 +150,9 @@ The type of a form value is `U2<string, File>`, and `U2.Case1` matches the text 
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/"><strong>Workers</strong><span>Request handlers</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/clients/"><strong>Client Catalog</strong><span>Access and Turnstile setup</span></a>
 </div>
+
+## NuGet packages
+
+[Management.Security 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Security/0.1.0), [Runtime.PagesPluginCloudflareAccess 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/0.1.0), [Runtime.PagesPluginStaticForms 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginStaticForms/0.1.0), [Runtime.PagesPluginTurnstile 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

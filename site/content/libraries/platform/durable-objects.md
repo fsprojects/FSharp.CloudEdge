@@ -61,7 +61,7 @@ import { equals } from "./fable_modules/fable-library-js.5.13.0/Util.js";
 import { item } from "./fable_modules/fable-library-js.5.13.0/Array.js";
 import { WorkerEntrypoint, DurableObject } from "cloudflare:workers";
 import { class_type, obj_type } from "./fable_modules/fable-library-js.5.13.0/Reflection.js";
-import { getFetchByName } from "./src/Support/FSharp.CloudEdge.Support.Workers/DurableObjects.js";
+import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
 
 export class ChatRoom extends DurableObject {
     constructor(ctx, env) {
@@ -303,3 +303,9 @@ type Leaderboard(ctx: Workers.DurableObjectState<obj>, env: obj) =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/storage/"><strong>Storage</strong><span>KV, D1 and R2</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Bindings and migrations</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

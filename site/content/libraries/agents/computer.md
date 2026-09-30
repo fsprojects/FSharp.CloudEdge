@@ -70,3 +70,9 @@ When accessing a workspace across the Worker–Durable Object boundary, follow t
 The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include storage interface compatibility, file encodings, backend events and results, filesystem synchronization, and handle disposal.
 
 See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+
+## NuGet packages
+
+[Runtime.Computer 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.0), [Runtime.ComputerArtifacts 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

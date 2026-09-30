@@ -217,3 +217,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/background-work/"><strong>Background Work</strong><span>Queues and Workflows</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Upload with bindings</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

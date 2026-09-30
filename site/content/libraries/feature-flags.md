@@ -136,3 +136,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Declare bindings</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/clients/"><strong>Client Catalog</strong><span>Flagship apps from .NET</span></a>
 </div>
+
+## NuGet packages
+
+[Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0), [Runtime.Flagship 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Flagship/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

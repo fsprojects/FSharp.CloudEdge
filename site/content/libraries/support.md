@@ -175,7 +175,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ```javascript
 import { substring } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { requireFetchTransport } from "./src/Support/FSharp.CloudEdge.Support.Workers/DurableObjects.js";
+import { requireFetchTransport } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
 
 export const westernEurope = {
     locationHint: "weur",
@@ -210,3 +210,9 @@ export default worker;
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/durable-objects/"><strong>Durable Objects</strong><span>Room classes</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Declare bindings</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V3.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.0), [Support.AI.V4.OpenAICompatible 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

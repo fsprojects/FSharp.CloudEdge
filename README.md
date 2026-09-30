@@ -120,6 +120,10 @@ let listAccounts (apiToken: string) =
 
 [`tests/HawaiiApi/Program.fs`](tests/HawaiiApi/Program.fs) exercises the same clients against a loopback server, including a multipart asset upload.
 
+## NuGet release preparation
+
+The first 0.1.0 release is being prepared. The [package catalog](https://fsprojects.github.io/FSharp.CloudEdge/libraries/packages/) lists the intended package IDs and URLs. The [maintainer release guide](docs/nuget-release.md) covers publisher access, the F#/.NET release tool, and the current upstream Fable packaging blocker. Public installation is pending those checks and publication.
+
 ## Local Build
 
 FSharp.CloudEdge builds from source. The runtime projects reference local builds of Xantham's support packages, and both generators run as pinned local .NET tools, so a first setup packs them from their source checkouts. You need:

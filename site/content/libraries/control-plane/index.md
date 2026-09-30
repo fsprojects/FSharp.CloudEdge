@@ -148,3 +148,9 @@ let main _ = setup().GetAwaiter().GetResult()
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/clients/"><strong>Client Catalog</strong><span>Eleven clients by purpose</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/guide/credentials/"><strong>Credentials</strong><span>Account ID and API token</span></a>
 </div>
+
+## NuGet packages
+
+[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0), [Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0), [Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Tenancy 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Tenancy/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

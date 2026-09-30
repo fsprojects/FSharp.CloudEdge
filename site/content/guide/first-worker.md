@@ -7,16 +7,16 @@ order: 4
 <div class="ce-block-head">
 <p class="ce-block-lead">Your first Worker responds to HTTP requests with JSON. You write it in 22 lines of F# and compile it with Fable. Then you run it on your own machine in workerd, Cloudflare's open-source Workers runtime.</p>
 <ul class="ce-facts">
-<li><span>You need</span> The FSharp.CloudEdge folder from <a href="/FSharp.CloudEdge/guide/local-build/">Local Build</a>, Node.js with npm, curl</li>
+<li><span>You need</span> The .NET SDK, Node.js with npm, curl, and <a href="/FSharp.CloudEdge/guide/packages/">NuGet packages</a></li>
 <li><span>You get</span> <code>hello-worker</code> on <code>localhost:8787</code></li>
 </ul>
 </div>
 
 ## Project Folder
 
-With `hello-worker` next to FSharp.CloudEdge, the project file can reference the Workers library through the relative path `../FSharp.CloudEdge`.
+Create the application anywhere convenient. It restores `FSharp.CloudEdge.Runtime.Workers` version `0.1.0` from NuGet; no sibling library checkout is required. See [Packages](packages.md) for release availability and candidate-feed testing.
 
-1. Open a terminal in the `repos` folder from [Local Build](local-build.md).
+1. Open a terminal in the folder where you keep your projects.
 2. Create `hello-worker` and enter it.
 
    ```bash
@@ -28,7 +28,7 @@ Stay in `hello-worker` for the remaining commands.
 
 ## Project File
 
-Save this as `hello-worker.fsproj`. It declares `Worker.fs` and one package. It also references the Workers library in FSharp.CloudEdge.
+Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the Workers package at version `0.1.0`.
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -42,21 +42,20 @@ Save this as `hello-worker.fsproj`. It declares `Worker.fs` and one package. It 
     <PackageReference Include="Fable.Core" Version="5.2.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="../FSharp.CloudEdge/src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.0" />
   </ItemGroup>
 </Project>
 ```
 
-Fable.Core 5.2.0 matches the Workers library's own dependency. The Workers library also references two support packages, Xantham.Fable.Core and Xantham.Fable.Core.TS. NuGet restores both through your project reference. Their version numbers end in a digest that the bootstrap step on Local Build computes on your machine, so Fable.Core is the only package `hello-worker.fsproj` lists.
+Fable.Core 5.2.0 matches the Workers package's dependency. NuGet restores the Xantham support packages transitively. The package includes the F# source needed by Fable.
 
-Next to it, add `NuGet.Config` with the package sources NuGet restores from. The first is the feed in `FSharp.CloudEdge/artifacts/tool-feed`, which holds the two support packages. The second, nuget.org, hosts Fable.Core and the Fable compiler.
+Next to the project, add `NuGet.Config` to select the public feed. Package IDs and versions belong in `PackageReference`; the feed URL belongs here.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <configuration>
   <packageSources>
     <clear />
-    <add key="local-generators" value="../FSharp.CloudEdge/artifacts/tool-feed" />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
   </packageSources>
 </configuration>
@@ -125,16 +124,7 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
    dotnet fable hello-worker.fsproj -o build
    ```
 
-   ```text
-   Parsing hello-worker.fsproj...
-   Project and references (6 source files) parsed in 1970ms
-
-   Started Fable compilation...
-
-   Fable compilation finished in 30684ms
-   ```
-
-The six source files are `Worker.fs` plus the sources of the Workers library and its two support packages. Fable compiles all six, so this step takes about half a minute. `build/Worker.js` contains your handler, and the Fable library code it imports is in `build/fable_modules`.
+Fable processes `Worker.fs` and the sources supplied by its NuGet dependencies. Source counts and compile times vary with the package contents. `build/Worker.js` contains your handler, and the Fable library code it imports is in `build/fable_modules`.
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 

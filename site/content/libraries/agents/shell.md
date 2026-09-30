@@ -72,3 +72,9 @@ Shell supplies state backends and Code Mode providers. [Computer](computer.md) p
 The examples on this page are checked against F# source projects. Compilation and emitted JavaScript checks do not establish hosted service behavior. Useful targets for community verification include persistence across Durable Object restarts, file metadata, filesystem adapters, and state-tool arguments and results.
 
 See [Verify bindings](../../guide/verify-bindings.md) for the existing evidence, reproducible checks, and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml). Include the pinned package version and the specific behavior exercised; successful reproductions are useful evidence too.
+
+## NuGet packages
+
+[Runtime.Shell 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Shell/0.1.0), [Runtime.ShellGit 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ShellGit/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

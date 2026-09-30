@@ -228,3 +228,9 @@ let addRecord (networking: NetworkingClient) zoneId =
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Modules and bindings</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/ai/"><strong>AI</strong><span>Models and gateways in a Worker</span></a>
 </div>
+
+## NuGet packages
+
+[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0), [Management.AI 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.AI/0.1.0), [Management.Browser 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Browser/0.1.0), [Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0), [Management.ContentDelivery 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.ContentDelivery/0.1.0), [Management.Media 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Media/0.1.0), [Management.Messaging 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Messaging/0.1.0), [Management.Networking 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Networking/0.1.0), [Management.Observability 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Observability/0.1.0), [Management.Security 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Security/0.1.0), [Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Tenancy 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Tenancy/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

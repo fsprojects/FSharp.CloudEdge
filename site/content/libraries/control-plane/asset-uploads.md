@@ -269,3 +269,9 @@ These runs were recorded against a local test server in place of Cloudflare's AP
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/hybrid-search/"><strong>Hybrid Search</strong><span>Reindexing only changed chunks</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/clients/"><strong>Client Catalog</strong><span>Every control-plane client</span></a>
 </div>
+
+## NuGet packages
+
+[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0), [Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

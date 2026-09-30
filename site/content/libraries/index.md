@@ -23,3 +23,11 @@ The 31 runtime libraries bind the Cloudflare SDKs below, and 11 control-plane cl
 Client-side adapters and optional integrations are left out of this selection, and [`config/sdk-delivery.json`](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/config/sdk-delivery.json) records the reason for each.
 
 The capability pages describe integration boundaries and areas that need runtime evidence. See [Verify bindings](../guide/verify-bindings.md) to contribute a reproducible issue or a successful check.
+
+## NuGet packages
+
+[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0).
+
+See [installation and release availability](../guide/packages.md).
+
+The [NuGet package catalog](packages.md) lists every package ID and its versioned `0.1.0` URL.

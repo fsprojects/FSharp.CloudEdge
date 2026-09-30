@@ -5,8 +5,10 @@
   </PropertyGroup>
   <Import Project="../Examples.props" />
   <ItemGroup>
-    <ProjectReference Include="$(CloudEdgeSrc)Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
-    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+    <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.0" Condition="'$(CloudEdgeUseSource)' != 'true'" />
+    <ProjectReference Include="$(CloudEdgeSrc)Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="../Credentials/ClientSetup.fs" />

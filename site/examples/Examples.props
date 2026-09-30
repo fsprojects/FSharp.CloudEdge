@@ -1,20 +1,22 @@
 <Project>
   <!--
     Shared settings for the site's example projects. Every F# block on the site is an excerpt of a file
-    compiled here, and scripts/check-examples.py verifies that. Build the solution first: the examples
-    use the bindings' existing build output instead of rebuilding them.
+    compiled here, and the F# NuGetRelease tool verifies that. Examples consume NuGet 0.1.0 by default.
+    Before publication, use the candidate feed produced by tools/NuGetRelease.
+    Contributors may set CloudEdgeUseSource=true after building the bindings from source.
   -->
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <IsPackable>false</IsPackable>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <BuildProjectReferences Condition="'$(BuildProjectReferences)' == ''">false</BuildProjectReferences>
+    <BuildProjectReferences Condition="'$(CloudEdgeUseSource)' == 'true' and '$(BuildProjectReferences)' == ''">false</BuildProjectReferences>
     <CloudEdgeSrc>$(MSBuildThisFileDirectory)../../src/</CloudEdgeSrc>
+    <RestoreAdditionalProjectSources Condition="'$(CloudEdgeUseSource)' == 'true'">$(MSBuildThisFileDirectory)../../artifacts/tool-feed</RestoreAdditionalProjectSources>
   </PropertyGroup>
   <!-- Worker-side examples compile with Fable. Set ExampleKind to DotNet for control-plane examples. -->
   <ItemGroup Condition="'$(ExampleKind)' != 'DotNet'">
     <PackageReference Include="Fable.Core" Version="5.2.0" />
-    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.83b9196820f7e253f211" />
-    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.2cc2de89eabe31fc35f6" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.83b9196820f7e253f211" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.2cc2de89eabe31fc35f6" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
 </Project>

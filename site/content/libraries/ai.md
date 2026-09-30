@@ -369,3 +369,9 @@ Conversation persistence, history migration, and the F# `AIChatAgent` binding bo
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/"><strong>Workers</strong><span>Handlers and bindings</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Workers and their bindings</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.AIChat 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIChat/0.1.0), [Runtime.AIGatewayProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIGatewayProvider/0.1.0), [Runtime.AISearchProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AISearchProvider/0.1.0), [Runtime.AIUtils 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIUtils/0.1.0), [Runtime.Think 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Think/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V3.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

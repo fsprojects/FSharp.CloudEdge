@@ -56,44 +56,36 @@ Other operations in the generated clients may require other permissions. You can
 ## Token Safety
 
 - **Use a scoped token, never the Global API Key.** That key has the same permissions as your user, on all of your resources. Anyone holding your new token can perform the actions its five permissions grant.
-- **Keep tokens out of source control.** The token belongs in `.env`, which Git ignores in the FSharp.CloudEdge folder. GitHub scans public repositories for Cloudflare tokens. When it finds one, Cloudflare revokes the token and notifies you by email.
+- **Keep tokens out of source control.** The token belongs in `.env`, which you must exclude in your application’s `.gitignore`. GitHub scans public repositories for Cloudflare tokens. When it finds one, Cloudflare revokes the token and notifies you by email.
 - **Roll a lost or leaked token.** On **My Profile** > **API Tokens**, open the three-dot menu next to the token and choose **Roll**, then **Confirm**. Cloudflare invalidates the old secret, and the new one has the same permissions.
 
 ## The .env File
 
-You clone FSharp.CloudEdge into your `repos` folder on [Local Build](local-build.md), the next page. Its root holds a template for this file, `.env.template`, and its `.gitignore` lists `.env`. Run the steps below after Local Build and before [First Deploy](first-deploy.md).
+Keep credentials in the `hello-worker` application folder from [First Worker](first-worker.md). Complete these steps before [First Deploy](first-deploy.md); a library source checkout is not required.
 
-1. From your `repos` folder, copy the template and make `.env` readable by your user alone.
-
-   ```bash
-   cd FSharp.CloudEdge
-   cp .env.template .env
-   chmod 600 .env
-   cat .env
-   ```
+1. In `hello-worker`, create `.env` with your account ID and scoped token:
 
    ```text
-   # Cloudflare dashboard: Account home > Search > "Copy account ID"
    CLOUDFLARE_ACCOUNT_ID=
-   # Cloudflare dashboard: My Profile > API Tokens > Create Token
    CLOUDFLARE_API_TOKEN=
    ```
 
-2. Open `.env` in your editor. Paste each value straight after its `=` sign: the account ID on the `CLOUDFLARE_ACCOUNT_ID=` line and the token on the `CLOUDFLARE_API_TOKEN=` line. Save your changes.
+2. Add `.env` to the application's `.gitignore`, and restrict its permissions:
 
-3. Confirm that Git ignores `.env`.
+   ```bash
+   printf '\n.env\n' >> .gitignore
+   chmod 600 .env
+   ```
+
+3. If the application is in a Git repository, confirm that the file is ignored:
 
    ```bash
    git check-ignore .env
    ```
 
-   ```text
-   .env
-   ```
-
 ## Shell Variables
 
-`Environment.GetEnvironmentVariable` reads the environment that your terminal passes to each program it starts. Load `.env` into that environment from the FSharp.CloudEdge folder.
+`Environment.GetEnvironmentVariable` reads the environment that your terminal passes to each program it starts. Load `.env` into that environment from the hello-worker folder.
 
 ```bash
 set -a
@@ -109,11 +101,11 @@ printenv CLOUDFLARE_ACCOUNT_ID
 
 It prints your account ID. If the output is empty, check that you saved your account ID in `.env`, then run the three lines again in this terminal.
 
-In each new terminal, load `.env` again. From your hello-worker folder, the path is `../FSharp.CloudEdge/.env`:
+In each new terminal, load `.env` again from your hello-worker folder:
 
 ```bash
 set -a
-source ../FSharp.CloudEdge/.env
+source .env
 set +a
 ```
 
@@ -192,5 +184,5 @@ For a rejected token, the `Status4XX` branch prints the HTTP status with each er
 ## Next Step
 
 <div class="ce-next">
-<a class="ce-next__card" href="/FSharp.CloudEdge/guide/local-build/"><strong>Local Build</strong><span>Clone and build the libraries</span></a>
+<a class="ce-next__card" href="/FSharp.CloudEdge/guide/packages/"><strong>Packages</strong><span>Install the 0.1.0 libraries</span></a>
 </div>

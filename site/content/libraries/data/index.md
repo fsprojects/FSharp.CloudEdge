@@ -16,3 +16,9 @@ Data services deserve their own design decisions: schema, keys, consistency, ret
 The [Hybrid Search recipe](../hybrid-search.md) combines D1 and Vectorize with an embedding model. [Artifacts](../agents/artifacts.md) has its own treatment for Git-compatible repositories and versioned file trees.
 
 Start with [Account Setup](../control-plane/account-setup.md) to see management clients create resources, then [Worker Upload](../control-plane/worker-upload.md) for environment bindings. Each service page calls out behaviors that need runtime verification; [community reports](../../guide/verify-bindings.md) help mature those bindings.
+
+## NuGet packages
+
+[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../../guide/packages.md).

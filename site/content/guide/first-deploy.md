@@ -15,7 +15,7 @@ order: 5
 
 ## Project Folder
 
-The upload program is a .NET console project in a `deploy` folder inside hello-worker. It references two projects in the FSharp.CloudEdge folder: `Core.Api` for the request and response types, and `Management.Compute` for `ComputeClient`.
+The upload program is a .NET console project in a `deploy` folder inside hello-worker. It references two NuGet packages at version `0.1.0`: `Core.Api` for the request and response types, and `Management.Compute` for `ComputeClient`.
 
 1. From your hello-worker folder, create `deploy`.
 
@@ -44,8 +44,8 @@ The upload program is a .NET console project in a `deploy` folder inside hello-w
      </ItemGroup>
 
      <ItemGroup>
-       <ProjectReference Include="../../FSharp.CloudEdge/src/Core/FSharp.CloudEdge.Core.Api/FSharp.CloudEdge.Core.Api.fsproj" />
-       <ProjectReference Include="../../FSharp.CloudEdge/src/Management/FSharp.CloudEdge.Management.Compute/FSharp.CloudEdge.Management.Compute.fsproj" />
+       <PackageReference Include="FSharp.CloudEdge.Core.Api" Version="0.1.0" />
+       <PackageReference Include="FSharp.CloudEdge.Management.Compute" Version="0.1.0" />
      </ItemGroup>
 
    </Project>
@@ -176,7 +176,7 @@ deploy().GetAwaiter().GetResult()
 
    ```bash
    set -a
-   source ../FSharp.CloudEdge/.env
+   source .env
    set +a
    ```
 
@@ -188,7 +188,7 @@ deploy().GetAwaiter().GetResult()
    dotnet run --project deploy -c Release
    ```
 
-   `-c Release` matches the configuration of the libraries you compiled on [Local Build](local-build.md). With the default Debug configuration, the build would compile both libraries a second time.
+   NuGet restores the versioned client packages. `-c Release` selects the build configuration for your deploy program.
 
    ```text
    Uploaded hello-worker, startup time 4 ms

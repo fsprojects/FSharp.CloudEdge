@@ -373,3 +373,9 @@ Using Dynamic Workflows from F# requires a cast in 0.1.0, so the library has no 
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/compute/"><strong>Compute</strong><span>Sandboxes for running code</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>A Worker and its bindings</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.Actors 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Actors/0.1.0), [Runtime.Cabidela 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Cabidela/0.1.0), [Runtime.Chanfana 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Chanfana/0.1.0), [Runtime.DynamicWorkflows 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.DynamicWorkflows/0.1.0), [Runtime.KvAssetHandler 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.KvAssetHandler/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersOauthProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersOauthProvider/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

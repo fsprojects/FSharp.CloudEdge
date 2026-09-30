@@ -189,9 +189,10 @@ let theme =
                 [
                     Menu.page "guide/index.md"
                     Menu.page "guide/credentials.md"
-                    Menu.page "guide/local-build.md"
+                    Menu.page "guide/packages.md"
                     Menu.page "guide/first-worker.md"
                     Menu.page "guide/first-deploy.md"
+                    Menu.page "guide/local-build.md"
                     Menu.page "guide/verify-bindings.md"
                 ]
         ]
@@ -199,6 +200,7 @@ let theme =
         "libraries"
         [
             Menu.page "libraries/index.md"
+            Menu.page "libraries/packages.md"
             Menu.section
                 "Runtime"
                 [

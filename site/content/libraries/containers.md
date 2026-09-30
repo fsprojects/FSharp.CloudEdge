@@ -61,7 +61,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { getFetchByName } from "./src/Support/FSharp.CloudEdge.Support.Workers/DurableObjects.js";
+import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
 import { switchPort } from "@cloudflare/containers";
 
 export const worker = {
@@ -100,3 +100,9 @@ A useful container fixture pins the image, starts the instance, waits for readin
 ## Help verify these bindings
 
 Contributions that reproduce a type mismatch, incorrect emitted call, or a hosted lifecycle result help mature this binding. See [Verify bindings](../guide/verify-bindings.md) for the evidence to collect and the [binding issue form](https://github.com/fsprojects/FSharp.CloudEdge/issues/new?template=binding-report.yml).
+
+## NuGet packages
+
+[Runtime.Containers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Containers/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

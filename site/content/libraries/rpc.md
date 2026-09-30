@@ -147,3 +147,9 @@ export function onRequest(context) {
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/"><strong>Workers</strong><span>Request handlers</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/durable-objects/"><strong>Durable Objects</strong><span>Stateful rooms</span></a>
 </div>
+
+## NuGet packages
+
+[Runtime.Capnweb 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Capnweb/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+
+See [installation and release availability](../guide/packages.md).

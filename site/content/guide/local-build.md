@@ -5,7 +5,7 @@ order: 3
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">Today you get the libraries by cloning the FSharp.CloudEdge repository and building it on your machine. The build generates the runtime bindings from exact releases of Cloudflare's npm packages and the control-plane clients from a pinned copy of Cloudflare's OpenAPI document. You add the result to your Worker project on the next page.</p>
+<p class="ce-block-lead">This is the contributor workflow for regenerating and building the libraries from source. See <a href="/FSharp.CloudEdge/guide/packages/">Packages</a> for the planned NuGet release and its current status. The build generates the runtime bindings from exact releases of Cloudflare's npm packages and the control-plane clients from a pinned copy of Cloudflare's OpenAPI document.</p>
 <ul class="ce-facts">
 <li><span>You need</span> .NET SDK 10.0.401, Node.js with npm, Python 3, git</li>
 <li><span>You get</span> Compiled bindings and a local package feed</li>
@@ -42,7 +42,7 @@ The build requires three more repositories beside FSharp.CloudEdge. Xantham and 
    HEAD is now at c7e2fa0 Flatten interface bases emitted as abstract classes
    ```
 
-The parent folder now holds four checkouts. On the First Worker page you create `hello-worker` in this same folder.
+The parent folder now holds four checkouts. The package-based First Worker guide does not require this folder layout.
 
 ```bash
 ls
@@ -152,10 +152,16 @@ npm run tools:bootstrap
 
 ## Build Output
 
-Your projects on the next pages use two folders from FSharp.CloudEdge.
+Source-based consumers use two folders from FSharp.CloudEdge.
 
-- `src/` holds the bindings, compiled in Release. Your Worker project on First Worker references `src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers`, and the upload program on First Deploy references the control-plane projects in `src/Core` and `src/Management`.
+- `src/` holds the bindings, compiled in Release. A source-based Worker consumer can reference `src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers`, and a source-based upload program can reference the control-plane projects in `src/Core` and `src/Management`.
 - `artifacts/tool-feed/` is the local package feed. The runtime bindings reference `Xantham.Fable.Core` and `Xantham.Fable.Core.TS`, so a project that uses the bindings restores those two packages from this folder.
+
+To run site examples against these source builds instead of packages, pass `-p:CloudEdgeUseSource=true`. The normal example mode uses NuGet `0.1.0`.
+
+```bash
+dotnet build site/examples/FirstWorker/FirstWorker.fsproj -c Release -p:CloudEdgeUseSource=true
+```
 
 ## Next Step
 

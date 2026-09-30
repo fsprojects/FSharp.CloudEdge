@@ -1,0 +1,85 @@
+name: NuGet
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish validated 0.1.0 packages to NuGet.org
+        type: boolean
+        default: false
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nuget-release
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - name: Check release tooling
+        run: dotnet run --project tools/NuGetRelease -- check
+      - name: Pack selected libraries
+        run: dotnet run --project tools/NuGetRelease -- pack
+      - name: Compile package-only consumers
+        run: dotnet run --project tools/NuGetRelease -- examples --fable
+      - name: Check documentation excerpts
+        run: dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
+      - name: Check public Fable support helpers
+        run: dotnet run --project tools/NuGetRelease -- support
+      - name: Retain candidates and verification evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: nuget-candidates
+          path: |
+            artifacts/nuget-release/0.1.0/packages/
+            artifacts/nuget-release/0.1.0/manifest.json
+            artifacts/nuget-release/0.1.0/consumers-candidate/results.json
+            artifacts/nuget-release/0.1.0/consumers-candidate/logs/
+            artifacts/nuget-release/0.1.0/staged/**/pack.log
+            artifacts/nuget-release/0.1.0/public-support/logs/
+
+  publish:
+    if: (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.publish)
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+      - uses: actions/download-artifact@v8
+        with:
+          name: nuget-candidates
+          path: artifacts/nuget-release/0.1.0
+      - name: Verify candidate contents and hashes
+        run: dotnet run --project tools/NuGetRelease -- verify
+      - name: Obtain temporary NuGet credentials
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: houstonhaynes
+      - name: Publish in dependency order
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet run --project tools/NuGetRelease -- publish --confirm 0.1.0
+      - name: Confirm public availability
+        run: dotnet run --project tools/NuGetRelease -- availability
+      - name: Compile against NuGet.org alone
+        run: dotnet run --project tools/NuGetRelease -- examples --fable --public

@@ -1,0 +1,11 @@
+{
+  "version": "0.1.0",
+  "solution": "FSharp.CloudEdge.Bindings.slnx",
+  "repository": "https://github.com/fsprojects/FSharp.CloudEdge",
+  "projectUrl": "https://fsprojects.github.io/FSharp.CloudEdge/",
+  "authors": "FSharp.CloudEdge Contributors",
+  "publicDependencies": {
+    "Xantham.Fable.Core": "0.1.0",
+    "Xantham.Fable.Core.TS": "0.1.0"
+  }
+}
