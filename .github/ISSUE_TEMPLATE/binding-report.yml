@@ -1,0 +1,61 @@
+name: Binding defect or verification result
+description: Report a reproducible binding problem, missing API, or successful runtime check.
+title: "[Binding] "
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Report kind
+      options:
+        - F# type or signature problem
+        - Incorrect Fable output
+        - Runtime behavior
+        - Missing API or unsupported integration
+        - Successful verification result
+    validations:
+      required: true
+  - type: textarea
+    id: versions
+    attributes:
+      label: Library, symbol, and versions
+      description: Include the CloudEdge commit, binding library and symbol, upstream npm package/version, and relevant .NET/Fable versions.
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment exercised
+      multiple: true
+      options:
+        - F# compilation
+        - Fable output inspection
+        - Node or another JavaScript runtime
+        - Local Worker runtime
+        - Hosted Cloudflare
+        - API inspection only
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide F# source, commands, and relevant configuration (including compatibility date and flags). Remove tokens and private data. A small linked fixture is welcome.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected and actual result
+      description: Include errors or assertions and relevant emitted JavaScript. For a successful check, state exactly what passed and what was not exercised.
+    validations:
+      required: true
+  - type: textarea
+    id: comparison
+    attributes:
+      label: Upstream comparison or workaround
+      description: If available, include an equivalent JavaScript/TypeScript reproduction using the same upstream version, related issues, or a workaround.
+  - type: textarea
+    id: lifecycle
+    attributes:
+      label: Lifecycle and cleanup
+      description: For tests that create resources, record readiness, recovery if tested, and confirmed cleanup. Leave blank if not applicable.

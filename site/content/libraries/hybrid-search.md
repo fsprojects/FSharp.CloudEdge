@@ -17,6 +17,8 @@ order: 8
 
 ## Keyword Query
 
+For the individual service and binding lifecycles, see [D1](data/d1.md) and [Vectorize](data/vectorize.md). This page combines them into a search recipe.
+
 The `chunks` table uses FTS5, the SQLite full-text search module that [D1 supports](https://developers.cloudflare.com/d1/sql-api/sql-statements/). `ORDER BY bm25(chunks)` puts the best match first, because `bm25` scores better matches lower. `keywordSearch` quotes each word and joins the words with `OR`. Unquoted, `d1: store` is FTS5 syntax for a column filter and fails with `no such column: d1`.
 
 ```fsharp

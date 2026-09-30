@@ -6,6 +6,8 @@
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode/FSharp.CloudEdge.Runtime.CodeMode.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Shell/FSharp.CloudEdge.Runtime.Shell.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient/FSharp.CloudEdge.Runtime.AgentsMcpClient.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" />
   </ItemGroup>
@@ -16,5 +18,7 @@
     <Compile Include="DraftsFolder.fs" />
     <Compile Include="AudioPreview.fs" />
     <Compile Include="SupportInbox.fs" />
+    <Compile Include="GitChanges.fs" />
+    <Compile Include="McpToolCatalog.fs" />
   </ItemGroup>
 </Project>

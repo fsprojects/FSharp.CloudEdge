@@ -212,7 +212,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 ## Related Pages
 
 <div class="ce-next">
-<a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/storage/"><strong>Storage</strong><span>KV, R2 and D1</span></a>
+<a class="ce-next__card" href="/FSharp.CloudEdge/libraries/data/"><strong>Data &amp; Analytics</strong><span>D1, R2, KV, Vectorize and Analytics Engine</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/durable-objects/"><strong>Durable Objects</strong><span>Stateful rooms</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/platform/background-work/"><strong>Background Work</strong><span>Queues and Workflows</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/"><strong>Worker Upload</strong><span>Upload with bindings</span></a>

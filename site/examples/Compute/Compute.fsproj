@@ -5,6 +5,7 @@
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.Sandbox/FSharp.CloudEdge.Runtime.Sandbox.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxBridge/FSharp.CloudEdge.Runtime.SandboxBridge.fsproj" />
     <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerArtifacts/FSharp.CloudEdge.Runtime.ComputerArtifacts.fsproj" />
+    <ProjectReference Include="$(CloudEdgeSrc)Runtime/Compute/FSharp.CloudEdge.Runtime.Computer/FSharp.CloudEdge.Runtime.Computer.fsproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeRunner.fs" />
@@ -13,5 +14,6 @@
     <Compile Include="TestRunner.fs" />
     <Compile Include="TextSearch.fs" />
     <Compile Include="TeamRepositories.fs" />
+    <Compile Include="WorkspacePlan.fs" />
   </ItemGroup>
 </Project>

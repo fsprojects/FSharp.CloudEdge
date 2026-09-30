@@ -347,50 +347,7 @@ export default worker;
 
 ## Chat History Upgrade
 
-`autoTransformMessages` converts a conversation saved in the AI SDK v4 message format to v5 `UIMessage` objects. Apps built on v5 can then read chat history stored before the upgrade.
-
-```fsharp
-open Fable.Core
-
-module Workers = FSharp.CloudEdge.Runtime.Workers
-module Migration = FSharp.CloudEdge.Runtime.AIChat.AiChatV5Migration
-
-[<ExportDefault>]
-let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
-    Workers.ExportedHandler.Create(
-        fetch = fun request _ _ ->
-            async {
-                let! stored = request.json<obj[]> () |> Async.AwaitPromise
-                let upgraded = Migration.Exports.autoTransformMessages stored
-                return Workers.Exports.Response.json upgraded
-            }
-            |> Async.StartAsPromise
-            |> U2.Case1
-    )
-```
-
-<details class="ce-js"><summary>Emitted JavaScript</summary>
-
-```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { autoTransformMessages } from "@cloudflare/ai-chat/ai-chat-v5-migration";
-
-export const worker = {
-    fetch: (request, _arg, _arg_1) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(request.json()), (_arg_2) => {
-        const upgraded = autoTransformMessages(_arg_2);
-        return singleton.Return(globalThis.Response.json(upgraded));
-    }))),
-};
-
-export default worker;
-```
-
-</details>
-
-:::info
-`AIChatAgent` and `Think` are base classes for chat agents, and the bindings declare both as F# interfaces. An F# class can extend an imported JavaScript class only through a class binding, so F# code calls the functions these packages export, such as `autoTransformMessages`. [Agents](agents.md) shows how an F# agent extends a Durable Object. Upstream marks `@cloudflare/think` as experimental.
-:::
+Conversation persistence, history migration, and the F# `AIChatAgent` binding boundary have their own treatment on the [Chat agents page](agents/chat.md#chat-history-upgrade).
 
 ## Library Table
 

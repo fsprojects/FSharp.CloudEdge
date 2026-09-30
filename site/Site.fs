@@ -161,14 +161,17 @@ let theme =
                 "Libraries",
                 [
                     NavbarDescribed ("Workers", "Requests, responses and bindings", "/libraries/platform/")
-                    NavbarDescribed ("Storage", "KV, R2 and D1", "/libraries/platform/storage/")
+                    NavbarDescribed ("Data & Analytics", "D1, R2, KV, Vectorize and Analytics Engine", "/libraries/data/")
                     NavbarDescribed ("Durable Objects", "Stateful rooms, WebSockets and alarms", "/libraries/platform/durable-objects/")
                     NavbarDescribed ("Background Work", "Queues and Workflows", "/libraries/platform/background-work/")
-                    NavbarDescribed ("Agents", "Agents SDK, Code Mode, Shell and Voice", "/libraries/agents/")
+                    NavbarDescribed ("Agents & Tools", "SDK, MCP, chat and workspace tools", "/libraries/agents/")
                     NavbarDescribed ("AI", "Workers AI, AI Gateway and AI Search", "/libraries/ai/")
                     NavbarDescribed ("Hybrid Search", "Keyword and vector search, indexed incrementally", "/libraries/hybrid-search/")
-                    NavbarDescribed ("Compute", "Sandbox and Computer", "/libraries/compute/")
-                    NavbarDescribed ("Services", "Containers, Actors, OAuth and more", "/libraries/services/")
+                    NavbarDescribed ("Compute", "Compare execution environments", "/libraries/compute/")
+                    NavbarDescribed ("Containers", "Your own containerized services", "/libraries/containers/")
+                    NavbarDescribed ("Sandbox", "Linux commands, files and processes", "/libraries/agents/sandbox/")
+                    NavbarDescribed ("Artifacts", "Git-compatible versioned repositories", "/libraries/agents/artifacts/")
+                    NavbarDescribed ("Services", "Actors, OAuth and more", "/libraries/services/")
                     NavbarDescribed ("RPC", "Cap'n Web", "/libraries/rpc/")
                     NavbarDescribed ("Feature Flags", "Flagship", "/libraries/feature-flags/")
                     NavbarDescribed ("Pages Plugins", "Access, Turnstile and Static Forms", "/libraries/pages/")
@@ -189,6 +192,7 @@ let theme =
                     Menu.page "guide/local-build.md"
                     Menu.page "guide/first-worker.md"
                     Menu.page "guide/first-deploy.md"
+                    Menu.page "guide/verify-bindings.md"
                 ]
         ]
     |> Theme.menu
@@ -201,19 +205,49 @@ let theme =
                     Menu.group
                         "libraries/platform/index.md"
                         [
-                            Menu.page "libraries/platform/storage.md"
                             Menu.page "libraries/platform/durable-objects.md"
                             Menu.page "libraries/platform/background-work.md"
                         ]
-                    Menu.page "libraries/agents.md"
                     Menu.page "libraries/ai.md"
-                    Menu.page "libraries/hybrid-search.md"
-                    Menu.page "libraries/compute.md"
                     Menu.page "libraries/services.md"
                     Menu.page "libraries/rpc.md"
                     Menu.page "libraries/feature-flags.md"
                     Menu.page "libraries/pages.md"
                     Menu.page "libraries/support.md"
+                ]
+            Menu.section
+                "Data & Analytics"
+                [
+                    Menu.page "libraries/data/index.md"
+                    Menu.page "libraries/data/d1.md"
+                    Menu.page "libraries/data/r2.md"
+                    Menu.page "libraries/data/kv.md"
+                    Menu.page "libraries/data/vectorize.md"
+                    Menu.page "libraries/data/analytics-engine.md"
+                    Menu.page "libraries/hybrid-search.md"
+                ]
+            Menu.section
+                "Compute"
+                [
+                    Menu.page "libraries/compute.md"
+                    Menu.page "libraries/containers.md"
+                    Menu.page "libraries/agents/sandbox.md"
+                    Menu.page "libraries/agents/computer.md"
+                ]
+            Menu.section
+                "Agents & Tools"
+                [
+                    Menu.page "libraries/agents.md"
+                    Menu.page "libraries/agents/sdk.md"
+                    Menu.page "libraries/agents/chat.md"
+                    Menu.page "libraries/agents/mcp.md"
+                    Menu.page "libraries/agents/code-mode.md"
+                    Menu.page "libraries/agents/shell.md"
+                    Menu.page "libraries/agents/git.md"
+                    Menu.page "libraries/agents/artifacts.md"
+                    Menu.page "libraries/agents/voice.md"
+                    Menu.page "libraries/agents/email.md"
+                    Menu.link "Verify bindings" "/FSharp.CloudEdge/guide/verify-bindings/"
                 ]
             Menu.section
                 "Control plane"

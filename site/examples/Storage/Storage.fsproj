@@ -9,5 +9,6 @@
     <Compile Include="FileDrop.fs" />
     <Compile Include="Guestbook.fs" />
     <Compile Include="Checkout.fs" />
+    <Compile Include="RequestMetrics.fs" />
   </ItemGroup>
 </Project>

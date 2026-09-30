@@ -1,73 +1,25 @@
 ---
 title: Services
-description: Containers, Actors, OAuth, asset serving and validation.
+description: Actors, OAuth, asset serving and validation.
 order: 9
 ---
 
 <div class="ce-block-head">
-<p class="ce-block-lead">An F# Worker can send heavy jobs to a container and require an OAuth 2.1 token for its API. Other libraries in this block serve a single-page app from KV and check incoming JSON against a schema.</p>
+<p class="ce-block-lead">Build stateful services, require an OAuth 2.1 token for an API, serve assets, and validate incoming JSON. Container execution has its own dedicated page.</p>
 <ul class="ce-facts">
-<li><span>Libraries</span> <code>Runtime.Containers</code> <code>Runtime.Actors</code> <code>Runtime.DynamicWorkflows</code> <code>Runtime.WorkersOauthProvider</code> <code>Runtime.KvAssetHandler</code> <code>Runtime.Cabidela</code> <code>Runtime.Chanfana</code></li>
-<li><span>npm</span> six <code>@cloudflare/</code> packages and <code>chanfana</code></li>
+<li><span>Libraries</span> <code>Runtime.Actors</code> <code>Runtime.DynamicWorkflows</code> <code>Runtime.WorkersOauthProvider</code> <code>Runtime.KvAssetHandler</code> <code>Runtime.Cabidela</code> <code>Runtime.Chanfana</code></li>
+<li><span>npm</span> See the library table below</li>
 <li><span>Free plan</span> 100,000 Worker requests a day</li>
-<li><span>Containers</span> <a href="https://developers.cloudflare.com/containers/">Workers Paid plan</a></li>
 </ul>
 </div>
 
 ## Image Resizer
 
-The Worker posts each upload to a container and returns the container's response. `switchPort` copies the request and sets its target port to 8080. `getFetchByName`, from the [Support Libraries](support.md), produces a fetch stub for the container's Durable Object.
-
-```fsharp
-open Fable.Core
-
-module Workers = FSharp.CloudEdge.Runtime.Workers
-module Containers = FSharp.CloudEdge.Runtime.Containers
-module Transport = FSharp.CloudEdge.Support.Workers.DurableObjects
-
-type Env =
-    abstract RESIZER: Workers.DurableObjectNamespace<Containers.Container<obj>>
-
-[<ExportDefault>]
-let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
-    Workers.ExportedHandler.Create(
-        fetch = fun request env _ ->
-            let resize =
-                Workers.Exports.Request.Create(
-                    U3.Case1 "http://resizer/thumbnail?width=320",
-                    Workers.RequestInit.Create(``method`` = "POST", body = request.body))
-            let resizer = Transport.getFetchByName env.RESIZER "resizer"
-            resizer.fetch (Containers.Exports.switchPort(resize, 8080.)) |> U2.Case1
-    )
-```
-
-<div class="ce-needs"><p><strong>Needs</strong> the Workers Paid plan and a container image whose server listens on port 8080. The <code>RESIZER</code> binding refers to a Durable Object class that extends <code>Container</code>. F# code cannot subclass <code>Container</code> in 0.1.0, so that class is written in JavaScript. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how an F# program declares a Worker's bindings.</p></div>
-
-<details class="ce-js"><summary>Emitted JavaScript</summary>
-
-```javascript
-import { getFetchByName } from "./src/Support/FSharp.CloudEdge.Support.Workers/DurableObjects.js";
-import { switchPort } from "@cloudflare/containers";
-
-export const worker = {
-    fetch: (request, env, _arg) => {
-        const resize = new globalThis.Request("http://resizer/thumbnail?width=320", ({
-            method: "POST",
-            body: request.body,
-        }));
-        const resizer = getFetchByName(env.RESIZER, "resizer");
-        return resizer.fetch(switchPort(resize, 8080));
-    },
-};
-
-export default worker;
-```
-
-</details>
+The container-backed image resizer now has its own [Containers page](containers.md#image-resizer), including the current F# subclassing limitation.
 
 ## Event RSVP
 
-Each invitation is a Durable Object that stores RSVPs in SQLite and responds with the headcount, plus-ones included. The Actors `Storage` helper saves the number of the last migration it applied, so the second migration adds `plus_ones` once to every invitation, old or new. `Invitation` inherits the Workers `DurableObject` class because F# cannot subclass `Actor` either.
+Each invitation is a Durable Object that stores RSVPs in SQLite and responds with the headcount, plus-ones included. The Actors `Storage` helper saves the number of the last migration it applied, so the second migration adds `plus_ones` once to every invitation, old or new. `Invitation` inherits the Workers `DurableObject` class because the current bindings do not support subclassing `Actor` directly from F#.
 
 ```fsharp
 open Fable.Core
@@ -403,7 +355,6 @@ export default worker;
 
 | Library | npm package and version | What it covers |
 | --- | --- | --- |
-| `Runtime.Containers` | `@cloudflare/containers` 0.3.7 | Container-backed Durable Objects |
 | `Runtime.Actors` | `@cloudflare/actors` 0.0.1-beta.6 | Durable Object helpers |
 | `Runtime.DynamicWorkflows` | `@cloudflare/dynamic-workflows` 0.1.1 | Workflows per tenant |
 | `Runtime.WorkersOauthProvider` | `@cloudflare/workers-oauth-provider` 0.10.3 | OAuth 2.1 provider |
