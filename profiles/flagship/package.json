@@ -8,6 +8,6 @@
     "@cloudflare/workers-types": "5.20260906.1",
     "@openfeature/server-sdk": "1.23.0",
     "@openfeature/web-sdk": "1.10.0",
-    "@types/node": "22.19.19"
+    "@types/node": "26.4.1"
   }
 }

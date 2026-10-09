@@ -38,7 +38,7 @@ export async function buildSdk({ root = defaultRoot, args = process.argv.slice(2
     ? deliveryConfiguration(partitioned, plan.partitions, read("config/sdk-delivery.json"), root) : undefined;
   const configuration = delivery?.configuration ?? partitioned;
   const requested = args.includes("--all") ? [] : explicit.length ? [...new Set(explicit)]
-    : delivery?.libraries.map(library => library.id) ?? firstDelivery;
+    : delivery ? [...delivery.libraries.map(library => library.id), ...delivery.scope.supportTargets] : firstDelivery;
   const selected = generationOrder(configuration.targets, requested);
   const selectedIds = new Set(selected.map(target => target.id));
   const selectedPartitions = (delivery?.libraries ?? plan.partitions).filter(partition => selectedIds.has(partition.id));

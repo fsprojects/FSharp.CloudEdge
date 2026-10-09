@@ -46,7 +46,7 @@ flowchart LR
 | Widened | Information TypeScript had was dropped. |
 | Escape | The construct is not represented. |
 
-Xantham generates the 31 runtime libraries from 112 selected npm entry points, together with the three AI SDK contract libraries they share. The generator version and build hashes are recorded in [`config/tool-packages.json`](config/tool-packages.json).
+Xantham generates the 31 runtime libraries from 112 selected npm entry points, together with the dependency contract libraries they share: AI SDK, Zod and JSON Schema. Generation builds the primary Xantham checkout at the revision pinned under `xantham.source` in [`config/targets.json`](config/targets.json); each `artifacts/<target>/generation.json` records the fingerprint of the source adapter that generated the target.
 
 ### Hawaii
 
@@ -134,11 +134,11 @@ let listAccounts (apiToken: string) =
 
 ## Local Build
 
-FSharp.CloudEdge builds from source. The runtime projects reference local builds of Xantham's support packages, and both generators run as pinned local .NET tools, so a first setup packs them from their source checkouts. You need:
+FSharp.CloudEdge builds from source. The runtime projects reference local builds of Xantham's support packages, SDK generation builds the pinned Xantham checkout, and Hawaii runs as a pinned local .NET tool, so a first setup packs the support packages and Hawaii from their source checkouts. You need:
 
 - the .NET SDK `10.0.401` or a later `10.0.4xx` patch, as [`global.json`](global.json) requires
 - Node.js with npm, and Python 3 for the Hawaii runner
-- Xantham at commit [`c7e2fa0`](https://github.com/shayanhabibi/Xantham/commit/c7e2fa0daa2ed3ec662cd453ae4c287a6a28673b) and Hawaii on its [`fsharp-cloudedge-support`](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support) branch
+- Xantham at the commit pinned under `xantham.source.xanthamRevision` in [`config/targets.json`](config/targets.json), and Hawaii on its [`fsharp-cloudedge-support`](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support) branch
 - BAREWire, for the ByteBridge consumer in the solution
 
 The default layout:

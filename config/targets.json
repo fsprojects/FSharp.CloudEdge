@@ -4,7 +4,11 @@
     "typescript": "7.1.0-dev.20260902.1"
   },
   "xantham": {
-    "tool": "xantham"
+    "tool": "xantham",
+    "source": {
+      "project": "generators/xantham/Xantham.CloudEdge.fsproj",
+      "xanthamRevision": "2ecbd73cff0ee95b46ebc68ade560a473307e974"
+    }
   },
   "targets": [
     {
@@ -5620,7 +5624,7 @@
     "packages": {
       "Fable.Core": "5.2.0",
       "Xantham.Fable.Core": "0.1.0-local.83b9196820f7e253f211",
-      "Xantham.Fable.Core.TS": "0.1.0-local.2cc2de89eabe31fc35f6"
+      "Xantham.Fable.Core.TS": "0.1.0-local.db71f538557715417502"
     }
   },
   "profiles": [

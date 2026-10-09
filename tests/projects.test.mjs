@@ -433,7 +433,7 @@ test("a selected explicit dependency reconciles its own catalog dependencies tra
 
 test("project checks authenticate opt-in projection selection, payload and manifest", t => {
   const config = configuration();
-  config.targets[0].projection = { project: "generators/adapter/Adapter.fsproj", selections: [{ methodName: "submit" }] };
+  config.targets[0].projection = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40), selections: [{ methodName: "submit" }] };
   const plan = planProjects(config, temporary(t));
   generated(plan);
   const adapter = path.join(plan.root, "generators/adapter");
@@ -446,6 +446,7 @@ test("project checks authenticate opt-in projection selection, payload and manif
   writeFileSync(manifest, JSON.stringify({ projections: [{ sourceIdentity: "source" }] }));
   const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
   receipt.projection = config.targets[0].projection;
+  receipt.sourceTool = { project: config.targets[0].projection.project, xanthamRevision: config.targets[0].projection.xanthamRevision };
   const options = { projectionToolResolver: () => ({ fingerprint: { payload: hash(readFileSync(path.join(adapter, "bin/Release/net10.0/Adapter.dll"))) } }) };
   receipt.generatorTool = options.projectionToolResolver().fingerprint;
   receipt.projectionManifestSha256 = hash(readFileSync(manifest));
@@ -455,7 +456,23 @@ test("project checks authenticate opt-in projection selection, payload and manif
   assert.throws(() => checkProjects(plan, [], options), /customization evidence differs/);
   writeFileSync(manifest, JSON.stringify({ projections: [{ sourceIdentity: "source" }] }));
   writeFileSync(path.join(adapter, "bin/Release/net10.0/Adapter.dll"), "changed adapter");
-  assert.throws(() => checkProjects(plan, [], options), /projection adapter differs/);
+  assert.throws(() => checkProjects(plan, [], options), /source adapter differs/);
+});
+
+test("ordinary project receipts authenticate the shared source adapter and reject stale package receipts", t => {
+  const config = configuration();
+  config.xantham.source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  const plan = planProjects(config, temporary(t)); generated(plan);
+  const options = { sourceToolResolver: (_root, source) => ({ fingerprint: { source, payload: "frozen source adapter" } }) };
+  assert.throws(() => checkProjects(plan, [], options), /source adapter differs/);
+  const file = path.join(plan.root, "artifacts/workers/generation.json");
+  const receipt = JSON.parse(readFileSync(file, "utf8"));
+  receipt.generatorTool = options.sourceToolResolver(plan.root, config.xantham.source).fingerprint;
+  receipt.sourceTool = config.xantham.source;
+  writeFileSync(file, JSON.stringify(receipt));
+  assert.equal(checkProjects(plan, [], options).length, 1);
+  config.xantham.source = { ...config.xantham.source, xanthamRevision: "1".repeat(40) };
+  assert.throws(() => checkProjects(plan, [], options), /source adapter differs/);
 });
 
 for (const version of [2, 3]) test(`catalog schema ${version} respects supported owner graph versions`, t => {

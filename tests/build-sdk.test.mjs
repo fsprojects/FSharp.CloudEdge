@@ -63,6 +63,19 @@ test("generation receives the exact partition configuration and failures prevent
   assert.equal(f.report().failedStage, "generating");
 });
 
+test("the default delivery selection includes every support target, including unreferenced ones", async t => {
+  const f = fixture(t);
+  const owner = { id: "extra-owner", package: "sdk", version: "1.0.0", profile: "sdk", dependencies: [],
+    outputDirectory: "src/extra-owner", files: ["Bindings.ExtraOwner.fs"],
+    generator: { module: "Bindings.ExtraOwner", entry: "extra.d.ts", lib: ["esnext"], types: [] } };
+  writeFileSync(path.join(f.root, "config/sdk-delivery.json"), JSON.stringify({ schemaVersion: 1, name: "server",
+    libraries: [{ partition: "sdk", publicInputs: [".", "./extra"] }],
+    deferred: [{ partitions: ["browser"], reason: "Browser clients are outside this delivery." }], supportTargets: [owner] }));
+  const report = await buildSdk({ root: f.root, args: ["--plan"] });
+  assert.deepEqual([...report.requested].sort(), ["extra-owner", "sdk"]);
+  assert.deepEqual(report.supportTargets, ["extra-owner"]);
+});
+
 test("all mode includes browser partitions and unknown selections fail before generation", async t => {
   const f = fixture(t);
   const report = await buildSdk({ root: f.root, args: ["--all", "--plan"] });

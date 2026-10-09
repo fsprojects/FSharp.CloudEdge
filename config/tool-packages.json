@@ -110,8 +110,8 @@
       "packageSha256": "5af551353822bda916d40d2dc8b126a898e18993268df1be78ab5aa5fb7f4a5b"
     },
     "Xantham.Fable.Core.TS": {
-      "version": "0.1.0-local.2cc2de89eabe31fc35f6",
-      "packageSha256": "f875da41ac64329895010d626e43fdb94e673d928b92d2d2a50bd2b5cf6ad79f"
+      "version": "0.1.0-local.db71f538557715417502",
+      "packageSha256": "575f04fd2169a7d3a8cefb5bb34ee20619de6d36798c6e3554a008f1392ae8b1"
     }
   }
 }

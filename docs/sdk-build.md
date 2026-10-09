@@ -1,6 +1,7 @@
 # Build selected SDK partitions
 
-After restoring the pinned profiles and local tool packages:
+After restoring the pinned profiles and Hawaii tool package, and placing the
+primary Xantham checkout at the exact `xantham.source.xanthamRevision` pin:
 
 ```sh
 npm run build -- --resume
@@ -9,6 +10,19 @@ npm run build -- --resume
 This builds the selected SDK/support libraries and the Hawaii management hierarchy together.
 The [library guide](SDK-LIBRARY.md) describes the layout, dependency injection and fidelity
 contract. Run `npm run build` for fresh generation through both tools.
+
+Every delivered SDK target uses the source adapter in `generators/xantham`.
+`config/targets.json` owns its project path and exact Xantham revision once under
+`xantham.source`; individual targets only select optional projections. A target without a projection runs `Pipeline.run`, the same pipeline as the Xantham CLI, so library compilation is its compile gate. A target with a projection runs `Pipeline.runProjectedWith`, which also compiles the generated sources against the adapter's Xantham support assemblies before writing them; that validation has no catalog producer assemblies, so a projected target cannot import catalogs. The default `XanthamProjectRoot` is the primary sibling `../Xantham`; set `CLOUDEDGE_XANTHAM_ROOT` for another primary checkout location.
+
+Generation requires clean pinned generator/support sources. Explicit development may set `CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1`, recording the source diff and untracked-source hashes as `source.dirty` in each receipt. Such receipts are development evidence: they authenticate only while the variable is set and the same diff persists. Acceptance regenerates at a committed `xanthamRevision` with the variable unset. Generated projects compile against the `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` packages in `projectDefaults`; `npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham` packs them from the checked-out Xantham revision, so bootstrap at the pin before regenerating.
+
+The generation receipt binds the source adapter configuration, compiled payload,
+TypeScript pin, profile and output hashes. Its build receipt associates source and
+ancestor build inputs with that payload; `--no-build` refuses stale associations.
+One frozen adapter build serves the selected generation closure. Project checks
+authenticate it again before compilation. Configurations without `xantham.source`
+retain the legacy pinned local Xantham CLI mode.
 
 For SDK-only work:
 
@@ -19,16 +33,9 @@ npm run build:sdk -- workers containers
 npm run build:sdk -- --all --plan
 ```
 
-The default is the server selection in
-[`config/sdk-delivery.json`](../config/sdk-delivery.json), plus its explicit support owners.
-It includes Agents, Sandbox, Containers, AI Gateway, Workers AI, AI Search and the selected
-server helpers. React/web-client behavior and optional integration work remain outside the
-default build. Management stays OpenAPI → Hawaii.
+The default is the server selection in [`config/sdk-delivery.json`](../config/sdk-delivery.json) plus every configured support target, including `agents-pi`. A default build therefore materializes the complete delivered inventory that `test:contracts` and `test:agents-pi` read. It includes Agents, Sandbox, Containers, AI Gateway, Workers AI, AI Search and the selected server helpers. React/web-client behavior and optional integration work remain outside the default build. Management stays OpenAPI → Hawaii.
 
-Each library selects exact public subpaths from the pinned compiler partition. Inputs left
-out require a reason; newly inventoried inputs require an explicit disposition. Included
-declaration files retain their full exported APIs. Support catalogs are supplied through
-`catalogImports`; compatible inference profiles and source/API identities are validated.
+Each library selects exact public subpaths from the pinned compiler partition. Inputs left out require a reason; newly inventoried inputs require an explicit disposition. Included declaration files retain their full exported APIs. Support catalogs are supplied through `catalogImports`. Delivery configuration rejects an import unless the consumer and producer have identical inference settings (normally one named `inferenceProfiles` entry) and the consumer ships the producer's package; Xantham then validates source and API identities. A consumer that generates a shipped declaration absent from every referenced catalog emits it in `groups/<module>.fs`; that file must appear in the target's `files` list, ahead of the entry file.
 
 The command retains canonical inventory metadata in `config/targets.json`. It saves the
 materialized configuration in `artifacts/sdk-build/targets.json`, complete disposition
@@ -63,21 +70,7 @@ npm run build:sdk -- agents-pi
 npm run test:agents-pi
 ```
 
-This target uses the opt-in embedding runner in `generators/xantham`, which calls
-Xantham's early operation projection API and actual Myriad plugin before shaping.
-The default `XanthamProjectRoot` is the primary sibling `../Xantham`; set
-`CLOUDEDGE_XANTHAM_ROOT` to use another primary checkout location. The target pins the exact Xantham commit in `projection.xanthamRevision`; the
-runner requires that commit with clean generator/support sources. Explicit local
-development may set `CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1`, which records source diff and
-untracked-source hashes in the receipt. Accepted release generation uses the clean
-pin. This source-backed target is explicitly selected; existing default targets
-keep their current build prerequisites.
-Ordinary targets retain the pinned local Xantham CLI. The generation receipt
-hashes the adapter's runtime payload, its project/source, exact projection
-selection and projection provenance in the manifest. Its build receipt associates
-those source and ancestor build inputs with the compiled payload; `--no-build`
-reuse rejects a stale association. Project checks authenticate that closure again
-before compilation.
+This support target adds early operation projections to the shared source runner. It calls Xantham's projection API and actual Myriad plugin before shaping. Its receipt additionally hashes the exact projection selection and projection provenance in the manifest. It keeps its own profile and imports no catalogs: its Workers types pin `5.20261009.1`, which wrangler 4.130.0 requires, and its projection validation compiles without producer assemblies.
 
 The shared public input is `FSharp.CloudEdge.Pi.HarnessSubmit.Input`. Its `Text`
 case takes a string; its `Items` case takes typed text/image payloads. The same

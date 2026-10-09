@@ -39,6 +39,7 @@ function fixture(t) {
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 const args = process.argv.slice(2);
+if (process.env.FAKE_ARGUMENTS_LOG) appendFileSync(process.env.FAKE_ARGUMENTS_LOG, JSON.stringify(args) + "\\n");
 const config = JSON.parse(readFileSync(args[args.indexOf("--config") + 1], "utf8"));
 appendFileSync(process.env.FAKE_CALLS, config.module + "\\n");
 if (process.env.FAKE_FAIL === config.module) process.exit(4);
@@ -285,5 +286,38 @@ test("projected generation rejects a changed adapter payload before accepting ou
   let calls = 0;
   const options = { projectionToolResolver: () => ({ args: [], fingerprint: { payload: ++calls } }) };
   await assert.rejects(f.run(["owner"], {}, options), /generator or compiler changed during generation/);
+  assert.ok(!existsSync(path.join(f.root, "artifacts/owner/generation.json")));
+});
+
+test("a shared source adapter generates ordinary and projected targets with one frozen build", async t => {
+  const f = fixture(t);
+  f.config.xantham.source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  f.config.targets[1].projection = { selections: [{ methodName: "submit" }] };
+  f.save();
+  const builds = [];
+  const options = { toolResolver: () => assert.fail("source delivery used the packaged tool"), sourceToolResolver: (_root, source, _env, build) => {
+    if (build) builds.push(source);
+    return { args: ["source-adapter.dll"], fingerprint: { source, payload: "frozen" } };
+  } };
+  const argumentsFile = path.join(f.root, "arguments.jsonl");
+  assert.deepEqual((await f.run(["adapter"], { FAKE_ARGUMENTS_LOG: argumentsFile }, options)).map(result => result.status), ["generated", "generated"]);
+  assert.equal(builds.length, 1);
+  const calls = readFileSync(argumentsFile, "utf8").trim().split("\n").map(JSON.parse);
+  assert.ok(calls.every(args => args[0] === "source-adapter.dll" && args.includes("--workspace")));
+  assert.equal(calls[0].includes("--projection"), false);
+  assert.equal(calls[1].includes("--projection"), true);
+  for (const id of ["owner", "adapter"]) assert.deepEqual(json(path.join(f.root, `artifacts/${id}/generation.json`)).sourceTool, f.config.xantham.source);
+  assert.deepEqual((await f.run(["--resume", "--no-build", "adapter"], {}, options)).map(result => result.status), ["current", "current"]);
+  assert.equal(builds.length, 1);
+  f.config.xantham.source.xanthamRevision = "1".repeat(40); f.save();
+  assert.deepEqual((await f.run(["--resume", "adapter"], {}, options)).map(result => result.status), ["generated", "generated"]);
+});
+
+test("ordinary source generation rejects payload drift before accepting output", async t => {
+  const f = fixture(t);
+  f.config.xantham.source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  f.save();
+  let reads = 0;
+  await assert.rejects(f.run(["owner"], {}, { sourceToolResolver: () => ({ args: [], fingerprint: { payload: ++reads } }) }), /generator or compiler changed during generation/);
   assert.ok(!existsSync(path.join(f.root, "artifacts/owner/generation.json")));
 });

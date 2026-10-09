@@ -3,7 +3,7 @@ import { spawnSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveProjectionTool, sameTool } from "./tool-packages.mjs";
+import { resolveSourceTool, sourceToolConfiguration, sameTool } from "./tool-packages.mjs";
 import { inspectInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, catalogProjectDependencies, declarationReferences, generationOrder } from "./catalogs.mjs";
 
@@ -87,6 +87,7 @@ export function planProjects(config, repositoryRoot, catalogDependencies = new M
   for (const target of config.targets) {
     const targetKeys = ["id", "package", "version", "outputDirectory", "files", "generator", "profile", "dependencies"];
     fields(target, targetKeys, [...targetKeys, "catalogCandidates", "projection"], "target");
+    sourceToolConfiguration(config, target);
     requireThat(typeof target.id === "string" && /^[a-z][a-z0-9-]*$/.test(target.id) && !byId.has(target.id), "Target IDs must be unique lowercase names");
     requireThat(typeof target.package === "string" && /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(target.package) && exactVersion(target.version), `${target.id}: invalid package or exact version`);
     requireThat(profiles.has(target.profile), `${target.id}: unknown profile ${target.profile}`);
@@ -179,7 +180,7 @@ function selectedProjects(plan, requested) {
 }
 
 /** Cache read-only profile inspection across receipts, including inherited catalog producers. */
-function receiptReader(plan, projectionToolResolver = resolveProjectionTool) {
+function receiptReader(plan, sourceToolResolver = resolveSourceTool) {
   const profiles = new Map(plan.config.profiles.map((profile) => [profile.id, path.resolve(plan.root, profile.directory)]));
   const inspectedProfiles = new Map();
   const receipts = new Map();
@@ -187,12 +188,11 @@ function receiptReader(plan, projectionToolResolver = resolveProjectionTool) {
     const provenanceFile = path.join(plan.root, "artifacts", target.id, "generation.json");
     requireThat(existsSync(provenanceFile), `${target.id}: generation provenance is missing`);
     const provenance = JSON.parse(readFileSync(provenanceFile, "utf8"));
-    if (target.projection) {
-      const current = projectionToolResolver(plan.root, target.projection);
+    const source = sourceToolConfiguration(plan.config, target);
+    if (source) {
+      const current = sourceToolResolver(plan.root, source);
       requireThat(object(provenance.generatorTool) && sameTool(current, { fingerprint: provenance.generatorTool }),
-        `${target.id}: generation projection adapter differs from its authenticated payload`);
-      const customization = path.join(plan.root, "artifacts", target.id, "manifest.json");
-      requireThat(existsSync(customization) && provenance.projectionManifestSha256 === sha256(readFileSync(customization)), `${target.id}: customization evidence differs from generation`);
+        `${target.id}: generation source adapter differs from its authenticated payload`);
     } else {
       const toolLockFile = path.join(plan.root, "config/tool-packages.json");
       requireThat(existsSync(toolLockFile), `${target.id}: generator package lock is missing`);
@@ -204,6 +204,11 @@ function receiptReader(plan, projectionToolResolver = resolveProjectionTool) {
         && Object.entries(expectedTool).every(([key, value]) => canonical(provenance.generatorTool[key]) === canonical(value)),
         `${target.id}: generation tool differs from the pinned package`);
     }
+    if (target.projection) {
+      const customization = path.join(plan.root, "artifacts", target.id, "manifest.json");
+      requireThat(existsSync(customization) && provenance.projectionManifestSha256 === sha256(readFileSync(customization)), `${target.id}: customization evidence differs from generation`);
+    }
+    requireThat(canonical(provenance.sourceTool) === canonical(source), `${target.id}: source adapter configuration differs from generation`);
     requireThat(canonical(provenance.projection) === canonical(target.projection), `${target.id}: projection selection differs from generation`);
     requireThat(provenance.target === target.id && provenance.package === target.package && provenance.version === target.version, `${target.id}: generation input differs from target`);
     requireThat(provenance.typescript === plan.config.toolchain.typescript && canonical(provenance.generator) === canonical(target.generator), `${target.id}: generation configuration differs from target`);
@@ -312,8 +317,8 @@ export function reconcileProjects(plan, requested = [], strict = false, readRece
 }
 
 /** Verify project text and generation provenance before invoking the compiler. */
-export function checkProjects(plan, requested = [], { projectionToolResolver = resolveProjectionTool } = {}) {
-  const readReceipt = receiptReader(plan, projectionToolResolver);
+export function checkProjects(plan, requested = [], { projectionToolResolver = resolveSourceTool, sourceToolResolver = projectionToolResolver } = {}) {
+  const readReceipt = receiptReader(plan, sourceToolResolver);
   plan = reconcileProjects(plan, requested, true, readReceipt);
   const selected = selectedProjects(plan, requested);
   requireThat(existsSync(plan.solution) && readFileSync(plan.solution, "utf8") === plan.solutionContent, "Bindings solution differs from configuration; run projects.mjs --write");

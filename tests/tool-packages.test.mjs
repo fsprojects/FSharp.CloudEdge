@@ -7,11 +7,23 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { zipSync } from "fflate";
-import { installedTool, packageCache, resolveTool, resolveProjectionTool, sameTool } from "../scripts/tool-packages.mjs";
+import { installedTool, packageCache, resolveTool, resolveProjectionTool, sourceToolConfiguration, sameTool } from "../scripts/tool-packages.mjs";
 
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const write = (file, bytes) => { mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, bytes); };
 const json = (file, value) => write(file, JSON.stringify(value));
+
+test("source adapter configuration has one shared pin and rejects conflicting projection ownership", () => {
+  const source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  const configuration = { xantham: { source } };
+  assert.equal(sourceToolConfiguration(configuration, { id: "ordinary" }), source);
+  assert.equal(sourceToolConfiguration(configuration, { id: "projected", projection: { selections: [{}] } }), source);
+  assert.deepEqual(sourceToolConfiguration({ xantham: {} }, { projection: { ...source, selections: [{}] } }), source);
+  assert.throws(() => sourceToolConfiguration(configuration, { id: "conflict", projection: { ...source, xanthamRevision: "1".repeat(40) } }), /differs from shared/);
+  assert.throws(() => sourceToolConfiguration({ xantham: { source: { ...source, extra: true } } }, {}), /must name a project/);
+  assert.throws(() => sourceToolConfiguration({ xantham: {} }, { projection: { selections: [{}] } }), /requires a source adapter/);
+  assert.throws(() => sourceToolConfiguration({ xantham: { source: { ...source, xanthamRevision: "develop" } } }, {}), /exact Xantham source revision/);
+});
 
 function fixture(t) {
   const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-tool-package-"));

@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { inspectInputOverlays, prepareInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, declarationReferences, generationDependencies, generationOrder } from "./catalogs.mjs";
-import { resolveTool, resolveProjectionTool, sameTool } from "./tool-packages.mjs";
+import { resolveTool, resolveSourceTool, sourceToolConfiguration, sameTool } from "./tool-packages.mjs";
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
@@ -39,12 +39,12 @@ function sourceFiles(directory, prefix = "") {
   }).sort();
 }
 
-export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, projectionToolResolver = resolveProjectionTool, configuration } = {}) {
+export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, projectionToolResolver = resolveSourceTool, sourceToolResolver = projectionToolResolver, configuration } = {}) {
   requireThat(args.filter((arg) => arg.startsWith("--")).every((arg) => ["--check", "--no-build", "--continue-on-error", "--resume"].includes(arg)), "Usage: node scripts/generate.mjs [--check] [--no-build] [--continue-on-error] [--resume] [target ...]");
   const config = configuration ?? readJson(path.join(root, "config/targets.json"));
   fields(config, ["schemaVersion", "toolchain", "xantham", "profiles", "projectDefaults", "targets"], "targets.json");
   fields(config.toolchain, ["typescript"], "toolchain");
-  fields(config.xantham, ["tool"], "xantham");
+  fields(config.xantham, ["tool"], "xantham", ["source"]);
   requireThat(config.xantham.tool === "xantham", "xantham must select the pinned local tool");
   requireThat(config.schemaVersion === 2 && exactVersion(config.toolchain.typescript), "Unsupported configuration schema or TypeScript pin");
   requireThat(Array.isArray(config.targets) && config.targets.length > 0, "At least one generation target is required");
@@ -72,9 +72,10 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       destinations.add(destination);
     });
     if (target.projection !== undefined) {
-      fields(target.projection, ["project", "xanthamRevision", "selections"], `${target.id}: projection`);
-      requireThat(typeof target.projection.project === "string" && Array.isArray(target.projection.selections) && target.projection.selections.length > 0, `${target.id}: projection must select operations`);
+      fields(target.projection, ["selections"], `${target.id}: projection`, ["project", "xanthamRevision"]);
+      requireThat(Array.isArray(target.projection.selections) && target.projection.selections.length > 0, `${target.id}: projection must select operations`);
     }
+    sourceToolConfiguration(config, target);
     requireThat(target.generator && typeof target.generator.module === "string" && /^[A-Za-z_][A-Za-z0-9_.]*$/.test(target.generator.module), `${target.id}: generator.module is required`);
   }
   const requested = args.filter((arg) => !arg.startsWith("--"));
@@ -112,16 +113,21 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
     return;
   }
   const dotnet = environment.CLOUDEDGE_DOTNET ?? "dotnet";
-  const ordinaryTool = selected.some(target => !target.projection) ? toolResolver(root, config.xantham.tool, environment) : undefined;
-  const projectedTools = new Map(selected.filter(target => target.projection).map(target => [target.id,
-    projectionToolResolver(root, target.projection, environment, !args.includes("--no-build"))]));
+  const ordinaryTool = selected.some(target => !sourceToolConfiguration(config, target)) ? toolResolver(root, config.xantham.tool, environment) : undefined;
+  const sourceTools = new Map();
+  for (const target of selected) {
+    const source = sourceToolConfiguration(config, target);
+    if (source && !sourceTools.has(JSON.stringify(source)))
+      sourceTools.set(JSON.stringify(source), sourceToolResolver(root, source, environment, !args.includes("--no-build")));
+  }
   const typescriptExecutableSha256 = hash(tsc);
   const env = { ...environment, XANTHAM_TSGO_EXE: tsc, XANTHAM_REQUIRE_TSC: "1" };
   const results = [];
   const preparedProfiles = new Map();
   for (const target of selected) {
-    const currentTool = () => target.projection ? projectionToolResolver(root, target.projection, environment, false) : toolResolver(root, config.xantham.tool, environment);
-    const tool = projectedTools.get(target.id) ?? ordinaryTool;
+    const source = sourceToolConfiguration(config, target);
+    const currentTool = () => source ? sourceToolResolver(root, source, environment, false) : toolResolver(root, config.xantham.tool, environment);
+    const tool = source ? sourceTools.get(JSON.stringify(source)) : ordinaryTool;
     const failedDependencies = generationDependencies(target).filter((id) => results.some((result) => result.target === id && ["failed", "blocked"].includes(result.status)));
     if (failedDependencies.length) {
       results.push({ target: target.id, status: "blocked", dependencies: failedDependencies });
@@ -155,6 +161,7 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
             && previous.inputOverlays?.fingerprint === inputOverlays.fingerprint
             && JSON.stringify(previous.generator) === JSON.stringify(target.generator)
             && JSON.stringify(previous.projection) === JSON.stringify(target.projection)
+            && JSON.stringify(previous.sourceTool) === JSON.stringify(source)
             && (!target.projection || existsSync(path.join(artifacts, "manifest.json")) && previous.projectionManifestSha256 === hash(path.join(artifacts, "manifest.json")))
             && JSON.stringify(previous.catalogCandidates) === JSON.stringify(catalogCandidates(target))
             && JSON.stringify(previous.generatorTool) === JSON.stringify(tool.fingerprint)
@@ -172,10 +179,11 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       const settings = path.join(stage, "xantham.json");
       writeFileSync(settings, JSON.stringify(effectiveGenerator, null, 2) + "\n");
       const projectionArguments = [];
+      if (source) projectionArguments.push("--workspace", path.join(root, "tests/.scratch/generation", target.id));
       if (target.projection) {
         const projectionFile = path.join(stage, "projection.json");
         writeFileSync(projectionFile, JSON.stringify(target.projection, null, 2) + "\n");
-        projectionArguments.push("--projection", projectionFile, "--workspace", path.join(root, "tests/.scratch/generation", target.id));
+        projectionArguments.push("--projection", projectionFile);
       }
       const log = openSync(path.join(artifacts, "generate.log"), "w");
       try {
@@ -195,7 +203,7 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       target.files.forEach((file) => requireThat(readFileSync(inside(stage, file)).length > 0, `${target.id}: empty generated source ${file}`));
       const declarationCatalogSha256 = target.generator.declarationCatalog ? hash(path.join(stage, "declarations.json")) : undefined;
       const projectionManifestSha256 = target.projection ? hash(path.join(stage, "manifest.json")) : undefined;
-      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, projection: target.projection, projectionManifestSha256, effectiveGenerator, declarationReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
+      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, projection: target.projection, sourceTool: source, projectionManifestSha256, effectiveGenerator, declarationReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
       for (const file of target.files) {
         const destination = inside(inside(root, target.outputDirectory), file);
         mkdirSync(path.dirname(destination), { recursive: true });

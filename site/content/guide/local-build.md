@@ -32,15 +32,13 @@ The build requires three more repositories beside FSharp.CloudEdge. Xantham and 
    git clone https://github.com/FidelityFramework/BAREWire.git
    ```
 
-3. Switch Xantham to commit `c7e2fa0`. The runtime bindings in the repository were generated with a Xantham tool packed from that commit.
+3. Switch Xantham to the revision pinned in `config/targets.json` under `xantham.source.xanthamRevision`. SDK generation builds that exact checkout through `generators/xantham`; any other `HEAD`, or uncommitted changes in its generator and support sources, stops generation. The bootstrap in a later step packs `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` from the same checked-out revision.
 
    ```bash
-   git -C Xantham switch --detach c7e2fa0daa2ed3ec662cd453ae4c287a6a28673b
+   git -C Xantham switch --detach "$(node -p "require('./FSharp.CloudEdge/config/targets.json').xantham.source.xanthamRevision")"
    ```
 
-   ```text
-   HEAD is now at c7e2fa0 Flatten interface bases emitted as abstract classes
-   ```
+   Git reports `HEAD is now at` followed by the pinned commit.
 
 The parent folder now holds four checkouts. The package-based First Worker guide does not require this folder layout.
 
@@ -115,7 +113,7 @@ Xantham and Hawaii run as .NET tools that you pack from your checkouts. Enter th
    npm run build
    ```
 
-   - Xantham generates the 31 runtime libraries from the declarations in the profiles, along with the three AI SDK contract libraries they share. The build then compiles those 34 libraries.
+   - Xantham generates the 31 runtime libraries from the declarations in the profiles, along with the seven dependency contract libraries they share (AI SDK, Zod and JSON Schema) and the Agents Pi operations library. The build then compiles those 39 libraries.
    - A Python runner downloads Cloudflare's OpenAPI document at a pinned commit and verifies its SHA-256. Hawaii generates the 11 control-plane clients and their shared model project from the downloaded file. The runner builds those 12 projects. A test program then sends four requests through the Tenancy and Compute clients to a loopback HTTP server.
    - The build compiles the solution, `FSharp.CloudEdge.slnx`, in Release.
 
