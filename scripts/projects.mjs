@@ -3,6 +3,7 @@ import { spawnSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveProjectionTool, sameTool } from "./tool-packages.mjs";
 import { inspectInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, catalogProjectDependencies, declarationReferences, generationOrder } from "./catalogs.mjs";
 
@@ -85,7 +86,7 @@ export function planProjects(config, repositoryRoot, catalogDependencies = new M
   const moduleOwners = new Map();
   for (const target of config.targets) {
     const targetKeys = ["id", "package", "version", "outputDirectory", "files", "generator", "profile", "dependencies"];
-    fields(target, targetKeys, [...targetKeys, "catalogCandidates"], "target");
+    fields(target, targetKeys, [...targetKeys, "catalogCandidates", "projection"], "target");
     requireThat(typeof target.id === "string" && /^[a-z][a-z0-9-]*$/.test(target.id) && !byId.has(target.id), "Target IDs must be unique lowercase names");
     requireThat(typeof target.package === "string" && /^(?:@[a-z0-9._-]+\/)?[a-z0-9._-]+$/.test(target.package) && exactVersion(target.version), `${target.id}: invalid package or exact version`);
     requireThat(profiles.has(target.profile), `${target.id}: unknown profile ${target.profile}`);
@@ -178,7 +179,7 @@ function selectedProjects(plan, requested) {
 }
 
 /** Cache read-only profile inspection across receipts, including inherited catalog producers. */
-function receiptReader(plan) {
+function receiptReader(plan, projectionToolResolver = resolveProjectionTool) {
   const profiles = new Map(plan.config.profiles.map((profile) => [profile.id, path.resolve(plan.root, profile.directory)]));
   const inspectedProfiles = new Map();
   const receipts = new Map();
@@ -186,15 +187,24 @@ function receiptReader(plan) {
     const provenanceFile = path.join(plan.root, "artifacts", target.id, "generation.json");
     requireThat(existsSync(provenanceFile), `${target.id}: generation provenance is missing`);
     const provenance = JSON.parse(readFileSync(provenanceFile, "utf8"));
-    const toolLockFile = path.join(plan.root, "config/tool-packages.json");
-    requireThat(existsSync(toolLockFile), `${target.id}: generator package lock is missing`);
-    const toolLock = JSON.parse(readFileSync(toolLockFile, "utf8"));
-    const expectedTool = toolLock.tools?.[plan.config.xantham.tool];
-    requireThat(toolLock.schemaVersion === 1 && object(expectedTool) && typeof expectedTool.packageSha256 === "string",
-      `${target.id}: generator package lock is incomplete`);
-    requireThat(object(provenance.generatorTool)
-      && Object.entries(expectedTool).every(([key, value]) => canonical(provenance.generatorTool[key]) === canonical(value)),
-      `${target.id}: generation tool differs from the pinned package`);
+    if (target.projection) {
+      const current = projectionToolResolver(plan.root, target.projection);
+      requireThat(object(provenance.generatorTool) && sameTool(current, { fingerprint: provenance.generatorTool }),
+        `${target.id}: generation projection adapter differs from its authenticated payload`);
+      const customization = path.join(plan.root, "artifacts", target.id, "manifest.json");
+      requireThat(existsSync(customization) && provenance.projectionManifestSha256 === sha256(readFileSync(customization)), `${target.id}: customization evidence differs from generation`);
+    } else {
+      const toolLockFile = path.join(plan.root, "config/tool-packages.json");
+      requireThat(existsSync(toolLockFile), `${target.id}: generator package lock is missing`);
+      const toolLock = JSON.parse(readFileSync(toolLockFile, "utf8"));
+      const expectedTool = toolLock.tools?.[plan.config.xantham.tool];
+      requireThat(toolLock.schemaVersion === 1 && object(expectedTool) && typeof expectedTool.packageSha256 === "string",
+        `${target.id}: generator package lock is incomplete`);
+      requireThat(object(provenance.generatorTool)
+        && Object.entries(expectedTool).every(([key, value]) => canonical(provenance.generatorTool[key]) === canonical(value)),
+        `${target.id}: generation tool differs from the pinned package`);
+    }
+    requireThat(canonical(provenance.projection) === canonical(target.projection), `${target.id}: projection selection differs from generation`);
     requireThat(provenance.target === target.id && provenance.package === target.package && provenance.version === target.version, `${target.id}: generation input differs from target`);
     requireThat(provenance.typescript === plan.config.toolchain.typescript && canonical(provenance.generator) === canonical(target.generator), `${target.id}: generation configuration differs from target`);
     requireThat(canonical(provenance.catalogCandidates) === canonical(catalogCandidates(target)), `${target.id}: generation catalog candidates differ from target`);
@@ -302,8 +312,8 @@ export function reconcileProjects(plan, requested = [], strict = false, readRece
 }
 
 /** Verify project text and generation provenance before invoking the compiler. */
-export function checkProjects(plan, requested = []) {
-  const readReceipt = receiptReader(plan);
+export function checkProjects(plan, requested = [], { projectionToolResolver = resolveProjectionTool } = {}) {
+  const readReceipt = receiptReader(plan, projectionToolResolver);
   plan = reconcileProjects(plan, requested, true, readReceipt);
   const selected = selectedProjects(plan, requested);
   requireThat(existsSync(plan.solution) && readFileSync(plan.solution, "utf8") === plan.solutionContent, "Bindings solution differs from configuration; run projects.mjs --write");

@@ -5,7 +5,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { inspectInputOverlays, prepareInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, declarationReferences, generationDependencies, generationOrder } from "./catalogs.mjs";
-import { resolveTool, sameTool } from "./tool-packages.mjs";
+import { resolveTool, resolveProjectionTool, sameTool } from "./tool-packages.mjs";
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
@@ -39,7 +39,7 @@ function sourceFiles(directory, prefix = "") {
   }).sort();
 }
 
-export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, configuration } = {}) {
+export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, projectionToolResolver = resolveProjectionTool, configuration } = {}) {
   requireThat(args.filter((arg) => arg.startsWith("--")).every((arg) => ["--check", "--no-build", "--continue-on-error", "--resume"].includes(arg)), "Usage: node scripts/generate.mjs [--check] [--no-build] [--continue-on-error] [--resume] [target ...]");
   const config = configuration ?? readJson(path.join(root, "config/targets.json"));
   fields(config, ["schemaVersion", "toolchain", "xantham", "profiles", "projectDefaults", "targets"], "targets.json");
@@ -58,7 +58,7 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
   const ids = new Set();
   const destinations = new Set();
   for (const target of config.targets) {
-    fields(target, ["id", "package", "version", "profile", "dependencies", "outputDirectory", "files", "generator"], "target", ["catalogCandidates"]);
+    fields(target, ["id", "package", "version", "profile", "dependencies", "outputDirectory", "files", "generator"], "target", ["catalogCandidates", "projection"]);
     requireThat(typeof target.id === "string" && /^[a-z][a-z0-9-]*$/.test(target.id) && !ids.has(target.id), "Target IDs must be unique lowercase names");
     ids.add(target.id);
     requireThat(profiles.has(target.profile), `${target.id}: unknown profile ${target.profile}`);
@@ -71,6 +71,10 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       requireThat(!destinations.has(destination), `Targets cannot share a generated destination: ${destination}`);
       destinations.add(destination);
     });
+    if (target.projection !== undefined) {
+      fields(target.projection, ["project", "xanthamRevision", "selections"], `${target.id}: projection`);
+      requireThat(typeof target.projection.project === "string" && Array.isArray(target.projection.selections) && target.projection.selections.length > 0, `${target.id}: projection must select operations`);
+    }
     requireThat(target.generator && typeof target.generator.module === "string" && /^[A-Za-z_][A-Za-z0-9_.]*$/.test(target.generator.module), `${target.id}: generator.module is required`);
   }
   const requested = args.filter((arg) => !arg.startsWith("--"));
@@ -108,12 +112,16 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
     return;
   }
   const dotnet = environment.CLOUDEDGE_DOTNET ?? "dotnet";
-  const tool = toolResolver(root, config.xantham.tool, environment);
+  const ordinaryTool = selected.some(target => !target.projection) ? toolResolver(root, config.xantham.tool, environment) : undefined;
+  const projectedTools = new Map(selected.filter(target => target.projection).map(target => [target.id,
+    projectionToolResolver(root, target.projection, environment, !args.includes("--no-build"))]));
   const typescriptExecutableSha256 = hash(tsc);
   const env = { ...environment, XANTHAM_TSGO_EXE: tsc, XANTHAM_REQUIRE_TSC: "1" };
   const results = [];
   const preparedProfiles = new Map();
   for (const target of selected) {
+    const currentTool = () => target.projection ? projectionToolResolver(root, target.projection, environment, false) : toolResolver(root, config.xantham.tool, environment);
+    const tool = projectedTools.get(target.id) ?? ordinaryTool;
     const failedDependencies = generationDependencies(target).filter((id) => results.some((result) => result.target === id && ["failed", "blocked"].includes(result.status)));
     if (failedDependencies.length) {
       results.push({ target: target.id, status: "blocked", dependencies: failedDependencies });
@@ -146,6 +154,8 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
             && previous.profileManifestSha256 === expectedInput.profileManifestSha256
             && previous.inputOverlays?.fingerprint === inputOverlays.fingerprint
             && JSON.stringify(previous.generator) === JSON.stringify(target.generator)
+            && JSON.stringify(previous.projection) === JSON.stringify(target.projection)
+            && (!target.projection || existsSync(path.join(artifacts, "manifest.json")) && previous.projectionManifestSha256 === hash(path.join(artifacts, "manifest.json")))
             && JSON.stringify(previous.catalogCandidates) === JSON.stringify(catalogCandidates(target))
             && JSON.stringify(previous.generatorTool) === JSON.stringify(tool.fingerprint)
             && previous.typescriptExecutableSha256 === typescriptExecutableSha256
@@ -161,11 +171,17 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       stage = mkdtempSync(path.join(artifacts, "staging-"));
       const settings = path.join(stage, "xantham.json");
       writeFileSync(settings, JSON.stringify(effectiveGenerator, null, 2) + "\n");
+      const projectionArguments = [];
+      if (target.projection) {
+        const projectionFile = path.join(stage, "projection.json");
+        writeFileSync(projectionFile, JSON.stringify(target.projection, null, 2) + "\n");
+        projectionArguments.push("--projection", projectionFile, "--workspace", path.join(root, "tests/.scratch/generation", target.id));
+      }
       const log = openSync(path.join(artifacts, "generate.log"), "w");
       try {
-        run(dotnet, [...tool.args, "generate", packageDirectory, "--config", settings, "--out", stage], { cwd: root, env, stdio: ["ignore", log, log] });
+        run(dotnet, [...tool.args, "generate", packageDirectory, "--config", settings, "--out", stage, ...projectionArguments], { cwd: root, env, stdio: ["ignore", log, log] });
       } finally { closeSync(log); }
-      requireThat(sameTool(toolResolver(root, config.xantham.tool, environment), tool) && hash(tsc) === typescriptExecutableSha256,
+      requireThat(sameTool(currentTool(), tool) && hash(tsc) === typescriptExecutableSha256,
         `${target.id}: generator or compiler changed during generation; output was not accepted`);
       requireThat(prepareInputOverlays({ root, profileDirectory: sourceProfileDirectory }).fingerprint === inputOverlays.fingerprint
         && JSON.stringify(referenceHashes()) === JSON.stringify(declarationReferenceSha256),
@@ -178,14 +194,15 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
         `${target.id}: declaration catalog output differs from the requested configuration`);
       target.files.forEach((file) => requireThat(readFileSync(inside(stage, file)).length > 0, `${target.id}: empty generated source ${file}`));
       const declarationCatalogSha256 = target.generator.declarationCatalog ? hash(path.join(stage, "declarations.json")) : undefined;
-      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, effectiveGenerator, declarationReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
+      const projectionManifestSha256 = target.projection ? hash(path.join(stage, "manifest.json")) : undefined;
+      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, projection: target.projection, projectionManifestSha256, effectiveGenerator, declarationReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
       for (const file of target.files) {
         const destination = inside(inside(root, target.outputDirectory), file);
         mkdirSync(path.dirname(destination), { recursive: true });
         copyFileSync(inside(stage, file), destination + ".tmp");
         renameSync(destination + ".tmp", destination);
       }
-      for (const file of ["manifest.json", "symbols.jsonl", "xantham.json"]) copyFileSync(path.join(stage, file), path.join(artifacts, file));
+      for (const file of ["manifest.json", "symbols.jsonl", "xantham.json", ...(target.projection ? ["projection.json"] : [])]) copyFileSync(path.join(stage, file), path.join(artifacts, file));
       if (target.generator.declarationCatalog) copyFileSync(path.join(stage, "declarations.json"), catalogFile);
       else if (existsSync(catalogFile)) rmSync(catalogFile);
       writeFileSync(path.join(artifacts, "generation.json"), JSON.stringify(provenance, null, 2) + "\n");

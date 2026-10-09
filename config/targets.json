@@ -5843,6 +5843,10 @@
     {
       "id": "voice-providers",
       "directory": "profiles/voice-providers"
+    },
+    {
+      "id": "agents-pi",
+      "directory": "profiles/agents-pi"
     }
   ]
 }

@@ -18,6 +18,10 @@
     <ProjectReference Include="../../src/Runtime/AI/FSharp.CloudEdge.Runtime.WorkersAIProvider/FSharp.CloudEdge.Runtime.WorkersAIProvider.fsproj" />
     <ProjectReference Include="../../src/Runtime/AI/FSharp.CloudEdge.Runtime.AISearchProvider/FSharp.CloudEdge.Runtime.AISearchProvider.fsproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(CloudEdgeIncludeAgentsPi)' == 'true'">
+    <ProjectReference Include="../../src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj" />
+    <Compile Include="Pi.fs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="Native.fs" />
     <Compile Include="DurableObjects.fs" />

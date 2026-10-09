@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { buildProjects, checkProjects, planProjects, reconcileProjects, writeProjects } from "../scripts/projects.mjs";
@@ -24,7 +23,9 @@ const configuration = () => ({
 });
 
 function temporary(t) {
-  const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-projects-"));
+  const scratch = new URL("./.scratch/project-tooling/", import.meta.url);
+  mkdirSync(scratch, { recursive: true });
+  const root = mkdtempSync(path.join(scratch.pathname, "cloudedge-projects-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }
@@ -428,4 +429,44 @@ test("a selected explicit dependency reconciles its own catalog dependencies tra
   const plan = catalogFamily(t, [target("wrapper", "Example.wrapper", "runtime", ["consumer"])]);
   writeProjects(plan);
   assert.deepEqual(checkProjects(plan, ["wrapper"]).map((entry) => entry.target), ["owner", "consumer", "wrapper"]);
+});
+
+test("project checks authenticate opt-in projection selection, payload and manifest", t => {
+  const config = configuration();
+  config.targets[0].projection = { project: "generators/adapter/Adapter.fsproj", selections: [{ methodName: "submit" }] };
+  const plan = planProjects(config, temporary(t));
+  generated(plan);
+  const adapter = path.join(plan.root, "generators/adapter");
+  mkdirSync(path.join(adapter, "bin/Release/net10.0"), { recursive: true });
+  writeFileSync(path.join(adapter, "Adapter.fsproj"), "<Project />");
+  writeFileSync(path.join(adapter, "Program.fs"), "module Adapter");
+  writeFileSync(path.join(adapter, "bin/Release/net10.0/Adapter.dll"), "frozen adapter");
+  const receiptPath = path.join(plan.root, "artifacts/workers/generation.json");
+  const manifest = path.join(plan.root, "artifacts/workers/manifest.json");
+  writeFileSync(manifest, JSON.stringify({ projections: [{ sourceIdentity: "source" }] }));
+  const receipt = JSON.parse(readFileSync(receiptPath, "utf8"));
+  receipt.projection = config.targets[0].projection;
+  const options = { projectionToolResolver: () => ({ fingerprint: { payload: hash(readFileSync(path.join(adapter, "bin/Release/net10.0/Adapter.dll"))) } }) };
+  receipt.generatorTool = options.projectionToolResolver().fingerprint;
+  receipt.projectionManifestSha256 = hash(readFileSync(manifest));
+  writeFileSync(receiptPath, JSON.stringify(receipt));
+  assert.equal(checkProjects(plan, [], options).length, 1);
+  writeFileSync(manifest, "{}");
+  assert.throws(() => checkProjects(plan, [], options), /customization evidence differs/);
+  writeFileSync(manifest, JSON.stringify({ projections: [{ sourceIdentity: "source" }] }));
+  writeFileSync(path.join(adapter, "bin/Release/net10.0/Adapter.dll"), "changed adapter");
+  assert.throws(() => checkProjects(plan, [], options), /projection adapter differs/);
+});
+
+for (const version of [2, 3]) test(`catalog schema ${version} respects supported owner graph versions`, t => {
+  const config = configuration(); config.targets[0].generator.declarationCatalog = true;
+  const plan = planProjects(config, temporary(t)); generated(plan);
+  const catalogPath = path.join(plan.root, "artifacts/workers/declarations.json");
+  const catalog = JSON.parse(readFileSync(catalogPath, "utf8")); catalog.schemaVersion = version;
+  writeFileSync(catalogPath, JSON.stringify(catalog));
+  const receiptPath = path.join(plan.root, "artifacts/workers/generation.json");
+  const receipt = JSON.parse(readFileSync(receiptPath, "utf8")); receipt.declarationCatalogSha256 = hash(readFileSync(catalogPath));
+  writeFileSync(receiptPath, JSON.stringify(receipt));
+  if (version === 2) assert.equal(checkProjects(plan).length, 1);
+  else assert.throws(() => checkProjects(plan), /catalog owner differs/);
 });

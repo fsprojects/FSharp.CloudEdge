@@ -462,6 +462,96 @@
           "@ai-sdk/openai-compatible": "ship"
         }
       }
+    },
+    {
+      "id": "agents-pi",
+      "package": "agents",
+      "version": "0.27.0",
+      "profile": "agents-pi",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.fs",
+        "FSharp.CloudEdge.Pi.HarnessSubmit.fs",
+        "FSharp.CloudEdge.Pi.HarnessPrompt.fs",
+        "FSharp.CloudEdge.Pi.SessionSubmit.fs",
+        "FSharp.CloudEdge.Pi.SessionPrompt.fs"
+      ],
+      "generator": {
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "module": "FSharp.CloudEdge.Runtime.AgentsPi",
+        "lib": [
+          "esnext"
+        ],
+        "types": [
+          "@cloudflare/workers-types"
+        ],
+        "declarationCatalog": true,
+        "groups": {
+          "@earendil-works/pi-ai": "ship",
+          "@earendil-works/pi-durable": "ship",
+          "@earendil-works/chord": "ship"
+        },
+        "publicInputs": {
+          "./harness/pi": "dist/harness/pi/index.d.ts",
+          "./models/pi-ai": "dist/models/pi-ai/index.d.ts"
+        },
+        "recursiveGroups": true
+      },
+      "projection": {
+        "project": "generators/xantham/Xantham.CloudEdge.fsproj",
+        "selections": [
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiHarness"
+            ],
+            "methodName": "submit",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarness",
+            "moduleName": "FSharp.CloudEdge.Pi.HarnessSubmit",
+            "typeName": "Input",
+            "functionName": "submit"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiHarness"
+            ],
+            "methodName": "prompt",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarness",
+            "moduleName": "FSharp.CloudEdge.Pi.HarnessPrompt",
+            "typeName": "Input",
+            "functionName": "prompt"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiSession"
+            ],
+            "methodName": "submit",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession",
+            "moduleName": "FSharp.CloudEdge.Pi.SessionSubmit",
+            "typeName": "Input",
+            "functionName": "submit"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiSession"
+            ],
+            "methodName": "prompt",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession",
+            "moduleName": "FSharp.CloudEdge.Pi.SessionPrompt",
+            "typeName": "Input",
+            "functionName": "prompt"
+          }
+        ],
+        "xanthamRevision": "2ecbd73cff0ee95b46ebc68ade560a473307e974"
+      }
     }
   ],
   "catalogImports": {

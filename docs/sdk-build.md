@@ -47,3 +47,108 @@ known incomplete declaration surfaces. That command does not apply the default s
 support injection. It is available for deliberate inventory work and does not define
 the default build. The [scope table](SDK-DELIVERY-SCOPE.md) lists the selected libraries
 and versions; `config/sdk-delivery.json` records reasons for excluded inputs.
+
+
+## Agents Pi operations
+
+`agents-pi` adds Agents 0.27.0's `agents/harness/pi` and `agents/models/pi-ai`
+entrypoints beside the existing Agents 0.22 delivery. Its isolated profile pins
+pi-ai, pi-durable and Chord at 1.1.0. The generated project owns their reached
+binding types in a recursive namespace source, so references between packages
+compile together.
+
+```sh
+npm run install:profiles -- agents-pi
+npm run build:sdk -- agents-pi
+npm run test:agents-pi
+```
+
+This target uses the opt-in embedding runner in `generators/xantham`, which calls
+Xantham's early operation projection API and actual Myriad plugin before shaping.
+The default `XanthamProjectRoot` is the primary sibling `../Xantham`; set
+`CLOUDEDGE_XANTHAM_ROOT` to use another primary checkout location. The target pins the exact Xantham commit in `projection.xanthamRevision`; the
+runner requires that commit with clean generator/support sources. Explicit local
+development may set `CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1`, which records source diff and
+untracked-source hashes in the receipt. Accepted release generation uses the clean
+pin. This source-backed target is explicitly selected; existing default targets
+keep their current build prerequisites.
+Ordinary targets retain the pinned local Xantham CLI. The generation receipt
+hashes the adapter's runtime payload, its project/source, exact projection
+selection and projection provenance in the manifest. Its build receipt associates
+those source and ancestor build inputs with the compiled payload; `--no-build`
+reuse rejects a stale association. Project checks authenticate that closure again
+before compilation.
+
+The shared public input is `FSharp.CloudEdge.Pi.HarnessSubmit.Input`. Its `Text`
+case takes a string; its `Items` case takes typed text/image payloads. The same
+value works with `HarnessSubmit.submit`, `HarnessPrompt.prompt`,
+`SessionSubmit.submit` and `SessionPrompt.prompt`. Required `type` tags are
+encoded by the generated operation. Image payloads require `Data` and `MimeType`;
+text payloads require `Text`. `TextSignature = None` omits the property, while
+`Some InputItemsItemTextTextSignature.Undefined` passes an explicit JavaScript
+`undefined`. Options and return types come from each actual SDK method.
+
+The raw SDK surface remains available. Its UserInput already has an erased `U2`
+representation; the strict operations add closed payload construction and shared
+F# types. The public factory context now resolves to the shipped Chord `Context`.
+Other lossy mappings remain recorded in the manifest. Reached dependency types
+are included; standalone pi-ai/pi-durable value exports remain outside this
+Agents entrypoint selection.
+
+`test:agents-pi` pins Fable 5.17.2 and Fable.Core 5.2.0. It enables the optional
+SDKComposition consumer with `CloudEdgeIncludeAgentsPi=true`; the default
+composition excludes this project and its Pi consumer. It rejects malformed image
+payloads at compile time, then runs the generated F# constructor and operations
+inside a local SQLite Durable Object. The JavaScript host installs the real
+PiHarness lifecycle and supplies pi-ai's deterministic `fauxProvider` through
+`createModels`, `createRegistry` and `Harness.open`. The gate checks both submit
+and prompt receiver types, encoded mixed content, optional-property presence,
+model replies, durable transcripts and idempotency across runtime restart.
+Receipts and local runtime state live under ignored `tests/.scratch/agents-pi`;
+state is removed when the gate ends. This gate proves local SDK behavior with a
+scripted provider; hosted provider credentials and deployed Cloudflare behavior
+remain separate integration checks.
+
+### Agents Pi acceptance, 2026-10-09
+
+The delivery pins clean Xantham `2ecbd73cff0ee95b46ebc68ade560a473307e974`.
+`npm run test:tooling` passed 184 tests. The explicit generated project and
+SDKComposition consumer compiled; the malformed image control failed with F#
+field/type diagnostics as expected. The Fable/workerd gate passed all 11
+assertions, including restart persistence, with unchanged input hashes. The
+source-to-payload control changed the adapter source while retaining its DLL:
+reuse was refused, and restoring the source restored the accepted fingerprint.
+Generation, build and runtime receipts remain under `artifacts/agents-pi`,
+`generators/xantham/bin/Release/net10.0/cloudedge-build.json` and
+`tests/.scratch/agents-pi`. The retained binding index is
+`tests/.scratch/strict-operation-audit/final-binding.json`.
+
+The shape controls cover string input, arrays of tagged text/image records,
+optional omission versus explicit undefined, shared input across four methods,
+invalid image fields and invalid null strings. The raw manifest records
+84 exact, 308 ergonomic, 294 widened and 12 escape symbols; these grades describe
+the selected raw closure, not just the four strict operations. Remaining raw
+widenings and standalone dependency value exports are outside this increment.
+
+Retrieval used fresh/latest snapshot
+`0cbe94d87d33e4cd8d2f3f0437fa2b9860db04e798b93d6efa5d56ca09edcb97`.
+Xantham and CloudEdge were absent from that snapshot, so bounded owning-file
+reads used the unindexed-repository exception; uncommitted changes were reviewed
+as diffs. F# semantic tools were unavailable; compiler and Fable evidence supplied
+the semantic checks. The reviewer verified receipt binding and the default
+composition exclusion. No baseline suite was repeated to rediscover accepted
+results, and no alternate checkout or Bozzetto gate was used.
+
+Growth from `3bf08618837910e433b779cf6c0396fc900a1080` to this increment's
+commit: 29 files changed, 15616 insertions(+), 30 deletions(-). Existing generation, catalog, project and tool
+owners were extended. The 16 new files have these owners and reasons:
+
+| New files | Owner | Reason |
+| --- | --- | --- |
+| `generators/xantham/Program.fs`, `Xantham.CloudEdge.fsproj` | Generation orchestration | Invoke the existing early Xantham/Myriad projection API from the pinned primary checkout. |
+| `profiles/agents-pi/package.json`, `package-lock.json` | Profile installation | Pin the isolated Agents 0.27/Pi 1.1 dependency closure. |
+| `src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/groups/FSharp.CloudEdge.Runtime.fs` | Xantham raw generation | Emit the reached package types together so recursive references compile. |
+| The same project's four `FSharp.CloudEdge.Pi.{HarnessSubmit,HarnessPrompt,SessionSubmit,SessionPrompt}.fs` files | Xantham/Myriad operation generation | Emit authenticated typed operations sharing one input definition. |
+| The same project's `FSharp.CloudEdge.Runtime.AgentsPi.fsproj` | Project emission | Compile the authenticated ordered source closure. |
+| `tests/SDKComposition/Pi.fs` | SDKComposition | Compile the optional API alongside existing library owners. |
+| `tests/AgentsPi/{AgentsPi.fsproj,Client.fs,worker.mjs,check.mjs,.config/dotnet-tools.json}` | Agents Pi acceptance | Exercise generated F# calls against the actual pinned SDK and local Durable Object lifecycle. |
