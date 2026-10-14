@@ -75,7 +75,7 @@ export function declarationReferences(target, root, originalPackageDirectory) {
 
 /** Read the current owner's actual dependencies, not all inherited candidate declarations. */
 export function catalogProjectDependencies(catalog, target, targets) {
-  requireThat(object(catalog) && catalog.schemaVersion === 1 && catalog.owner === target.generator.module && Array.isArray(catalog.owners), `${target.id}: declaration catalog owner differs from target`);
+  requireThat(object(catalog) && [1, 2].includes(catalog.schemaVersion) && catalog.owner === target.generator.module && Array.isArray(catalog.owners), `${target.id}: declaration catalog owner differs from target`);
   const owners = new Map();
   for (const owner of catalog.owners) {
     requireThat(object(owner) && typeof owner.name === "string" && owner.name.length > 0 && !owners.has(owner.name)

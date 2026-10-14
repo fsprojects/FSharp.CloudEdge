@@ -17,7 +17,7 @@
       "rollForward": false
     },
     "xantham": {
-      "version": "0.1.0-local.8e4c7b11b0ac90236c25",
+      "version": "0.4.0-beta.1",
       "commands": [
         "xantham"
       ],

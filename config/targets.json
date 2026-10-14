@@ -5619,8 +5619,8 @@
     "targetFramework": "net8.0",
     "packages": {
       "Fable.Core": "5.2.0",
-      "Xantham.Fable.Core": "0.1.0-local.83b9196820f7e253f211",
-      "Xantham.Fable.Core.TS": "0.1.0-local.2cc2de89eabe31fc35f6"
+      "Xantham.Fable.Core": "0.2.0",
+      "Xantham.Fable.Core.TS": "0.4.0-beta.1"
     }
   },
   "profiles": [
