@@ -6,7 +6,7 @@
   "devDependencies": {
     "@cloudflare/codemode": "0.5.1",
     "@cloudflare/workers-types": "5.20260906.1",
-    "@modelcontextprotocol/sdk": "1.30.0",
+    "@modelcontextprotocol/sdk": "1.32.1",
     "@tanstack/ai": "0.53.0",
     "@types/node": "22.19.19",
     "ai": "7.0.93",
