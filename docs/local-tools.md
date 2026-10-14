@@ -1,8 +1,12 @@
 # Local generator tools
 
-Contributors regenerate bindings with pinned Xantham and Hawaii .NET tools. Their source
-checkouts are used by the bootstrap step to build the local versions recorded in
-`.config/dotnet-tools.json` and `config/tool-packages.json`.
+Contributors regenerate bindings with pinned Xantham and Hawaii .NET tools, recorded in
+`.config/dotnet-tools.json` and `config/tool-packages.json`. Xantham `0.4.0-beta.1` and its
+support packages (`Xantham.Fable.Core` `0.2.0`, `Xantham.Fable.Core.TS` `0.4.0-beta.1`) are
+published prereleases restored from the
+[temporary Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham), which
+[`NuGet.Config`](../NuGet.Config) lists as `xantham-temporary`. Hawaii is still built from its
+source checkout by the bootstrap step.
 
 Applications consuming [CloudEdge packages](https://www.nuget.org/packages?q=FSharp.CloudEdge)
 use the released Xantham support packages selected in
@@ -11,15 +15,23 @@ checkouts or the contributor bootstrap process.
 
 ## First setup
 
-Use the reviewed Xantham and Hawaii branches beside FSharp.CloudEdge. The bootstrap script accepts alternate locations when your checkout layout differs:
+Use the reviewed Hawaii branch beside FSharp.CloudEdge. The bootstrap script accepts an alternate location when your checkout layout differs:
 
 ```sh
 npm ci
-npm run tools:bootstrap -- --xantham-source ../Xantham --hawaii-source ../Hawaii
+npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
 npm run tools:restore
 npm run tools:check
-npm run test:support-package
 ```
+
+`npm run test:support-package` smoke-tests a `Xantham.Fable.Core` archive from a local feed
+directory. For the published package, download `Xantham.Fable.Core.0.2.0.nupkg` from the
+Cloudsmith feed into a directory, check its SHA-256 against `config/tool-packages.json`, and pass
+that directory with `npm run test:support-package -- --feed <directory>`.
+
+Running `npm run tools:bootstrap -- --only xantham` against a source checkout replaces the
+published Xantham pins with local `-local.<digest>` builds. Use it only to test unreleased
+generator changes.
 
 Bootstrap runs `dotnet pack` on each generator project in Release configuration, writes the packages to the ignored `artifacts/tool-feed/` directory, and installs them into this repository's local tool manifest. The normal calls are:
 
@@ -33,7 +45,6 @@ The manifest at `.config/dotnet-tools.json` pins the versions. `config/tool-pack
 Local package versions include a digest of the source and build recipe. Updating a generator checkout has no effect on routine generation until you explicitly bootstrap that tool again:
 
 ```sh
-npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
 npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
 ```
 

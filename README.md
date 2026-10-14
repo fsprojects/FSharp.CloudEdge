@@ -134,11 +134,11 @@ let listAccounts (apiToken: string) =
 
 ## Local Build
 
-FSharp.CloudEdge builds from source. The runtime projects reference local builds of Xantham's support packages, and both generators run as pinned local .NET tools, so a first setup packs them from their source checkouts. You need:
+FSharp.CloudEdge builds from source. Both generators run as pinned local .NET tools. Xantham `0.4.0-beta.1` and its support packages restore from the [temporary Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham), which [`NuGet.Config`](NuGet.Config) lists; Hawaii is packed from its source checkout on first setup. You need:
 
 - the .NET SDK `10.0.401` or a later `10.0.4xx` patch, as [`global.json`](global.json) requires
 - Node.js with npm, and Python 3 for the Hawaii runner
-- Xantham at commit [`c7e2fa0`](https://github.com/shayanhabibi/Xantham/commit/c7e2fa0daa2ed3ec662cd453ae4c287a6a28673b) and Hawaii on its [`fsharp-cloudedge-support`](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support) branch
+- Hawaii on its [`fsharp-cloudedge-support`](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support) branch
 - BAREWire, for the ByteBridge consumer in the solution
 
 The default layout:
@@ -146,17 +146,15 @@ The default layout:
 ```text
 repos/
   FSharp.CloudEdge/
-  Xantham/
   Hawaii/
   BAREWire/
 ```
 
 ```sh
 npm ci
-npm run tools:bootstrap
+npm run tools:bootstrap -- --only hawaii
 npm run tools:restore
 npm run install:profiles -- --delivery
-npm run test:support-package
 npm run build
 npm run test:bridge
 ```
