@@ -145,9 +145,9 @@ type StateFindEntry =
     abstract ``type``: StateEntryType with get, set
     abstract depth: float with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (path: string, name: string, ``type``: StateEntryType, depth: float, size: float, mtime: JS.Date) : StateFindEntry = jsNative
+    static member Create (path: string, name: string, ``type``: StateEntryType, depth: float, size: float, mtime: Fable.Core.TS.Es.Date) : StateFindEntry = jsNative
 
 [<Interface>]
 type StateFindOptions =
@@ -159,10 +159,10 @@ type StateFindOptions =
     abstract empty: bool option with get, set
     abstract sizeMin: float option with get, set
     abstract sizeMax: float option with get, set
-    abstract mtimeAfter: U2<string, JS.Date> option with get, set
-    abstract mtimeBefore: U2<string, JS.Date> option with get, set
+    abstract mtimeAfter: U2<string, Fable.Core.TS.Es.Date> option with get, set
+    abstract mtimeBefore: U2<string, Fable.Core.TS.Es.Date> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?name: string, ?pathPattern: string, ?``type``: U2<string, StateEntryType[]>, ?minDepth: float, ?maxDepth: float, ?empty: bool, ?sizeMin: float, ?sizeMax: float, ?mtimeAfter: U2<string, JS.Date>, ?mtimeBefore: U2<string, JS.Date>) : StateFindOptions = jsNative
+    static member Create (?name: string, ?pathPattern: string, ?``type``: U2<string, StateEntryType[]>, ?minDepth: float, ?maxDepth: float, ?empty: bool, ?sizeMin: float, ?sizeMax: float, ?mtimeAfter: U2<string, Fable.Core.TS.Es.Date>, ?mtimeBefore: U2<string, Fable.Core.TS.Es.Date>) : StateFindOptions = jsNative
 
 [<Interface>]
 type StateHashOptions =
@@ -177,18 +177,30 @@ type StateJsonUpdateOperation =
 
 [<Interface>]
 type StateJsonUpdateOperation2 =
+    /// <remarks>TypeScript type: <c>"set"</c></remarks>
     abstract op: string with get, set
     abstract path: string with get, set
     abstract value: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (op: string, path: string, value: obj) : StateJsonUpdateOperation2 = jsNative
+    [<ParamObject; Emit("({ op: 'set', ...$0 })")>]
+    static member Create (path: string, value: obj) : StateJsonUpdateOperation2 = jsNative
+
+module StateJsonUpdateOperation2 =
+    /// <remarks>TypeScript type: <c>"set"</c></remarks>
+    [<Literal>]
+    let op = "set"
 
 [<Interface>]
 type StateJsonUpdateOperation3 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
     abstract op: string with get, set
     abstract path: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (op: string, path: string) : StateJsonUpdateOperation3 = jsNative
+    [<ParamObject; Emit("({ op: 'delete', ...$0 })")>]
+    static member Create (path: string) : StateJsonUpdateOperation3 = jsNative
+
+module StateJsonUpdateOperation3 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
+    [<Literal>]
+    let op = "delete"
 
 [<Interface>]
 type StateJsonUpdateResult =
@@ -229,13 +241,19 @@ type StatePlannedEdit =
 
 [<Interface>]
 type StateReplaceEditInstruction =
+    /// <remarks>TypeScript type: <c>"replace"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract search: string with get, set
     abstract replacement: string with get, set
     abstract options: StateSearchOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, search: string, replacement: string, ?options: StateSearchOptions) : StateReplaceEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'replace', ...$0 })")>]
+    static member Create (path: string, search: string, replacement: string, ?options: StateSearchOptions) : StateReplaceEditInstruction = jsNative
+
+module StateReplaceEditInstruction =
+    /// <remarks>TypeScript type: <c>"replace"</c></remarks>
+    [<Literal>]
+    let kind = "replace"
 
 [<Interface>]
 type StateReplaceInFilesOptions =
@@ -283,10 +301,10 @@ type StateSearchOptions =
 type StateStat =
     abstract ``type``: StateEntryType with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     abstract mode: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: StateEntryType, size: float, mtime: JS.Date, ?mode: float) : StateStat = jsNative
+    static member Create (``type``: StateEntryType, size: float, mtime: Fable.Core.TS.Es.Date, ?mode: float) : StateStat = jsNative
 
 [<Interface>]
 type StateTextMatch =
@@ -327,20 +345,32 @@ type StateTreeSummary =
 
 [<Interface>]
 type StateWriteEditInstruction =
+    /// <remarks>TypeScript type: <c>"write"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract content: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, content: string) : StateWriteEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'write', ...$0 })")>]
+    static member Create (path: string, content: string) : StateWriteEditInstruction = jsNative
+
+module StateWriteEditInstruction =
+    /// <remarks>TypeScript type: <c>"write"</c></remarks>
+    [<Literal>]
+    let kind = "write"
 
 [<Interface>]
 type StateWriteJsonEditInstruction =
+    /// <remarks>TypeScript type: <c>"writeJson"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract value: obj with get, set
     abstract options: StateJsonWriteOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, value: obj, ?options: StateJsonWriteOptions) : StateWriteJsonEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'writeJson', ...$0 })")>]
+    static member Create (path: string, value: obj, ?options: StateJsonWriteOptions) : StateWriteJsonEditInstruction = jsNative
+
+module StateWriteJsonEditInstruction =
+    /// <remarks>TypeScript type: <c>"writeJson"</c></remarks>
+    [<Literal>]
+    let kind = "writeJson"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type EntryType =
@@ -393,7 +423,7 @@ type Workspace =
     /// <remarks>@internal</remarks>
     abstract _getAllPaths: unit -> JS.Promise<string[]>
     /// <remarks>@internal</remarks>
-    abstract _updateModifiedAt: path: string * mtime: JS.Date -> JS.Promise<unit>
+    abstract _updateModifiedAt: path: string * mtime: Fable.Core.TS.Es.Date -> JS.Promise<unit>
     abstract ensureParentDir: obj with get, set
     abstract deleteDescendants: obj with get, set
 
@@ -450,10 +480,10 @@ type FileSystemEntryType =
 type FsStat =
     abstract ``type``: FileSystemEntryType with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     abstract mode: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: FileSystemEntryType, size: float, mtime: JS.Date, ?mode: float) : FsStat = jsNative
+    static member Create (``type``: FileSystemEntryType, size: float, mtime: Fable.Core.TS.Es.Date, ?mode: float) : FsStat = jsNative
 
 [<Interface>]
 type MkdirOptions =
@@ -835,9 +865,9 @@ module Git =
                 [<Interface>]
                 type Item =
                     abstract ok: bool with get, set
-                    abstract refs: Record<string, obj> with get, set
+                    abstract refs: JS.Record<string, obj> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (ok: bool, refs: Record<string, obj>) : Item = jsNative
+                    static member Create (ok: bool, refs: JS.Record<string, obj>) : Item = jsNative
 
         module Remote =
             [<Interface>]
@@ -984,7 +1014,7 @@ module Workers =
         /// The single authoring surface: one record, one entry per tool.
         /// Derived connectors (MCP, OpenAPI) generate this for you.
         /// </summary>
-        abstract tools: unit -> Record<string, obj>
+        abstract tools: unit -> JS.Record<string, obj>
         abstract getTypeScriptTypes: unit -> JS.Promise<string>
         abstract ``__#6@#private``: obj with get, set
         /// <summary>
@@ -1001,7 +1031,7 @@ module Workers =
         /// </code>
         /// </summary>
         abstract tool: _name: string * t: obj -> obj
-        abstract resolvedTools: unit -> JS.Promise<Record<string, obj>>
+        abstract resolvedTools: unit -> JS.Promise<JS.Record<string, obj>>
         abstract describe: unit -> JS.Promise<obj>
         abstract executeTool: ``method``: string * args: obj * ?ctx: obj -> JS.Promise<obj>
         /// <summary>

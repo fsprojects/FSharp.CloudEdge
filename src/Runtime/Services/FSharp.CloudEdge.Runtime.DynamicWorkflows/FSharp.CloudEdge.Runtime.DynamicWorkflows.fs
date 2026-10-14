@@ -41,7 +41,7 @@ type DynamicWorkflowBinding =
     abstract get: id: string -> JS.Promise<obj>
     abstract __WORKER_ENTRYPOINT_BRAND: unit
     abstract ctx: obj with get, set
-    abstract env: Record<string, obj> with get, set
+    abstract env: JS.Record<string, obj> with get, set
     abstract email: (obj -> JS.Promise<unit> option) option with get, set
     abstract fetch: (obj -> obj) option with get, set
     abstract connect: (obj -> JS.Promise<unit> option) option with get, set
@@ -52,7 +52,7 @@ type DynamicWorkflowBinding =
     abstract test: (obj -> JS.Promise<unit> option) option with get, set
     abstract trace: (obj[] -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (impl: obj, create: (obj option -> JS.Promise<obj>), createBatch: (obj[] -> JS.Promise<obj[]>), get: (string -> JS.Promise<obj>), ctx: obj, env: Record<string, obj>, ?email: (obj -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?queue: (obj -> JS.Promise<unit> option), ?scheduled: (obj -> JS.Promise<unit> option), ?tail: (obj[] -> JS.Promise<unit> option), ?tailStream: (obj -> obj), ?test: (obj -> JS.Promise<unit> option), ?trace: (obj[] -> JS.Promise<unit> option)) : DynamicWorkflowBinding = jsNative
+    static member Create (impl: obj, create: (obj option -> JS.Promise<obj>), createBatch: (obj[] -> JS.Promise<obj[]>), get: (string -> JS.Promise<obj>), ctx: obj, env: JS.Record<string, obj>, ?email: (obj -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?queue: (obj -> JS.Promise<unit> option), ?scheduled: (obj -> JS.Promise<unit> option), ?tail: (obj[] -> JS.Promise<unit> option), ?tailStream: (obj -> obj), ?test: (obj -> JS.Promise<unit> option), ?trace: (obj[] -> JS.Promise<unit> option)) : DynamicWorkflowBinding = jsNative
 
 [<Interface>]
 type DynamicWorkflowBindingProps =
@@ -104,10 +104,10 @@ type MissingDispatcherMetadataError =
 [<Interface>]
 type WorkflowEventLike<'T> =
     abstract payload: 'T with get, set
-    abstract timestamp: JS.Date with get, set
+    abstract timestamp: Fable.Core.TS.Es.Date with get, set
     abstract instanceId: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (payload: 'T, timestamp: JS.Date, instanceId: string) : WorkflowEventLike<'T> = jsNative
+    static member Create (payload: 'T, timestamp: Fable.Core.TS.Es.Date, instanceId: string) : WorkflowEventLike<'T> = jsNative
 
 /// <summary>
 /// Metadata that the dispatcher attaches to every workflow invocation.
@@ -120,7 +120,7 @@ type WorkflowEventLike<'T> =
 /// It is completely opaque to the library — consumers are free to put anything
 /// serializable inside (tenant ids, routing keys, worker names, etc.).
 /// </summary>
-type DispatcherMetadata = Record<string, obj>
+type DispatcherMetadata = JS.Record<string, obj>
 
 /// <summary>
 /// A dynamic workflow runner — something with a <c>run(event, step)</c> method that
@@ -180,7 +180,7 @@ type Exports =
     /// uses to create a specialised RPC stub per tenant.
     /// </summary>
     [<Import("DynamicWorkflowBinding", "@cloudflare/dynamic-workflows"); EmitConstructor>]
-    static member DynamicWorkflowBinding (ctx: obj, env: Record<string, obj>) : DynamicWorkflowBinding = jsNative
+    static member DynamicWorkflowBinding (ctx: obj, env: JS.Record<string, obj>) : DynamicWorkflowBinding = jsNative
     /// <summary>
     /// Produce a <c>Workflow</c>-shaped RPC stub that, when <c>.create()</c> / <c>.createBatch()</c>
     /// is called on it, tags each new instance's params with the given dispatcher
@@ -264,12 +264,12 @@ type Exports =
     /// </code>
     /// </summary>
     [<Import("createDynamicWorkflowEntrypoint", "@cloudflare/dynamic-workflows")>]
-    static member createDynamicWorkflowEntrypoint<'Env, 'Params, 'Result> (loadRunner: (LoadWorkflowRunnerContext<'Env> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.DynamicWorkflows.WorkflowRunner<'Params, 'Result>>, FSharp.CloudEdge.Runtime.DynamicWorkflows.WorkflowRunner<'Params, 'Result>>)) : CreateDynamicWorkflowEntrypoint.ResultConstructor = jsNative
+    static member createDynamicWorkflowEntrypoint<'Env, 'Params, 'Result> (loadRunner: (LoadWorkflowRunnerContext<'Env> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.DynamicWorkflows.WorkflowRunner<'Params, 'Result>>, FSharp.CloudEdge.Runtime.DynamicWorkflows.WorkflowRunner<'Params, 'Result>>)) : CreateDynamicWorkflowEntrypoint.ResultConstructor<'Env, 'Params> = jsNative
 
 module CreateDynamicWorkflowEntrypoint =
-    type ResultConstructor =
+    type ResultConstructor<'Env, 'Params> =
         [<EmitConstructor>]
-        abstract Create: ctx: obj * env: obj -> obj
+        abstract Create: ctx: obj * env: 'Env -> obj
 
 module DispatchWorkflow =
     [<Interface>]

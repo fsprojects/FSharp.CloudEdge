@@ -43,198 +43,371 @@ type EmaValidationError =
 
 [<Interface>]
 type EmaValidationError10 =
+    /// <remarks>TypeScript type: <c>"jwks_fetch_failed"</c></remarks>
     abstract reason: string with get, set
     abstract status: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?status: float) : EmaValidationError10 = jsNative
+    [<ParamObject; Emit("({ reason: 'jwks_fetch_failed', ...$0 })")>]
+    static member Create (?status: float) : EmaValidationError10 = jsNative
+
+module EmaValidationError10 =
+    /// <remarks>TypeScript type: <c>"jwks_fetch_failed"</c></remarks>
+    [<Literal>]
+    let reason = "jwks_fetch_failed"
 
 [<Interface>]
 type EmaValidationError11 =
+    /// <remarks>TypeScript type: <c>"invalid_claim"</c></remarks>
     abstract reason: string with get, set
     abstract claim: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, claim: string) : EmaValidationError11 = jsNative
+    [<ParamObject; Emit("({ reason: 'invalid_claim', ...$0 })")>]
+    static member Create (claim: string) : EmaValidationError11 = jsNative
+
+module EmaValidationError11 =
+    /// <remarks>TypeScript type: <c>"invalid_claim"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_claim"
 
 [<Interface>]
 type EmaValidationError12 =
+    /// <remarks>TypeScript type: <c>"aud_mismatch"</c></remarks>
     abstract reason: string with get, set
     abstract expected: string with get, set
     abstract got: U2<string, string[]> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: U2<string, string[]>) : EmaValidationError12 = jsNative
+    [<ParamObject; Emit("({ reason: 'aud_mismatch', ...$0 })")>]
+    static member Create (expected: string, got: U2<string, string[]>) : EmaValidationError12 = jsNative
+
+module EmaValidationError12 =
+    /// <remarks>TypeScript type: <c>"aud_mismatch"</c></remarks>
+    [<Literal>]
+    let reason = "aud_mismatch"
 
 [<Interface>]
 type EmaValidationError13 =
+    /// <remarks>TypeScript type: <c>"unsupported_claim"</c></remarks>
     abstract reason: string with get, set
     abstract claim: EmaValidationError13.Claim with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, claim: EmaValidationError13.Claim) : EmaValidationError13 = jsNative
+    [<ParamObject; Emit("({ reason: 'unsupported_claim', ...$0 })")>]
+    static member Create (claim: EmaValidationError13.Claim) : EmaValidationError13 = jsNative
+
+module EmaValidationError13 =
+    /// <remarks>TypeScript type: <c>"unsupported_claim"</c></remarks>
+    [<Literal>]
+    let reason = "unsupported_claim"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Claim =
+        | [<CompiledName("authorization_details")>] AuthorizationDetails
+        | [<CompiledName("cnf")>] Cnf
 
 [<Interface>]
 type EmaValidationError14 =
+    /// <remarks>TypeScript type: <c>"expired"</c></remarks>
     abstract reason: string with get, set
     abstract exp: float with get, set
     abstract now: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, exp: float, now: float) : EmaValidationError14 = jsNative
+    [<ParamObject; Emit("({ reason: 'expired', ...$0 })")>]
+    static member Create (exp: float, now: float) : EmaValidationError14 = jsNative
+
+module EmaValidationError14 =
+    /// <remarks>TypeScript type: <c>"expired"</c></remarks>
+    [<Literal>]
+    let reason = "expired"
 
 [<Interface>]
 type EmaValidationError15 =
+    /// <remarks>TypeScript type: <c>"iat_in_future"</c></remarks>
     abstract reason: string with get, set
     abstract iat: float with get, set
     abstract now: float with get, set
     abstract skew: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, iat: float, now: float, skew: float) : EmaValidationError15 = jsNative
+    [<ParamObject; Emit("({ reason: 'iat_in_future', ...$0 })")>]
+    static member Create (iat: float, now: float, skew: float) : EmaValidationError15 = jsNative
+
+module EmaValidationError15 =
+    /// <remarks>TypeScript type: <c>"iat_in_future"</c></remarks>
+    [<Literal>]
+    let reason = "iat_in_future"
 
 [<Interface>]
 type EmaValidationError16 =
+    /// <remarks>TypeScript type: <c>"nbf_in_future"</c></remarks>
     abstract reason: string with get, set
     abstract nbf: float with get, set
     abstract now: float with get, set
     abstract skew: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, nbf: float, now: float, skew: float) : EmaValidationError16 = jsNative
+    [<ParamObject; Emit("({ reason: 'nbf_in_future', ...$0 })")>]
+    static member Create (nbf: float, now: float, skew: float) : EmaValidationError16 = jsNative
+
+module EmaValidationError16 =
+    /// <remarks>TypeScript type: <c>"nbf_in_future"</c></remarks>
+    [<Literal>]
+    let reason = "nbf_in_future"
 
 [<Interface>]
 type EmaValidationError17 =
+    /// <remarks>TypeScript type: <c>"lifetime_too_long"</c></remarks>
     abstract reason: string with get, set
     abstract lifetime: float with get, set
     abstract max: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, lifetime: float, max: float) : EmaValidationError17 = jsNative
+    [<ParamObject; Emit("({ reason: 'lifetime_too_long', ...$0 })")>]
+    static member Create (lifetime: float, max: float) : EmaValidationError17 = jsNative
+
+module EmaValidationError17 =
+    /// <remarks>TypeScript type: <c>"lifetime_too_long"</c></remarks>
+    [<Literal>]
+    let reason = "lifetime_too_long"
 
 [<Interface>]
 type EmaValidationError18 =
+    /// <remarks>TypeScript type: <c>"replayed"</c></remarks>
     abstract reason: string with get, set
     abstract jti: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, jti: string) : EmaValidationError18 = jsNative
+    [<ParamObject; Emit("({ reason: 'replayed', ...$0 })")>]
+    static member Create (jti: string) : EmaValidationError18 = jsNative
+
+module EmaValidationError18 =
+    /// <remarks>TypeScript type: <c>"replayed"</c></remarks>
+    [<Literal>]
+    let reason = "replayed"
 
 [<Interface>]
 type EmaValidationError19 =
+    /// <remarks>TypeScript type: <c>"client_id_mismatch"</c></remarks>
     abstract reason: string with get, set
     abstract expected: string with get, set
     abstract got: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: string) : EmaValidationError19 = jsNative
+    [<ParamObject; Emit("({ reason: 'client_id_mismatch', ...$0 })")>]
+    static member Create (expected: string, got: string) : EmaValidationError19 = jsNative
+
+module EmaValidationError19 =
+    /// <remarks>TypeScript type: <c>"client_id_mismatch"</c></remarks>
+    [<Literal>]
+    let reason = "client_id_mismatch"
 
 [<Interface>]
 type EmaValidationError2 =
+    /// <remarks>TypeScript type: <c>"assertion_missing"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError2 = jsNative
+    [<Emit("({ reason: 'assertion_missing' })")>]
+    static member Create () : EmaValidationError2 = jsNative
+
+module EmaValidationError2 =
+    /// <remarks>TypeScript type: <c>"assertion_missing"</c></remarks>
+    [<Literal>]
+    let reason = "assertion_missing"
 
 [<Interface>]
 type EmaValidationError20 =
+    /// <remarks>TypeScript type: <c>"resource_invalid"</c></remarks>
     abstract reason: string with get, set
     abstract resource: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, resource: string) : EmaValidationError20 = jsNative
+    [<ParamObject; Emit("({ reason: 'resource_invalid', ...$0 })")>]
+    static member Create (resource: string) : EmaValidationError20 = jsNative
+
+module EmaValidationError20 =
+    /// <remarks>TypeScript type: <c>"resource_invalid"</c></remarks>
+    [<Literal>]
+    let reason = "resource_invalid"
 
 [<Interface>]
 type EmaValidationError21 =
+    /// <remarks>TypeScript type: <c>"resource_mismatch"</c></remarks>
     abstract reason: string with get, set
     abstract expected: string with get, set
     abstract got: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: string) : EmaValidationError21 = jsNative
+    [<ParamObject; Emit("({ reason: 'resource_mismatch', ...$0 })")>]
+    static member Create (expected: string, got: string) : EmaValidationError21 = jsNative
+
+module EmaValidationError21 =
+    /// <remarks>TypeScript type: <c>"resource_mismatch"</c></remarks>
+    [<Literal>]
+    let reason = "resource_mismatch"
 
 [<Interface>]
 type EmaValidationError22 =
+    /// <remarks>TypeScript type: <c>"invalid_scope_param"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError22 = jsNative
+    [<Emit("({ reason: 'invalid_scope_param' })")>]
+    static member Create () : EmaValidationError22 = jsNative
+
+module EmaValidationError22 =
+    /// <remarks>TypeScript type: <c>"invalid_scope_param"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_scope_param"
 
 [<Interface>]
 type EmaValidationError23 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_user"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError23 = jsNative
+    [<Emit("({ reason: 'invalid_mapped_user' })")>]
+    static member Create () : EmaValidationError23 = jsNative
+
+module EmaValidationError23 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_user"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_mapped_user"
 
 [<Interface>]
 type EmaValidationError24 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_scope"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError24 = jsNative
+    [<Emit("({ reason: 'invalid_mapped_scope' })")>]
+    static member Create () : EmaValidationError24 = jsNative
+
+module EmaValidationError24 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_scope"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_mapped_scope"
 
 [<Interface>]
 type EmaValidationError25 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_props"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError25 = jsNative
+    [<Emit("({ reason: 'invalid_mapped_props' })")>]
+    static member Create () : EmaValidationError25 = jsNative
+
+module EmaValidationError25 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_props"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_mapped_props"
 
 [<Interface>]
 type EmaValidationError26 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_ttl"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError26 = jsNative
+    [<Emit("({ reason: 'invalid_mapped_ttl' })")>]
+    static member Create () : EmaValidationError26 = jsNative
+
+module EmaValidationError26 =
+    /// <remarks>TypeScript type: <c>"invalid_mapped_ttl"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_mapped_ttl"
 
 [<Interface>]
 type EmaValidationError27 =
+    /// <remarks>TypeScript type: <c>"mapper_denied"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError27 = jsNative
+    [<Emit("({ reason: 'mapper_denied' })")>]
+    static member Create () : EmaValidationError27 = jsNative
+
+module EmaValidationError27 =
+    /// <remarks>TypeScript type: <c>"mapper_denied"</c></remarks>
+    [<Literal>]
+    let reason = "mapper_denied"
 
 [<Interface>]
 type EmaValidationError28 =
+    /// <remarks>TypeScript type: <c>"mapper_threw"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError28 = jsNative
+    [<Emit("({ reason: 'mapper_threw' })")>]
+    static member Create () : EmaValidationError28 = jsNative
+
+module EmaValidationError28 =
+    /// <remarks>TypeScript type: <c>"mapper_threw"</c></remarks>
+    [<Literal>]
+    let reason = "mapper_threw"
 
 [<Interface>]
 type EmaValidationError29 =
+    /// <remarks>TypeScript type: <c>"assertion_expired_after_processing"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError29 = jsNative
+    [<Emit("({ reason: 'assertion_expired_after_processing' })")>]
+    static member Create () : EmaValidationError29 = jsNative
+
+module EmaValidationError29 =
+    /// <remarks>TypeScript type: <c>"assertion_expired_after_processing"</c></remarks>
+    [<Literal>]
+    let reason = "assertion_expired_after_processing"
 
 [<Interface>]
 type EmaValidationError3 =
+    /// <remarks>TypeScript type: <c>"assertion_too_large"</c></remarks>
     abstract reason: string with get, set
     abstract size: float with get, set
     abstract max: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, size: float, max: float) : EmaValidationError3 = jsNative
+    [<ParamObject; Emit("({ reason: 'assertion_too_large', ...$0 })")>]
+    static member Create (size: float, max: float) : EmaValidationError3 = jsNative
+
+module EmaValidationError3 =
+    /// <remarks>TypeScript type: <c>"assertion_too_large"</c></remarks>
+    [<Literal>]
+    let reason = "assertion_too_large"
 
 [<Interface>]
 type EmaValidationError4 =
+    /// <remarks>TypeScript type: <c>"assertion_malformed"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError4 = jsNative
+    [<Emit("({ reason: 'assertion_malformed' })")>]
+    static member Create () : EmaValidationError4 = jsNative
+
+module EmaValidationError4 =
+    /// <remarks>TypeScript type: <c>"assertion_malformed"</c></remarks>
+    [<Literal>]
+    let reason = "assertion_malformed"
 
 [<Interface>]
 type EmaValidationError5 =
+    /// <remarks>TypeScript type: <c>"invalid_typ"</c></remarks>
     abstract reason: string with get, set
     abstract got: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?got: obj) : EmaValidationError5 = jsNative
+    [<ParamObject; Emit("({ reason: 'invalid_typ', ...$0 })")>]
+    static member Create (?got: obj) : EmaValidationError5 = jsNative
+
+module EmaValidationError5 =
+    /// <remarks>TypeScript type: <c>"invalid_typ"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_typ"
 
 [<Interface>]
 type EmaValidationError6 =
+    /// <remarks>TypeScript type: <c>"invalid_alg"</c></remarks>
     abstract reason: string with get, set
     abstract got: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?got: obj) : EmaValidationError6 = jsNative
+    [<ParamObject; Emit("({ reason: 'invalid_alg', ...$0 })")>]
+    static member Create (?got: obj) : EmaValidationError6 = jsNative
+
+module EmaValidationError6 =
+    /// <remarks>TypeScript type: <c>"invalid_alg"</c></remarks>
+    [<Literal>]
+    let reason = "invalid_alg"
 
 [<Interface>]
 type EmaValidationError7 =
+    /// <remarks>TypeScript type: <c>"issuer_not_trusted"</c></remarks>
     abstract reason: string with get, set
     abstract iss: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, iss: string) : EmaValidationError7 = jsNative
+    [<ParamObject; Emit("({ reason: 'issuer_not_trusted', ...$0 })")>]
+    static member Create (iss: string) : EmaValidationError7 = jsNative
+
+module EmaValidationError7 =
+    /// <remarks>TypeScript type: <c>"issuer_not_trusted"</c></remarks>
+    [<Literal>]
+    let reason = "issuer_not_trusted"
 
 [<Interface>]
 type EmaValidationError8 =
+    /// <remarks>TypeScript type: <c>"no_matching_key"</c></remarks>
     abstract reason: string with get, set
     abstract kid: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?kid: string) : EmaValidationError8 = jsNative
+    [<ParamObject; Emit("({ reason: 'no_matching_key', ...$0 })")>]
+    static member Create (?kid: string) : EmaValidationError8 = jsNative
+
+module EmaValidationError8 =
+    /// <remarks>TypeScript type: <c>"no_matching_key"</c></remarks>
+    [<Literal>]
+    let reason = "no_matching_key"
 
 [<Interface>]
 type EmaValidationError9 =
+    /// <remarks>TypeScript type: <c>"signature_failed"</c></remarks>
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError9 = jsNative
+    [<Emit("({ reason: 'signature_failed' })")>]
+    static member Create () : EmaValidationError9 = jsNative
+
+module EmaValidationError9 =
+    /// <remarks>TypeScript type: <c>"signature_failed"</c></remarks>
+    [<Literal>]
+    let reason = "signature_failed"
 
 /// <summary>
 /// Claims expected in an MCP Enterprise-Managed Authorization ID-JAG assertion.
@@ -678,7 +851,7 @@ type ClientRegistrationCallbackOptions =
     /// are NOT currently merged in by the library — if <c>software_statement</c> is present
     /// the callback is responsible for verifying the JWT and applying its claims.
     /// </summary>
-    abstract clientMetadata: Record<string, obj> with get, set
+    abstract clientMetadata: JS.Record<string, obj> with get, set
     /// <summary>
     /// A clone of the registration HTTP request. The body has not been consumed,
     /// so the callback may call <c>request.text()</c> / <c>request.json()</c> if needed
@@ -686,7 +859,7 @@ type ClientRegistrationCallbackOptions =
     /// </summary>
     abstract request: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (clientMetadata: Record<string, obj>, request: obj) : ClientRegistrationCallbackOptions = jsNative
+    static member Create (clientMetadata: JS.Record<string, obj>, request: obj) : ClientRegistrationCallbackOptions = jsNative
 
 /// <summary>
 /// Result of the client registration callback.
@@ -789,7 +962,7 @@ type OAuthProviderOptions<'Env> =
     /// <c>apiRoute</c> + <c>apiHandler</c> (single-handler configuration) OR <c>apiHandlers</c> (multi-handler
     /// configuration), not both.
     /// </summary>
-    abstract apiHandlers: Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>> option with get, set
+    abstract apiHandlers: JS.Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>> option with get, set
     /// <summary>
     /// Handler for all non-API requests or API requests without a valid token.
     /// Can be either an ExportedHandler object with a fetch method or a class extending WorkerEntrypoint.
@@ -948,7 +1121,7 @@ type OAuthProviderOptions<'Env> =
     /// </summary>
     abstract resourceMetadata: OAuthProviderOptions.ResourceMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (defaultHandler: obj, authorizeEndpoint: string, tokenEndpoint: string, ?apiRoute: U2<string, string[]>, ?apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env>>, ?apiHandlers: Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>>, ?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowImplicitFlow: bool, ?allowPlainPKCE: bool, ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?resolveExternalToken: (ResolveExternalTokenInput<'Env> -> JS.Promise<ResolveExternalTokenResult option>), ?onError: (OAuthProviderOptions.OnError.Error -> obj option), ?clientIdMetadataDocumentEnabled: bool, ?resourceMatchOriginOnly: bool, ?resourceMetadata: OAuthProviderOptions.ResourceMetadata) : OAuthProviderOptions<'Env> = jsNative
+    static member Create (defaultHandler: obj, authorizeEndpoint: string, tokenEndpoint: string, ?apiRoute: U2<string, string[]>, ?apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env>>, ?apiHandlers: JS.Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>>, ?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowImplicitFlow: bool, ?allowPlainPKCE: bool, ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?resolveExternalToken: (ResolveExternalTokenInput<'Env> -> JS.Promise<ResolveExternalTokenResult option>), ?onError: (OAuthProviderOptions.OnError.Error -> obj option), ?clientIdMetadataDocumentEnabled: bool, ?resourceMatchOriginOnly: bool, ?resourceMetadata: OAuthProviderOptions.ResourceMetadata) : OAuthProviderOptions<'Env> = jsNative
 
 /// <summary>
 /// Helper methods for OAuth operations provided to handler functions
@@ -1057,6 +1230,7 @@ type OAuthHelpers =
 [<Interface>]
 type TokenResponse =
     abstract access_token: string with get, set
+    /// <remarks>TypeScript type: <c>"bearer"</c></remarks>
     abstract token_type: string with get, set
     abstract expires_in: float with get, set
     abstract refresh_token: string option with get, set
@@ -1066,8 +1240,13 @@ type TokenResponse =
     /// SHOULD be included to indicate the resource server(s) for which the token is valid
     /// </summary>
     abstract resource: U2<string, string[]> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (access_token: string, token_type: string, expires_in: float, scope: string, ?refresh_token: string, ?resource: U2<string, string[]>) : TokenResponse = jsNative
+    [<ParamObject; Emit("({ token_type: 'bearer', ...$0 })")>]
+    static member Create (access_token: string, expires_in: float, scope: string, ?refresh_token: string, ?resource: U2<string, string[]>) : TokenResponse = jsNative
+
+module TokenResponse =
+    /// <remarks>TypeScript type: <c>"bearer"</c></remarks>
+    [<Literal>]
+    let token_type = "bearer"
 
 /// <summary>
 /// Options for token exchange operations (RFC 8693)
@@ -1191,7 +1370,7 @@ type ClientInfo =
     /// fields above; this map holds only the locale-specific variants so that
     /// consumers can perform their own locale selection.
     /// </summary>
-    abstract i18n: Record<string, string> option with get, set
+    abstract i18n: JS.Record<string, string> option with get, set
     /// <summary>
     /// List of email addresses for contacting the client developers
     /// </summary>
@@ -1219,7 +1398,7 @@ type ClientInfo =
     /// </summary>
     abstract tokenEndpointAuthMethod: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (clientId: string, redirectUris: string[], tokenEndpointAuthMethod: string, ?clientSecret: string, ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float) : ClientInfo = jsNative
+    static member Create (clientId: string, redirectUris: string[], tokenEndpointAuthMethod: string, ?clientSecret: string, ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: JS.Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float) : ClientInfo = jsNative
 
 /// <summary>
 /// Options for completing an authorization request
@@ -1617,9 +1796,9 @@ type OAuthErrorOptions =
     /// retry-storming. Per RFC 7231 §7.1.3 the value may be either a
     /// number of seconds or an HTTP-date.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (description: string, ?statusCode: float, ?headers: Record<string, string>) : OAuthErrorOptions = jsNative
+    static member Create (description: string, ?statusCode: float, ?headers: JS.Record<string, string>) : OAuthErrorOptions = jsNative
 
 /// <summary>
 /// Structured OAuth 2.0 token-endpoint error.
@@ -1684,13 +1863,13 @@ type OAuthError =
     /// <summary>
     /// Additional response headers.
     /// </summary>
-    abstract headers: Record<string, string> option
+    abstract headers: JS.Record<string, string> option
     abstract name: string with get, set
     abstract message: string with get, set
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (code: string, options: OAuthError.Options, description: string, statusCode: float, name: string, message: string, ?headers: Record<string, string>, ?stack: string, ?cause: obj) : OAuthError = jsNative
+    static member Create (code: string, options: OAuthError.Options, description: string, statusCode: float, name: string, message: string, ?headers: JS.Record<string, string>, ?stack: string, ?cause: obj) : OAuthError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
@@ -1714,7 +1893,7 @@ type ExternalTokenErrorOptions =
     /// <summary>
     /// Additional public response headers, such as <c>Retry-After</c>.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     /// <summary>
     /// Minimum scopes needed for the protected-resource operation.
     /// <br /><br />
@@ -1724,7 +1903,7 @@ type ExternalTokenErrorOptions =
     /// </summary>
     abstract requiredScopes: string[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (description: string, statusCode: float, ?headers: Record<string, string>, ?requiredScopes: string[]) : ExternalTokenErrorOptions = jsNative
+    static member Create (description: string, statusCode: float, ?headers: JS.Record<string, string>, ?requiredScopes: string[]) : ExternalTokenErrorOptions = jsNative
 
 /// <summary>
 /// Intentional public error from an external bearer-token validator.
@@ -1751,7 +1930,7 @@ type ExternalTokenError =
     /// <summary>
     /// Additional public response headers.
     /// </summary>
-    abstract headers: Record<string, string> option
+    abstract headers: JS.Record<string, string> option
     /// <summary>
     /// Minimum scopes for an <c>insufficient_scope</c> challenge.
     /// </summary>
@@ -1761,7 +1940,7 @@ type ExternalTokenError =
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (code: OAuthTokenErrorCode, description: string, statusCode: float, name: string, message: string, ?headers: Record<string, string>, ?requiredScopes: string[], ?stack: string, ?cause: obj) : ExternalTokenError = jsNative
+    static member Create (code: OAuthTokenErrorCode, description: string, statusCode: float, name: string, message: string, ?headers: JS.Record<string, string>, ?requiredScopes: string[], ?stack: string, ?cause: obj) : ExternalTokenError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
@@ -1789,6 +1968,7 @@ type CimdFetchError =
     /// <summary>
     /// Stable reason slug suitable for telemetry and control flow.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"metadata_resolution_failed"</c></remarks>
     abstract reason: string
     /// <summary>
     /// The CIMD URL whose fetch or validation failed.
@@ -1802,13 +1982,21 @@ type CimdFetchError =
     abstract message: string with get, set
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, metadataUrl: string, detail: string, name: string, message: string, ?stack: string, ?cause: obj) : CimdFetchError = jsNative
+    [<ParamObject; Emit("({ reason: 'metadata_resolution_failed', ...$0 })")>]
+    static member Create (metadataUrl: string, detail: string, name: string, message: string, ?stack: string, ?cause: obj) : CimdFetchError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     [<Import("CimdFetchError.isError", "@cloudflare/workers-oauth-provider")>]
     static member isError (error: obj) : bool = jsNative
+
+module CimdFetchError =
+    /// <summary>
+    /// Stable reason slug suitable for telemetry and control flow.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"metadata_resolution_failed"</c></remarks>
+    [<Literal>]
+    let reason = "metadata_resolution_failed"
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -1931,12 +2119,12 @@ type Exports =
     /// Decodes a base64url-encoded string to bytes.
     /// </summary>
     [<Import("base64UrlToBytes", "@cloudflare/workers-oauth-provider")>]
-    static member base64UrlToBytes (base64Url: string) : JS.Uint8Array = jsNative
+    static member base64UrlToBytes (base64Url: string) : Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> = jsNative
     /// <summary>
     /// Parses a base64url-encoded JWT JSON part into an object.
     /// </summary>
     [<Import("parseJwtJsonPart", "@cloudflare/workers-oauth-provider")>]
-    static member parseJwtJsonPart (encoded: string) : Record<string, obj> = jsNative
+    static member parseJwtJsonPart (encoded: string) : JS.Record<string, obj> = jsNative
     /// <summary>
     /// Gets WebCrypto import and verify parameters for supported JOSE algorithms.
     /// </summary>
@@ -2397,12 +2585,6 @@ module EmaClaimsMapperInput =
                 | ZM
                 | ZW
 
-module EmaValidationError13 =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Claim =
-        | [<CompiledName("authorization_details")>] AuthorizationDetails
-        | [<CompiledName("cnf")>] Cnf
-
 module GetJwtCryptoAlgorithms =
     [<Interface>]
     type Result =
@@ -2420,7 +2602,7 @@ module OAuthError =
         /// </summary>
         abstract statusCode: float with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (description: string, statusCode: float, ?headers: Record<string, string>) : Options = jsNative
+        static member Create (description: string, statusCode: float, ?headers: JS.Record<string, string>) : Options = jsNative
 
 module OAuthHelpers =
     module CompleteAuthorization =
@@ -2482,7 +2664,7 @@ module OAuthHelpers =
             /// fields above; this map holds only the locale-specific variants so that
             /// consumers can perform their own locale selection.
             /// </summary>
-            abstract i18n: Record<string, string> option with get, set
+            abstract i18n: JS.Record<string, string> option with get, set
             /// <summary>
             /// List of email addresses for contacting the client developers
             /// </summary>
@@ -2510,12 +2692,12 @@ module OAuthHelpers =
             /// </summary>
             abstract tokenEndpointAuthMethod: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?clientId: string, ?clientSecret: string, ?redirectUris: string[], ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float, ?tokenEndpointAuthMethod: string) : ClientInfo = jsNative
+            static member Create (?clientId: string, ?clientSecret: string, ?redirectUris: string[], ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: JS.Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float, ?tokenEndpointAuthMethod: string) : ClientInfo = jsNative
 
 module OAuthProviderOptions =
     [<Interface>]
     type ApiHandler<'Env> =
-        abstract fetch: obj with get, set
+        inherit OAuthProviderOptions.ApiHandler.Base<'Env>
         abstract connect: obj option with get, set
         abstract tail: obj option with get, set
         abstract trace: obj option with get, set
@@ -2566,6 +2748,12 @@ module OAuthProviderOptions =
 
     module ApiHandler =
         [<Interface>]
+        type Base<'Env> =
+            abstract fetch: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fetch: obj) : Base<'Env> = jsNative
+
+        [<Interface>]
         type Result<'Env> =
             abstract __WORKER_ENTRYPOINT_BRAND: unit
             abstract ctx: obj with get, set
@@ -2600,11 +2788,11 @@ module OAuthProviderOptions =
             abstract code: string with get, set
             abstract description: string with get, set
             abstract status: float with get, set
-            abstract headers: Record<string, string> with get, set
+            abstract headers: JS.Record<string, string> with get, set
             abstract ``internal``: OAuthProviderOptions.OnError.Error.Internal option with get, set
             abstract request: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (code: string, description: string, status: float, headers: Record<string, string>, ?``internal``: OAuthProviderOptions.OnError.Error.Internal, ?request: obj) : Error = jsNative
+            static member Create (code: string, description: string, status: float, headers: JS.Record<string, string>, ?``internal``: OAuthProviderOptions.OnError.Error.Internal, ?request: obj) : Error = jsNative
 
         module Error =
             [<Interface>]

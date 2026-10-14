@@ -30,12 +30,12 @@ type AISearchChatSettings =
 [<Interface>]
 type AISearchChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
     abstract settings: AISearchChatSettings
     abstract config: obj
     abstract buildRequest: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, modelId: string, settings: AISearchChatSettings, config: obj, provider: string, buildRequest: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3StreamResult>)) : AISearchChatLanguageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v3', ...$0 })")>]
+    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, modelId: string, settings: AISearchChatSettings, config: obj, provider: string, buildRequest: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3StreamResult>)) : AISearchChatLanguageModel = jsNative
 
 [<Interface>]
 type AISearchNamespaceSettings =
@@ -143,7 +143,7 @@ module AISearchItemsProvider =
     module UploadAndPoll =
         [<Interface>]
         type Options =
-            abstract metadata: Record<string, obj> option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
             /// <summary>
             /// Polling interval in milliseconds (default 1000).
             /// </summary>
@@ -153,4 +153,4 @@ module AISearchItemsProvider =
             /// </summary>
             abstract timeoutMs: float option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?metadata: Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
+            static member Create (?metadata: JS.Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative

@@ -24,9 +24,9 @@ type WorkspaceObserver =
     /// (or its promise) unchanged so the wrapping is invisible to the
     /// caller. Errors thrown by <c>run</c> must propagate.
     /// </summary>
-    abstract span<'T>: name: string * attributes: ReadonlyRecord<string, WorkspaceAttributeValue option> * run: (WorkspaceSpan -> JS.Promise<'T>) -> JS.Promise<'T>
+    abstract span<'T>: name: string * attributes: JS.ReadonlyRecord<string, WorkspaceAttributeValue option> * run: (WorkspaceSpan -> JS.Promise<'T>) -> JS.Promise<'T>
     [<ParamObject; Emit("$0")>]
-    static member Create (span: Func<string, ReadonlyRecord<string, WorkspaceAttributeValue option>, (WorkspaceSpan -> JS.Promise<'T>), JS.Promise<'T>>) : WorkspaceObserver = jsNative
+    static member Create (span: Func<string, JS.ReadonlyRecord<string, WorkspaceAttributeValue option>, (WorkspaceSpan -> JS.Promise<'T>), JS.Promise<'T>>) : WorkspaceObserver = jsNative
 
 [<Interface>]
 type WorkspaceSpan =
@@ -191,7 +191,7 @@ module Artifacts =
         /// <summary>
         /// Environment variables. Reserved for future use.
         /// </summary>
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         /// <summary>
         /// Optional git seam used only by the <c>create</c> shorthand to register
         /// the remote. When absent, <c>create</c> skips the git step and instead
@@ -199,7 +199,7 @@ module Artifacts =
         /// </summary>
         abstract remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (argv: string[], ?env: Record<string, string>, ?remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn) : ArtifactsCLIInput = jsNative
+        static member Create (argv: string[], ?env: JS.Record<string, string>, ?remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn) : ArtifactsCLIInput = jsNative
 
     [<Interface>]
     type ArtifactsCLIResult =
@@ -447,7 +447,7 @@ module Assets =
         [<ParamObject; Emit("$0")>]
         static member Create (sessionId: string, fs: Assets.WorkspaceLike.Fs) : WorkspaceLike = jsNative
 
-    type AssetsEnv = Record<string, string option>
+    type AssetsEnv = JS.Record<string, string option>
 
     [<Interface>]
     type S3Config =
@@ -500,9 +500,9 @@ module Assets =
             [<Interface>]
             type Options =
                 abstract httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata option with get, set
-                abstract customMetadata: Record<string, string> option with get, set
+                abstract customMetadata: JS.Record<string, string> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata, ?customMetadata: Record<string, string>) : Options = jsNative
+                static member Create (?httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata, ?customMetadata: JS.Record<string, string>) : Options = jsNative
 
             module Options =
                 [<Interface>]
@@ -574,7 +574,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/core")>]
-            static member _default: ReadonlyRecord<string, Shell.Core.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Core.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -589,7 +589,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/curl")>]
-            static member _default: ReadonlyRecord<string, Shell.Curl.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Curl.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -604,7 +604,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/file")>]
-            static member _default: ReadonlyRecord<string, Shell.File.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.File.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -619,7 +619,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/html-to-markdown")>]
-            static member _default: ReadonlyRecord<string, Shell.HtmlToMarkdown.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.HtmlToMarkdown.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -634,7 +634,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/jq")>]
-            static member _default: ReadonlyRecord<string, Shell.Jq.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Jq.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -649,7 +649,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/js-exec")>]
-            static member _default: ReadonlyRecord<string, Shell.JsExec.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.JsExec.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -664,7 +664,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/python")>]
-            static member _default: ReadonlyRecord<string, Shell.Python.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Python.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -679,7 +679,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/sqlite")>]
-            static member _default: ReadonlyRecord<string, Shell.Sqlite.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Sqlite.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -694,7 +694,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/xan")>]
-            static member _default: ReadonlyRecord<string, Shell.Xan.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Xan.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -709,7 +709,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/yq")>]
-            static member _default: ReadonlyRecord<string, Shell.Yq.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Yq.Default.Item> = jsNative
 
         module Default =
             [<Interface>]

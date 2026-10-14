@@ -138,13 +138,24 @@ type OpenAPIRouteSchema =
     abstract security: obj[] option with get, set
     abstract servers: obj[] option with get, set
     abstract request: RequestTypes option with get, set
-    abstract responses: Record<string, ResponseConfig> option with get, set
+    abstract responses: JS.Record<string, ResponseConfig> option with get, set
     abstract ``x-ignore``: bool option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
 [<Erase>]
 type ValidatedData<'S> = private ValidatedData__ of obj
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type Method =
+    | [<CompiledName("delete")>] Delete
+    | [<CompiledName("get")>] Get
+    | [<CompiledName("head")>] Head
+    | [<CompiledName("options")>] Options
+    | [<CompiledName("patch")>] Patch
+    | [<CompiledName("post")>] Post
+    | [<CompiledName("put")>] Put
+    | [<CompiledName("trace")>] Trace
 
 [<Interface>]
 type OpenAPIRegistryMerger =
@@ -199,6 +210,24 @@ type HttpMethod =
     | [<CompiledName("patch")>] Patch
     | [<CompiledName("post")>] Post
     | [<CompiledName("put")>] Put
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type ContinentCode =
+    | AF
+    | AN
+    | AS
+    | EU
+    | NA
+    | OC
+    | SA
+
+type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
+    | N0 = 0
+    | N1 = 1
+    | N2 = 2
+    | N3 = 3
+    | N4 = 4
+    | N5 = 5
 
 /// <summary>
 /// Handles the generation of OpenAPI schema and serves the documentation UI.
@@ -280,15 +309,15 @@ type OpenAPIHandler =
     /// Must be implemented by subclasses.
     /// </summary>
     /// <param name="_args">- Handler arguments</param>
-    abstract getUrlParams: _args: obj[] -> Record<string, obj>
+    abstract getUrlParams: _args: obj[] -> JS.Record<string, obj>
     /// <summary>
     /// Gets environment bindings from handler arguments.
     /// Must be implemented by subclasses.
     /// </summary>
     /// <param name="_args">- Handler arguments</param>
-    abstract getBindings: _args: obj[] -> Record<string, obj>
+    abstract getBindings: _args: obj[] -> JS.Record<string, obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>, getRequest: (obj[] -> obj), getUrlParams: (obj[] -> Record<string, obj>), getBindings: (obj[] -> Record<string, obj>)) : OpenAPIHandler = jsNative
+    static member Create (router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>, getRequest: (obj[] -> obj), getUrlParams: (obj[] -> JS.Record<string, obj>), getBindings: (obj[] -> JS.Record<string, obj>)) : OpenAPIHandler = jsNative
 
 /// <summary>
 /// Base class for all OpenAPI route handlers.
@@ -425,17 +454,31 @@ type OpenAPIRoute<'HandleArgs> =
         and set (_: bool): unit = jsNative
 
 type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
-    abstract original: obj with get, set
+    inherit HonoOpenAPIRouterType.Base<'E, 'S, 'BasePath>
     abstract options: HonoOpenAPIRouterType.Options<'S, 'BasePath, 'E> with get, set
-    abstract registry: OpenAPIRegistryMerger with get, set
-    abstract schema: obj with get, set
     abstract on: ``method``: string * path: string * endpoint: FSharp.CloudEdge.Runtime.Chanfana.OpenAPIRouteConstructor -> obj
     abstract on: ``method``: string * path: string * router: obj -> obj
     abstract on<'M, 'P>: ``method``: 'M * path: 'P * handler: obj -> obj
     abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract on<'M, 'P>: ``method``: 'M * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract on<'M, 'P>: ``method``: 'M * path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract on<'M, 'P>: methods: 'M[] * path: 'P * handler: obj -> obj
     abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract on<'M, 'P>: methods: 'M[] * path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract on<'M, 'P>: methods: 'M[] * path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract on<'M, 'Ps>: methods: U2<'M, 'M[]> * paths: 'Ps * [<ParamArray>] handlers: obj[] -> obj
     /// <summary>
@@ -485,6 +528,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract all: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract all<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract all: [<ParamArray>] handlers: obj[] -> obj
     abstract all<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract all<'P>: path: 'P -> obj
@@ -496,6 +552,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract delete: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract delete<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract delete: [<ParamArray>] handlers: obj[] -> obj
     abstract delete<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract delete<'P>: path: 'P -> obj
@@ -507,6 +576,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract get: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract get<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract get: [<ParamArray>] handlers: obj[] -> obj
     abstract get<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract get<'P>: path: 'P -> obj
@@ -518,6 +600,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract patch: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract patch<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract patch: [<ParamArray>] handlers: obj[] -> obj
     abstract patch<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract patch<'P>: path: 'P -> obj
@@ -529,6 +624,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract post: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract post<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract post: [<ParamArray>] handlers: obj[] -> obj
     abstract post<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract post<'P>: path: 'P -> obj
@@ -540,6 +648,19 @@ type HonoOpenAPIRouterType<'E, 'S, 'BasePath> =
     abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj -> obj
     abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
     abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+    abstract put: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+    abstract put<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
     abstract put: [<ParamArray>] handlers: obj[] -> obj
     abstract put<'P>: path: 'P * [<ParamArray>] handlers: obj[] -> obj
     abstract put<'P>: path: 'P -> obj
@@ -692,20 +813,17 @@ type HonoOpenAPIHandler =
     /// Gets URL parameters from handler arguments.
     /// Must be implemented by subclasses.
     /// </summary>
-    abstract getUrlParams: args: obj[] -> Record<string, obj>
+    abstract getUrlParams: args: obj[] -> JS.Record<string, obj>
     /// <summary>
     /// Gets environment bindings from handler arguments.
     /// Must be implemented by subclasses.
     /// </summary>
-    abstract getBindings: args: obj[] -> Record<string, obj>
+    abstract getBindings: args: obj[] -> JS.Record<string, obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, getRequest: (obj[] -> obj), getUrlParams: (obj[] -> Record<string, obj>), getBindings: (obj[] -> Record<string, obj>), router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>) : HonoOpenAPIHandler = jsNative
+    static member Create (routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, getRequest: (obj[] -> obj), getUrlParams: (obj[] -> JS.Record<string, obj>), getBindings: (obj[] -> JS.Record<string, obj>), router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>) : HonoOpenAPIHandler = jsNative
 
 type IttyRouterOpenAPIRouterType<'M> =
-    abstract original: 'M with get, set
-    abstract options: RouterOptions with get, set
-    abstract registry: OpenAPIRegistryMerger with get, set
-    abstract schema: obj with get, set
+    inherit FSharp.CloudEdge.Runtime.Chanfana.OpenAPIRouterType<'M>
     abstract all: path: string * endpoint: OpenAPIRouteConstructor -> obj
     abstract all: path: string * router: 'M -> obj
     abstract delete: path: string * endpoint: FSharp.CloudEdge.Runtime.Chanfana.OpenAPIRouteConstructor -> obj
@@ -733,14 +851,14 @@ type IttyRouterOpenAPIHandler =
     /// Gets URL parameters from handler arguments.
     /// Must be implemented by subclasses.
     /// </summary>
-    abstract getUrlParams: args: obj[] -> Record<string, obj>
+    abstract getUrlParams: args: obj[] -> JS.Record<string, obj>
     /// <summary>
     /// Gets environment bindings from handler arguments.
     /// Must be implemented by subclasses.
     /// </summary>
-    abstract getBindings: args: obj[] -> Record<string, obj>
+    abstract getBindings: args: obj[] -> JS.Record<string, obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (getRequest: (obj[] -> obj), getUrlParams: (obj[] -> Record<string, obj>), getBindings: (obj[] -> Record<string, obj>), router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>) : IttyRouterOpenAPIHandler = jsNative
+    static member Create (getRequest: (obj[] -> obj), getUrlParams: (obj[] -> JS.Record<string, obj>), getBindings: (obj[] -> JS.Record<string, obj>), router: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, allowedMethods: string[], routerHandlesBasePrefix: bool, wrapHandler: Func<(obj[] -> JS.Promise<obj>), (obj[] -> JS.Promise<obj>)>, createDocsRoutes: (unit -> unit), getGeneratedSchema: (unit -> obj), registerNestedRouter: (OpenAPIHandler.RegisterNestedRouter.Params -> obj[]), parseRoute: (string -> string), sanitizeOperationId: obj, registerRoute: (OpenAPIHandler.RegisterRoute.Params -> obj[]), handleCommonProxy: Func<obj, string, obj[], obj>) : IttyRouterOpenAPIHandler = jsNative
 
 type OpenAPIRouteConstructor =
     abstract isRoute: bool with get, set
@@ -771,15 +889,15 @@ type Filters =
 [<Interface>]
 type UpdateFilters =
     abstract filters: FilterCondition[] with get, set
-    abstract updatedData: Record<string, obj> with get, set
+    abstract updatedData: JS.Record<string, obj> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (filters: FilterCondition[], updatedData: Record<string, obj>) : UpdateFilters = jsNative
+    static member Create (filters: FilterCondition[], updatedData: JS.Record<string, obj>) : UpdateFilters = jsNative
 
 [<Interface>]
 type UpdatedData =
-    abstract updatedData: Record<string, obj> with get, set
+    abstract updatedData: JS.Record<string, obj> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (updatedData: Record<string, obj>) : UpdatedData = jsNative
+    static member Create (updatedData: JS.Record<string, obj>) : UpdatedData = jsNative
 
 [<Interface>]
 type SerializerContext =
@@ -856,16 +974,16 @@ type CreateEndpoint<'HandleArgs> =
     /// Override this method to customize schema properties.
     /// </summary>
     abstract getSchema: unit -> CreateEndpoint.GetSchema.Result
-    abstract getObject: unit -> JS.Promise<Record<string, obj>>
-    abstract before: data: Record<string, obj> -> JS.Promise<Record<string, obj>>
-    abstract after: data: Record<string, obj> -> JS.Promise<Record<string, obj>>
-    abstract create: data: Record<string, obj> -> JS.Promise<Record<string, obj>>
+    abstract getObject: unit -> JS.Promise<JS.Record<string, obj>>
+    abstract before: data: JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>
+    abstract after: data: JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>
+    abstract create: data: JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>
     /// <summary>
     /// The main handler method to be implemented by subclasses.
     /// </summary>
     abstract handle: [<ParamArray>] _args: 'HandleArgs -> JS.Promise<obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (_meta: MetaInput, meta: CreateEndpoint.Meta, getSchema: (unit -> CreateEndpoint.GetSchema.Result), getObject: (unit -> JS.Promise<Record<string, obj>>), before: (Record<string, obj> -> JS.Promise<Record<string, obj>>), after: (Record<string, obj> -> JS.Promise<Record<string, obj>>), create: (Record<string, obj> -> JS.Promise<Record<string, obj>>), handle: ('HandleArgs -> JS.Promise<obj>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : CreateEndpoint<'HandleArgs> = jsNative
+    static member Create (_meta: MetaInput, meta: CreateEndpoint.Meta, getSchema: (unit -> CreateEndpoint.GetSchema.Result), getObject: (unit -> JS.Promise<JS.Record<string, obj>>), before: (JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>), after: (JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>), create: (JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>), handle: ('HandleArgs -> JS.Promise<obj>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : CreateEndpoint<'HandleArgs> = jsNative
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -897,7 +1015,7 @@ type ApiException =
     [<ParamObject; Emit("$0")>]
     static member Create (isVisible: bool, message: string, default_message: string, status: float, code: float, includesPath: bool, buildResponse: (unit -> ApiException.BuildResponse.Result.Item[]), name: string, ?stack: string, ?cause: obj) : ApiException = jsNative
     [<Import("ApiException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
@@ -929,7 +1047,7 @@ type InputValidationException =
     [<Import("InputValidationException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("InputValidationException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception that aggregates multiple API exceptions.
@@ -959,7 +1077,7 @@ type MultiException =
     [<Import("MultiException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("MultiException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for resource not found (404).
@@ -984,7 +1102,7 @@ type NotFoundException =
     [<Import("NotFoundException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("NotFoundException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for unauthorized access (401).
@@ -1001,7 +1119,7 @@ type UnauthorizedException =
     [<Import("UnauthorizedException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("UnauthorizedException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for forbidden access (403).
@@ -1018,7 +1136,7 @@ type ForbiddenException =
     [<Import("ForbiddenException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("ForbiddenException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for method not allowed (405).
@@ -1035,7 +1153,7 @@ type MethodNotAllowedException =
     [<Import("MethodNotAllowedException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("MethodNotAllowedException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for conflict errors (409).
@@ -1052,7 +1170,7 @@ type ConflictException =
     [<Import("ConflictException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("ConflictException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for unprocessable entity (422).
@@ -1071,7 +1189,7 @@ type UnprocessableEntityException =
     [<Import("UnprocessableEntityException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("UnprocessableEntityException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for rate limiting (429).
@@ -1089,7 +1207,7 @@ type TooManyRequestsException =
     [<Import("TooManyRequestsException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("TooManyRequestsException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for unexpected server errors (500).
@@ -1109,7 +1227,7 @@ type InternalServerErrorException =
     [<Import("InternalServerErrorException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("InternalServerErrorException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for bad gateway errors (502).
@@ -1126,7 +1244,7 @@ type BadGatewayException =
     [<Import("BadGatewayException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("BadGatewayException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for service unavailable (503).
@@ -1144,7 +1262,7 @@ type ServiceUnavailableException =
     [<Import("ServiceUnavailableException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("ServiceUnavailableException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for gateway timeout (504).
@@ -1161,7 +1279,7 @@ type GatewayTimeoutException =
     [<Import("GatewayTimeoutException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("GatewayTimeoutException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Exception for response validation errors (500).
@@ -1180,7 +1298,7 @@ type ResponseValidationException =
     [<Import("ResponseValidationException.isError", "chanfana")>]
     static member isError (error: obj) : bool = jsNative
     [<Import("ResponseValidationException.schema", "chanfana")>]
-    static member schema () : Record<float, ApiException.Schema.Result.Item> = jsNative
+    static member schema () : JS.Record<float, ApiException.Schema.Result.Item> = jsNative
 
 /// <summary>
 /// Result from getSafeFilters - contains validated SQL conditions and parameters
@@ -1217,7 +1335,7 @@ type D1CreateEndpoint<'HandleArgs> =
     /// <summary>
     /// Custom error messages for UNIQUE constraint violations. Keys are constraint names (e.g., "users.email")
     /// </summary>
-    abstract constraintsMessages: Record<string, InputValidationException> with get, set
+    abstract constraintsMessages: JS.Record<string, InputValidationException> with get, set
     /// <summary>
     /// Gets the D1 database binding from the worker environment.
     /// </summary>
@@ -1245,16 +1363,16 @@ type DeleteEndpoint<'HandleArgs> =
     /// </summary>
     abstract getSchema: unit -> DeleteEndpoint.GetSchema.Result
     abstract getFilters: unit -> JS.Promise<Filters>
-    abstract before: _oldObj: Record<string, obj> * filters: Filters -> JS.Promise<Filters>
-    abstract after: data: Record<string, obj> -> JS.Promise<Record<string, obj>>
-    abstract delete: _oldObj: Record<string, obj> * _filters: Filters -> JS.Promise<Record<string, obj> option>
-    abstract getObject: _filters: Filters -> JS.Promise<Record<string, obj> option>
+    abstract before: _oldObj: JS.Record<string, obj> * filters: Filters -> JS.Promise<Filters>
+    abstract after: data: JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>
+    abstract delete: _oldObj: JS.Record<string, obj> * _filters: Filters -> JS.Promise<JS.Record<string, obj> option>
+    abstract getObject: _filters: Filters -> JS.Promise<JS.Record<string, obj> option>
     /// <summary>
     /// The main handler method to be implemented by subclasses.
     /// </summary>
     abstract handle: [<ParamArray>] _args: 'HandleArgs -> JS.Promise<DeleteEndpoint.Handle.Result.Item>
     [<ParamObject; Emit("$0")>]
-    static member Create (_meta: MetaInput, meta: DeleteEndpoint.Meta, getSchema: (unit -> DeleteEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<Filters>), before: Func<Record<string, obj>, Filters, JS.Promise<Filters>>, after: (Record<string, obj> -> JS.Promise<Record<string, obj>>), delete: Func<Record<string, obj>, Filters, JS.Promise<Record<string, obj> option>>, getObject: (Filters -> JS.Promise<Record<string, obj> option>), handle: ('HandleArgs -> JS.Promise<DeleteEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : DeleteEndpoint<'HandleArgs> = jsNative
+    static member Create (_meta: MetaInput, meta: DeleteEndpoint.Meta, getSchema: (unit -> DeleteEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<Filters>), before: Func<JS.Record<string, obj>, Filters, JS.Promise<Filters>>, after: (JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>), delete: Func<JS.Record<string, obj>, Filters, JS.Promise<JS.Record<string, obj> option>>, getObject: (Filters -> JS.Promise<JS.Record<string, obj> option>), handle: ('HandleArgs -> JS.Promise<DeleteEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : DeleteEndpoint<'HandleArgs> = jsNative
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1279,7 +1397,7 @@ type D1DeleteEndpoint<'HandleArgs> =
     /// <summary>
     /// Custom error messages for UNIQUE constraint violations. Keys are constraint names (e.g., "users.email")
     /// </summary>
-    abstract constraintsMessages: Record<string, InputValidationException> with get, set
+    abstract constraintsMessages: JS.Record<string, InputValidationException> with get, set
     /// <summary>
     /// Gets the D1 database binding from the worker environment.
     /// </summary>
@@ -1303,7 +1421,7 @@ type D1DeleteEndpoint<'HandleArgs> =
     /// </summary>
     /// <param name="filters">- Filter conditions for finding the object</param>
     /// <returns>The existing record or null if not found</returns>
-    abstract getObject: filters: Filters -> JS.Promise<Record<string, obj> option>
+    abstract getObject: filters: Filters -> JS.Promise<JS.Record<string, obj> option>
     /// <summary>
     /// Deletes a record from the database.
     /// </summary>
@@ -1311,7 +1429,7 @@ type D1DeleteEndpoint<'HandleArgs> =
     /// <param name="filters">- Filter conditions for the deletion</param>
     /// <returns>The deleted record or null if deletion failed</returns>
     /// <remarks>@throws ApiException on database errors</remarks>
-    abstract delete: oldObj: Record<string, obj> * filters: Filters -> JS.Promise<Record<string, obj> option>
+    abstract delete: oldObj: JS.Record<string, obj> * filters: Filters -> JS.Promise<JS.Record<string, obj> option>
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1408,14 +1526,14 @@ type ReadEndpoint<'HandleArgs> =
     abstract getSchema: unit -> ReadEndpoint.GetSchema.Result
     abstract getFilters: unit -> JS.Promise<ListFilters>
     abstract before: filters: ListFilters -> JS.Promise<ListFilters>
-    abstract after: data: Record<string, obj> -> JS.Promise<Record<string, obj>>
-    abstract fetch: _filters: ListFilters -> JS.Promise<Record<string, obj> option>
+    abstract after: data: JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>
+    abstract fetch: _filters: ListFilters -> JS.Promise<JS.Record<string, obj> option>
     /// <summary>
     /// The main handler method to be implemented by subclasses.
     /// </summary>
     abstract handle: [<ParamArray>] _args: 'HandleArgs -> JS.Promise<ReadEndpoint.Handle.Result.Item>
     [<ParamObject; Emit("$0")>]
-    static member Create (_meta: MetaInput, meta: ReadEndpoint.Meta, getSchema: (unit -> ReadEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<ListFilters>), before: (ListFilters -> JS.Promise<ListFilters>), after: (Record<string, obj> -> JS.Promise<Record<string, obj>>), fetch: (ListFilters -> JS.Promise<Record<string, obj> option>), handle: ('HandleArgs -> JS.Promise<ReadEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : ReadEndpoint<'HandleArgs> = jsNative
+    static member Create (_meta: MetaInput, meta: ReadEndpoint.Meta, getSchema: (unit -> ReadEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<ListFilters>), before: (ListFilters -> JS.Promise<ListFilters>), after: (JS.Record<string, obj> -> JS.Promise<JS.Record<string, obj>>), fetch: (ListFilters -> JS.Promise<JS.Record<string, obj> option>), handle: ('HandleArgs -> JS.Promise<ReadEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : ReadEndpoint<'HandleArgs> = jsNative
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1452,7 +1570,7 @@ type D1ReadEndpoint<'HandleArgs> =
     /// </summary>
     /// <param name="filters">- Filter conditions for the query</param>
     /// <returns>The found record or null if not found</returns>
-    abstract fetch: filters: ListFilters -> JS.Promise<Record<string, obj> option>
+    abstract fetch: filters: ListFilters -> JS.Promise<JS.Record<string, obj> option>
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1469,17 +1587,17 @@ type UpdateEndpoint<'HandleArgs> =
     /// </summary>
     abstract getSchema: unit -> UpdateEndpoint.GetSchema.Result
     abstract getFilters: unit -> JS.Promise<Filters>
-    abstract getUpdatedData: _oldObj: Record<string, obj> -> JS.Promise<UpdatedData>
-    abstract before: _oldObj: Record<string, obj> * filters: UpdateFilters -> JS.Promise<UpdateFilters>
+    abstract getUpdatedData: _oldObj: JS.Record<string, obj> -> JS.Promise<UpdatedData>
+    abstract before: _oldObj: JS.Record<string, obj> * filters: UpdateFilters -> JS.Promise<UpdateFilters>
     abstract after<'T>: data: 'T -> JS.Promise<'T>
-    abstract getObject: _filters: Filters -> JS.Promise<Record<string, obj> option>
-    abstract update: oldObj: Record<string, obj> * _filters: UpdateFilters -> JS.Promise<Record<string, obj>>
+    abstract getObject: _filters: Filters -> JS.Promise<JS.Record<string, obj> option>
+    abstract update: oldObj: JS.Record<string, obj> * _filters: UpdateFilters -> JS.Promise<JS.Record<string, obj>>
     /// <summary>
     /// The main handler method to be implemented by subclasses.
     /// </summary>
     abstract handle: [<ParamArray>] _args: 'HandleArgs -> JS.Promise<UpdateEndpoint.Handle.Result.Item>
     [<ParamObject; Emit("$0")>]
-    static member Create (_meta: MetaInput, meta: UpdateEndpoint.Meta, getSchema: (unit -> UpdateEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<Filters>), getUpdatedData: (Record<string, obj> -> JS.Promise<UpdatedData>), before: Func<Record<string, obj>, UpdateFilters, JS.Promise<UpdateFilters>>, after: ('T -> JS.Promise<'T>), getObject: (Filters -> JS.Promise<Record<string, obj> option>), update: Func<Record<string, obj>, UpdateFilters, JS.Promise<Record<string, obj>>>, handle: ('HandleArgs -> JS.Promise<UpdateEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : UpdateEndpoint<'HandleArgs> = jsNative
+    static member Create (_meta: MetaInput, meta: UpdateEndpoint.Meta, getSchema: (unit -> UpdateEndpoint.GetSchema.Result), getFilters: (unit -> JS.Promise<Filters>), getUpdatedData: (JS.Record<string, obj> -> JS.Promise<UpdatedData>), before: Func<JS.Record<string, obj>, UpdateFilters, JS.Promise<UpdateFilters>>, after: ('T -> JS.Promise<'T>), getObject: (Filters -> JS.Promise<JS.Record<string, obj> option>), update: Func<JS.Record<string, obj>, UpdateFilters, JS.Promise<JS.Record<string, obj>>>, handle: ('HandleArgs -> JS.Promise<UpdateEndpoint.Handle.Result.Item>), args: 'HandleArgs, validatedData: obj, unvalidatedData: obj, ``params``: RouteOptions, schema: OpenAPIRoute.Schema, getValidatedData: (unit -> JS.Promise<obj>), getUnvalidatedData: (unit -> JS.Promise<obj>), getSchemaZod: (unit -> OpenAPIRouteSchema), handleError: (obj -> obj), execute: ('HandleArgs -> JS.Promise<obj>), getResponseSchema: (float -> obj option), validateResponse: (obj -> JS.Promise<obj>), validateRequest: (obj -> JS.Promise<obj>)) : UpdateEndpoint<'HandleArgs> = jsNative
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1503,7 +1621,7 @@ type D1UpdateEndpoint<'HandleArgs> =
     /// <summary>
     /// Custom error messages for UNIQUE constraint violations. Keys are constraint names (e.g., "users.email")
     /// </summary>
-    abstract constraintsMessages: Record<string, InputValidationException> with get, set
+    abstract constraintsMessages: JS.Record<string, InputValidationException> with get, set
     /// <summary>
     /// Gets the D1 database binding from the worker environment.
     /// </summary>
@@ -1526,7 +1644,7 @@ type D1UpdateEndpoint<'HandleArgs> =
     /// </summary>
     /// <param name="filters">- Filter conditions for finding the object</param>
     /// <returns>The existing record or null if not found</returns>
-    abstract getObject: filters: Filters -> JS.Promise<Record<string, obj> option>
+    abstract getObject: filters: Filters -> JS.Promise<JS.Record<string, obj> option>
     /// <summary>
     /// Updates a record in the database.
     /// </summary>
@@ -1534,7 +1652,7 @@ type D1UpdateEndpoint<'HandleArgs> =
     /// <param name="filters">- Filter conditions and data to update</param>
     /// <returns>The updated record</returns>
     /// <remarks>@throws ApiException on database errors</remarks>
-    abstract update: _oldObj: Record<string, obj> * filters: UpdateFilters -> JS.Promise<Record<string, obj>>
+    abstract update: _oldObj: JS.Record<string, obj> * filters: UpdateFilters -> JS.Promise<JS.Record<string, obj>>
     static member isRoute
         with get (): bool = jsNative
         and set (_: bool): unit = jsNative
@@ -1572,7 +1690,7 @@ type Exports =
     [<Import("MetaGenerator", "chanfana")>]
     static member MetaGenerator (meta: MetaInput) : MetaGenerator.Result = jsNative
     [<Import("metaSchemaProps", "chanfana")>]
-    static member metaSchemaProps (meta: MetaInput) : Record<string, obj> = jsNative
+    static member metaSchemaProps (meta: MetaInput) : JS.Record<string, obj> = jsNative
     [<Import("CreateEndpoint", "chanfana"); EmitConstructor>]
     static member CreateEndpoint<'HandleArgs> (``params``: RouteOptions) : CreateEndpoint<'HandleArgs> = jsNative
     /// <summary>
@@ -1704,7 +1822,7 @@ type Exports =
     /// Error details are hidden from clients (isVisible=false) and logged via console.error.
     /// </summary>
     [<Import("ResponseValidationException", "chanfana"); EmitConstructor>]
-    static member ResponseValidationException (?message: string, ?options: obj) : ResponseValidationException = jsNative
+    static member ResponseValidationException (?message: string, ?options: Fable.Core.TS.Es.ErrorOptions) : ResponseValidationException = jsNative
     /// <summary>
     /// Validates that a string is a safe SQL identifier (table name, column name).
     /// Prevents SQL injection by only allowing alphanumeric characters and underscores.
@@ -1779,7 +1897,7 @@ type Exports =
     /// <returns>D1Database instance</returns>
     /// <remarks>@throws ApiException if binding is not defined or is not a D1 binding</remarks>
     [<Import("getD1Binding", "chanfana")>]
-    static member getD1Binding (getBindings: (obj[] -> Record<string, obj>), args: obj[], dbName: string) : obj = jsNative
+    static member getD1Binding (getBindings: (obj[] -> JS.Record<string, obj>), args: obj[], dbName: string) : obj = jsNative
     /// <summary>
     /// Handles database errors and maps UNIQUE constraint violations to custom exceptions.
     /// </summary>
@@ -1789,7 +1907,7 @@ type Exports =
     /// <param name="operation">- Description of the operation for logging</param>
     /// <remarks>@throws The mapped InputValidationException or a sanitized ApiException</remarks>
     [<Import("handleDbError", "chanfana")>]
-    static member handleDbError (error: exn, constraintsMessages: Record<string, InputValidationException>, ?logger: Logger, ?operation: string) : unit = jsNative
+    static member handleDbError (error: exn, constraintsMessages: JS.Record<string, InputValidationException>, ?logger: Logger, ?operation: string) : unit = jsNative
     /// <summary>
     /// Builds a safe WHERE clause from conditions array.
     /// </summary>
@@ -1861,7 +1979,7 @@ type Exports =
     /// <param name="schema">- Optional Zod schema to guide coercion</param>
     /// <returns>Coerced data object or null if empty</returns>
     [<Import("coerceInputs", "chanfana")>]
-    static member coerceInputs (data: Record<string, obj>, ?schema: RouteParameter) : Record<string, obj> option = jsNative
+    static member coerceInputs (data: JS.Record<string, obj>, ?schema: RouteParameter) : JS.Record<string, obj> option = jsNative
     [<Import("getSwaggerUI", "chanfana")>]
     static member getSwaggerUI (schemaUrl: string) : string = jsNative
     [<Import("getReDocUI", "chanfana")>]
@@ -1898,10 +2016,57 @@ module ApiException =
         module Result =
             [<Interface>]
             type Item =
-                abstract content: obj with get, set
+                abstract content: ApiException.Schema.Result.Item.Content with get, set
                 abstract description: string with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (content: obj, description: string) : Item = jsNative
+                static member Create (content: ApiException.Schema.Result.Item.Content, description: string) : Item = jsNative
+
+            module Item =
+                [<Interface>]
+                type Content =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson) : Content = jsNative
+
+                [<Interface>]
+                type ContentApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+                module ContentApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract errors: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson.Schema.Item.Errors.Item[] with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, errors: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson.Schema.Item.Errors.Item[]) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract errors: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson.Schema.Item.Item.Errors.Item[] with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, errors: FSharp.CloudEdge.Runtime.Chanfana.ApiException.Schema.Result.Item.ContentApplicationJson.Schema.Item.Item.Errors.Item[]) : Item = jsNative
+
+                            module Errors =
+                                [<Interface>]
+                                type Item =
+                                    abstract code: float with get, set
+                                    abstract message: string with get, set
+                                    [<ParamObject; Emit("$0")>]
+                                    static member Create (code: float, message: string) : Item = jsNative
+
+                            module Item =
+                                module Errors =
+                                    [<Interface>]
+                                    type Item =
+                                        abstract code: float with get, set
+                                        abstract message: string with get, set
+                                        [<ParamObject; Emit("$0")>]
+                                        static member Create (code: float, message: string) : Item = jsNative
 
 module ContentJson =
     [<Interface>]
@@ -1947,11 +2112,87 @@ module CreateEndpoint =
             abstract requestBody: obj option with get, set
             abstract callbacks: obj option with get, set
             abstract deprecated: bool option with get, set
-            abstract request: obj with get, set
-            abstract responses: obj with get, set
+            abstract request: U2<RequestTypes, CreateEndpoint.GetSchema.Result.Request> with get, set
+            abstract responses: U2<JS.Record<string, ResponseConfig>, CreateEndpoint.GetSchema.Result.Responses> with get, set
             abstract ``x-ignore``: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: obj, responses: obj, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+            static member Create (request: U2<RequestTypes, CreateEndpoint.GetSchema.Result.Request>, responses: U2<JS.Record<string, ResponseConfig>, CreateEndpoint.GetSchema.Result.Responses>, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+
+        module Result =
+            [<Interface>]
+            type Request =
+                abstract body: U2<ZodRequestBody, CreateEndpoint.GetSchema.Result.Request.Body> with get, set
+                abstract ``params``: AnyZodObject with get, set
+                abstract query: AnyZodObject option with get, set
+                abstract cookies: AnyZodObject option with get, set
+                abstract headers: obj option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (body: U2<ZodRequestBody, CreateEndpoint.GetSchema.Result.Request.Body>, ``params``: AnyZodObject, ?query: AnyZodObject, ?cookies: AnyZodObject, ?headers: obj) : Request = jsNative
+
+            [<Interface>]
+            type Responses =
+                abstract ``201``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Responses201 with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``201``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Responses201) : Responses = jsNative
+
+            [<Interface>]
+            type Responses201 =
+                abstract description: string with get, set
+                abstract headers: obj option with get, set
+                abstract links: LinksObject option with get, set
+                abstract content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, CreateEndpoint.GetSchema.Result.Responses201.Content2> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, CreateEndpoint.GetSchema.Result.Responses201.Content2>, ?headers: obj, ?links: LinksObject) : Responses201 = jsNative
+
+            module Request =
+                [<Interface>]
+                type Body =
+                    abstract content: CreateEndpoint.GetSchema.Result.Request.Body.Content with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (content: CreateEndpoint.GetSchema.Result.Request.Body.Content) : Body = jsNative
+
+                module Body =
+                    [<Interface>]
+                    type Content =
+                        abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson) : Content = jsNative
+
+                    [<Interface>]
+                    type ContentApplicationJson =
+                        abstract schema: obj with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+            module Responses201 =
+                [<Interface>]
+                type Content2 =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Responses201.Content2ApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.CreateEndpoint.GetSchema.Result.Responses201.Content2ApplicationJson) : Content2 = jsNative
+
+                [<Interface>]
+                type Content2ApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : Content2ApplicationJson = jsNative
+
+                module Content2ApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract result: JS.Record<string, obj> with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract result: JS.Record<string, obj> with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
 
     module Meta =
         [<Interface>]
@@ -1959,27 +2200,52 @@ module CreateEndpoint =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<CreateEndpoint.Meta.Model.Serializer, CreateEndpoint.Meta.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<CreateEndpoint.Meta.Model.Serializer, CreateEndpoint.Meta.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 module D1ListEndpoint =
     module List =
         [<Interface>]
         type Filters =
-            abstract filters: obj option with get, set
+            abstract filters: D1ListEndpoint.List.Filters.Filters.Item[] option with get, set
             abstract options: ListFilters.Options option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?filters: obj, ?options: ListFilters.Options) : Filters = jsNative
+            static member Create (?filters: D1ListEndpoint.List.Filters.Filters.Item[], ?options: ListFilters.Options) : Filters = jsNative
+
+        module Filters =
+            module Filters =
+                [<Interface>]
+                type Item =
+                    abstract field: string with get, set
+                    abstract operator: string with get, set
+                    abstract value: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (field: string, operator: string, value: obj) : Item = jsNative
 
         module Result =
             [<Interface>]
             type Item =
-                abstract result: Record<string, obj>[] with get, set
-                abstract result_info: obj with get, set
+                abstract result: JS.Record<string, obj>[] with get, set
+                abstract result_info: D1ListEndpoint.List.Result.Item.ResultInfo with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (result: Record<string, obj>[], result_info: obj) : Item = jsNative
+                static member Create (result: JS.Record<string, obj>[], result_info: D1ListEndpoint.List.Result.Item.ResultInfo) : Item = jsNative
+
+            module Item =
+                [<Interface>]
+                type ResultInfo =
+                    abstract count: float with get, set
+                    abstract page: float with get, set
+                    abstract per_page: float with get, set
+                    abstract total_count: float with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (count: float, page: float, per_page: float, total_count: float) : ResultInfo = jsNative
 
 module DeleteEndpoint =
     [<Interface>]
@@ -2005,11 +2271,87 @@ module DeleteEndpoint =
             abstract requestBody: obj option with get, set
             abstract callbacks: obj option with get, set
             abstract deprecated: bool option with get, set
-            abstract request: obj with get, set
-            abstract responses: obj with get, set
+            abstract request: U2<RequestTypes, DeleteEndpoint.GetSchema.Result.Request> with get, set
+            abstract responses: U2<JS.Record<string, ResponseConfig>, DeleteEndpoint.GetSchema.Result.Responses> with get, set
             abstract ``x-ignore``: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: obj, responses: obj, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+            static member Create (request: U2<RequestTypes, DeleteEndpoint.GetSchema.Result.Request>, responses: U2<JS.Record<string, ResponseConfig>, DeleteEndpoint.GetSchema.Result.Responses>, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+
+        module Result =
+            [<Interface>]
+            type Request =
+                abstract body: U2<ZodRequestBody, DeleteEndpoint.GetSchema.Result.Request.Body> option with get, set
+                abstract ``params``: AnyZodObject with get, set
+                abstract query: AnyZodObject option with get, set
+                abstract cookies: AnyZodObject option with get, set
+                abstract headers: obj option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``params``: AnyZodObject, ?body: U2<ZodRequestBody, DeleteEndpoint.GetSchema.Result.Request.Body>, ?query: AnyZodObject, ?cookies: AnyZodObject, ?headers: obj) : Request = jsNative
+
+            [<Interface>]
+            type Responses =
+                abstract ``200``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Responses200 with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``200``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Responses200) : Responses = jsNative
+
+            [<Interface>]
+            type Responses200 =
+                abstract description: string with get, set
+                abstract headers: obj option with get, set
+                abstract links: LinksObject option with get, set
+                abstract content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, DeleteEndpoint.GetSchema.Result.Responses200.Content> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, DeleteEndpoint.GetSchema.Result.Responses200.Content>, ?headers: obj, ?links: LinksObject) : Responses200 = jsNative
+
+            module Request =
+                [<Interface>]
+                type Body =
+                    abstract content: DeleteEndpoint.GetSchema.Result.Request.Body.Content with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (content: DeleteEndpoint.GetSchema.Result.Request.Body.Content) : Body = jsNative
+
+                module Body =
+                    [<Interface>]
+                    type Content =
+                        abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson) : Content = jsNative
+
+                    [<Interface>]
+                    type ContentApplicationJson =
+                        abstract schema: obj with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+            module Responses200 =
+                [<Interface>]
+                type Content =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Responses200.ContentApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.DeleteEndpoint.GetSchema.Result.Responses200.ContentApplicationJson) : Content = jsNative
+
+                [<Interface>]
+                type ContentApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+                module ContentApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract result: JS.Record<string, obj> with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract result: JS.Record<string, obj> with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
 
     module Handle =
         module Result =
@@ -2026,12 +2368,26 @@ module DeleteEndpoint =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<DeleteEndpoint.Meta.Model.Serializer, DeleteEndpoint.Meta.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<DeleteEndpoint.Meta.Model.Serializer, DeleteEndpoint.Meta.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 module HonoOpenAPIRouterType =
+    [<Interface>]
+    type Base<'E, 'S, 'BasePath> =
+        abstract original: obj with get, set
+        abstract options: RouterOptions with get, set
+        abstract registry: OpenAPIRegistryMerger with get, set
+        abstract schema: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (original: obj, options: RouterOptions, registry: OpenAPIRegistryMerger, schema: obj) : Base<'E, 'S, 'BasePath> = jsNative
+
     type Fetch = delegate of request: obj * env: obj option * executionCtx: obj option -> obj
 
     [<Interface>]
@@ -2051,6 +2407,32 @@ module HonoOpenAPIRouterType =
         abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
         [<Emit("$0($1...)")>]
         abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke: handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj -> obj
+        [<Emit("$0($1...)")>]
+        abstract Invoke<'P>: path: 'P * handlers0: obj * handlers1: obj * handlers2: obj * handlers3: obj * handlers4: obj * handlers5: obj * handlers6: obj * handlers7: obj * handlers8: obj * handlers9: obj -> obj
         [<Emit("$0($1...)")>]
         abstract Invoke: [<ParamArray>] handlers: obj[] -> obj
         [<Emit("$0($1...)")>]
@@ -2096,9 +2478,9 @@ module ListEndpoint =
     module After =
         [<Interface>]
         type Data =
-            abstract result: Record<string, obj>[] with get, set
+            abstract result: JS.Record<string, obj>[] with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (result: Record<string, obj>[]) : Data = jsNative
+            static member Create (result: JS.Record<string, obj>[]) : Data = jsNative
 
     module GetSchema =
         [<Interface>]
@@ -2115,19 +2497,65 @@ module ListEndpoint =
             abstract callbacks: obj option with get, set
             abstract deprecated: bool option with get, set
             abstract request: RequestTypes with get, set
-            abstract responses: obj with get, set
+            abstract responses: U2<JS.Record<string, ResponseConfig>, ListEndpoint.GetSchema.Result.Responses> with get, set
             abstract ``x-ignore``: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: RequestTypes, responses: obj, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+            static member Create (request: RequestTypes, responses: U2<JS.Record<string, ResponseConfig>, ListEndpoint.GetSchema.Result.Responses>, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+
+        module Result =
+            [<Interface>]
+            type Responses =
+                abstract ``200``: FSharp.CloudEdge.Runtime.Chanfana.ListEndpoint.GetSchema.Result.Responses200 with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``200``: FSharp.CloudEdge.Runtime.Chanfana.ListEndpoint.GetSchema.Result.Responses200) : Responses = jsNative
+
+            [<Interface>]
+            type Responses200 =
+                abstract description: string with get, set
+                abstract headers: obj option with get, set
+                abstract links: LinksObject option with get, set
+                abstract content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, ListEndpoint.GetSchema.Result.Responses200.Content> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, ListEndpoint.GetSchema.Result.Responses200.Content>, ?headers: obj, ?links: LinksObject) : Responses200 = jsNative
+
+            module Responses200 =
+                [<Interface>]
+                type Content =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ListEndpoint.GetSchema.Result.Responses200.ContentApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ListEndpoint.GetSchema.Result.Responses200.ContentApplicationJson) : Content = jsNative
+
+                [<Interface>]
+                type ContentApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+                module ContentApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract result: JS.Record<string, obj>[] with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, result: JS.Record<string, obj>[]) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract result: JS.Record<string, obj>[] with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, result: JS.Record<string, obj>[]) : Item = jsNative
 
     module Handle =
         module Result =
             [<Interface>]
             type Item =
-                abstract result: Record<string, obj>[] with get, set
+                abstract result: JS.Record<string, obj>[] with get, set
                 abstract success: bool with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (result: Record<string, obj>[], success: bool) : Item = jsNative
+                static member Create (result: JS.Record<string, obj>[], success: bool) : Item = jsNative
 
     module Meta =
         [<Interface>]
@@ -2135,10 +2563,15 @@ module ListEndpoint =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<ListEndpoint.Meta.Model.Serializer, ListEndpoint.Meta.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<ListEndpoint.Meta.Model.Serializer, ListEndpoint.Meta.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 module ListFilters =
     type Options =
@@ -2165,10 +2598,15 @@ module MetaGenerator =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<MetaGenerator.Result.Model.Serializer, MetaGenerator.Result.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<MetaGenerator.Result.Model.Serializer, MetaGenerator.Result.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 module Model =
     type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
@@ -2184,6 +2622,460 @@ module MultiException =
                 static member Create (code: float, message: string) : Item = jsNative
 
 module OpenAPIHandler =
+    module GetRequest =
+        module Result =
+            type Item<'HostMetadata> =
+                /// <summary>
+                /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
+                /// </summary>
+                /// <example><c>395747</c></example>
+                abstract asn: float option with get, set
+                /// <summary>
+                /// The organization which owns the ASN of the incoming request.
+                /// </summary>
+                /// <example><c>"Google Cloud"</c></example>
+                abstract asOrganization: string option with get, set
+                /// <summary>
+                /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+                /// </summary>
+                /// <example><c>"gzip, deflate, br"</c></example>
+                abstract clientAcceptEncoding: string option with get, set
+                /// <summary>
+                /// The number of milliseconds it took for the request to reach your worker.
+                /// </summary>
+                /// <example><c>22</c></example>
+                abstract clientTcpRtt: float option with get, set
+                /// <summary>
+                /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
+                /// airport code of the data center that the request hit.
+                /// </summary>
+                /// <example><c>"DFW"</c></example>
+                abstract colo: string with get, set
+                /// <summary>
+                /// Represents the upstream's response to a
+                /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
+                /// from cloudflare.
+                /// <br /><br />
+                /// For workers with no upstream, this will always be <c>1</c>.
+                /// </summary>
+                /// <example><c>3</c></example>
+                abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
+                /// <summary>
+                /// The HTTP Protocol the request used.
+                /// </summary>
+                /// <example><c>"HTTP/2"</c></example>
+                abstract httpProtocol: string with get, set
+                /// <summary>
+                /// The browser-requested prioritization information in the request object.
+                /// <br /><br />
+                /// If no information was set, defaults to the empty string <c>""</c>
+                /// </summary>
+                /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
+                /// <defaultValue>""</defaultValue>
+                abstract requestPriority: string with get, set
+                /// <summary>
+                /// The TLS version of the connection to Cloudflare.
+                /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+                /// </summary>
+                /// <example><c>"TLSv1.3"</c></example>
+                abstract tlsVersion: string with get, set
+                /// <summary>
+                /// The cipher for the connection to Cloudflare.
+                /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
+                /// </summary>
+                /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
+                abstract tlsCipher: string with get, set
+                /// <summary>
+                /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
+                /// <br /><br />
+                /// If the incoming request was served over plaintext (without TLS) this field is undefined.
+                /// </summary>
+                abstract tlsExportedAuthenticator: obj option with get, set
+                /// <summary>
+                /// Results of Cloudflare's Bot Management analysis
+                /// </summary>
+                abstract botManagement: OpenAPIHandler.GetRequest.Result.Item.BotManagement with get, set
+                /// <summary>
+                /// Duplicate of <c>botManagement.score</c>.
+                /// </summary>
+                /// <remarks>@deprecated</remarks>
+                abstract clientTrustScore: float with get, set
+                /// <summary>
+                /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
+                /// <br /><br />
+                /// This field is only present if you have Cloudflare for SaaS enabled on your account
+                /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
+                /// </summary>
+                abstract hostMetadata: 'HostMetadata option with get, set
+                /// <summary>
+                /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
+                /// <br /><br />
+                /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
+                /// <br /><br />
+                /// If Cloudflare is unable to determine where the request originated this property is omitted.
+                /// <br /><br />
+                /// The country code <c>"T1"</c> is used for requests originating on TOR.
+                /// </summary>
+                /// <example><c>"GB"</c></example>
+                abstract country: OpenAPIHandler.GetRequest.Result.Item.Country option with get, set
+                /// <summary>
+                /// If present, this property indicates that the request originated in the EU
+                /// </summary>
+                /// <example><c>"1"</c></example>
+                abstract isEUCountry: string option with get, set
+                /// <summary>
+                /// A two-letter code indicating the continent the request originated from.
+                /// </summary>
+                /// <example><c>"AN"</c></example>
+                abstract continent: ContinentCode option with get, set
+                /// <summary>
+                /// The city the request originated from
+                /// </summary>
+                /// <example><c>"Austin"</c></example>
+                abstract city: string option with get, set
+                /// <summary>
+                /// Postal code of the incoming request
+                /// </summary>
+                /// <example><c>"78701"</c></example>
+                abstract postalCode: string option with get, set
+                /// <summary>
+                /// Latitude of the incoming request
+                /// </summary>
+                /// <example><c>"30.27130"</c></example>
+                abstract latitude: string option with get, set
+                /// <summary>
+                /// Longitude of the incoming request
+                /// </summary>
+                /// <example><c>"-97.74260"</c></example>
+                abstract longitude: string option with get, set
+                /// <summary>
+                /// Timezone of the incoming request
+                /// </summary>
+                /// <example><c>"America/Chicago"</c></example>
+                abstract timezone: string option with get, set
+                /// <summary>
+                /// If known, the ISO 3166-2 name for the first level region associated with
+                /// the IP address of the incoming request
+                /// </summary>
+                /// <example><c>"Texas"</c></example>
+                abstract region: string option with get, set
+                /// <summary>
+                /// If known, the ISO 3166-2 code for the first-level region associated with
+                /// the IP address of the incoming request
+                /// </summary>
+                /// <example><c>"TX"</c></example>
+                abstract regionCode: string option with get, set
+                /// <summary>
+                /// Metro code (DMA) of the incoming request
+                /// </summary>
+                /// <example><c>"635"</c></example>
+                abstract metroCode: string option with get, set
+                /// <summary>
+                /// Information about the client certificate presented to Cloudflare.
+                /// <br /><br />
+                /// This is populated when the incoming request is served over TLS using
+                /// either Cloudflare Access or API Shield (mTLS)
+                /// and the presented SSL certificate has a valid
+                /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
+                /// (i.e., not <c>null</c> or <c>""</c>).
+                /// <br /><br />
+                /// Otherwise, a set of placeholder values are used.
+                /// <br /><br />
+                /// The property <c>certPresented</c> will be set to <c>"1"</c> when
+                /// the object is populated (i.e. the above conditions were met).
+                /// </summary>
+                abstract tlsClientAuth: obj with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> obj with get, set
+
+            module Item =
+                [<Interface>]
+                type BotManagement =
+                    /// <summary>
+                    /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
+                    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
+                    /// </summary>
+                    /// <example><c>54</c></example>
+                    abstract score: float with get, set
+                    /// <summary>
+                    /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
+                    /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
+                    /// </summary>
+                    abstract verifiedBot: bool with get, set
+                    /// <summary>
+                    /// A boolean value that is true if the request originates from a
+                    /// Cloudflare-verified proxy service.
+                    /// </summary>
+                    abstract corporateProxy: bool with get, set
+                    /// <summary>
+                    /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
+                    /// </summary>
+                    abstract staticResource: bool with get, set
+                    /// <summary>
+                    /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
+                    /// </summary>
+                    abstract detectionIds: float[] with get, set
+                    /// <summary>
+                    /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
+                    /// across different destination IPs, Ports, and X509 certificates.
+                    /// </summary>
+                    abstract ja3Hash: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
+
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Country =
+                    | AD
+                    | AE
+                    | AF
+                    | AG
+                    | AI
+                    | AL
+                    | AM
+                    | AO
+                    | AQ
+                    | AR
+                    | AS
+                    | AT
+                    | AU
+                    | AW
+                    | AX
+                    | AZ
+                    | BA
+                    | BB
+                    | BD
+                    | BE
+                    | BF
+                    | BG
+                    | BH
+                    | BI
+                    | BJ
+                    | BL
+                    | BM
+                    | BN
+                    | BO
+                    | BQ
+                    | BR
+                    | BS
+                    | BT
+                    | BV
+                    | BW
+                    | BY
+                    | BZ
+                    | CA
+                    | CC
+                    | CD
+                    | CF
+                    | CG
+                    | CH
+                    | CI
+                    | CK
+                    | CL
+                    | CM
+                    | CN
+                    | CO
+                    | CR
+                    | CU
+                    | CV
+                    | CW
+                    | CX
+                    | CY
+                    | CZ
+                    | DE
+                    | DJ
+                    | DK
+                    | DM
+                    | DO
+                    | DZ
+                    | EC
+                    | EE
+                    | EG
+                    | EH
+                    | ER
+                    | ES
+                    | ET
+                    | FI
+                    | FJ
+                    | FK
+                    | FM
+                    | FO
+                    | FR
+                    | GA
+                    | GB
+                    | GD
+                    | GE
+                    | GF
+                    | GG
+                    | GH
+                    | GI
+                    | GL
+                    | GM
+                    | GN
+                    | GP
+                    | GQ
+                    | GR
+                    | GS
+                    | GT
+                    | GU
+                    | GW
+                    | GY
+                    | HK
+                    | HM
+                    | HN
+                    | HR
+                    | HT
+                    | HU
+                    | ID
+                    | IE
+                    | IL
+                    | IM
+                    | IN
+                    | IO
+                    | IQ
+                    | IR
+                    | IS
+                    | IT
+                    | JE
+                    | JM
+                    | JO
+                    | JP
+                    | KE
+                    | KG
+                    | KH
+                    | KI
+                    | KM
+                    | KN
+                    | KP
+                    | KR
+                    | KW
+                    | KY
+                    | KZ
+                    | LA
+                    | LB
+                    | LC
+                    | LI
+                    | LK
+                    | LR
+                    | LS
+                    | LT
+                    | LU
+                    | LV
+                    | LY
+                    | MA
+                    | MC
+                    | MD
+                    | ME
+                    | MF
+                    | MG
+                    | MH
+                    | MK
+                    | ML
+                    | MM
+                    | MN
+                    | MO
+                    | MP
+                    | MQ
+                    | MR
+                    | MS
+                    | MT
+                    | MU
+                    | MV
+                    | MW
+                    | MX
+                    | MY
+                    | MZ
+                    | NA
+                    | NC
+                    | NE
+                    | NF
+                    | NG
+                    | NI
+                    | NL
+                    | NO
+                    | NP
+                    | NR
+                    | NU
+                    | NZ
+                    | OM
+                    | PA
+                    | PE
+                    | PF
+                    | PG
+                    | PH
+                    | PK
+                    | PL
+                    | PM
+                    | PN
+                    | PR
+                    | PS
+                    | PT
+                    | PW
+                    | PY
+                    | QA
+                    | RE
+                    | RO
+                    | RS
+                    | RU
+                    | RW
+                    | SA
+                    | SB
+                    | SC
+                    | SD
+                    | SE
+                    | SG
+                    | SH
+                    | SI
+                    | SJ
+                    | SK
+                    | SL
+                    | SM
+                    | SN
+                    | SO
+                    | SR
+                    | SS
+                    | ST
+                    | SV
+                    | SX
+                    | SY
+                    | SZ
+                    | T1
+                    | TC
+                    | TD
+                    | TF
+                    | TG
+                    | TH
+                    | TJ
+                    | TK
+                    | TL
+                    | TM
+                    | TN
+                    | TO
+                    | TR
+                    | TT
+                    | TV
+                    | TW
+                    | TZ
+                    | UA
+                    | UG
+                    | UM
+                    | US
+                    | UY
+                    | UZ
+                    | VA
+                    | VC
+                    | VE
+                    | VG
+                    | VI
+                    | VN
+                    | VU
+                    | WF
+                    | WS
+                    | YE
+                    | YT
+                    | ZA
+                    | ZM
+                    | ZW
+
     module RegisterNestedRouter =
         [<Interface>]
         type Params =
@@ -2213,33 +3105,90 @@ module OpenAPIRegistryMerger =
 
         [<Interface>]
         type Item2 =
-            abstract ``type``: obj with get, set
-            abstract componentType: obj with get, set
+            /// <remarks>TypeScript type: <c>"component"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract componentType: string with get, set
             abstract name: string with get, set
             abstract ``component``: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: obj, componentType: obj, name: string, ``component``: obj) : Item2 = jsNative
+            [<ParamObject; Emit("({ type: 'component', ...$0 })")>]
+            static member Create (componentType: string, name: string, ``component``: obj) : Item2 = jsNative
+
+        module Item2 =
+            /// <remarks>TypeScript type: <c>"component"</c></remarks>
+            [<Literal>]
+            let ``type`` = "component"
 
         [<Interface>]
         type Item3 =
-            abstract ``type``: obj with get, set
+            /// <remarks>TypeScript type: <c>"schema"</c></remarks>
+            abstract ``type``: string with get, set
             abstract schema: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: obj, schema: obj) : Item3 = jsNative
+            [<ParamObject; Emit("({ type: 'schema', ...$0 })")>]
+            static member Create (schema: obj) : Item3 = jsNative
+
+        module Item3 =
+            /// <remarks>TypeScript type: <c>"schema"</c></remarks>
+            [<Literal>]
+            let ``type`` = "schema"
 
         [<Interface>]
         type Item4 =
-            abstract ``type``: obj with get, set
+            /// <remarks>TypeScript type: <c>"parameter"</c></remarks>
+            abstract ``type``: string with get, set
             abstract schema: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: obj, schema: obj) : Item4 = jsNative
+            [<ParamObject; Emit("({ type: 'parameter', ...$0 })")>]
+            static member Create (schema: obj) : Item4 = jsNative
+
+        module Item4 =
+            /// <remarks>TypeScript type: <c>"parameter"</c></remarks>
+            [<Literal>]
+            let ``type`` = "parameter"
 
         [<Interface>]
         type Item5 =
-            abstract ``type``: obj with get, set
+            /// <remarks>TypeScript type: <c>"route"</c></remarks>
+            abstract ``type``: string with get, set
             abstract route: OpenAPIRegistryMerger.Definitions.Item5.Route with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: obj, route: OpenAPIRegistryMerger.Definitions.Item5.Route) : Item5 = jsNative
+            [<ParamObject; Emit("({ type: 'route', ...$0 })")>]
+            static member Create (route: OpenAPIRegistryMerger.Definitions.Item5.Route) : Item5 = jsNative
+
+        module Item5 =
+            /// <remarks>TypeScript type: <c>"route"</c></remarks>
+            [<Literal>]
+            let ``type`` = "route"
+
+            type Route =
+                inherit OpenAPIRegistryMerger.Definitions.Item5.Route.Base
+                abstract ``method``: Method with get, set
+                abstract path: string with get, set
+                abstract request: OpenAPIRegistryMerger.Definitions.Item5.Route.Request option with get, set
+                abstract responses: JS.Record<string, obj> with get, set
+
+            module Route =
+                type Base =
+                    abstract tags: string[] option with get, set
+                    abstract summary: string option with get, set
+                    abstract description: string option with get, set
+                    abstract externalDocs: obj option with get, set
+                    abstract operationId: string option with get, set
+                    abstract parameters: obj[] option with get, set
+                    abstract requestBody: obj option with get, set
+                    abstract callbacks: obj option with get, set
+                    abstract deprecated: bool option with get, set
+                    abstract security: obj[] option with get, set
+                    abstract servers: obj[] option with get, set
+                    [<EmitIndexer>]
+                    abstract Item: string -> obj with get, set
+
+                [<Interface>]
+                type Request =
+                    abstract body: obj option with get, set
+                    abstract ``params``: obj option with get, set
+                    abstract query: obj option with get, set
+                    abstract cookies: obj option with get, set
+                    abstract headers: obj option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?body: obj, ?``params``: obj, ?query: obj, ?cookies: obj, ?headers: obj) : Request = jsNative
 
         module Item =
             [<Interface>]
@@ -2247,26 +3196,6 @@ module OpenAPIRegistryMerger =
                 abstract path: string with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (path: string) : Route = jsNative
-
-        module Item5 =
-            type Route =
-                abstract tags: string[] option with get, set
-                abstract summary: string option with get, set
-                abstract description: string option with get, set
-                abstract externalDocs: obj option with get, set
-                abstract operationId: string option with get, set
-                abstract parameters: obj[] option with get, set
-                abstract requestBody: obj option with get, set
-                abstract callbacks: obj option with get, set
-                abstract deprecated: bool option with get, set
-                abstract security: obj[] option with get, set
-                abstract servers: obj[] option with get, set
-                abstract ``method``: obj with get, set
-                abstract path: string with get, set
-                abstract request: obj option with get, set
-                abstract responses: Record<string, obj> with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
 
     module RegisterComponent =
         [<Interface>]
@@ -2297,7 +3226,7 @@ module OpenAPIRoute =
         abstract security: obj[] option with get, set
         abstract servers: obj[] option with get, set
         abstract request: RequestTypes option with get, set
-        abstract responses: Record<string, ResponseConfig> option with get, set
+        abstract responses: JS.Record<string, ResponseConfig> option with get, set
         abstract ``x-ignore``: bool option with get, set
         [<EmitIndexer>]
         abstract Item: string -> obj with get, set
@@ -2327,10 +3256,56 @@ module ReadEndpoint =
             abstract callbacks: obj option with get, set
             abstract deprecated: bool option with get, set
             abstract request: RequestTypes with get, set
-            abstract responses: obj with get, set
+            abstract responses: U2<JS.Record<string, ResponseConfig>, ReadEndpoint.GetSchema.Result.Responses> with get, set
             abstract ``x-ignore``: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: RequestTypes, responses: obj, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+            static member Create (request: RequestTypes, responses: U2<JS.Record<string, ResponseConfig>, ReadEndpoint.GetSchema.Result.Responses>, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+
+        module Result =
+            [<Interface>]
+            type Responses =
+                abstract ``200``: FSharp.CloudEdge.Runtime.Chanfana.ReadEndpoint.GetSchema.Result.Responses200 with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``200``: FSharp.CloudEdge.Runtime.Chanfana.ReadEndpoint.GetSchema.Result.Responses200) : Responses = jsNative
+
+            [<Interface>]
+            type Responses200 =
+                abstract description: string with get, set
+                abstract headers: obj option with get, set
+                abstract links: LinksObject option with get, set
+                abstract content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, ReadEndpoint.GetSchema.Result.Responses200.Content> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, ReadEndpoint.GetSchema.Result.Responses200.Content>, ?headers: obj, ?links: LinksObject) : Responses200 = jsNative
+
+            module Responses200 =
+                [<Interface>]
+                type Content =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ReadEndpoint.GetSchema.Result.Responses200.ContentApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.ReadEndpoint.GetSchema.Result.Responses200.ContentApplicationJson) : Content = jsNative
+
+                [<Interface>]
+                type ContentApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+                module ContentApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract result: JS.Record<string, obj> with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract result: JS.Record<string, obj> with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
 
     module Handle =
         module Result =
@@ -2347,10 +3322,15 @@ module ReadEndpoint =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<ReadEndpoint.Meta.Model.Serializer, ReadEndpoint.Meta.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<ReadEndpoint.Meta.Model.Serializer, ReadEndpoint.Meta.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 module RouterOptions =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -2422,11 +3402,87 @@ module UpdateEndpoint =
             abstract requestBody: obj option with get, set
             abstract callbacks: obj option with get, set
             abstract deprecated: bool option with get, set
-            abstract request: obj with get, set
-            abstract responses: obj with get, set
+            abstract request: U2<RequestTypes, UpdateEndpoint.GetSchema.Result.Request> with get, set
+            abstract responses: U2<JS.Record<string, ResponseConfig>, UpdateEndpoint.GetSchema.Result.Responses> with get, set
             abstract ``x-ignore``: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: obj, responses: obj, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+            static member Create (request: U2<RequestTypes, UpdateEndpoint.GetSchema.Result.Request>, responses: U2<JS.Record<string, ResponseConfig>, UpdateEndpoint.GetSchema.Result.Responses>, ?servers: obj[], ?security: obj[], ?tags: string[], ?externalDocs: obj, ?summary: string, ?description: string, ?operationId: string, ?parameters: obj[], ?requestBody: obj, ?callbacks: obj, ?deprecated: bool, ?``x-ignore``: bool) : Result = jsNative
+
+        module Result =
+            [<Interface>]
+            type Request =
+                abstract body: U2<ZodRequestBody, UpdateEndpoint.GetSchema.Result.Request.Body> with get, set
+                abstract ``params``: AnyZodObject with get, set
+                abstract query: AnyZodObject option with get, set
+                abstract cookies: AnyZodObject option with get, set
+                abstract headers: obj option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (body: U2<ZodRequestBody, UpdateEndpoint.GetSchema.Result.Request.Body>, ``params``: AnyZodObject, ?query: AnyZodObject, ?cookies: AnyZodObject, ?headers: obj) : Request = jsNative
+
+            [<Interface>]
+            type Responses =
+                abstract ``200``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Responses200 with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``200``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Responses200) : Responses = jsNative
+
+            [<Interface>]
+            type Responses200 =
+                abstract description: string with get, set
+                abstract headers: obj option with get, set
+                abstract links: LinksObject option with get, set
+                abstract content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, UpdateEndpoint.GetSchema.Result.Responses200.Content> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, content: U2<FSharp.CloudEdge.Runtime.Chanfana.ZodContentObject, UpdateEndpoint.GetSchema.Result.Responses200.Content>, ?headers: obj, ?links: LinksObject) : Responses200 = jsNative
+
+            module Request =
+                [<Interface>]
+                type Body =
+                    abstract content: UpdateEndpoint.GetSchema.Result.Request.Body.Content with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (content: UpdateEndpoint.GetSchema.Result.Request.Body.Content) : Body = jsNative
+
+                module Body =
+                    [<Interface>]
+                    type Content =
+                        abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Request.Body.ContentApplicationJson) : Content = jsNative
+
+                    [<Interface>]
+                    type ContentApplicationJson =
+                        abstract schema: obj with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+            module Responses200 =
+                [<Interface>]
+                type Content =
+                    abstract ``application/json``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Responses200.ContentApplicationJson with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (``application/json``: FSharp.CloudEdge.Runtime.Chanfana.UpdateEndpoint.GetSchema.Result.Responses200.ContentApplicationJson) : Content = jsNative
+
+                [<Interface>]
+                type ContentApplicationJson =
+                    abstract schema: obj with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (schema: obj) : ContentApplicationJson = jsNative
+
+                module ContentApplicationJson =
+                    module Schema =
+                        [<Interface>]
+                        type Item =
+                            abstract success: bool with get, set
+                            abstract result: JS.Record<string, obj> with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
+
+                        module Item =
+                            [<Interface>]
+                            type Item =
+                                abstract success: bool with get, set
+                                abstract result: JS.Record<string, obj> with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (success: bool, result: JS.Record<string, obj>) : Item = jsNative
 
     module Handle =
         module Result =
@@ -2443,10 +3499,15 @@ module UpdateEndpoint =
             abstract tableName: string with get, set
             abstract schema: AnyZodObject with get, set
             abstract primaryKeys: string[] with get, set
-            abstract serializer: obj with get, set
+            abstract serializer: U2<UpdateEndpoint.Meta.Model.Serializer, UpdateEndpoint.Meta.Model.Serializer2> with get, set
             abstract serializerSchema: AnyZodObject with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: obj, serializerSchema: AnyZodObject) : Model = jsNative
+            static member Create (tableName: string, schema: AnyZodObject, primaryKeys: string[], serializer: U2<UpdateEndpoint.Meta.Model.Serializer, UpdateEndpoint.Meta.Model.Serializer2>, serializerSchema: AnyZodObject) : Model = jsNative
+
+        module Model =
+            type Serializer = delegate of obj: obj * context: SerializerContext option -> obj
+
+            type Serializer2 = delegate of obj: obj * _context: SerializerContext option -> obj
 
 /// <summary>
 /// Base class for all OpenAPI route handlers.
@@ -2481,7 +3542,7 @@ type CreateEndpointConstructor =
 /// </code>
 /// </example>
 type ApiExceptionConstructor =
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
@@ -2518,7 +3579,7 @@ type InputValidationExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for input validation errors (400).
     /// Used when request data fails Zod schema validation.
@@ -2554,7 +3615,7 @@ type MultiExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception that aggregates multiple API exceptions.
     /// The highest status code among all errors will be used as the response status.
@@ -2590,7 +3651,7 @@ type NotFoundExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for resource not found (404).
     /// Used when the requested resource doesn't exist.
@@ -2615,7 +3676,7 @@ type UnauthorizedExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for unauthorized access (401).
     /// Used when authentication is required but not provided or invalid.
@@ -2632,7 +3693,7 @@ type ForbiddenExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for forbidden access (403).
     /// Used when the user is authenticated but doesn't have permission.
@@ -2649,7 +3710,7 @@ type MethodNotAllowedExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for method not allowed (405).
     /// Used when the HTTP method is not supported for the requested resource.
@@ -2666,7 +3727,7 @@ type ConflictExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for conflict errors (409).
     /// Used when the request conflicts with the current state (e.g., duplicate resource).
@@ -2683,7 +3744,7 @@ type UnprocessableEntityExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for unprocessable entity (422).
     /// Used when the request is well-formed but semantically incorrect.
@@ -2700,7 +3761,7 @@ type TooManyRequestsExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for rate limiting (429).
     /// Used when the user has sent too many requests in a given time period.
@@ -2720,7 +3781,7 @@ type InternalServerErrorExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for unexpected server errors (500).
     /// Unlike the base ApiException (also 500, code 7000), this class defaults to isVisible=false,
@@ -2740,7 +3801,7 @@ type BadGatewayExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for bad gateway errors (502).
     /// Used when an upstream server returns an invalid response.
@@ -2757,7 +3818,7 @@ type ServiceUnavailableExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for service unavailable (503).
     /// Used when the server is temporarily unavailable (maintenance, overload).
@@ -2774,7 +3835,7 @@ type GatewayTimeoutExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for gateway timeout (504).
     /// Used when an upstream server doesn't respond in time.
@@ -2793,7 +3854,7 @@ type ResponseValidationExceptionConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
-    abstract schema: unit -> Record<float, ApiException.Schema.Result.Item>
+    abstract schema: unit -> JS.Record<float, ApiException.Schema.Result.Item>
     /// <summary>
     /// Exception for response validation errors (500).
     /// Used when a handler's response doesn't match its declared Zod response schema.
@@ -2801,7 +3862,7 @@ type ResponseValidationExceptionConstructor =
     /// Error details are hidden from clients (isVisible=false) and logged via console.error.
     /// </summary>
     [<EmitConstructor>]
-    abstract Create: ?message: string * ?options: obj -> ResponseValidationException
+    abstract Create: ?message: string * ?options: Fable.Core.TS.Es.ErrorOptions -> ResponseValidationException
 
 /// <summary>
 /// D1-specific CreateEndpoint implementation.

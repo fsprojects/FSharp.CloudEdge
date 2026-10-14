@@ -122,13 +122,13 @@ type GatewayProviderInfo =
     /// <summary>
     /// Host matcher for bring-your-own-provider URL detection.
     /// </summary>
-    abstract hostPattern: obj option with get, set
+    abstract hostPattern: Fable.Core.TS.Es.RegExp option with get, set
     /// <summary>
     /// Strip the provider host, leaving the gateway endpoint path (+ query).
     /// </summary>
     abstract transformEndpoint: (string -> string) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (resolverKey: string, gatewayProviderId: string, runCatalog: bool, billing: Billing, authHeaders: string[], ?wireFormat: WireFormat, ?runWireFormat: WireFormat, ?baseURL: string, ?gatewayPath: bool, ?hostPattern: obj, ?transformEndpoint: (string -> string)) : GatewayProviderInfo = jsNative
+    static member Create (resolverKey: string, gatewayProviderId: string, runCatalog: bool, billing: Billing, authHeaders: string[], ?wireFormat: WireFormat, ?runWireFormat: WireFormat, ?baseURL: string, ?gatewayPath: bool, ?hostPattern: Fable.Core.TS.Es.RegExp, ?transformEndpoint: (string -> string)) : GatewayProviderInfo = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ResumeExpiredPolicy =
@@ -481,7 +481,7 @@ type DelegateCallOptions =
     /// <summary>
     /// Extra request headers (run path: <c>extraHeaders</c>; gateway path: entry headers).
     /// </summary>
-    abstract extraHeaders: Record<string, string> option with get, set
+    abstract extraHeaders: JS.Record<string, string> option with get, set
     /// <summary>
     /// Gateway path only: forward the upstream provider key instead of stripping it.
     /// Required for BYOK providers (not on unified billing). Supply the key via
@@ -514,7 +514,7 @@ type DelegateCallOptions =
     /// options; gateway path: <c>cf-aig-metadata</c> header). <c>bigint</c> values are
     /// coerced to strings for the header form.
     /// </summary>
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
+    abstract metadata: JS.Record<string, U4<string, float, bigint, bool> option> option with get, set
     /// <summary>
     /// Force gateway log collection on/off for this request (both transports).
     /// </summary>
@@ -531,7 +531,7 @@ type DelegateCallOptions =
     /// </summary>
     abstract onProgress: (float -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?resume: bool, ?fallback: FallbackOptions, ?cacheTtl: float, ?skipCache: bool, ?transport: Transport, ?onResumeExpired: ResumeExpiredPolicy, ?extraHeaders: Record<string, string>, ?byok: bool, ?byokAlias: string, ?zdr: bool, ?gateway: obj, ?metadata: Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?onDispatch: (DispatchInfo -> unit), ?onProgress: (float -> unit)) : DelegateCallOptions = jsNative
+    static member Create (?resume: bool, ?fallback: FallbackOptions, ?cacheTtl: float, ?skipCache: bool, ?transport: Transport, ?onResumeExpired: ResumeExpiredPolicy, ?extraHeaders: JS.Record<string, string>, ?byok: bool, ?byokAlias: string, ?zdr: bool, ?gateway: obj, ?metadata: JS.Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?onDispatch: (DispatchInfo -> unit), ?onProgress: (float -> unit)) : DelegateCallOptions = jsNative
 
 [<Interface>]
 type Selection =
@@ -590,7 +590,7 @@ type GatewayFetchConfig =
     /// <summary>
     /// Extra headers added to every gateway entry.
     /// </summary>
-    abstract extraHeaders: Record<string, string> option with get, set
+    abstract extraHeaders: JS.Record<string, string> option with get, set
     /// <summary>
     /// Gateway-path response caching (seconds).
     /// </summary>
@@ -600,7 +600,7 @@ type GatewayFetchConfig =
     /// </summary>
     abstract skipCache: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: obj, gateway: obj, ?provider: string, ?byok: bool, ?extraHeaders: Record<string, string>, ?cacheTtl: float, ?skipCache: bool) : GatewayFetchConfig = jsNative
+    static member Create (binding: obj, gateway: obj, ?provider: string, ?byok: bool, ?extraHeaders: JS.Record<string, string>, ?cacheTtl: float, ?skipCache: bool) : GatewayFetchConfig = jsNative
 
 /// <remarks>@deprecated Use <c>AISearchChatSettings</c> instead. AutoRAG has been renamed to AI Search.</remarks>
 /// <remarks>@see https://developers.cloudflare.com/ai-search/</remarks>
@@ -616,8 +616,9 @@ type AISearchChatSettings =
 [<Interface>]
 type AISearchChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
     abstract defaultObjectGenerationMode: string
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
     abstract modelId: TextGenerationModels
     abstract settings: AISearchChatSettings
     abstract config: obj
@@ -627,8 +628,21 @@ type AISearchChatLanguageModel =
     /// Flattens the conversation into a single string for aiSearch.
     /// </summary>
     abstract buildQuery: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, defaultObjectGenerationMode: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, modelId: TextGenerationModels, settings: AISearchChatSettings, config: obj, provider: string, getWarnings: obj, buildQuery: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : AISearchChatLanguageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', defaultObjectGenerationMode: 'json', ...$0 })")>]
+    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, modelId: TextGenerationModels, settings: AISearchChatSettings, config: obj, provider: string, getWarnings: obj, buildQuery: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : AISearchChatLanguageModel = jsNative
+
+module AISearchChatLanguageModel =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
+    [<Literal>]
+    let defaultObjectGenerationMode = "json"
+
+    [<Interface>]
+    type Config =
+        abstract provider: string with get, set
+        abstract binding: obj with get, set
+        abstract gateway: obj option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (provider: string, binding: obj, ?gateway: obj) : Config = jsNative
 
 type TextGenerationModels = string
 
@@ -683,8 +697,8 @@ type WorkersAITranscriptionModel =
     abstract normalizeWhisperResponse: obj with get, set
     abstract runNova3: obj with get, set
     abstract normalizeNova3Response: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: TranscriptionModels, settings: WorkersAITranscriptionSettings, config: WorkersAITranscriptionModel.Config, specificationVersion: string, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.TranscriptionModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.TranscriptionModelV4Result>), runWhisper: obj, normalizeWhisperResponse: obj, runNova3: obj, normalizeNova3Response: obj) : WorkersAITranscriptionModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+    static member Create (modelId: TranscriptionModels, settings: WorkersAITranscriptionSettings, config: WorkersAITranscriptionModel.Config, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.TranscriptionModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.TranscriptionModelV4Result>), runWhisper: obj, normalizeWhisperResponse: obj, runNova3: obj, normalizeNova3Response: obj) : WorkersAITranscriptionModel = jsNative
 
 type WorkersAISpeechSettings = obj
 
@@ -702,8 +716,8 @@ type WorkersAISpeechModel =
     abstract modelId: SpeechModels
     abstract settings: WorkersAISpeechSettings
     abstract config: WorkersAISpeechModel.Config
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: SpeechModels, settings: WorkersAISpeechSettings, config: WorkersAISpeechModel.Config, specificationVersion: string, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.SpeechModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.SpeechModelV4Result>)) : WorkersAISpeechModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+    static member Create (modelId: SpeechModels, settings: WorkersAISpeechSettings, config: WorkersAISpeechModel.Config, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.SpeechModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.SpeechModelV4Result>)) : WorkersAISpeechModel = jsNative
 
 type WorkersAIRerankingSettings = obj
 
@@ -724,16 +738,16 @@ type WorkersAIRerankingModel =
     abstract modelId: RerankingModels
     abstract settings: WorkersAIRerankingSettings
     abstract config: WorkersAIRerankingModel.Config
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: RerankingModels, settings: WorkersAIRerankingSettings, config: WorkersAIRerankingModel.Config, specificationVersion: string, provider: string, doRerank: (FSharp.CloudEdge.Support.AI.V4.Provider.RerankingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.RerankingModelV4Result>)) : WorkersAIRerankingModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+    static member Create (modelId: RerankingModels, settings: WorkersAIRerankingSettings, config: WorkersAIRerankingModel.Config, provider: string, doRerank: (FSharp.CloudEdge.Support.AI.V4.Provider.RerankingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.RerankingModelV4Result>)) : WorkersAIRerankingModel = jsNative
 
 /// <remarks>@deprecated Use <c>AISearchChatLanguageModel</c> instead. AutoRAG has been renamed to AI Search.</remarks>
 /// <remarks>@see https://developers.cloudflare.com/ai-search/</remarks>
 [<Interface>]
 type AutoRAGChatLanguageModel =
     inherit AISearchChatLanguageModel
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, defaultObjectGenerationMode: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, modelId: TextGenerationModels, settings: AISearchChatSettings, config: obj, provider: string, getWarnings: obj, buildQuery: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : AutoRAGChatLanguageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', defaultObjectGenerationMode: 'json', ...$0 })")>]
+    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, modelId: TextGenerationModels, settings: AISearchChatSettings, config: obj, provider: string, getWarnings: obj, buildQuery: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : AutoRAGChatLanguageModel = jsNative
 
 /// <remarks>@deprecated Use <c>AISearchChatSettings</c> instead. AutoRAG has been renamed to AI Search.</remarks>
 /// <remarks>@see https://developers.cloudflare.com/ai-search/</remarks>
@@ -871,8 +885,9 @@ type WorkersAI =
 [<Interface>]
 type WorkersAIChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
     abstract defaultObjectGenerationMode: string
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
     abstract modelId: TextGenerationModels
     abstract settings: WorkersAIChatLanguageModel.Settings
     abstract config: obj
@@ -920,8 +935,64 @@ type WorkersAIChatLanguageModel =
     /// place so callers can observe the reinterpretation.
     /// </summary>
     abstract extractContent: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, defaultObjectGenerationMode: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, modelId: TextGenerationModels, settings: WorkersAIChatLanguageModel.Settings, config: obj, provider: string, getArgs: obj, buildRunInputs: obj, getRunOptions: obj, extractContent: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : WorkersAIChatLanguageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', defaultObjectGenerationMode: 'json', ...$0 })")>]
+    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, modelId: TextGenerationModels, settings: WorkersAIChatLanguageModel.Settings, config: obj, provider: string, getArgs: obj, buildRunInputs: obj, getRunOptions: obj, extractContent: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : WorkersAIChatLanguageModel = jsNative
+
+module WorkersAIChatLanguageModel =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
+    [<Literal>]
+    let defaultObjectGenerationMode = "json"
+
+    type Settings =
+        /// <summary>
+        /// Whether to inject a safety prompt before all conversations.
+        /// Defaults to <c>false</c>.
+        /// </summary>
+        abstract safePrompt: bool option with get, set
+        /// <summary>
+        /// Optionally set Cloudflare AI Gateway options.
+        /// </summary>
+        abstract gateway: obj option with get, set
+        /// <summary>
+        /// Session affinity key for prefix-cache optimization.
+        /// Routes requests with the same key to the same backend replica.
+        /// </summary>
+        abstract sessionAffinity: string option with get, set
+        /// <summary>
+        /// Controls the reasoning budget for reasoning-capable Workers AI models
+        /// (e.g. <c>@cf/zai-org/glm-4.7-flash</c>, <c>@cf/moonshotai/kimi-k2.7-code</c>,
+        /// <c>@cf/openai/gpt-oss-120b</c>).
+        /// <br /><br />
+        /// <c>null</c> is a valid value and disables reasoning for models that support it.
+        /// Forwarded on the <c>inputs</c> object of <c>binding.run(model, inputs)</c>.
+        /// </summary>
+        abstract reasoning_effort: WorkersAIChatLanguageModel.Settings.ReasoningEffort option with get, set
+        /// <summary>
+        /// Chat-template overrides for reasoning-capable models that expose
+        /// thinking toggles (e.g. GLM, Kimi).
+        /// <br /><br />
+        /// Forwarded on the <c>inputs</c> object of <c>binding.run(model, inputs)</c>.
+        /// </summary>
+        abstract chat_template_kwargs: WorkersAIChatLanguageModel.Settings.ChatTemplateKwargs option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+    module Settings =
+        [<Interface>]
+        type ChatTemplateKwargs =
+            /// <summary>
+            /// Whether to enable reasoning. Enabled by default on reasoning models.
+            /// </summary>
+            abstract enable_thinking: bool option with get, set
+            abstract clear_thinking: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?enable_thinking: bool, ?clear_thinking: bool) : ChatTemplateKwargs = jsNative
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ReasoningEffort =
+            | [<CompiledName("high")>] High
+            | [<CompiledName("low")>] Low
+            | [<CompiledName("medium")>] Medium
 
 [<Interface>]
 type WorkersAIEmbeddingModel =
@@ -932,8 +1003,8 @@ type WorkersAIEmbeddingModel =
     abstract maxEmbeddingsPerCall: float
     abstract supportsParallelCalls: bool
     abstract doEmbed: __0: FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4Result>
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, modelId: EmbeddingModels, config: obj, settings: obj, provider: string, maxEmbeddingsPerCall: float, supportsParallelCalls: bool, doEmbed: (FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4Result>)) : WorkersAIEmbeddingModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+    static member Create (modelId: EmbeddingModels, config: obj, settings: obj, provider: string, maxEmbeddingsPerCall: float, supportsParallelCalls: bool, doEmbed: (FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4Result>)) : WorkersAIEmbeddingModel = jsNative
 
 [<Interface>]
 type WorkersAIImageModel =
@@ -943,8 +1014,8 @@ type WorkersAIImageModel =
     abstract config: WorkersAIImageModel.Config
     abstract maxImagesPerCall: float
     abstract doGenerate: __0: FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4Result>
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: ImageGenerationModels, settings: WorkersAI.Image.Settings, config: WorkersAIImageModel.Config, specificationVersion: string, maxImagesPerCall: float, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4Result>)) : WorkersAIImageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+    static member Create (modelId: ImageGenerationModels, settings: WorkersAI.Image.Settings, config: WorkersAIImageModel.Config, maxImagesPerCall: float, provider: string, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4Result>)) : WorkersAIImageModel = jsNative
 
 /// <remarks>@deprecated Use <c>AISearchSettings</c> instead. AutoRAG has been renamed to AI Search.</remarks>
 /// <remarks>@see https://developers.cloudflare.com/ai-search/</remarks>
@@ -1120,15 +1191,6 @@ type Exports =
     [<Import("createAutoRAG", "workers-ai-provider")>]
     static member createAutoRAG (options: AISearchSettings) : AISearchProvider = jsNative
 
-module AISearchChatLanguageModel =
-    [<Interface>]
-    type Config =
-        abstract provider: string with get, set
-        abstract binding: obj with get, set
-        abstract gateway: obj option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, binding: obj, ?gateway: obj) : Config = jsNative
-
 /// <summary>workers-ai-provider/anthropic</summary>
 module Anthropic =
     /// <summary>The package's value exports, each bound to its import.</summary>
@@ -1151,7 +1213,7 @@ module CreateGatewayProvider =
         abstract apiKey: string option with get, set
         abstract baseURL: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (binding: obj, gateway: obj, ?provider: string, ?byok: bool, ?extraHeaders: Record<string, string>, ?cacheTtl: float, ?skipCache: bool, ?apiKey: string, ?baseURL: string) : Config = jsNative
+        static member Create (binding: obj, gateway: obj, ?provider: string, ?byok: bool, ?extraHeaders: JS.Record<string, string>, ?cacheTtl: float, ?skipCache: bool, ?apiKey: string, ?baseURL: string) : Config = jsNative
 
     module Factory =
         [<Interface>]
@@ -1729,58 +1791,6 @@ module WorkersAI =
             abstract maxImagesPerCall: float option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?maxImagesPerCall: float) : Settings = jsNative
-
-module WorkersAIChatLanguageModel =
-    type Settings =
-        /// <summary>
-        /// Whether to inject a safety prompt before all conversations.
-        /// Defaults to <c>false</c>.
-        /// </summary>
-        abstract safePrompt: bool option with get, set
-        /// <summary>
-        /// Optionally set Cloudflare AI Gateway options.
-        /// </summary>
-        abstract gateway: obj option with get, set
-        /// <summary>
-        /// Session affinity key for prefix-cache optimization.
-        /// Routes requests with the same key to the same backend replica.
-        /// </summary>
-        abstract sessionAffinity: string option with get, set
-        /// <summary>
-        /// Controls the reasoning budget for reasoning-capable Workers AI models
-        /// (e.g. <c>@cf/zai-org/glm-4.7-flash</c>, <c>@cf/moonshotai/kimi-k2.7-code</c>,
-        /// <c>@cf/openai/gpt-oss-120b</c>).
-        /// <br /><br />
-        /// <c>null</c> is a valid value and disables reasoning for models that support it.
-        /// Forwarded on the <c>inputs</c> object of <c>binding.run(model, inputs)</c>.
-        /// </summary>
-        abstract reasoning_effort: WorkersAIChatLanguageModel.Settings.ReasoningEffort option with get, set
-        /// <summary>
-        /// Chat-template overrides for reasoning-capable models that expose
-        /// thinking toggles (e.g. GLM, Kimi).
-        /// <br /><br />
-        /// Forwarded on the <c>inputs</c> object of <c>binding.run(model, inputs)</c>.
-        /// </summary>
-        abstract chat_template_kwargs: WorkersAIChatLanguageModel.Settings.ChatTemplateKwargs option with get, set
-        [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
-
-    module Settings =
-        [<Interface>]
-        type ChatTemplateKwargs =
-            /// <summary>
-            /// Whether to enable reasoning. Enabled by default on reasoning models.
-            /// </summary>
-            abstract enable_thinking: bool option with get, set
-            abstract clear_thinking: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?enable_thinking: bool, ?clear_thinking: bool) : ChatTemplateKwargs = jsNative
-
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ReasoningEffort =
-            | [<CompiledName("high")>] High
-            | [<CompiledName("low")>] Low
-            | [<CompiledName("medium")>] Medium
 
 module WorkersAIGatewayError =
     [<Interface>]

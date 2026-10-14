@@ -29,10 +29,10 @@ type Identity =
     abstract is_warp: bool with get, set
     abstract is_gateway: bool with get, set
     abstract version: float with get, set
-    abstract device_sessions: Record<string, Identity.DeviceSessions.Item> with get, set
+    abstract device_sessions: JS.Record<string, Identity.DeviceSessions.Item> with get, set
     abstract iat: float with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, name: string, email: string, groups: string[], amr: string[], idp: Identity.Idp, geo: Identity.Geo, user_uuid: string, account_id: string, ip: string, auth_status: string, common_name: string, service_token_id: string, service_token_status: bool, is_warp: bool, is_gateway: bool, version: float, device_sessions: Record<string, Identity.DeviceSessions.Item>, iat: float) : Identity = jsNative
+    static member Create (id: string, name: string, email: string, groups: string[], amr: string[], idp: Identity.Idp, geo: Identity.Geo, user_uuid: string, account_id: string, ip: string, auth_status: string, common_name: string, service_token_id: string, service_token_status: bool, is_warp: bool, is_gateway: bool, version: float, device_sessions: JS.Record<string, Identity.DeviceSessions.Item>, iat: float) : Identity = jsNative
 
 [<Interface>]
 type JWTPayload =

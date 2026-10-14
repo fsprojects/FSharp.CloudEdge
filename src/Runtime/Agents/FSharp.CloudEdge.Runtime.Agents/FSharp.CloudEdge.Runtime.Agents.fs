@@ -122,16 +122,15 @@ type DurableObjectJurisdiction =
     | [<CompiledName("fedramp-high")>] FedrampHigh
     | [<CompiledName("us")>] Us
 
-[<Interface>]
 type EmailBridge =
-    abstract ``__#6@#private``: obj with get, set
+    abstract ``__#5@#private``: obj with get, set
     abstract getRaw: unit -> JS.Promise<obj>
     abstract setReject: reason: string -> unit
     abstract forward: rcptTo: string * ?headers: obj -> JS.Promise<obj>
     abstract reply: options: EmailBridge.Reply.Options -> JS.Promise<obj>
     abstract __RPC_TARGET_BRAND: unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#6@#private``: obj, getRaw: (unit -> JS.Promise<obj>), setReject: (string -> unit), forward: Func<string, obj option, JS.Promise<obj>>, reply: (EmailBridge.Reply.Options -> JS.Promise<obj>)) : EmailBridge = jsNative
+    [<Emit("$0[Symbol.dispose]()")>]
+    abstract SymbolDispose: unit -> unit
 
 [<Interface>]
 type Emitter<'T> =
@@ -144,35 +143,59 @@ type Emitter<'T> =
 
 [<Interface>]
 type FiberRecoveryResult2 =
+    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
     abstract status: string with get, set
     abstract snapshot: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?snapshot: obj, ?metadata: Record<string, obj>) : FiberRecoveryResult2 = jsNative
+    abstract metadata: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
+    static member Create (?snapshot: obj, ?metadata: JS.Record<string, obj>) : FiberRecoveryResult2 = jsNative
+
+module FiberRecoveryResult2 =
+    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
+    [<Literal>]
+    let status = "completed"
 
 [<Interface>]
 type FiberRecoveryResult3 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract status: string with get, set
     abstract error: obj option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?error: obj, ?snapshot: obj) : FiberRecoveryResult3 = jsNative
+    [<ParamObject; Emit("({ status: 'error', ...$0 })")>]
+    static member Create (?error: obj, ?snapshot: obj) : FiberRecoveryResult3 = jsNative
+
+module FiberRecoveryResult3 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let status = "error"
 
 [<Interface>]
 type FiberRecoveryResult4 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
     abstract status: string with get, set
     abstract reason: string option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?reason: string, ?snapshot: obj) : FiberRecoveryResult4 = jsNative
+    [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
+    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult4 = jsNative
+
+module FiberRecoveryResult4 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
+    [<Literal>]
+    let status = "aborted"
 
 [<Interface>]
 type FiberRecoveryResult5 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
     abstract status: string with get, set
     abstract reason: string option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?reason: string, ?snapshot: obj) : FiberRecoveryResult5 = jsNative
+    [<ParamObject; Emit("({ status: 'interrupted', ...$0 })")>]
+    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult5 = jsNative
+
+module FiberRecoveryResult5 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+    [<Literal>]
+    let status = "interrupted"
 
 type LegacyCallToolResultSchema = obj
 
@@ -319,7 +342,7 @@ type MCPClientManager =
     inherit Lifecycle.LifecycleCapability<obj>
     abstract _name: obj
     abstract _version: obj
-    abstract mcpConnections: Record<string, MCPClientConnection> with get, set
+    abstract mcpConnections: JS.Record<string, MCPClientConnection> with get, set
     /// <summary>
     /// Cache only the current catalog so old schema graphs are not retained.
     /// </summary>
@@ -422,7 +445,7 @@ type MCPClientManager =
     /// The binding name is stored so this manager can resolve the namespace from
     /// its runtime environment during restore.
     /// </summary>
-    abstract saveRpcServerToStorage: id: string * name: string * normalizedName: string * bindingName: string * ?props: Record<string, obj> -> unit
+    abstract saveRpcServerToStorage: id: string * name: string * normalizedName: string * bindingName: string * ?props: JS.Record<string, obj> -> unit
     /// <summary>
     /// Restore persisted HTTP MCP connections.
     /// </summary>
@@ -618,11 +641,6 @@ type MCPClientManager =
     /// <summary>
     /// Namespaced version of callTool
     /// </summary>
-    /// <remarks>
-    /// @deprecated
-    /// Prefer the v2 request-options overload. Explicit legacy result
-    /// schemas remain honored through the v2 SDK request funnel.
-    /// </remarks>
     abstract callTool: ``params``: MCPClientManager.CallTool.Params * ?options: MCPClientManager.CallTool.Options -> JS.Promise<MCPClientManager.CallTool.Result.Item>
     /// <summary>
     /// Namespaced version of callTool
@@ -695,6 +713,7 @@ type MCPObservabilityEvent =
 
 [<Interface>]
 type MCPObservabilityEvent2 =
+    /// <remarks>TypeScript type: <c>"mcp:client:authorize"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// The class name of the agent that emitted this event
@@ -715,11 +734,25 @@ type MCPObservabilityEvent2 =
     /// The timestamp of the event in milliseconds since epoch
     /// </summary>
     abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: MCPObservabilityEvent2.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent2 = jsNative
+    [<ParamObject; Emit("({ type: 'mcp:client:authorize', ...$0 })")>]
+    static member Create (payload: MCPObservabilityEvent2.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent2 = jsNative
+
+module MCPObservabilityEvent2 =
+    /// <remarks>TypeScript type: <c>"mcp:client:authorize"</c></remarks>
+    [<Literal>]
+    let ``type`` = "mcp:client:authorize"
+
+    [<Interface>]
+    type Payload =
+        abstract serverId: string with get, set
+        abstract authUrl: string with get, set
+        abstract clientId: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (serverId: string, authUrl: string, ?clientId: string) : Payload = jsNative
 
 [<Interface>]
 type MCPObservabilityEvent3 =
+    /// <remarks>TypeScript type: <c>"mcp:client:close"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// The class name of the agent that emitted this event
@@ -740,11 +773,33 @@ type MCPObservabilityEvent3 =
     /// The timestamp of the event in milliseconds since epoch
     /// </summary>
     abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: MCPObservabilityEvent3.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent3 = jsNative
+    [<ParamObject; Emit("({ type: 'mcp:client:close', ...$0 })")>]
+    static member Create (payload: MCPObservabilityEvent3.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent3 = jsNative
+
+module MCPObservabilityEvent3 =
+    /// <remarks>TypeScript type: <c>"mcp:client:close"</c></remarks>
+    [<Literal>]
+    let ``type`` = "mcp:client:close"
+
+    [<Interface>]
+    type Payload =
+        abstract url: string with get, set
+        abstract transport: string option with get, set
+        abstract state: string with get, set
+        abstract error: string option with get, set
+        abstract phase: MCPObservabilityEvent3.Payload.Phase option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, state: string, ?transport: string, ?error: string, ?phase: MCPObservabilityEvent3.Payload.Phase) : Payload = jsNative
+
+    module Payload =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Phase =
+            | [<CompiledName("client-close")>] ClientClose
+            | [<CompiledName("terminate-session")>] TerminateSession
 
 [<Interface>]
 type MCPObservabilityEvent4 =
+    /// <remarks>TypeScript type: <c>"mcp:client:connect"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// The class name of the agent that emitted this event
@@ -765,11 +820,26 @@ type MCPObservabilityEvent4 =
     /// The timestamp of the event in milliseconds since epoch
     /// </summary>
     abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: MCPObservabilityEvent4.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent4 = jsNative
+    [<ParamObject; Emit("({ type: 'mcp:client:connect', ...$0 })")>]
+    static member Create (payload: MCPObservabilityEvent4.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent4 = jsNative
+
+module MCPObservabilityEvent4 =
+    /// <remarks>TypeScript type: <c>"mcp:client:connect"</c></remarks>
+    [<Literal>]
+    let ``type`` = "mcp:client:connect"
+
+    [<Interface>]
+    type Payload =
+        abstract url: string with get, set
+        abstract transport: string with get, set
+        abstract state: string with get, set
+        abstract error: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (url: string, transport: string, state: string, ?error: string) : Payload = jsNative
 
 [<Interface>]
 type MCPObservabilityEvent5 =
+    /// <remarks>TypeScript type: <c>"mcp:client:discover"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// The class name of the agent that emitted this event
@@ -790,11 +860,26 @@ type MCPObservabilityEvent5 =
     /// The timestamp of the event in milliseconds since epoch
     /// </summary>
     abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: MCPObservabilityEvent5.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent5 = jsNative
+    [<ParamObject; Emit("({ type: 'mcp:client:discover', ...$0 })")>]
+    static member Create (payload: MCPObservabilityEvent5.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent5 = jsNative
+
+module MCPObservabilityEvent5 =
+    /// <remarks>TypeScript type: <c>"mcp:client:discover"</c></remarks>
+    [<Literal>]
+    let ``type`` = "mcp:client:discover"
+
+    [<Interface>]
+    type Payload =
+        abstract url: string option with get, set
+        abstract state: string option with get, set
+        abstract error: string option with get, set
+        abstract capability: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?url: string, ?state: string, ?error: string, ?capability: string) : Payload = jsNative
 
 [<Interface>]
 type MCPObservabilityEvent6 =
+    /// <remarks>TypeScript type: <c>"mcp:client:preconnect"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// The class name of the agent that emitted this event
@@ -815,18 +900,29 @@ type MCPObservabilityEvent6 =
     /// The timestamp of the event in milliseconds since epoch
     /// </summary>
     abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: MCPObservabilityEvent6.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent6 = jsNative
+    [<ParamObject; Emit("({ type: 'mcp:client:preconnect', ...$0 })")>]
+    static member Create (payload: MCPObservabilityEvent6.Payload, timestamp: float, ?agent: string, ?name: string) : MCPObservabilityEvent6 = jsNative
+
+module MCPObservabilityEvent6 =
+    /// <remarks>TypeScript type: <c>"mcp:client:preconnect"</c></remarks>
+    [<Literal>]
+    let ``type`` = "mcp:client:preconnect"
+
+    [<Interface>]
+    type Payload =
+        abstract serverId: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (serverId: string) : Payload = jsNative
 
 type MCPTransportOptions = U3<MCPTransportOptions2, MCPTransportOptions3, MCPTransportOptions4>
 
 [<Interface>]
 type MCPTransportOptions2 =
-    inherit Mcp.RPCClientTransportOptions<Mcp.McpAgent<obj, obj, Record<string, obj>>>
+    inherit Mcp.RPCClientTransportOptions<Mcp.McpAgent<obj, obj, JS.Record<string, obj>>>
     abstract authProvider: AgentMcpOAuthProvider option with get, set
     abstract ``type``: TransportType option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``namespace``: obj, name: string, ?props: Record<string, obj>, ?authProvider: AgentMcpOAuthProvider, ?``type``: TransportType) : MCPTransportOptions2 = jsNative
+    static member Create (``namespace``: obj, name: string, ?props: JS.Record<string, obj>, ?authProvider: AgentMcpOAuthProvider, ?``type``: TransportType) : MCPTransportOptions2 = jsNative
 
 [<Interface>]
 type MCPTransportOptions3 =
@@ -969,7 +1065,7 @@ type MCPTransportOptions4 =
 [<Interface>]
 type Scheduler<'Handlers> =
     inherit Lifecycle.LifecycleCapability<obj>
-    abstract ``__#2@#private``: obj with get, set
+    abstract ``__#3@#private``: obj with get, set
     /// <summary>
     /// Initialize and migrate schedule storage during Lifecycle startup.
     /// </summary>
@@ -989,19 +1085,19 @@ type Scheduler<'Handlers> =
     /// <summary>
     /// Set a delayed, dated, or cron schedule for a registered callback.
     /// </summary>
-    abstract set<'Name>: ``when``: U3<string, float, JS.Date> * callback: 'Name * ?payload: obj * ?options: Scheduler.Set.Options -> JS.Promise<Scheduler.Set.Result.Item>
+    abstract set<'Name>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: 'Name * ?payload: obj * ?options: Scheduler.Set.Options -> JS.Promise<Schedule<obj>>
     /// <summary>
     /// Set a fixed-interval schedule for a registered callback.
     /// </summary>
-    abstract every<'Name>: intervalSeconds: float * callback: 'Name * ?payload: obj * ?options: Scheduler.Set.Options -> JS.Promise<Scheduler.Every.Result.Item>
+    abstract every<'Name>: intervalSeconds: float * callback: 'Name * ?payload: obj * ?options: Scheduler.Set.Options -> JS.Promise<Schedule<obj>>
     /// <summary>
     /// Get a schedule by ID. Works inside routed sub-agents.
     /// </summary>
-    abstract get: id: string -> JS.Promise<Scheduler.List.Result.Item.Item option>
+    abstract get: id: string -> JS.Promise<Schedule<obj> option>
     /// <summary>
     /// List schedules matching criteria. Works inside routed sub-agents.
     /// </summary>
-    abstract list: ?criteria: ScheduleCriteria -> JS.Promise<Scheduler.List.Result.Item.Item[]>
+    abstract list: ?criteria: ScheduleCriteria -> JS.Promise<Schedule<obj>[]>
     /// <summary>
     /// Cancel one schedule owned by this Scheduler.
     /// </summary>
@@ -1014,20 +1110,20 @@ type Scheduler<'Handlers> =
     /// Not part of the primitive's contract — use {@link get}. Cannot cross
     /// Durable Object boundaries and throws inside routed sub-agents.
     /// </remarks>
-    abstract __DO_NOT_USE_WILL_REMOVE__getSchedule<'T>: id: string -> U4<Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result2<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result3<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result4<'T>> option
+    abstract __DO_NOT_USE_WILL_REMOVE__getSchedule<'T>: id: string -> Schedule<'T> option
     /// <remarks>
     /// @internal
     /// Synchronous read backing Agent's deprecated <c>getSchedules()</c>.
     /// Not part of the primitive's contract — use {@link list}. Cannot cross
     /// Durable Object boundaries and throws inside routed sub-agents.
     /// </remarks>
-    abstract __DO_NOT_USE_WILL_REMOVE__getSchedules: ?criteria: ScheduleCriteria -> FSharp.CloudEdge.Runtime.Agents.Schedule[]
+    abstract __DO_NOT_USE_WILL_REMOVE__getSchedules<'T>: ?criteria: ScheduleCriteria -> Schedule<'T>[]
     /// <remarks>@internal Remove rows owned by one routed Lifecycle subtree.</remarks>
     abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> unit
     /// <remarks>@internal Apply Agent's outer alarm memory-limit policy to Scheduler rows.</remarks>
     abstract __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: options: Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (``__#2@#private``: obj, onStart: (unit -> JS.Promise<unit>), onAlarm: (unit -> JS.Promise<unit>), onRoute: (Lifecycle.LifecycleRouteContext -> JS.Promise<obj>), getNextAlarm: (unit -> float option), set: Func<U3<string, float, JS.Date>, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Scheduler.Set.Result.Item>>, every: Func<float, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Scheduler.Every.Result.Item>>, get: (string -> JS.Promise<Scheduler.List.Result.Item.Item option>), list: (ScheduleCriteria option -> JS.Promise<Scheduler.List.Result.Item.Item[]>), cancel: (string -> JS.Promise<bool>), __DO_NOT_USE_WILL_REMOVE__getSchedule: (string -> U4<Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result2<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result3<'T>, Scheduler.DONOTUSEWILLREMOVEGetSchedule.Result4<'T>> option), __DO_NOT_USE_WILL_REMOVE__getSchedules: (ScheduleCriteria option -> FSharp.CloudEdge.Runtime.Agents.Schedule[]), __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: (string -> unit), __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: (Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit), capabilityId: string, lifecycle: Lifecycle.LifecycleServices, ?lifecycleServices: Lifecycle.LifecycleServices) : Scheduler<'Handlers> = jsNative
+    static member Create (``__#3@#private``: obj, onStart: (unit -> JS.Promise<unit>), onAlarm: (unit -> JS.Promise<unit>), onRoute: (Lifecycle.LifecycleRouteContext -> JS.Promise<obj>), getNextAlarm: (unit -> float option), set: Func<U3<string, float, Fable.Core.TS.Es.Date>, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Schedule<obj>>>, every: Func<float, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Schedule<obj>>>, get: (string -> JS.Promise<Schedule<obj> option>), list: (ScheduleCriteria option -> JS.Promise<Schedule<obj>[]>), cancel: (string -> JS.Promise<bool>), __DO_NOT_USE_WILL_REMOVE__getSchedule: (string -> Schedule<'T> option), __DO_NOT_USE_WILL_REMOVE__getSchedules: (ScheduleCriteria option -> Schedule<'T>[]), __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: (string -> unit), __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: (Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit), capabilityId: string, lifecycle: Lifecycle.LifecycleServices, ?lifecycleServices: Lifecycle.LifecycleServices) : Scheduler<'Handlers> = jsNative
 
 [<Interface>]
 type ServeOptions =
@@ -1042,12 +1138,12 @@ type ServeOptions =
 type SubAgentConnectionBridge =
     inherit SubAgentConnectionBridge.Implements
     abstract ``__#4@#private``: obj with get, set
-    abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+    abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
     abstract close: ?code: float * ?reason: string -> unit
-    abstract broadcast: ownerPath: SubAgentConnectionBridge.Broadcast.OwnerPath.Item[] * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> JS.Promise<unit> option
+    abstract broadcast: ownerPath: SubAgentConnectionBridge.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
     abstract __RPC_TARGET_BRAND: unit
     [<ParamObject; Emit("$0")>]
-    static member Create (``__#4@#private``: obj, send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Broadcast.OwnerPath.Item[], U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, string[] option, JS.Promise<unit> option>) : SubAgentConnectionBridge = jsNative
+    static member Create (``__#4@#private``: obj, send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Broadcast.OwnerPath.Item[], U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option, JS.Promise<unit> option>) : SubAgentConnectionBridge = jsNative
 
 [<Interface>]
 type MCPAITool =
@@ -1064,7 +1160,7 @@ type MCPAITool =
 /// Compatible with the AI SDK without importing its types into the core
 /// <c>agents</c> declaration graph.
 /// </summary>
-type MCPAIToolSet = Record<string, MCPAITool>
+type MCPAIToolSet = JS.Record<string, MCPAITool>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type WorkflowBackoff =
@@ -1358,7 +1454,7 @@ type RunAgentToolResult<'Output> =
     [<ParamObject; Emit("$0")>]
     static member Create (runId: string, agentType: string, status: AgentToolTerminalStatus, ?output: 'Output, ?summary: string, ?error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : RunAgentToolResult<'Output> = jsNative
 
-type ChatCapableAgentClass<'T when 'T :> Agent<obj, obj, Record<string, obj>>> =
+type ChatCapableAgentClass<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> =
     [<EmitConstructor>]
     abstract Create: ctx: obj * env: unit -> 'T
 
@@ -1419,49 +1515,80 @@ type AgentToolEvent =
 
 [<Interface>]
 type AgentToolEvent2 =
+    /// <remarks>TypeScript type: <c>"started"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract agentType: string with get, set
     abstract inputPreview: obj option with get, set
     abstract order: float with get, set
     abstract display: AgentToolDisplayMetadata option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, agentType: string, order: float, ?inputPreview: obj, ?display: AgentToolDisplayMetadata) : AgentToolEvent2 = jsNative
+    [<ParamObject; Emit("({ kind: 'started', ...$0 })")>]
+    static member Create (runId: string, agentType: string, order: float, ?inputPreview: obj, ?display: AgentToolDisplayMetadata) : AgentToolEvent2 = jsNative
+
+module AgentToolEvent2 =
+    /// <remarks>TypeScript type: <c>"started"</c></remarks>
+    [<Literal>]
+    let kind = "started"
 
 [<Interface>]
 type AgentToolEvent3 =
+    /// <remarks>TypeScript type: <c>"chunk"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract body: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, body: string) : AgentToolEvent3 = jsNative
+    [<ParamObject; Emit("({ kind: 'chunk', ...$0 })")>]
+    static member Create (runId: string, body: string) : AgentToolEvent3 = jsNative
+
+module AgentToolEvent3 =
+    /// <remarks>TypeScript type: <c>"chunk"</c></remarks>
+    [<Literal>]
+    let kind = "chunk"
 
 [<Interface>]
 type AgentToolEvent4 =
+    /// <remarks>TypeScript type: <c>"finished"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract summary: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, summary: string) : AgentToolEvent4 = jsNative
+    [<ParamObject; Emit("({ kind: 'finished', ...$0 })")>]
+    static member Create (runId: string, summary: string) : AgentToolEvent4 = jsNative
+
+module AgentToolEvent4 =
+    /// <remarks>TypeScript type: <c>"finished"</c></remarks>
+    [<Literal>]
+    let kind = "finished"
 
 [<Interface>]
 type AgentToolEvent5 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract error: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, error: string) : AgentToolEvent5 = jsNative
+    [<ParamObject; Emit("({ kind: 'error', ...$0 })")>]
+    static member Create (runId: string, error: string) : AgentToolEvent5 = jsNative
+
+module AgentToolEvent5 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let kind = "error"
 
 [<Interface>]
 type AgentToolEvent6 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract reason: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, ?reason: string) : AgentToolEvent6 = jsNative
+    [<ParamObject; Emit("({ kind: 'aborted', ...$0 })")>]
+    static member Create (runId: string, ?reason: string) : AgentToolEvent6 = jsNative
+
+module AgentToolEvent6 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
+    [<Literal>]
+    let kind = "aborted"
 
 [<Interface>]
 type AgentToolEvent7 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
     abstract kind: string with get, set
     abstract runId: string with get, set
     abstract error: string with get, set
@@ -1472,18 +1599,29 @@ type AgentToolEvent7 =
     /// child from one the parent has torn down.
     /// </summary>
     abstract childStillRunning: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, runId: string, error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : AgentToolEvent7 = jsNative
+    [<ParamObject; Emit("({ kind: 'interrupted', ...$0 })")>]
+    static member Create (runId: string, error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : AgentToolEvent7 = jsNative
+
+module AgentToolEvent7 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+    [<Literal>]
+    let kind = "interrupted"
 
 [<Interface>]
 type AgentToolEventMessage =
+    /// <remarks>TypeScript type: <c>"agent-tool-event"</c></remarks>
     abstract ``type``: string with get, set
     abstract parentToolCallId: string option with get, set
     abstract sequence: float with get, set
     abstract replay: bool option with get, set
     abstract ``event``: AgentToolEvent with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, sequence: float, ``event``: AgentToolEvent, ?parentToolCallId: string, ?replay: bool) : AgentToolEventMessage = jsNative
+    [<ParamObject; Emit("({ type: 'agent-tool-event', ...$0 })")>]
+    static member Create (sequence: float, ``event``: AgentToolEvent, ?parentToolCallId: string, ?replay: bool) : AgentToolEventMessage = jsNative
+
+module AgentToolEventMessage =
+    /// <remarks>TypeScript type: <c>"agent-tool-event"</c></remarks>
+    [<Literal>]
+    let ``type`` = "agent-tool-event"
 
 [<Interface>]
 type AgentToolRunPart =
@@ -1535,23 +1673,29 @@ type AgentToolRunState<'Part when 'Part :> AgentToolRunPart> =
 
 [<Interface>]
 type AgentToolEventState<'Part when 'Part :> AgentToolRunPart> =
-    abstract runsById: Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>> with get, set
-    abstract runsByToolCallId: Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]> with get, set
+    abstract runsById: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>> with get, set
+    abstract runsByToolCallId: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]> with get, set
     abstract unboundRuns: FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (runsById: Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>>, runsByToolCallId: Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]>, unboundRuns: FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]) : AgentToolEventState<'Part> = jsNative
+    static member Create (runsById: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>>, runsByToolCallId: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]>, unboundRuns: FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]) : AgentToolEventState<'Part> = jsNative
 
 /// <summary>
 /// RPC request message from client
 /// </summary>
 [<Interface>]
 type RPCRequest =
+    /// <remarks>TypeScript type: <c>"rpc"</c></remarks>
     abstract ``type``: string with get, set
     abstract id: string with get, set
     abstract ``method``: string with get, set
     abstract args: obj[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, id: string, ``method``: string, args: obj[]) : RPCRequest = jsNative
+    [<ParamObject; Emit("({ type: 'rpc', ...$0 })")>]
+    static member Create (id: string, ``method``: string, args: obj[]) : RPCRequest = jsNative
+
+module RPCRequest =
+    /// <remarks>TypeScript type: <c>"rpc"</c></remarks>
+    [<Literal>]
+    let ``type`` = "rpc"
 
 /// <summary>
 /// State update message from client
@@ -1610,7 +1754,7 @@ type CallableMetadata =
     [<ParamObject; Emit("$0")>]
     static member Create (?description: string, ?streaming: bool) : CallableMetadata = jsNative
 
-type SubAgentClass<'T when 'T :> Agent<obj, obj, Record<string, obj>>> = FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>
+type SubAgentClass<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> = FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>
 
 /// <summary>
 /// A typed RPC stub for a sub-agent. Exposes all public instance methods
@@ -1620,7 +1764,7 @@ type SubAgentClass<'T when 'T :> Agent<obj, obj, Record<string, obj>>> = FSharp.
 /// are excluded — only user-defined methods on the subclass are exposed.
 /// </summary>
 [<Erase>]
-type SubAgentStub<'T when 'T :> Agent<obj, obj, Record<string, obj>>> = private SubAgentStub__ of obj
+type SubAgentStub<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> = private SubAgentStub__ of obj
 
 [<Interface>]
 type QueueItem<'T> =
@@ -1661,10 +1805,10 @@ type FiberStatus =
 type StartFiberOptions =
     abstract fiberId: string option with get, set
     abstract idempotencyKey: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract waitForCompletion: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fiberId: string, ?idempotencyKey: string, ?metadata: Record<string, obj>, ?waitForCompletion: bool) : StartFiberOptions = jsNative
+    static member Create (?fiberId: string, ?idempotencyKey: string, ?metadata: JS.Record<string, obj>, ?waitForCompletion: bool) : StartFiberOptions = jsNative
 
 [<Interface>]
 type FiberInspection =
@@ -1674,23 +1818,23 @@ type FiberInspection =
     abstract status: FiberStatus with get, set
     abstract snapshot: obj option with get, set
     abstract error: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract createdAt: float with get, set
     abstract startedAt: float option with get, set
     abstract settledAt: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: Record<string, obj>, ?startedAt: float, ?settledAt: float) : FiberInspection = jsNative
+    static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : FiberInspection = jsNative
 
 [<Interface>]
 type StartFiberResult =
     inherit FiberInspection
     abstract accepted: bool with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: Record<string, obj>, ?startedAt: float, ?settledAt: float) : StartFiberResult = jsNative
+    static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : StartFiberResult = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type FiberRecoveryResult =
-    | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: Record<string, obj> option
+    | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: JS.Record<string, obj> option
     | [<CompiledName("error")>] Error of error: obj option * snapshot: obj option
     | [<CompiledName("aborted")>] Aborted of reason: string option * snapshot: obj option
     | [<CompiledName("interrupted")>] Interrupted of reason: string option * snapshot: obj option
@@ -1706,10 +1850,10 @@ type ListFibersOptions =
 [<Interface>]
 type DeleteFibersOptions =
     abstract status: U2<string, FiberStatus[]> option with get, set
-    abstract settledBefore: JS.Date option with get, set
+    abstract settledBefore: Fable.Core.TS.Es.Date option with get, set
     abstract limit: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?status: U2<string, FiberStatus[]>, ?settledBefore: JS.Date, ?limit: float) : DeleteFibersOptions = jsNative
+    static member Create (?status: U2<string, FiberStatus[]>, ?settledBefore: Fable.Core.TS.Es.Date, ?limit: float) : DeleteFibersOptions = jsNative
 
 /// <summary>
 /// Context passed to the <c>onFiberRecovered</c> hook when an interrupted
@@ -1723,16 +1867,22 @@ type FiberRecoveryContext =
     abstract name: string with get, set
     abstract status: FiberStatus option with get, set
     abstract idempotencyKey: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract snapshot: obj with get, set
     /// <summary>
     /// Epoch milliseconds when the fiber row was inserted (when <c>runFiber</c>
     /// started). Use <c>Date.now() - createdAt</c> to gate stale recoveries.
     /// </summary>
     abstract createdAt: float with get, set
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
     abstract recoveryReason: string with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
+
+module FiberRecoveryContext =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+    [<Literal>]
+    let recoveryReason = "interrupted"
 
 /// <summary>
 /// MCP Server state update message from server -&gt; Client
@@ -1746,12 +1896,12 @@ type MCPServerMessage =
 
 [<Interface>]
 type MCPServersState =
-    abstract servers: Record<string, MCPServer> with get, set
+    abstract servers: JS.Record<string, MCPServer> with get, set
     abstract tools: MCPServersState.Tools.Item[] with get, set
     abstract prompts: MCPServersState.Prompts.Item[] with get, set
     abstract resources: MCPServersState.Resources.Item[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (servers: Record<string, MCPServer>, tools: MCPServersState.Tools.Item[], prompts: MCPServersState.Prompts.Item[], resources: MCPServersState.Resources.Item[]) : MCPServersState = jsNative
+    static member Create (servers: JS.Record<string, MCPServer>, tools: MCPServersState.Tools.Item[], prompts: MCPServersState.Prompts.Item[], resources: MCPServersState.Resources.Item[]) : MCPServersState = jsNative
 
 [<Interface>]
 type MCPServer =
@@ -1811,9 +1961,9 @@ type AddRpcMcpServerOptions =
     /// different name or url.
     /// </summary>
     abstract id: string option with get, set
-    abstract props: Record<string, obj> option with get, set
+    abstract props: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?props: Record<string, obj>) : AddRpcMcpServerOptions = jsNative
+    static member Create (?id: string, ?props: JS.Record<string, obj>) : AddRpcMcpServerOptions = jsNative
 
 [<Interface>]
 type DEFAULTAGENTSTATICOPTIONS =
@@ -2112,7 +2262,7 @@ type Agent<'Env, 'State, 'Props> =
     /// schedule()/scheduleEvery()/getScheduleById()/listSchedules()/
     /// cancelSchedule() methods are the stable surface.
     /// </remarks>
-    abstract scheduler: Scheduler<Record<string, Mcp.McpAgent.Scheduler.Item.Item>>
+    abstract scheduler: Scheduler<JS.Record<string, Mcp.McpAgent.Scheduler.Item.Item>>
     abstract mcp: MCPClientManager
     /// <summary>
     /// Initial state for the Agent
@@ -2159,7 +2309,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Emit an observability event with auto-generated timestamp.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _emit: ``type``: Mcp.McpAgent.Emit.Type * ?payload: Record<string, obj> -> unit
+    abstract _emit: ``type``: Mcp.McpAgent.Emit.Type * ?payload: JS.Record<string, obj> -> unit
     /// <summary>
     /// Run SDK work under a stable parent for platform child spans.
     /// </summary>
@@ -2171,7 +2321,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="strings">SQL query template strings</param>
     /// <param name="values">Values to be inserted into the query</param>
     /// <returns>Array of query results</returns>
-    abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+    abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
     abstract _schemaInitialization: obj with get, set
     /// <summary>
     /// Create all internal tables and run migrations if needed.
@@ -2494,7 +2644,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: Mcp.McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: Mcp.McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<Schedule<'T>>
     /// <summary>
     /// Schedule a task to run repeatedly at a fixed interval.
     /// <br /><br />
@@ -2519,7 +2669,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options">Options for the scheduled task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract scheduleEvery<'T>: intervalSeconds: float * callback: Mcp.McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+    abstract scheduleEvery<'T>: intervalSeconds: float * callback: Mcp.McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<Schedule<'T>>
     /// <summary>
     /// Get a scheduled task by ID
     /// </summary>
@@ -2531,7 +2681,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Use {@link getScheduleById}. This synchronous API cannot cross
     /// Durable Object boundaries and throws inside sub-agents.
     /// </remarks>
-    abstract getSchedule<'T>: id: string -> U4<Mcp.McpAgent.GetSchedule.Result<'T>, Mcp.McpAgent.GetSchedule.Result2<'T>, Mcp.McpAgent.GetSchedule.Result3<'T>, Mcp.McpAgent.GetSchedule.Result4<'T>> option
+    abstract getSchedule<'T>: id: string -> Schedule<'T> option
     /// <summary>
     /// Get a scheduled task by ID.
     /// <br /><br />
@@ -2540,7 +2690,7 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     /// <param name="id">ID of the scheduled task</param>
     /// <returns>The Schedule object or undefined if not found</returns>
-    abstract getScheduleById: id: string -> JS.Promise<Scheduler.List.Result.Item.Item option>
+    abstract getScheduleById: id: string -> JS.Promise<Schedule<obj> option>
     /// <summary>
     /// Get scheduled tasks matching the given criteria
     /// </summary>
@@ -2552,7 +2702,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Use {@link listSchedules}. This synchronous API cannot cross
     /// Durable Object boundaries and throws inside sub-agents.
     /// </remarks>
-    abstract getSchedules: ?criteria: ScheduleCriteria -> FSharp.CloudEdge.Runtime.Agents.Schedule[]
+    abstract getSchedules<'T>: ?criteria: ScheduleCriteria -> Schedule<'T>[]
     /// <summary>
     /// List scheduled tasks matching the given criteria.
     /// <br /><br />
@@ -2561,7 +2711,7 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     /// <param name="criteria">Criteria to filter schedules</param>
     /// <returns>Array of matching Schedule objects</returns>
-    abstract listSchedules: ?criteria: ScheduleCriteria -> JS.Promise<Scheduler.List.Result.Item.Item[]>
+    abstract listSchedules: ?criteria: ScheduleCriteria -> JS.Promise<Schedule<obj>[]>
     /// <summary>
     /// Cancel a scheduled task.
     /// <br /><br />
@@ -2839,9 +2989,9 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     abstract fetch: request: obj -> JS.Promise<obj>
-    abstract broadcast: msg: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> unit
+    abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
     abstract getConnection<'TState>: id: string -> Connection<'TState> option
-    abstract getConnections: ?tag: string -> obj
+    abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<Connection<'TState>, obj, obj>
     abstract _cf_activeSubAgentBridge: obj with get, set
     /// <summary>
     /// Route a virtual sub-agent connection operation through its live frame
@@ -2861,9 +3011,9 @@ type Agent<'Env, 'State, 'Props> =
     abstract _cf_routeSubAgentBroadcast: obj with get, set
     abstract _cf_reportSubAgentConnectionOperationFailure: obj with get, set
     abstract _cf_broadcastToParentSubAgent: obj with get, set
-    abstract _cf_broadcastToSubAgent: ownerPath: AgentPathStep[] * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> JS.Promise<unit>
+    abstract _cf_broadcastToSubAgent: ownerPath: AgentPathStep[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit>
     abstract _cf_subAgentConnectionMetas: ownerPath: AgentPathStep[] -> JS.Promise<Mcp.McpAgent.CfSubAgentConnectionMetas.Result.Item.Item[]>
-    abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit>
+    abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract _cf_closeSubAgentConnection: connectionId: string * ?code: float * ?reason: string -> JS.Promise<unit>
     abstract _cf_setSubAgentConnectionState: connectionId: string * state: obj -> JS.Promise<obj>
     abstract _cf_subAgentConnectionMetaForPath: obj with get, set
@@ -3067,7 +3217,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract parentAgent<'T when 'T :> Agent<obj, obj, Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> -> JS.Promise<obj>
+    abstract parentAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> -> JS.Promise<obj>
     abstract _cf_getTopLevelNamespaceByClassName: obj with get, set
     abstract _cf_asDurableObjectNamespace: obj with get, set
     abstract _cf_parentAgentFacetProxy: obj with get, set
@@ -3093,7 +3243,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract subAgent<'T when 'T :> Agent<obj, obj, Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<obj>
+    abstract subAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<obj>
     /// <summary>
     /// Maximum number of non-terminal agent-tool runs this parent may own at once.
     /// </summary>
@@ -3207,7 +3357,7 @@ type Agent<'Env, 'State, 'Props> =
     /// itself once everything has settled (zero steady-state cost).
     /// </summary>
     abstract _cfDetachedReconcileTick: ?payload: Agent.CfDetachedReconcileTick.Payload -> JS.Promise<unit>
-    abstract hasAgentToolRun<'T when 'T :> Agent<obj, obj, Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * runId: string -> bool
+    abstract hasAgentToolRun<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * runId: string -> bool
     abstract hasAgentToolRun: agentType: string * runId: string -> bool
     abstract clearAgentToolRuns: ?options: Agent.ClearAgentToolRuns.Options -> JS.Promise<unit>
     abstract _isAgentToolTerminal: obj with get, set
@@ -3403,7 +3553,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract hasSubAgent<'T when 'T :> Agent<obj, obj, Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> bool
+    abstract hasSubAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> bool
     /// <summary>
     /// Whether this agent has previously spawned (and not deleted) a
     /// sub-agent of the given class and name. Backed by an
@@ -3432,7 +3582,7 @@ type Agent<'Env, 'State, 'Props> =
     /// deleteSubAgent.
     /// </summary>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
-    abstract listSubAgents<'T when 'T :> Agent<obj, obj, Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> -> Agent.ListSubAgents.Result.Item[]
+    abstract listSubAgents<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> -> Agent.ListSubAgents.Result.Item[]
     /// <summary>
     /// List known sub-agents, optionally filtered by class. Reflects
     /// the registry rows written by subAgent and removed by
@@ -3494,7 +3644,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Get all methods marked as callable on this Agent
     /// </summary>
     /// <returns>A map of method names to their metadata</returns>
-    abstract getCallableMethods: unit -> JS.Map<string, CallableMetadata>
+    abstract getCallableMethods: unit -> Fable.Core.TS.Es.Map<string, CallableMetadata>
     /// <summary>
     /// Start a workflow and track it in this Agent's database.
     /// Automatically injects agent identity into the workflow params.
@@ -3794,7 +3944,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Override this to handle all callback types in one place.
     /// </summary>
     /// <param name="callback">- The callback payload</param>
-    abstract onWorkflowCallback: callback: Agent.OnWorkflowCallback.Callback -> JS.Promise<unit>
+    abstract onWorkflowCallback: callback: Workflows.WorkflowCallback<Workflows.DefaultProgress> -> JS.Promise<unit>
     /// <summary>
     /// Called when a workflow reports progress.
     /// Override to handle progress updates.
@@ -3831,7 +3981,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Handle a workflow callback via RPC.
     /// </summary>
     /// <remarks>@internal - Called by AgentWorkflow, do not call directly</remarks>
-    abstract _workflow_handleCallback: callback: Agent.OnWorkflowCallback.Callback -> JS.Promise<unit>
+    abstract _workflow_handleCallback: callback: Workflows.WorkflowCallback<Workflows.DefaultProgress> -> JS.Promise<unit>
     /// <summary>
     /// Broadcast a message to all connected clients via RPC.
     /// </summary>
@@ -3917,7 +4067,7 @@ type Agent<'Env, 'State, 'Props> =
     abstract ctx: obj with get, set
     abstract env: 'Env with get, set
     abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
     /// <summary>
@@ -3946,7 +4096,7 @@ type Agent<'Env, 'State, 'Props> =
 /// <remarks>@template Agentic Type of the Agent class</remarks>
 /// <remarks>@deprecated Use DurableObjectNamespace instead</remarks>
 [<Erase>]
-type AgentNamespace<'Agentic when 'Agentic :> Agent<obj, obj, Record<string, obj>>> = private AgentNamespace__ of obj
+type AgentNamespace<'Agentic when 'Agentic :> Agent<obj, obj, JS.Record<string, obj>>> = private AgentNamespace__ of obj
 
 /// <summary>
 /// Agent's durable context
@@ -4028,11 +4178,11 @@ type EmailResolverResult2 =
 
 [<Interface>]
 type EmailRoutingOptions<'Env> =
-    inherit AgentRouteOptions<'Env, Record<string, obj>>
+    inherit AgentRouteOptions<'Env, JS.Record<string, obj>>
     /// <summary>
     /// Properties supplied before lifecycle startup.
     /// </summary>
-    abstract props: Record<string, obj> option with get, set
+    abstract props: JS.Record<string, obj> option with get, set
     abstract onBeforeConnect: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeConnect<'Env> option with get, set
     abstract onBeforeRequest: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeRequest<'Env> option with get, set
     abstract resolver: Func<obj, 'Env, JS.Promise<EmailResolverResult2 option>> with get, set
@@ -4043,7 +4193,7 @@ type EmailRoutingOptions<'Env> =
     /// </summary>
     abstract onNoRoute: (obj -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (resolver: Func<obj, 'Env, JS.Promise<EmailResolverResult2 option>>, ?prefix: string, ?jurisdiction: DurableObjectJurisdiction, ?locationHint: DurableObjectLocationHint, ?props: Record<string, obj>, ?cors: obj, ?routingRetry: U2<bool, RoutingRetryOptions>, ?onBeforeConnect: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeConnect<'Env>, ?onBeforeRequest: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeRequest<'Env>, ?onNoRoute: (obj -> JS.Promise<unit> option)) : EmailRoutingOptions<'Env> = jsNative
+    static member Create (resolver: Func<obj, 'Env, JS.Promise<EmailResolverResult2 option>>, ?prefix: string, ?jurisdiction: DurableObjectJurisdiction, ?locationHint: DurableObjectLocationHint, ?props: JS.Record<string, obj>, ?cors: obj, ?routingRetry: U2<bool, RoutingRetryOptions>, ?onBeforeConnect: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeConnect<'Env>, ?onBeforeRequest: FSharp.CloudEdge.Runtime.Agents.AgentRouteOptions.OnBeforeRequest<'Env>, ?onNoRoute: (obj -> JS.Promise<unit> option)) : EmailRoutingOptions<'Env> = jsNative
 
 [<Interface>]
 type RoutingRetryEvent =
@@ -4117,7 +4267,7 @@ type RoutingRetryOptions =
 /// <summary>
 /// Configuration options for routeAgentRequest.
 /// </summary>
-type AgentOptions<'Env> = AgentRouteOptions<'Env, Record<string, obj>>
+type AgentOptions<'Env> = AgentRouteOptions<'Env, JS.Record<string, obj>>
 
 /// <summary>
 /// Options for resolving and starting a named Agent.
@@ -4140,7 +4290,7 @@ type AgentGetOptions<'Env, 'Props> =
 
 type AgentConstructor =
     [<EmitConstructor>]
-    abstract Create: ctx: obj * env: unit -> Agent<obj, obj, Record<string, obj>>
+    abstract Create: ctx: obj * env: unit -> Agent<obj, obj, JS.Record<string, obj>>
 
 [<Interface>]
 type StoredLock =
@@ -4214,11 +4364,11 @@ type AISDKRecoveryCodec =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ToolResultOutput =
-    | [<CompiledName("text")>] Text of value: string * providerOptions: Record<string, obj> option
-    | [<CompiledName("json")>] Json of value: obj option * providerOptions: Record<string, obj> option
-    | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: Record<string, obj> option
-    | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: Record<string, obj> option
-    | [<CompiledName("error-json")>] ErrorJson of value: obj option * providerOptions: Record<string, obj> option
+    | [<CompiledName("text")>] Text of value: string * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("json")>] Json of value: obj option * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("error-json")>] ErrorJson of value: obj option * providerOptions: JS.Record<string, obj> option
     | [<CompiledName("content")>] Content of value: ToolResultOutput7.Value.Item[]
 
 [<Interface>]
@@ -4226,31 +4376,47 @@ type ToolResultOutput2 =
     /// <summary>
     /// Text tool output that should be directly sent to the API.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: string with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: string, ?providerOptions: Record<string, obj>) : ToolResultOutput2 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member Create (value: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput2 = jsNative
+
+module ToolResultOutput2 =
+    /// <summary>
+    /// Text tool output that should be directly sent to the API.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ToolResultOutput3 =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: obj option with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?value: obj, ?providerOptions: Record<string, obj>) : ToolResultOutput3 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
+    static member Create (?value: obj, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput3 = jsNative
+
+module ToolResultOutput3 =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json"
 
 [<Interface>]
 type ToolResultOutput4 =
     /// <summary>
     /// Type when the user has denied the execution of the tool call.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// Optional reason for the execution denial.
@@ -4259,38 +4425,451 @@ type ToolResultOutput4 =
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?reason: string, ?providerOptions: Record<string, obj>) : ToolResultOutput4 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
+    static member Create (?reason: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput4 = jsNative
+
+module ToolResultOutput4 =
+    /// <summary>
+    /// Type when the user has denied the execution of the tool call.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
+    [<Literal>]
+    let ``type`` = "execution-denied"
 
 [<Interface>]
 type ToolResultOutput5 =
+    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: string with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: string, ?providerOptions: Record<string, obj>) : ToolResultOutput5 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
+    static member Create (value: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput5 = jsNative
+
+module ToolResultOutput5 =
+    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error-text"
 
 [<Interface>]
 type ToolResultOutput6 =
+    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: obj option with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?value: obj, ?providerOptions: Record<string, obj>) : ToolResultOutput6 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'error-json', ...$0 })")>]
+    static member Create (?value: obj, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput6 = jsNative
+
+module ToolResultOutput6 =
+    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error-json"
 
 [<Interface>]
 type ToolResultOutput7 =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: ToolResultOutput7.Value.Item[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: ToolResultOutput7.Value.Item[]) : ToolResultOutput7 = jsNative
+    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
+    static member Create (value: ToolResultOutput7.Value.Item[]) : ToolResultOutput7 = jsNative
+
+module ToolResultOutput7 =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
+    [<Literal>]
+    let ``type`` = "content"
+
+    module Value =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Item =
+            | [<CompiledName("text")>] Text of text: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file")>] File of data: obj * mediaType: string * filename: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-url")>] FileUrl of url: string * mediaType: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-id")>] FileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-reference")>] FileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-file-reference")>] ImageFileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("custom")>] Custom of providerOptions: JS.Record<string, obj> option
+
+        [<Interface>]
+        type Item10 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Image that is referenced using a provider file id.
+            /// <br /><br />
+            /// If you use multiple providers, you need to
+            /// specify the provider specific ids using
+            /// the Record option. The key is the provider
+            /// name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract fileId: U2<string, JS.Record<string, string>> with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-file-id', ...$0 })")>]
+            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: JS.Record<string, obj>) : Item10 = jsNative
+
+        module Item10 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-file-id"
+
+        [<Interface>]
+        type Item11 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-reference"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific references for the image file.
+            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-file-reference', ...$0 })")>]
+            static member Create (providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: JS.Record<string, obj>) : Item11 = jsNative
+
+        module Item11 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-reference"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-file-reference"
+
+        [<Interface>]
+        type Item12 =
+            /// <summary>
+            /// Custom content part. This can be used to implement
+            /// provider-specific content parts.
+            /// </summary>
+            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+            static member Create (?providerOptions: JS.Record<string, obj>) : Item12 = jsNative
+
+        module Item12 =
+            /// <summary>
+            /// Custom content part. This can be used to implement
+            /// provider-specific content parts.
+            /// </summary>
+            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+            [<Literal>]
+            let ``type`` = "custom"
+
+        [<Interface>]
+        type Item2 =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Text content.
+            /// </summary>
+            abstract text: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string, ?providerOptions: JS.Record<string, obj>) : Item2 = jsNative
+
+        module Item2 =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
+
+        [<Interface>]
+        type Item3 =
+            /// <remarks>TypeScript type: <c>"file"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// File data as a tagged discriminated union:
+            /// <br /><br />
+            /// - <c>{ type: 'data', data }</c>: raw bytes
+            ///   (base64 string, Uint8Array, ArrayBuffer, Buffer)
+            /// - <c>{ type: 'url', url }</c>: a URL that points to the file
+            /// - <c>{ type: 'reference', reference }</c>: a provider reference
+            ///   from <c>uploadFile</c>
+            /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline
+            ///   text document)
+            /// </summary>
+            abstract data: obj with get, set
+            /// <summary>
+            /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
+            /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
+            /// <br /><br />
+            /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
+            /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
+            /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
+            /// <c>detectMediaType</c>) to resolve the field according to their API
+            /// requirements.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Optional filename of the file.
+            /// </summary>
+            abstract filename: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+            static member Create (data: obj, mediaType: string, ?filename: string, ?providerOptions: JS.Record<string, obj>) : Item3 = jsNative
+
+        module Item3 =
+            /// <remarks>TypeScript type: <c>"file"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file"
+
+        [<Interface>]
+        type Item4 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType + tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Base-64 encoded media data.
+            /// </summary>
+            abstract data: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Optional filename of the file.
+            /// </summary>
+            abstract filename: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-data', ...$0 })")>]
+            static member Create (data: string, mediaType: string, ?filename: string, ?providerOptions: JS.Record<string, obj>) : Item4 = jsNative
+
+        module Item4 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType + tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-data"
+
+        [<Interface>]
+        type Item5 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType and tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// URL of the file.
+            /// </summary>
+            abstract url: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-url', ...$0 })")>]
+            static member Create (url: string, ?mediaType: string, ?providerOptions: JS.Record<string, obj>) : Item5 = jsNative
+
+        module Item5 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType and tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-url"
+
+        [<Interface>]
+        type Item6 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// ID of the file.
+            /// <br /><br />
+            /// If you use multiple providers, you need to
+            /// specify the provider specific ids using
+            /// the Record option. The key is the provider
+            /// name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract fileId: U2<string, JS.Record<string, string>> with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-id', ...$0 })")>]
+            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: JS.Record<string, obj>) : Item6 = jsNative
+
+        module Item6 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-id"
+
+        [<Interface>]
+        type Item7 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-reference"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific references for the file.
+            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-reference', ...$0 })")>]
+            static member Create (providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: JS.Record<string, obj>) : Item7 = jsNative
+
+        module Item7 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-reference"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-reference"
+
+            type ProviderReference =
+                abstract ``type``: unit option with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> string with get, set
+
+        [<Interface>]
+        type Item8 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType (e.g. 'image' or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Base-64 encoded image data.
+            /// </summary>
+            abstract data: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-data', ...$0 })")>]
+            static member Create (data: string, mediaType: string, ?providerOptions: JS.Record<string, obj>) : Item8 = jsNative
+
+        module Item8 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType (e.g. 'image' or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-data"
+
+        [<Interface>]
+        type Item9 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// URL of the image.
+            /// </summary>
+            abstract url: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-url', ...$0 })")>]
+            static member Create (url: string, ?providerOptions: JS.Record<string, obj>) : Item9 = jsNative
+
+        module Item9 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-url"
 
 type Set = delegate of key: string * content: string -> JS.Promise<unit>
 
@@ -4332,7 +4911,7 @@ type Connection<'TState> =
     /// <br /><br />
     /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
     /// </summary>
-    abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+    abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
     /// <summary>
     /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
     /// <br /><br />
@@ -4424,12 +5003,12 @@ type Connection<'TState> =
     /// </summary>
     abstract tags: string[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (accept: (obj option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
+    static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
 
 /// <summary>
 /// Payload delivered to a lifecycle-managed WebSocket callback.
 /// </summary>
-type WSMessage = U3<string, JS.ArrayBuffer, JS.ArrayBufferView>
+type WSMessage = U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 type GetConnectionTags = delegate of connection: Connection<obj> * context: ConnectionContext -> U2<string[], JS.Promise<string[]>>
 
@@ -4736,10 +5315,10 @@ type SendEmailOptions =
     abstract cc: U2<string, string[]> option with get, set
     abstract bcc: U2<string, string[]> option with get, set
     abstract inReplyTo: string option with get, set
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     abstract secret: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: EmailSendBinding, ``to``: U2<string, string[]>, from: U2<string, SendEmailOptions.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, SendEmailOptions.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: Record<string, string>, ?secret: string) : SendEmailOptions = jsNative
+    static member Create (binding: EmailSendBinding, ``to``: U2<string, string[]>, from: U2<string, SendEmailOptions.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, SendEmailOptions.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: JS.Record<string, string>, ?secret: string) : SendEmailOptions = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type InternalMessageChangeEvent =
@@ -4751,38 +5330,68 @@ type InternalMessageChangeEvent =
 
 [<Interface>]
 type InternalMessageChangeEvent2 =
+    /// <remarks>TypeScript type: <c>"append"</c></remarks>
     abstract ``type``: string with get, set
     abstract message: Experimental.Memory.Session.SessionMessage with get, set
     abstract parentId: string option with get, set
     abstract inserted: bool with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, message: Experimental.Memory.Session.SessionMessage, inserted: bool, ?parentId: string) : InternalMessageChangeEvent2 = jsNative
+    [<ParamObject; Emit("({ type: 'append', ...$0 })")>]
+    static member Create (message: Experimental.Memory.Session.SessionMessage, inserted: bool, ?parentId: string) : InternalMessageChangeEvent2 = jsNative
+
+module InternalMessageChangeEvent2 =
+    /// <remarks>TypeScript type: <c>"append"</c></remarks>
+    [<Literal>]
+    let ``type`` = "append"
 
 [<Interface>]
 type InternalMessageChangeEvent3 =
+    /// <remarks>TypeScript type: <c>"update"</c></remarks>
     abstract ``type``: string with get, set
     abstract message: Experimental.Memory.Session.SessionMessage with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, message: Experimental.Memory.Session.SessionMessage) : InternalMessageChangeEvent3 = jsNative
+    [<ParamObject; Emit("({ type: 'update', ...$0 })")>]
+    static member Create (message: Experimental.Memory.Session.SessionMessage) : InternalMessageChangeEvent3 = jsNative
+
+module InternalMessageChangeEvent3 =
+    /// <remarks>TypeScript type: <c>"update"</c></remarks>
+    [<Literal>]
+    let ``type`` = "update"
 
 [<Interface>]
 type InternalMessageChangeEvent4 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
     abstract ``type``: string with get, set
     abstract messageIds: string[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, messageIds: string[]) : InternalMessageChangeEvent4 = jsNative
+    [<ParamObject; Emit("({ type: 'delete', ...$0 })")>]
+    static member Create (messageIds: string[]) : InternalMessageChangeEvent4 = jsNative
+
+module InternalMessageChangeEvent4 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
+    [<Literal>]
+    let ``type`` = "delete"
 
 [<Interface>]
 type InternalMessageChangeEvent5 =
+    /// <remarks>TypeScript type: <c>"clear"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : InternalMessageChangeEvent5 = jsNative
+    [<Emit("({ type: 'clear' })")>]
+    static member Create () : InternalMessageChangeEvent5 = jsNative
+
+module InternalMessageChangeEvent5 =
+    /// <remarks>TypeScript type: <c>"clear"</c></remarks>
+    [<Literal>]
+    let ``type`` = "clear"
 
 [<Interface>]
 type InternalMessageChangeEvent6 =
+    /// <remarks>TypeScript type: <c>"compact"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : InternalMessageChangeEvent6 = jsNative
+    [<Emit("({ type: 'compact' })")>]
+    static member Create () : InternalMessageChangeEvent6 = jsNative
+
+module InternalMessageChangeEvent6 =
+    /// <remarks>TypeScript type: <c>"compact"</c></remarks>
+    [<Literal>]
+    let ``type`` = "compact"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type TransportType =
@@ -4812,11 +5421,11 @@ type RetryOptions =
     static member Create (?maxAttempts: float, ?baseDelayMs: float, ?maxDelayMs: float) : RetryOptions = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-type Schedule =
-    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float
-    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * delayInSeconds: float
-    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * cron: string
-    | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * intervalSeconds: float
+type Schedule<'T> =
+    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float
+    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * delayInSeconds: float
+    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * cron: string
+    | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * intervalSeconds: float
 
 [<Interface>]
 type Schedule2<'T> =
@@ -4830,10 +5439,19 @@ type Schedule2<'T> =
     /// <summary>
     /// One-time execution at a specific date.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
     abstract ``type``: string with get, set
     abstract time: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, ?retry: RetryOptions) : Schedule2<'T> = jsNative
+    [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+    static member Create (id: string, callback: string, payload: 'T, time: float, ?retry: RetryOptions) : Schedule2<'T> = jsNative
+
+module Schedule2 =
+    /// <summary>
+    /// One-time execution at a specific date.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+    [<Literal>]
+    let ``type`` = "scheduled"
 
 [<Interface>]
 type Schedule3<'T> =
@@ -4847,11 +5465,20 @@ type Schedule3<'T> =
     /// <summary>
     /// One-time execution after a relative delay.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
     abstract ``type``: string with get, set
     abstract time: float with get, set
     abstract delayInSeconds: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Schedule3<'T> = jsNative
+    [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
+    static member Create (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: RetryOptions) : Schedule3<'T> = jsNative
+
+module Schedule3 =
+    /// <summary>
+    /// One-time execution after a relative delay.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
+    [<Literal>]
+    let ``type`` = "delayed"
 
 [<Interface>]
 type Schedule4<'T> =
@@ -4865,11 +5492,20 @@ type Schedule4<'T> =
     /// <summary>
     /// Recurring execution from a cron expression.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"cron"</c></remarks>
     abstract ``type``: string with get, set
     abstract time: float with get, set
     abstract cron: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Schedule4<'T> = jsNative
+    [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
+    static member Create (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: RetryOptions) : Schedule4<'T> = jsNative
+
+module Schedule4 =
+    /// <summary>
+    /// Recurring execution from a cron expression.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"cron"</c></remarks>
+    [<Literal>]
+    let ``type`` = "cron"
 
 [<Interface>]
 type Schedule5<'T> =
@@ -4883,11 +5519,20 @@ type Schedule5<'T> =
     /// <summary>
     /// Recurring execution at a fixed interval.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"interval"</c></remarks>
     abstract ``type``: string with get, set
     abstract time: float with get, set
     abstract intervalSeconds: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Schedule5<'T> = jsNative
+    [<ParamObject; Emit("({ type: 'interval', ...$0 })")>]
+    static member Create (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: RetryOptions) : Schedule5<'T> = jsNative
+
+module Schedule5 =
+    /// <summary>
+    /// Recurring execution at a fixed interval.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"interval"</c></remarks>
+    [<Literal>]
+    let ``type`` = "interval"
 
 /// <summary>
 /// Filters accepted by <c>getSchedules()</c> and <c>listSchedules()</c>.
@@ -4902,10 +5547,10 @@ type ScheduleCriteria =
 
 [<Interface>]
 type ParsedSkillMarkdown =
-    abstract data: Record<string, obj> with get, set
+    abstract data: JS.Record<string, obj> with get, set
     abstract body: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (data: Record<string, obj>, body: string) : ParsedSkillMarkdown = jsNative
+    static member Create (data: JS.Record<string, obj>, body: string) : ParsedSkillMarkdown = jsNative
 
 type ReadResource = delegate of name: string * path: string -> JS.Promise<Skills.SkillResource option>
 
@@ -4974,7 +5619,7 @@ type SqlError =
     /// </code>
     /// </summary>
     [<Import("SqlError.captureStackTrace", "agents")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("SqlError.prepareStackTrace", "agents")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -5016,6 +5661,49 @@ type MessageType3 =
     abstract RPC: string
     [<ParamObject; Emit("$0")>]
     static member Create (CF_AGENT_MCP_SERVERS: string, CF_MCP_AGENT_EVENT: string, CF_AGENT_STATE: string, CF_AGENT_STATE_ERROR: string, CF_AGENT_IDENTITY: string, CF_AGENT_SESSION: string, CF_AGENT_SESSION_ERROR: string, RPC: string) : MessageType3 = jsNative
+
+[<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
+type AgentWorkflowOrigin =
+    | [<CompiledName("agent")>] Agent of version: float * binding: string * name: string
+    | [<CompiledName("facet")>] Facet of version: float * rootBinding: string * path: AgentPathStep[]
+
+[<Interface>]
+type AgentWorkflowOrigin2 =
+    /// <remarks>TypeScript type: <c>"agent"</c></remarks>
+    abstract kind: string with get, set
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    abstract version: float with get, set
+    abstract binding: string with get, set
+    abstract name: string with get, set
+    [<ParamObject; Emit("({ kind: 'agent', version: 1, ...$0 })")>]
+    static member Create (binding: string, name: string) : AgentWorkflowOrigin2 = jsNative
+
+module AgentWorkflowOrigin2 =
+    /// <remarks>TypeScript type: <c>"agent"</c></remarks>
+    [<Literal>]
+    let kind = "agent"
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let version = 1.0
+
+[<Interface>]
+type AgentWorkflowOrigin3 =
+    /// <remarks>TypeScript type: <c>"facet"</c></remarks>
+    abstract kind: string with get, set
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    abstract version: float with get, set
+    abstract rootBinding: string with get, set
+    abstract path: AgentPathStep[] with get, set
+    [<ParamObject; Emit("({ kind: 'facet', version: 1, ...$0 })")>]
+    static member Create (rootBinding: string, path: AgentPathStep[]) : AgentWorkflowOrigin3 = jsNative
+
+module AgentWorkflowOrigin3 =
+    /// <remarks>TypeScript type: <c>"facet"</c></remarks>
+    [<Literal>]
+    let kind = "facet"
+    /// <remarks>TypeScript type: <c>1</c></remarks>
+    [<Literal>]
+    let version = 1.0
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -5135,7 +5823,7 @@ type Exports =
     /// </example>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     [<Import("getSubAgentByName", "agents")>]
-    static member getSubAgentByName<'T when 'T :> Agent<obj, obj, Record<string, obj>>> (parent: obj, cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>, name: string) : JS.Promise<obj> = jsNative
+    static member getSubAgentByName<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> (parent: obj, cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>, name: string) : JS.Promise<obj> = jsNative
     /// <summary>
     /// Maximum length of a normalized MCP server id.
     /// </summary>
@@ -5189,14 +5877,14 @@ type Exports =
     /// </summary>
     /// <param name="metadata">Optional metadata about the callable method</param>
     [<Import("callable", "agents")>]
-    static member callable (?metadata: CallableMetadata) : Func<(obj -> obj), obj, (obj -> obj)> = jsNative
+    static member callable (?metadata: CallableMetadata) : Func<(obj -> obj), Fable.Core.TS.Es.ClassMethodDecoratorContext<obj, (obj -> obj)>, (obj -> obj)> = jsNative
     /// <summary>
     /// Decorator that marks a method as callable by clients
     /// </summary>
     /// <remarks>@deprecated this has been renamed to callable, and unstable_callable will be removed in the next major version</remarks>
     /// <param name="metadata">Optional metadata about the callable method</param>
     [<Import("unstable_callable", "agents")>]
-    static member unstable_callable (?metadata: CallableMetadata) : Func<(obj -> obj), obj, (obj -> obj)> = jsNative
+    static member unstable_callable (?metadata: CallableMetadata) : Func<(obj -> obj), Fable.Core.TS.Es.ClassMethodDecoratorContext<obj, (obj -> obj)>, (obj -> obj)> = jsNative
     /// <summary>
     /// Default options for Agent configuration.
     /// Child classes can override specific options without spreading.
@@ -5239,7 +5927,7 @@ type Exports =
     /// <param name="options">- Routing options.</param>
     /// <returns>The matched response, or <c>null</c> when the path does not match.</returns>
     [<Import("routeAgentRequest", "agents")>]
-    static member routeAgentRequest<'Env> (request: obj, env: 'Env, ?options: AgentRouteOptions<'Env, Record<string, obj>>) : JS.Promise<obj option> = jsNative
+    static member routeAgentRequest<'Env> (request: obj, env: 'Env, ?options: AgentRouteOptions<'Env, JS.Record<string, obj>>) : JS.Promise<obj option> = jsNative
     /// <summary>
     /// Get a named Agent stub after its lifecycle startup has completed.
     /// </summary>
@@ -5371,9 +6059,15 @@ module Agent =
             [<Interface>]
             type Item =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
                 abstract state: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string) : Item = jsNative
+                [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
+                static member Create (id: string) : Item = jsNative
+
+            module Item =
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
+                [<Literal>]
+                let state = "ready"
 
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
             type Item2 =
@@ -5383,25 +6077,37 @@ module Agent =
             [<Interface>]
             type Item22 =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
                 abstract state: string with get, set
                 abstract authUrl: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string, authUrl: string) : Item22 = jsNative
+                [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
+                static member Create (id: string, authUrl: string) : Item22 = jsNative
+
+            module Item22 =
+                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
+                [<Literal>]
+                let state = "authenticating"
 
             [<Interface>]
             type Item23 =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
                 abstract state: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string) : Item23 = jsNative
+                [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
+                static member Create (id: string) : Item23 = jsNative
+
+            module Item23 =
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
+                [<Literal>]
+                let state = "ready"
 
     module ApproveWorkflow =
         [<Interface>]
         type Data =
             abstract reason: string option with get, set
-            abstract metadata: Record<string, obj> option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?reason: string, ?metadata: Record<string, obj>) : Data = jsNative
+            static member Create (?reason: string, ?metadata: JS.Record<string, obj>) : Data = jsNative
 
     module CfDetachedReconcileTick =
         [<Interface>]
@@ -5421,16 +6127,23 @@ module Agent =
     module DeleteWorkflows =
         [<Interface>]
         type Criteria =
-            /// <summary>
-            /// Filter by status
-            /// </summary>
-            abstract status: U2<string, Workflows.WorkflowStatus[]> option with get, set
-            abstract workflowName: string option with get, set
-            abstract metadata: Record<string, U3<string, float, bool>> option with get, set
-            abstract cursor: string option with get, set
-            abstract createdBefore: JS.Date option with get, set
+            inherit Agent.DeleteWorkflows.Criteria.Base
+            abstract createdBefore: Fable.Core.TS.Es.Date option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, Workflows.WorkflowStatus[]>, ?workflowName: string, ?metadata: Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: JS.Date) : Criteria = jsNative
+            static member Create (?status: U2<string, Workflows.WorkflowStatus[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: Fable.Core.TS.Es.Date) : Criteria = jsNative
+
+        module Criteria =
+            [<Interface>]
+            type Base =
+                /// <summary>
+                /// Filter by status
+                /// </summary>
+                abstract status: U2<string, Workflows.WorkflowStatus[]> option with get, set
+                abstract workflowName: string option with get, set
+                abstract metadata: JS.Record<string, U3<string, float, bool>> option with get, set
+                abstract cursor: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?status: U2<string, Workflows.WorkflowStatus[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string) : Base = jsNative
 
     module DeliverDetachedMilestone =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -5455,14 +6168,6 @@ module Agent =
                 abstract createdAt: float with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (className: string, name: string, createdAt: float) : Item2 = jsNative
-
-    module OnWorkflowCallback =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Callback =
-            | [<CompiledName("complete")>] Complete of workflowName: string * workflowId: string * timestamp: float * result: obj option
-            | [<CompiledName("error")>] Error of workflowName: string * workflowId: string * timestamp: float * error: string
-            | [<CompiledName("event")>] Event of workflowName: string * workflowId: string * timestamp: float * ``event``: obj
-            | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: Workflows.DefaultProgress
 
     module RejectWorkflow =
         [<Interface>]
@@ -5672,14 +6377,21 @@ module AgentTools =
     module AgentTool =
         [<Interface>]
         type Options<'InputSchema, 'Output> =
-            abstract description: string with get, set
-            abstract outputSchema: obj option with get, set
-            abstract displayName: string option with get, set
-            abstract icon: string option with get, set
-            abstract display: AgentToolDisplayMetadata option with get, set
+            inherit AgentTools.AgentTool.Options.Base<'Output>
             abstract inputSchema: 'InputSchema with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (description: string, inputSchema: 'InputSchema, ?outputSchema: obj, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Options<'InputSchema, 'Output> = jsNative
+
+        module Options =
+            [<Interface>]
+            type Base<'Output> =
+                abstract description: string with get, set
+                abstract outputSchema: obj option with get, set
+                abstract displayName: string option with get, set
+                abstract icon: string option with get, set
+                abstract display: AgentToolDisplayMetadata option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (description: string, ?outputSchema: obj, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Base<'Output> = jsNative
 
     module AgentToolFactoryOptions =
         [<Interface>]
@@ -5696,10 +6408,11 @@ module AgentTools =
             /// <summary>
             /// Validates unknown input values.
             /// </summary>
-            abstract validate: AgentTools.AgentToolFactoryOptions.InputSchemaStandard.Validate
+            abstract validate: AgentTools.AgentToolFactoryOptions.InputSchemaStandard.Validate<'SCHEMA>
             /// <summary>
             /// The version number of the standard.
             /// </summary>
+            /// <remarks>TypeScript type: <c>1</c></remarks>
             abstract version: float
             /// <summary>
             /// The vendor name of the schema library.
@@ -5710,17 +6423,24 @@ module AgentTools =
             /// </summary>
             abstract types: obj option
             abstract jsonSchema: obj option
-            [<ParamObject; Emit("$0")>]
-            static member Create (validate: AgentTools.AgentToolFactoryOptions.InputSchemaStandard.Validate, version: float, vendor: string, ?types: obj, ?jsonSchema: obj) : InputSchemaStandard<'SCHEMA> = jsNative
+            [<ParamObject; Emit("({ version: 1, ...$0 })")>]
+            static member Create (validate: AgentTools.AgentToolFactoryOptions.InputSchemaStandard.Validate<'SCHEMA>, vendor: string, ?types: obj, ?jsonSchema: obj) : InputSchemaStandard<'SCHEMA> = jsNative
+
+        module InputSchemaStandard =
+            /// <summary>
+            /// The version number of the standard.
+            /// </summary>
+            /// <remarks>TypeScript type: <c>1</c></remarks>
+            [<Literal>]
+            let version = 1.0
+
+            type Validate<'SCHEMA> = delegate of value: obj * options: obj option -> obj
 
         [<Interface>]
         type OutputSchema<'Output> =
             abstract parse: value: obj -> 'Output
             [<ParamObject; Emit("$0")>]
             static member Create (parse: (obj -> 'Output)) : OutputSchema<'Output> = jsNative
-
-        module InputSchemaStandard =
-            type Validate = delegate of value: obj * options: obj option -> obj
 
 /// <summary>agents/chat</summary>
 module Chat =
@@ -5781,7 +6501,7 @@ module Chat =
         /// <summary>
         /// Live tailers per run; iterated to forward each progress chunk.
         /// </summary>
-        abstract forwarders: JS.Map<string, JS.Set<(AgentToolStoredChunk -> unit)>> with get, set
+        abstract forwarders: Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.Set<(AgentToolStoredChunk -> unit)>> with get, set
         /// <summary>
         /// Per-run forwarded-chunk counter; advanced even with no tailer attached.
         /// <br /><br />
@@ -5797,11 +6517,11 @@ module Chat =
         /// on one monotonic line; the tail realigns it to the stored high-water on each
         /// (re)attach so a replay→live handoff stays gap/duplicate-free.
         /// </summary>
-        abstract liveSequences: JS.Map<string, float> with get, set
+        abstract liveSequences: Fable.Core.TS.Es.Map<string, float> with get, set
         /// <summary>
         /// Per-run last error body, captured for replay to a late-attaching tailer.
         /// </summary>
-        abstract lastErrors: JS.Map<string, string> with get, set
+        abstract lastErrors: Fable.Core.TS.Es.Map<string, string> with get, set
         /// <summary>
         /// The host's use-chat-response wire type (<c>CHAT_MESSAGE_TYPES.USE_CHAT_RESPONSE</c>).
         /// </summary>
@@ -5811,7 +6531,7 @@ module Chat =
         /// </summary>
         abstract runForRequest: (string -> string option) with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (forwarders: JS.Map<string, JS.Set<(AgentToolStoredChunk -> unit)>>, liveSequences: JS.Map<string, float>, lastErrors: JS.Map<string, string>, responseType: string, runForRequest: (string -> string option)) : AgentToolBroadcastHooks = jsNative
+        static member Create (forwarders: Fable.Core.TS.Es.Map<string, Fable.Core.TS.Es.Set<(AgentToolStoredChunk -> unit)>>, liveSequences: Fable.Core.TS.Es.Map<string, float>, lastErrors: Fable.Core.TS.Es.Map<string, string>, responseType: string, runForRequest: (string -> string option)) : AgentToolBroadcastHooks = jsNative
 
     [<Interface>]
     type MessagePart10 =
@@ -5826,14 +6546,20 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
         abstract state: string with get, set
         abstract input: obj option with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: unit option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : MessagePart10 = jsNative
+        [<ParamObject; Emit("({ state: 'input-streaming', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : MessagePart10 = jsNative
+
+    module MessagePart10 =
+        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+        [<Literal>]
+        let state = "input-streaming"
 
     [<Interface>]
     type MessagePart11 =
@@ -5848,14 +6574,20 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: unit option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : MessagePart11 = jsNative
+        [<ParamObject; Emit("({ state: 'input-available', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : MessagePart11 = jsNative
+
+    module MessagePart11 =
+        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+        [<Literal>]
+        let state = "input-available"
 
     [<Interface>]
     type MessagePart12 =
@@ -5870,14 +6602,32 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart12.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart12.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart12 = jsNative
+        [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, approval: Chat.MessagePart12.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart12 = jsNative
+
+    module MessagePart12 =
+        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+        [<Literal>]
+        let state = "approval-requested"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: unit option with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: unit option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart13 =
@@ -5892,14 +6642,32 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart13.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart13.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart13 = jsNative
+        [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, approval: Chat.MessagePart13.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart13 = jsNative
+
+    module MessagePart13 =
+        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+        [<Literal>]
+        let state = "approval-responded"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart14 =
@@ -5914,16 +6682,34 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: obj with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
-        abstract resultProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+        abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
         abstract preliminary: bool option with get, set
         abstract approval: Chat.MessagePart14.Approval option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?preliminary: bool, ?approval: Chat.MessagePart14.Approval) : MessagePart14 = jsNative
+        [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?preliminary: bool, ?approval: Chat.MessagePart14.Approval) : MessagePart14 = jsNative
+
+    module MessagePart14 =
+        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+        [<Literal>]
+        let state = "output-available"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart15 =
@@ -5938,16 +6724,34 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract rawInput: obj option with get, set
         abstract output: unit option with get, set
         abstract errorText: string with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
-        abstract resultProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+        abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart15.Approval option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?approval: Chat.MessagePart15.Approval) : MessagePart15 = jsNative
+        [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?approval: Chat.MessagePart15.Approval) : MessagePart15 = jsNative
+
+    module MessagePart15 =
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+        [<Literal>]
+        let state = "output-error"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart16 =
@@ -5962,14 +6766,32 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart16.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart16.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart16 = jsNative
+        [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, approval: Chat.MessagePart16.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart16 = jsNative
+
+    module MessagePart16 =
+        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+        [<Literal>]
+        let state = "output-denied"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart2 =
@@ -5981,6 +6803,7 @@ module Chat =
 
     [<Interface>]
     type MessagePart3 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -5996,17 +6819,27 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
         abstract state: string with get, set
         abstract input: obj option with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: unit option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : MessagePart3 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-streaming', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : MessagePart3 = jsNative
+
+    module MessagePart3 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+        [<Literal>]
+        let state = "input-streaming"
 
     [<Interface>]
     type MessagePart4 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6022,17 +6855,27 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: unit option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : MessagePart4 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-available', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : MessagePart4 = jsNative
+
+    module MessagePart4 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+        [<Literal>]
+        let state = "input-available"
 
     [<Interface>]
     type MessagePart5 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6048,17 +6891,39 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart5.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart5.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart5 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-requested', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, approval: Chat.MessagePart5.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart5 = jsNative
+
+    module MessagePart5 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+        [<Literal>]
+        let state = "approval-requested"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: unit option with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: unit option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart6 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6074,17 +6939,39 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart6.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart6.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart6 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-responded', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, approval: Chat.MessagePart6.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart6 = jsNative
+
+    module MessagePart6 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+        [<Literal>]
+        let state = "approval-responded"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart7 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6100,19 +6987,41 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: obj with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
-        abstract resultProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+        abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
         abstract preliminary: bool option with get, set
         abstract approval: Chat.MessagePart7.Approval option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?preliminary: bool, ?approval: Chat.MessagePart7.Approval) : MessagePart7 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-available', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?preliminary: bool, ?approval: Chat.MessagePart7.Approval) : MessagePart7 = jsNative
+
+    module MessagePart7 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+        [<Literal>]
+        let state = "output-available"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart8 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6128,18 +7037,40 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: string with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
-        abstract resultProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+        abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart8.Approval option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?approval: Chat.MessagePart8.Approval) : MessagePart8 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-error', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?approval: Chat.MessagePart8.Approval) : MessagePart8 = jsNative
+
+    module MessagePart8 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+        [<Literal>]
+        let state = "output-error"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     [<Interface>]
     type MessagePart9 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Name of the tool that is being called.
@@ -6155,14 +7086,35 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
+        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
         abstract state: string with get, set
         abstract input: obj with get, set
         abstract output: unit option with get, set
         abstract errorText: unit option with get, set
-        abstract callProviderMetadata: Record<string, obj> option with get, set
+        abstract callProviderMetadata: JS.Record<string, obj> option with get, set
         abstract approval: Chat.MessagePart9.Approval with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: Chat.MessagePart9.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : MessagePart9 = jsNative
+        [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-denied', ...$0 })")>]
+        static member Create (toolName: string, toolCallId: string, input: obj, approval: Chat.MessagePart9.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : MessagePart9 = jsNative
+
+    module MessagePart9 =
+        /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic-tool"
+        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+        [<Literal>]
+        let state = "output-denied"
+
+        [<Interface>]
+        type Approval =
+            abstract id: string with get, set
+            abstract approved: bool with get, set
+            abstract descriptor: obj option with get, set
+            abstract requestReason: string option with get, set
+            abstract reason: string option with get, set
+            abstract isAutomatic: bool option with get, set
+            abstract signature: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     /// <summary>
     /// The parts array type from UIMessage
@@ -6199,7 +7151,7 @@ module Chat =
         abstract preliminary: bool option with get, set
         abstract approvalId: string option with get, set
         abstract approvalDescriptor: obj option with get, set
-        abstract providerMetadata: Record<string, obj> option with get, set
+        abstract providerMetadata: JS.Record<string, obj> option with get, set
         abstract providerExecuted: bool option with get, set
         abstract data: obj option with get, set
         abstract transient: bool option with get, set
@@ -6232,66 +7184,107 @@ module Chat =
         /// Eager seed; omitted continuations seed from the messages passed to <c>mergeInto</c>.
         /// </summary>
         abstract existingParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[] option with get, set
-        abstract existingMetadata: Record<string, obj> option with get, set
+        abstract existingMetadata: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (messageId: string, ?continuation: bool, ?existingParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], ?existingMetadata: Record<string, obj>) : StreamAccumulatorOptions = jsNative
+        static member Create (messageId: string, ?continuation: bool, ?existingParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], ?existingMetadata: JS.Record<string, obj>) : StreamAccumulatorOptions = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ChunkAction =
-        | [<CompiledName("start")>] Start of messageId: string option * metadata: Record<string, obj> option
-        | [<CompiledName("finish")>] Finish of finishReason: string option * metadata: Record<string, obj> option
-        | [<CompiledName("message-metadata")>] MessageMetadata of metadata: Record<string, obj>
+        | [<CompiledName("start")>] Start of messageId: string option * metadata: JS.Record<string, obj> option
+        | [<CompiledName("finish")>] Finish of finishReason: string option * metadata: JS.Record<string, obj> option
+        | [<CompiledName("message-metadata")>] MessageMetadata of metadata: JS.Record<string, obj>
         | [<CompiledName("tool-approval-request")>] ToolApprovalRequest of toolCallId: string
         | [<CompiledName("cross-message-tool-update")>] CrossMessageToolUpdate of updateType: Chat.ChunkAction6.UpdateType * toolCallId: string * output: obj option * errorText: string option * preliminary: bool option
         | [<CompiledName("error")>] Error of error: string
 
     [<Interface>]
     type ChunkAction2 =
+        /// <remarks>TypeScript type: <c>"start"</c></remarks>
         abstract ``type``: string with get, set
         abstract messageId: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, ?messageId: string, ?metadata: Record<string, obj>) : ChunkAction2 = jsNative
+        abstract metadata: JS.Record<string, obj> option with get, set
+        [<ParamObject; Emit("({ type: 'start', ...$0 })")>]
+        static member Create (?messageId: string, ?metadata: JS.Record<string, obj>) : ChunkAction2 = jsNative
+
+    module ChunkAction2 =
+        /// <remarks>TypeScript type: <c>"start"</c></remarks>
+        [<Literal>]
+        let ``type`` = "start"
 
     [<Interface>]
     type ChunkAction3 =
+        /// <remarks>TypeScript type: <c>"finish"</c></remarks>
         abstract ``type``: string with get, set
         abstract finishReason: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, ?finishReason: string, ?metadata: Record<string, obj>) : ChunkAction3 = jsNative
+        abstract metadata: JS.Record<string, obj> option with get, set
+        [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+        static member Create (?finishReason: string, ?metadata: JS.Record<string, obj>) : ChunkAction3 = jsNative
+
+    module ChunkAction3 =
+        /// <remarks>TypeScript type: <c>"finish"</c></remarks>
+        [<Literal>]
+        let ``type`` = "finish"
 
     [<Interface>]
     type ChunkAction4 =
+        /// <remarks>TypeScript type: <c>"message-metadata"</c></remarks>
         abstract ``type``: string with get, set
-        abstract metadata: Record<string, obj> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, metadata: Record<string, obj>) : ChunkAction4 = jsNative
+        abstract metadata: JS.Record<string, obj> with get, set
+        [<ParamObject; Emit("({ type: 'message-metadata', ...$0 })")>]
+        static member Create (metadata: JS.Record<string, obj>) : ChunkAction4 = jsNative
+
+    module ChunkAction4 =
+        /// <remarks>TypeScript type: <c>"message-metadata"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message-metadata"
 
     [<Interface>]
     type ChunkAction5 =
+        /// <remarks>TypeScript type: <c>"tool-approval-request"</c></remarks>
         abstract ``type``: string with get, set
         abstract toolCallId: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string) : ChunkAction5 = jsNative
+        [<ParamObject; Emit("({ type: 'tool-approval-request', ...$0 })")>]
+        static member Create (toolCallId: string) : ChunkAction5 = jsNative
+
+    module ChunkAction5 =
+        /// <remarks>TypeScript type: <c>"tool-approval-request"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool-approval-request"
 
     [<Interface>]
     type ChunkAction6 =
+        /// <remarks>TypeScript type: <c>"cross-message-tool-update"</c></remarks>
         abstract ``type``: string with get, set
         abstract updateType: Chat.ChunkAction6.UpdateType with get, set
         abstract toolCallId: string with get, set
         abstract output: obj option with get, set
         abstract errorText: string option with get, set
         abstract preliminary: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, updateType: Chat.ChunkAction6.UpdateType, toolCallId: string, ?output: obj, ?errorText: string, ?preliminary: bool) : ChunkAction6 = jsNative
+        [<ParamObject; Emit("({ type: 'cross-message-tool-update', ...$0 })")>]
+        static member Create (updateType: Chat.ChunkAction6.UpdateType, toolCallId: string, ?output: obj, ?errorText: string, ?preliminary: bool) : ChunkAction6 = jsNative
+
+    module ChunkAction6 =
+        /// <remarks>TypeScript type: <c>"cross-message-tool-update"</c></remarks>
+        [<Literal>]
+        let ``type`` = "cross-message-tool-update"
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type UpdateType =
+            | [<CompiledName("output-available")>] OutputAvailable
+            | [<CompiledName("output-error")>] OutputError
 
     [<Interface>]
     type ChunkAction7 =
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
         abstract ``type``: string with get, set
         abstract error: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, error: string) : ChunkAction7 = jsNative
+        [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+        static member Create (error: string) : ChunkAction7 = jsNative
+
+    module ChunkAction7 =
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "error"
 
     [<Interface>]
     type ChunkResult =
@@ -6304,7 +7297,7 @@ module Chat =
     type StreamAccumulator =
         abstract messageId: string with get, set
         abstract parts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[]
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract _isContinuation: obj with get, set
         abstract _pendingContinuationChunks: obj with get, set
         abstract applyChunk: chunk: FSharp.CloudEdge.Runtime.Agents.Chat.StreamChunkData -> FSharp.CloudEdge.Runtime.Agents.Chat.ChunkResult
@@ -6320,25 +7313,37 @@ module Chat =
         /// </summary>
         abstract mergeInto: messages: obj[] -> obj[]
         [<ParamObject; Emit("$0")>]
-        static member Create (messageId: string, parts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], _isContinuation: obj, _pendingContinuationChunks: obj, applyChunk: (FSharp.CloudEdge.Runtime.Agents.Chat.StreamChunkData -> FSharp.CloudEdge.Runtime.Agents.Chat.ChunkResult), toMessage: (unit -> obj), mergeInto: (obj[] -> obj[]), ?metadata: Record<string, obj>) : StreamAccumulator = jsNative
+        static member Create (messageId: string, parts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], _isContinuation: obj, _pendingContinuationChunks: obj, applyChunk: (FSharp.CloudEdge.Runtime.Agents.Chat.StreamChunkData -> FSharp.CloudEdge.Runtime.Agents.Chat.ChunkResult), toMessage: (unit -> obj), mergeInto: (obj[] -> obj[]), ?metadata: JS.Record<string, obj>) : StreamAccumulator = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-    type TurnResult =
-        | [<CompiledName("completed")>] Completed of value: obj
+    type TurnResult<'T> =
+        | [<CompiledName("completed")>] Completed of value: 'T
         | [<CompiledName("stale")>] Stale
 
     [<Interface>]
     type TurnResult2<'T> =
+        /// <remarks>TypeScript type: <c>"completed"</c></remarks>
         abstract status: string with get, set
         abstract value: 'T with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, value: 'T) : TurnResult2<'T> = jsNative
+        [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
+        static member Create (value: 'T) : TurnResult2<'T> = jsNative
+
+    module TurnResult2 =
+        /// <remarks>TypeScript type: <c>"completed"</c></remarks>
+        [<Literal>]
+        let status = "completed"
 
     [<Interface>]
     type TurnResult3 =
+        /// <remarks>TypeScript type: <c>"stale"</c></remarks>
         abstract status: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string) : TurnResult3 = jsNative
+        [<Emit("({ status: 'stale' })")>]
+        static member Create () : TurnResult3 = jsNative
+
+    module TurnResult3 =
+        /// <remarks>TypeScript type: <c>"stale"</c></remarks>
+        [<Literal>]
+        let status = "stale"
 
     [<Interface>]
     type EnqueueOptions =
@@ -6361,7 +7366,7 @@ module Chat =
         abstract generation: float
         abstract activeRequestId: string option
         abstract isActive: bool
-        abstract enqueue<'T>: requestId: string * fn: (unit -> JS.Promise<'T>) * ?options: FSharp.CloudEdge.Runtime.Agents.Chat.EnqueueOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.TurnResult>
+        abstract enqueue<'T>: requestId: string * fn: (unit -> JS.Promise<'T>) * ?options: FSharp.CloudEdge.Runtime.Agents.Chat.EnqueueOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.TurnResult<'T>>
         /// <summary>
         /// Advance the generation counter. All turns enqueued under older
         /// generations will be skipped when they reach the front of the queue.
@@ -6378,7 +7383,7 @@ module Chat =
         abstract queuedCount: ?generation: float -> float
         abstract _decrementCount: obj with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (_queue: obj, _generation: obj, _activeRequestId: obj, _countsByGeneration: obj, generation: float, isActive: bool, enqueue: Func<string, (unit -> JS.Promise<'T>), FSharp.CloudEdge.Runtime.Agents.Chat.EnqueueOptions option, JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.TurnResult>>, reset: (unit -> unit), waitForIdle: (unit -> JS.Promise<unit>), queuedCount: (float option -> float), _decrementCount: obj, ?activeRequestId: string) : TurnQueue = jsNative
+        static member Create (_queue: obj, _generation: obj, _activeRequestId: obj, _countsByGeneration: obj, generation: float, isActive: bool, enqueue: Func<string, (unit -> JS.Promise<'T>), FSharp.CloudEdge.Runtime.Agents.Chat.EnqueueOptions option, JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.TurnResult<'T>>>, reset: (unit -> unit), waitForIdle: (unit -> JS.Promise<unit>), queuedCount: (float option -> float), _decrementCount: obj, ?activeRequestId: string) : TurnQueue = jsNative
 
     /// <remarks>@internal A parsed structured-stream chunk accepted by the joiner.</remarks>
     [<Interface>]
@@ -6396,16 +7401,28 @@ module Chat =
 
     [<Interface>]
     type TextSegmentEvent2 =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
         abstract ``type``: string with get, set
         abstract text: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, text: string) : TextSegmentEvent2 = jsNative
+        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+        static member Create (text: string) : TextSegmentEvent2 = jsNative
+
+    module TextSegmentEvent2 =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
+        [<Literal>]
+        let ``type`` = "text"
 
     [<Interface>]
     type TextSegmentEvent3 =
+        /// <remarks>TypeScript type: <c>"boundary"</c></remarks>
         abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string) : TextSegmentEvent3 = jsNative
+        [<Emit("({ type: 'boundary' })")>]
+        static member Create () : TextSegmentEvent3 = jsNative
+
+    module TextSegmentEvent3 =
+        /// <remarks>TypeScript type: <c>"boundary"</c></remarks>
+        [<Literal>]
+        let ``type`` = "boundary"
 
     /// <remarks>
     /// @internal
@@ -6534,7 +7551,7 @@ module Chat =
         abstract partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[] with get, set
         abstract recoveryData: obj with get, set
         abstract messages: obj[] with get, set
-        abstract lastBody: Record<string, obj> option with get, set
+        abstract lastBody: JS.Record<string, obj> option with get, set
         abstract lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
         /// <summary>
         /// Epoch milliseconds when the underlying fiber was started. Compare
@@ -6543,7 +7560,7 @@ module Chat =
         /// </summary>
         abstract createdAt: float with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (incidentId: string, recoveryRootRequestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, streamId: string, requestId: string, partialText: string, partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], recoveryData: obj, messages: obj[], createdAt: float, ?lastBody: Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : ChatRecoveryContext = jsNative
+        static member Create (incidentId: string, recoveryRootRequestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, streamId: string, requestId: string, partialText: string, partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], recoveryData: obj, messages: obj[], createdAt: float, ?lastBody: JS.Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : ChatRecoveryContext = jsNative
 
     /// <summary>
     /// Options returned from <c>onChatRecovery</c> to control recovery behavior.
@@ -6568,31 +7585,7 @@ module Chat =
     /// </summary>
     [<Interface>]
     type ChatRecoveryExhaustedContext =
-        /// <summary>
-        /// Stable identifier for this recovery incident.
-        /// </summary>
-        abstract incidentId: string with get, set
-        /// <summary>
-        /// Stable request ID for the whole continuation chain (the recovery "root").
-        /// Unlike <c>requestId</c> — which changes on every chained continuation — this is
-        /// constant for the lifetime of the incident, so it's the right key for
-        /// per-incident budget tracking or fresh-incident detection without
-        /// re-deriving identity from message IDs.
-        /// </summary>
-        abstract recoveryRootRequestId: string with get, set
-        abstract attempt: float with get, set
-        abstract maxAttempts: float with get, set
-        abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-        abstract streamId: string with get, set
-        abstract requestId: string with get, set
-        abstract partialText: string with get, set
-        abstract partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[] with get, set
-        /// <summary>
-        /// Epoch milliseconds when the underlying fiber was started. Compare
-        /// against <c>Date.now()</c> to suppress continuations for turns that have
-        /// been orphaned too long to safely replay.
-        /// </summary>
-        abstract createdAt: float with get, set
+        inherit Chat.ChatRecoveryExhaustedContext.Base
         /// <summary>
         /// Why recovery stopped. One of:
         /// - <c>max_attempts_exceeded</c> — the per-incident attempt budget was spent.
@@ -6761,19 +7754,31 @@ module Chat =
 
     [<Interface>]
     type MessageConcurrency2 =
+        /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
         abstract strategy: string with get, set
         abstract debounceMs: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (strategy: string, ?debounceMs: float) : MessageConcurrency2 = jsNative
+        [<ParamObject; Emit("({ strategy: 'debounce', ...$0 })")>]
+        static member Create (?debounceMs: float) : MessageConcurrency2 = jsNative
+
+    module MessageConcurrency2 =
+        /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
+        [<Literal>]
+        let strategy = "debounce"
 
     type NormalizedMessageConcurrency = U2<string, FSharp.CloudEdge.Runtime.Agents.Chat.NormalizedMessageConcurrency2>
 
     [<Interface>]
     type NormalizedMessageConcurrency2 =
+        /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
         abstract strategy: string with get, set
         abstract debounceMs: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (strategy: string, debounceMs: float) : NormalizedMessageConcurrency2 = jsNative
+        [<ParamObject; Emit("({ strategy: 'debounce', ...$0 })")>]
+        static member Create (debounceMs: float) : NormalizedMessageConcurrency2 = jsNative
+
+    module NormalizedMessageConcurrency2 =
+        /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
+        [<Literal>]
+        let strategy = "debounce"
 
     [<Interface>]
     type SubmitConcurrencyDecision =
@@ -6821,17 +7826,29 @@ module Chat =
 
     [<Interface>]
     type BroadcastStreamState2 =
+        /// <remarks>TypeScript type: <c>"idle"</c></remarks>
         abstract status: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string) : BroadcastStreamState2 = jsNative
+        [<Emit("({ status: 'idle' })")>]
+        static member Create () : BroadcastStreamState2 = jsNative
+
+    module BroadcastStreamState2 =
+        /// <remarks>TypeScript type: <c>"idle"</c></remarks>
+        [<Literal>]
+        let status = "idle"
 
     [<Interface>]
     type BroadcastStreamState3 =
+        /// <remarks>TypeScript type: <c>"observing"</c></remarks>
         abstract status: string with get, set
         abstract streamId: string with get, set
         abstract accumulator: FSharp.CloudEdge.Runtime.Agents.Chat.StreamAccumulator with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, streamId: string, accumulator: FSharp.CloudEdge.Runtime.Agents.Chat.StreamAccumulator) : BroadcastStreamState3 = jsNative
+        [<ParamObject; Emit("({ status: 'observing', ...$0 })")>]
+        static member Create (streamId: string, accumulator: FSharp.CloudEdge.Runtime.Agents.Chat.StreamAccumulator) : BroadcastStreamState3 = jsNative
+
+    module BroadcastStreamState3 =
+        /// <remarks>TypeScript type: <c>"observing"</c></remarks>
+        [<Literal>]
+        let status = "observing"
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type BroadcastStreamEvent =
@@ -6841,6 +7858,7 @@ module Chat =
 
     [<Interface>]
     type BroadcastStreamEvent2 =
+        /// <remarks>TypeScript type: <c>"response"</c></remarks>
         abstract ``type``: string with get, set
         abstract streamId: string with get, set
         abstract messageId: string with get, set
@@ -6851,22 +7869,39 @@ module Chat =
         abstract replayComplete: bool option with get, set
         abstract continuation: bool option with get, set
         abstract currentMessages: obj[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, streamId: string, messageId: string, ?chunkData: obj, ?``done``: bool, ?error: bool, ?replay: bool, ?replayComplete: bool, ?continuation: bool, ?currentMessages: obj[]) : BroadcastStreamEvent2 = jsNative
+        [<ParamObject; Emit("({ type: 'response', ...$0 })")>]
+        static member Create (streamId: string, messageId: string, ?chunkData: obj, ?``done``: bool, ?error: bool, ?replay: bool, ?replayComplete: bool, ?continuation: bool, ?currentMessages: obj[]) : BroadcastStreamEvent2 = jsNative
+
+    module BroadcastStreamEvent2 =
+        /// <remarks>TypeScript type: <c>"response"</c></remarks>
+        [<Literal>]
+        let ``type`` = "response"
 
     [<Interface>]
     type BroadcastStreamEvent3 =
+        /// <remarks>TypeScript type: <c>"resume-fallback"</c></remarks>
         abstract ``type``: string with get, set
         abstract streamId: string with get, set
         abstract messageId: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, streamId: string, messageId: string) : BroadcastStreamEvent3 = jsNative
+        [<ParamObject; Emit("({ type: 'resume-fallback', ...$0 })")>]
+        static member Create (streamId: string, messageId: string) : BroadcastStreamEvent3 = jsNative
+
+    module BroadcastStreamEvent3 =
+        /// <remarks>TypeScript type: <c>"resume-fallback"</c></remarks>
+        [<Literal>]
+        let ``type`` = "resume-fallback"
 
     [<Interface>]
     type BroadcastStreamEvent4 =
+        /// <remarks>TypeScript type: <c>"clear"</c></remarks>
         abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string) : BroadcastStreamEvent4 = jsNative
+        [<Emit("({ type: 'clear' })")>]
+        static member Create () : BroadcastStreamEvent4 = jsNative
+
+    module BroadcastStreamEvent4 =
+        /// <remarks>TypeScript type: <c>"clear"</c></remarks>
+        [<Literal>]
+        let ``type`` = "clear"
 
     [<Interface>]
     type BroadcastTransitionResult =
@@ -6876,7 +7911,7 @@ module Chat =
         [<ParamObject; Emit("$0")>]
         static member Create (state: FSharp.CloudEdge.Runtime.Agents.Chat.BroadcastStreamState, isStreaming: bool, ?messagesUpdate: (obj[] -> obj[])) : BroadcastTransitionResult = jsNative
 
-    type SqlTaggedTemplate<'T> = delegate of strings: obj * values: U3<string, float, bool> option[] -> 'T[]
+    type SqlTaggedTemplate<'T> = delegate of strings: Fable.Core.TS.Es.TemplateStringsArray * values: U3<string, float, bool> option[] -> 'T[]
 
     [<Interface>]
     [<Import("ResumableStream", "agents/chat")>]
@@ -7082,10 +8117,23 @@ module Chat =
         /// <summary>
         /// No active, pending, or terminal stream exists for this agent.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"idle"</c></remarks>
         abstract IDLE: string
+        /// <remarks>TypeScript type: <c>"continuation-owned"</c></remarks>
         abstract CONTINUATION_OWNED: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (IDLE: string, CONTINUATION_OWNED: string) : STREAMRESUMENONEREASONS = jsNative
+        [<Emit("({ IDLE: 'idle', CONTINUATION_OWNED: 'continuation-owned' })")>]
+        static member Create () : STREAMRESUMENONEREASONS = jsNative
+
+    module STREAMRESUMENONEREASONS =
+        /// <summary>
+        /// No active, pending, or terminal stream exists for this agent.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"idle"</c></remarks>
+        [<Literal>]
+        let IDLE = "idle"
+        /// <remarks>TypeScript type: <c>"continuation-owned"</c></remarks>
+        [<Literal>]
+        let CONTINUATION_OWNED = "continuation-owned"
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type StreamResumeNoneReason =
@@ -7094,22 +8142,80 @@ module Chat =
 
     [<Interface>]
     type CHATMESSAGETYPES =
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_messages"</c></remarks>
         abstract CHAT_MESSAGES: string
+        /// <remarks>TypeScript type: <c>"cf_agent_use_chat_request"</c></remarks>
         abstract USE_CHAT_REQUEST: string
+        /// <remarks>TypeScript type: <c>"cf_agent_use_chat_response"</c></remarks>
         abstract USE_CHAT_RESPONSE: string
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_clear"</c></remarks>
         abstract CHAT_CLEAR: string
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_request_cancel"</c></remarks>
         abstract CHAT_REQUEST_CANCEL: string
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resuming"</c></remarks>
         abstract STREAM_RESUMING: string
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_ack"</c></remarks>
         abstract STREAM_RESUME_ACK: string
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_request"</c></remarks>
         abstract STREAM_RESUME_REQUEST: string
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_none"</c></remarks>
         abstract STREAM_RESUME_NONE: string
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_pending"</c></remarks>
         abstract STREAM_PENDING: string
+        /// <remarks>TypeScript type: <c>"cf_agent_tool_result"</c></remarks>
         abstract TOOL_RESULT: string
+        /// <remarks>TypeScript type: <c>"cf_agent_tool_approval"</c></remarks>
         abstract TOOL_APPROVAL: string
+        /// <remarks>TypeScript type: <c>"cf_agent_message_updated"</c></remarks>
         abstract MESSAGE_UPDATED: string
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_recovering"</c></remarks>
         abstract CHAT_RECOVERING: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (CHAT_MESSAGES: string, USE_CHAT_REQUEST: string, USE_CHAT_RESPONSE: string, CHAT_CLEAR: string, CHAT_REQUEST_CANCEL: string, STREAM_RESUMING: string, STREAM_RESUME_ACK: string, STREAM_RESUME_REQUEST: string, STREAM_RESUME_NONE: string, STREAM_PENDING: string, TOOL_RESULT: string, TOOL_APPROVAL: string, MESSAGE_UPDATED: string, CHAT_RECOVERING: string) : CHATMESSAGETYPES = jsNative
+        [<Emit("({ CHAT_MESSAGES: 'cf_agent_chat_messages', USE_CHAT_REQUEST: 'cf_agent_use_chat_request', USE_CHAT_RESPONSE: 'cf_agent_use_chat_response', CHAT_CLEAR: 'cf_agent_chat_clear', CHAT_REQUEST_CANCEL: 'cf_agent_chat_request_cancel', STREAM_RESUMING: 'cf_agent_stream_resuming', STREAM_RESUME_ACK: 'cf_agent_stream_resume_ack', STREAM_RESUME_REQUEST: 'cf_agent_stream_resume_request', STREAM_RESUME_NONE: 'cf_agent_stream_resume_none', STREAM_PENDING: 'cf_agent_stream_pending', TOOL_RESULT: 'cf_agent_tool_result', TOOL_APPROVAL: 'cf_agent_tool_approval', MESSAGE_UPDATED: 'cf_agent_message_updated', CHAT_RECOVERING: 'cf_agent_chat_recovering' })")>]
+        static member Create () : CHATMESSAGETYPES = jsNative
+
+    module CHATMESSAGETYPES =
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_messages"</c></remarks>
+        [<Literal>]
+        let CHAT_MESSAGES = "cf_agent_chat_messages"
+        /// <remarks>TypeScript type: <c>"cf_agent_use_chat_request"</c></remarks>
+        [<Literal>]
+        let USE_CHAT_REQUEST = "cf_agent_use_chat_request"
+        /// <remarks>TypeScript type: <c>"cf_agent_use_chat_response"</c></remarks>
+        [<Literal>]
+        let USE_CHAT_RESPONSE = "cf_agent_use_chat_response"
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_clear"</c></remarks>
+        [<Literal>]
+        let CHAT_CLEAR = "cf_agent_chat_clear"
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_request_cancel"</c></remarks>
+        [<Literal>]
+        let CHAT_REQUEST_CANCEL = "cf_agent_chat_request_cancel"
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resuming"</c></remarks>
+        [<Literal>]
+        let STREAM_RESUMING = "cf_agent_stream_resuming"
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_ack"</c></remarks>
+        [<Literal>]
+        let STREAM_RESUME_ACK = "cf_agent_stream_resume_ack"
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_request"</c></remarks>
+        [<Literal>]
+        let STREAM_RESUME_REQUEST = "cf_agent_stream_resume_request"
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_resume_none"</c></remarks>
+        [<Literal>]
+        let STREAM_RESUME_NONE = "cf_agent_stream_resume_none"
+        /// <remarks>TypeScript type: <c>"cf_agent_stream_pending"</c></remarks>
+        [<Literal>]
+        let STREAM_PENDING = "cf_agent_stream_pending"
+        /// <remarks>TypeScript type: <c>"cf_agent_tool_result"</c></remarks>
+        [<Literal>]
+        let TOOL_RESULT = "cf_agent_tool_result"
+        /// <remarks>TypeScript type: <c>"cf_agent_tool_approval"</c></remarks>
+        [<Literal>]
+        let TOOL_APPROVAL = "cf_agent_tool_approval"
+        /// <remarks>TypeScript type: <c>"cf_agent_message_updated"</c></remarks>
+        [<Literal>]
+        let MESSAGE_UPDATED = "cf_agent_message_updated"
+        /// <remarks>TypeScript type: <c>"cf_agent_chat_recovering"</c></remarks>
+        [<Literal>]
+        let CHAT_RECOVERING = "cf_agent_chat_recovering"
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type MessageType =
@@ -7129,12 +8235,12 @@ module Chat =
         | [<CompiledName("cf_agent_chat_recovering")>] CFAGENTCHATRECOVERING
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type OutgoingMessage =
+    type OutgoingMessage<'ChatMessage> =
         | [<CompiledName("cf_agent_chat_clear")>] CfAgentChatClear
-        | [<CompiledName("cf_agent_chat_messages")>] CfAgentChatMessages of messages: obj[]
+        | [<CompiledName("cf_agent_chat_messages")>] CfAgentChatMessages of messages: 'ChatMessage[]
         | [<CompiledName("cf_agent_use_chat_response")>] CfAgentUseChatResponse of id: string * body: string * ``done``: bool * error: bool option * continuation: bool option * replay: bool option * replayComplete: bool option
         | [<CompiledName("cf_agent_stream_resuming")>] CfAgentStreamResuming of id: string * probeId: string option
-        | [<CompiledName("cf_agent_message_updated")>] CfAgentMessageUpdated of message: obj
+        | [<CompiledName("cf_agent_message_updated")>] CfAgentMessageUpdated of message: 'ChatMessage
         | [<CompiledName("cf_agent_stream_resume_none")>] CfAgentStreamResumeNone of reason: FSharp.CloudEdge.Runtime.Agents.Chat.StreamResumeNoneReason option * probeId: string option
         | [<CompiledName("cf_agent_stream_pending")>] CfAgentStreamPending of id: string option * probeId: string option
         | [<CompiledName("cf_agent_chat_recovering")>] CfAgentChatRecovering of recovering: bool * id: string option
@@ -7237,10 +8343,10 @@ module Chat =
         static member Create (``type``: string, recovering: bool, ?id: string) : OutgoingMessage9 = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type IncomingMessage =
+    type IncomingMessage<'ChatMessage> =
         | [<CompiledName("cf_agent_chat_clear")>] CfAgentChatClear
         | [<CompiledName("cf_agent_use_chat_request")>] CfAgentUseChatRequest of id: string * init: Chat.IncomingMessage3.Init
-        | [<CompiledName("cf_agent_chat_messages")>] CfAgentChatMessages of messages: obj[]
+        | [<CompiledName("cf_agent_chat_messages")>] CfAgentChatMessages of messages: 'ChatMessage[]
         | [<CompiledName("cf_agent_chat_request_cancel")>] CfAgentChatRequestCancel of id: string
         | [<CompiledName("cf_agent_stream_resume_ack")>] CfAgentStreamResumeAck of id: string
         | [<CompiledName("cf_agent_stream_resume_request")>] CfAgentStreamResumeRequest of probeId: string option
@@ -7360,23 +8466,23 @@ module Chat =
         abstract connectionId: string option with get, set
         abstract requestId: string with get, set
         abstract clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
-        abstract body: Record<string, obj> option with get, set
+        abstract body: JS.Record<string, obj> option with get, set
         abstract errorPrefix: string option with get, set
         abstract prerequisite: JS.Promise<bool> option with get, set
         abstract pastCoalesce: bool with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (connection: 'TConnection, requestId: string, pastCoalesce: bool, ?connectionId: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: Record<string, obj>, ?errorPrefix: string, ?prerequisite: JS.Promise<bool>) : ContinuationPending<'TConnection> = jsNative
+        static member Create (connection: 'TConnection, requestId: string, pastCoalesce: bool, ?connectionId: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: JS.Record<string, obj>, ?errorPrefix: string, ?prerequisite: JS.Promise<bool>) : ContinuationPending<'TConnection> = jsNative
 
     [<Interface>]
     type ContinuationDeferred<'TConnection when 'TConnection :> FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection> =
         abstract connection: 'TConnection with get, set
         abstract connectionId: string option with get, set
         abstract clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
-        abstract body: Record<string, obj> option with get, set
+        abstract body: JS.Record<string, obj> option with get, set
         abstract errorPrefix: string with get, set
         abstract prerequisite: JS.Promise<bool> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (connection: 'TConnection, errorPrefix: string, ?connectionId: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: Record<string, obj>, ?prerequisite: JS.Promise<bool>) : ContinuationDeferred<'TConnection> = jsNative
+        static member Create (connection: 'TConnection, errorPrefix: string, ?connectionId: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: JS.Record<string, obj>, ?prerequisite: JS.Promise<bool>) : ContinuationDeferred<'TConnection> = jsNative
 
     [<Interface>]
     type ContinuationState<'TConnection when 'TConnection :> FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection> =
@@ -7384,7 +8490,7 @@ module Chat =
         abstract deferred: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationDeferred<'TConnection> option with get, set
         abstract activeRequestId: string option with get, set
         abstract activeConnectionId: string option with get, set
-        abstract awaitingConnections: JS.Map<string, 'TConnection> with get, set
+        abstract awaitingConnections: Fable.Core.TS.Es.Map<string, 'TConnection> with get, set
         /// <summary>
         /// Clear pending state and awaiting connections (without sending RESUME_NONE).
         /// </summary>
@@ -7421,7 +8527,7 @@ module Chat =
         /// </summary>
         abstract activateDeferred: generateRequestId: (unit -> string) -> FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationPending<'TConnection> option
         [<ParamObject; Emit("$0")>]
-        static member Create (awaitingConnections: JS.Map<string, 'TConnection>, clearPending: (unit -> unit), clearDeferred: (unit -> unit), clearAll: (unit -> unit), releaseConnection: (string -> unit), sendResumeNone: (unit -> unit), flushAwaitingConnections: (('TConnection -> unit) -> unit), activatePending: (unit -> unit), activateDeferred: ((unit -> string) -> FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationPending<'TConnection> option), ?pending: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationPending<'TConnection>, ?deferred: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationDeferred<'TConnection>, ?activeRequestId: string, ?activeConnectionId: string) : ContinuationState<'TConnection> = jsNative
+        static member Create (awaitingConnections: Fable.Core.TS.Es.Map<string, 'TConnection>, clearPending: (unit -> unit), clearDeferred: (unit -> unit), clearAll: (unit -> unit), releaseConnection: (string -> unit), sendResumeNone: (unit -> unit), flushAwaitingConnections: (('TConnection -> unit) -> unit), activatePending: (unit -> unit), activateDeferred: ((unit -> string) -> FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationPending<'TConnection> option), ?pending: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationPending<'TConnection>, ?deferred: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationDeferred<'TConnection>, ?activeRequestId: string, ?activeConnectionId: string) : ContinuationState<'TConnection> = jsNative
 
     [<Interface>]
     type PreStreamTurns<'TConnection when 'TConnection :> FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection> =
@@ -7434,7 +8540,7 @@ module Chat =
         /// <summary>
         /// Connections parked waiting for a stream to start.
         /// </summary>
-        abstract awaitingConnections: JS.Map<string, 'TConnection>
+        abstract awaitingConnections: Fable.Core.TS.Es.Map<string, 'TConnection>
         /// <summary>
         /// The most recently accepted pre-stream request id (for the keep-waiting frame).
         /// </summary>
@@ -7488,7 +8594,7 @@ module Chat =
         /// </summary>
         abstract reset: unit -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (_accepted: obj, awaitingConnections: JS.Map<string, 'TConnection>, _latestRequestId: obj, ``begin``: (string -> unit), settle: (string -> bool), hasInFlight: (unit -> bool), park: Func<'TConnection, string option, bool>, release: (string -> unit), flushOnStreamStart: (('TConnection -> unit) -> unit), releaseAwaiting: (unit -> unit), reset: (unit -> unit), ?latestRequestId: string) : PreStreamTurns<'TConnection> = jsNative
+        static member Create (_accepted: obj, awaitingConnections: Fable.Core.TS.Es.Map<string, 'TConnection>, _latestRequestId: obj, ``begin``: (string -> unit), settle: (string -> bool), hasInFlight: (unit -> bool), park: Func<'TConnection, string option, bool>, release: (string -> unit), flushOnStreamStart: (('TConnection -> unit) -> unit), releaseAwaiting: (unit -> unit), reset: (unit -> unit), ?latestRequestId: string) : PreStreamTurns<'TConnection> = jsNative
 
     /// <summary>
     /// The data a host supplies to schedule (or re-target) a pending/deferred
@@ -7501,10 +8607,10 @@ module Chat =
     type ContinuationSpec<'TConnection when 'TConnection :> FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection> =
         abstract connection: 'TConnection with get, set
         abstract clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
-        abstract body: Record<string, obj> option with get, set
+        abstract body: JS.Record<string, obj> option with get, set
         abstract errorPrefix: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (connection: 'TConnection, errorPrefix: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: Record<string, obj>) : ContinuationSpec<'TConnection> = jsNative
+        static member Create (connection: 'TConnection, errorPrefix: string, ?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?body: JS.Record<string, obj>) : ContinuationSpec<'TConnection> = jsNative
 
     /// <summary>
     /// Host substrate the controller parameterizes over. Implemented by the agent
@@ -7725,9 +8831,9 @@ module Chat =
     type ToolPartUpdate =
         abstract toolCallId: string with get, set
         abstract matchStates: string[] with get, set
-        abstract apply: (Record<string, obj> -> Record<string, obj>) with get, set
+        abstract apply: (JS.Record<string, obj> -> JS.Record<string, obj>) with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (toolCallId: string, matchStates: string[], apply: (Record<string, obj> -> Record<string, obj>)) : ToolPartUpdate = jsNative
+        static member Create (toolCallId: string, matchStates: string[], apply: (JS.Record<string, obj> -> JS.Record<string, obj>)) : ToolPartUpdate = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ChatProtocolEvent =
@@ -7742,27 +8848,52 @@ module Chat =
 
     [<Interface>]
     type ChatProtocolEvent2 =
+        /// <remarks>TypeScript type: <c>"chat-request"</c></remarks>
         abstract ``type``: string with get, set
         abstract id: string with get, set
         abstract init: Chat.ChatProtocolEvent2.Init with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: string, init: Chat.ChatProtocolEvent2.Init) : ChatProtocolEvent2 = jsNative
+        [<ParamObject; Emit("({ type: 'chat-request', ...$0 })")>]
+        static member Create (id: string, init: Chat.ChatProtocolEvent2.Init) : ChatProtocolEvent2 = jsNative
+
+    module ChatProtocolEvent2 =
+        /// <remarks>TypeScript type: <c>"chat-request"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat-request"
+
+        type Init =
+            abstract ``method``: string option with get, set
+            abstract body: string option with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
 
     [<Interface>]
     type ChatProtocolEvent3 =
+        /// <remarks>TypeScript type: <c>"clear"</c></remarks>
         abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string) : ChatProtocolEvent3 = jsNative
+        [<Emit("({ type: 'clear' })")>]
+        static member Create () : ChatProtocolEvent3 = jsNative
+
+    module ChatProtocolEvent3 =
+        /// <remarks>TypeScript type: <c>"clear"</c></remarks>
+        [<Literal>]
+        let ``type`` = "clear"
 
     [<Interface>]
     type ChatProtocolEvent4 =
+        /// <remarks>TypeScript type: <c>"cancel"</c></remarks>
         abstract ``type``: string with get, set
         abstract id: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: string) : ChatProtocolEvent4 = jsNative
+        [<ParamObject; Emit("({ type: 'cancel', ...$0 })")>]
+        static member Create (id: string) : ChatProtocolEvent4 = jsNative
+
+    module ChatProtocolEvent4 =
+        /// <remarks>TypeScript type: <c>"cancel"</c></remarks>
+        [<Literal>]
+        let ``type`` = "cancel"
 
     [<Interface>]
     type ChatProtocolEvent5 =
+        /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
         abstract ``type``: string with get, set
         abstract toolCallId: string with get, set
         abstract toolName: string with get, set
@@ -7771,38 +8902,76 @@ module Chat =
         abstract errorText: string option with get, set
         abstract autoContinue: bool option with get, set
         abstract clientTools: Chat.ChatProtocolEvent5.ClientTools.Item[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, toolName: string, output: obj, ?state: string, ?errorText: string, ?autoContinue: bool, ?clientTools: Chat.ChatProtocolEvent5.ClientTools.Item[]) : ChatProtocolEvent5 = jsNative
+        [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+        static member Create (toolCallId: string, toolName: string, output: obj, ?state: string, ?errorText: string, ?autoContinue: bool, ?clientTools: Chat.ChatProtocolEvent5.ClientTools.Item[]) : ChatProtocolEvent5 = jsNative
+
+    module ChatProtocolEvent5 =
+        /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool-result"
+
+        module ClientTools =
+            [<Interface>]
+            type Item =
+                abstract name: string with get, set
+                abstract description: string option with get, set
+                abstract parameters: obj option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (name: string, ?description: string, ?parameters: obj) : Item = jsNative
 
     [<Interface>]
     type ChatProtocolEvent6 =
+        /// <remarks>TypeScript type: <c>"tool-approval"</c></remarks>
         abstract ``type``: string with get, set
         abstract toolCallId: string with get, set
         abstract approved: bool with get, set
         abstract autoContinue: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, approved: bool, ?autoContinue: bool) : ChatProtocolEvent6 = jsNative
+        [<ParamObject; Emit("({ type: 'tool-approval', ...$0 })")>]
+        static member Create (toolCallId: string, approved: bool, ?autoContinue: bool) : ChatProtocolEvent6 = jsNative
+
+    module ChatProtocolEvent6 =
+        /// <remarks>TypeScript type: <c>"tool-approval"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool-approval"
 
     [<Interface>]
     type ChatProtocolEvent7 =
+        /// <remarks>TypeScript type: <c>"stream-resume-request"</c></remarks>
         abstract ``type``: string with get, set
         abstract probeId: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, ?probeId: string) : ChatProtocolEvent7 = jsNative
+        [<ParamObject; Emit("({ type: 'stream-resume-request', ...$0 })")>]
+        static member Create (?probeId: string) : ChatProtocolEvent7 = jsNative
+
+    module ChatProtocolEvent7 =
+        /// <remarks>TypeScript type: <c>"stream-resume-request"</c></remarks>
+        [<Literal>]
+        let ``type`` = "stream-resume-request"
 
     [<Interface>]
     type ChatProtocolEvent8 =
+        /// <remarks>TypeScript type: <c>"stream-resume-ack"</c></remarks>
         abstract ``type``: string with get, set
         abstract id: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: string) : ChatProtocolEvent8 = jsNative
+        [<ParamObject; Emit("({ type: 'stream-resume-ack', ...$0 })")>]
+        static member Create (id: string) : ChatProtocolEvent8 = jsNative
+
+    module ChatProtocolEvent8 =
+        /// <remarks>TypeScript type: <c>"stream-resume-ack"</c></remarks>
+        [<Literal>]
+        let ``type`` = "stream-resume-ack"
 
     [<Interface>]
     type ChatProtocolEvent9 =
+        /// <remarks>TypeScript type: <c>"messages"</c></remarks>
         abstract ``type``: string with get, set
         abstract messages: obj[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, messages: obj[]) : ChatProtocolEvent9 = jsNative
+        [<ParamObject; Emit("({ type: 'messages', ...$0 })")>]
+        static member Create (messages: obj[]) : ChatProtocolEvent9 = jsNative
+
+    module ChatProtocolEvent9 =
+        /// <remarks>TypeScript type: <c>"messages"</c></remarks>
+        [<Literal>]
+        let ``type`` = "messages"
 
     [<Interface>]
     type RepairInterruptedToolPartsOptions =
@@ -7818,7 +8987,7 @@ module Chat =
         /// Whether a tool part already carries a settled result (defaults to
         /// toolPartHasSettledResult).
         /// </summary>
-        abstract isSettled: (Record<string, obj> -> bool) option with get, set
+        abstract isSettled: (JS.Record<string, obj> -> bool) option with get, set
         /// <summary>
         /// Normalize a tool part's <c>input</c> (defaults to the shared
         /// normalizeToolInput).
@@ -7836,7 +9005,7 @@ module Chat =
         /// </summary>
         abstract shouldRepair: (FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart -> bool) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (repairPart: (FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart -> FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart), ?isSettled: (Record<string, obj> -> bool), ?normalizeInput: (obj -> Chat.RepairInterruptedToolPartsOptions.NormalizeInput.Result), ?shouldRepair: (FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart -> bool)) : RepairInterruptedToolPartsOptions = jsNative
+        static member Create (repairPart: (FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart -> FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart), ?isSettled: (JS.Record<string, obj> -> bool), ?normalizeInput: (obj -> Chat.RepairInterruptedToolPartsOptions.NormalizeInput.Result), ?shouldRepair: (FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart -> bool)) : RepairInterruptedToolPartsOptions = jsNative
 
     [<Interface>]
     type RepairInterruptedToolPartsResult =
@@ -7922,6 +9091,7 @@ module Chat =
     [<Interface>]
     type ChatFiberSnapshot<'Kind> =
         abstract kind: 'Kind with get, set
+        /// <remarks>TypeScript type: <c>1</c></remarks>
         abstract version: float with get, set
         abstract requestId: string with get, set
         abstract recoveryRootRequestId: string option with get, set
@@ -7930,10 +9100,15 @@ module Chat =
         abstract latestMessageRole: string option with get, set
         abstract latestUserMessageId: string option with get, set
         abstract startedAt: float with get, set
-        abstract lastBody: Record<string, obj> option with get, set
+        abstract lastBody: JS.Record<string, obj> option with get, set
         abstract lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: 'Kind, version: float, requestId: string, continuation: bool, startedAt: float, ?recoveryRootRequestId: string, ?latestMessageId: string, ?latestMessageRole: string, ?latestUserMessageId: string, ?lastBody: Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : ChatFiberSnapshot<'Kind> = jsNative
+        [<ParamObject; Emit("({ version: 1, ...$0 })")>]
+        static member Create (kind: 'Kind, requestId: string, continuation: bool, startedAt: float, ?recoveryRootRequestId: string, ?latestMessageId: string, ?latestMessageRole: string, ?latestUserMessageId: string, ?lastBody: JS.Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : ChatFiberSnapshot<'Kind> = jsNative
+
+    module ChatFiberSnapshot =
+        /// <remarks>TypeScript type: <c>1</c></remarks>
+        [<Literal>]
+        let version = 1.0
 
     [<Interface>]
     type CreateChatFiberSnapshot0<'Kind> =
@@ -7942,10 +9117,10 @@ module Chat =
         abstract recoveryRootRequestId: string option with get, set
         abstract continuation: bool with get, set
         abstract messages: FSharp.CloudEdge.Runtime.Agents.Chat.SnapshotMessage[] with get, set
-        abstract lastBody: Record<string, obj> option with get, set
+        abstract lastBody: JS.Record<string, obj> option with get, set
         abstract lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (kind: 'Kind, requestId: string, continuation: bool, messages: FSharp.CloudEdge.Runtime.Agents.Chat.SnapshotMessage[], ?recoveryRootRequestId: string, ?lastBody: Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : CreateChatFiberSnapshot0<'Kind> = jsNative
+        static member Create (kind: 'Kind, requestId: string, continuation: bool, messages: FSharp.CloudEdge.Runtime.Agents.Chat.SnapshotMessage[], ?recoveryRootRequestId: string, ?lastBody: JS.Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : CreateChatFiberSnapshot0<'Kind> = jsNative
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type ChatRecoveryKind =
@@ -8243,7 +9418,7 @@ module Chat =
         /// (<c>0</c> for the initial enqueue, <c>CHAT_RECOVERY_STABLE_RETRY_DELAY_SECONDS</c> for
         /// a stable-timeout reschedule).
         /// </summary>
-        abstract scheduleRecovery: callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback * data: Record<string, obj> * reason: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason * delaySeconds: float -> JS.Promise<unit>
+        abstract scheduleRecovery: callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback * data: JS.Record<string, obj> * reason: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason * delaySeconds: float -> JS.Promise<unit>
         /// <summary>
         /// Set or clear the live "recovering…" status (#1620). The engine calls this on
         /// the incident transitions: <c>scheduled</c> → active (keyed by the recovery-root
@@ -8298,7 +9473,7 @@ module Chat =
         /// </summary>
         abstract onGiveUpBookkeepingError: phase: Chat.ChatRecoveryAdapter.OnGiveUpBookkeepingError.Phase * error: obj -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (resolveConfig: (unit -> FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedChatRecoveryConfig), now: (unit -> float), sweepStaleIncidents: (float -> JS.Promise<unit>), getIncident: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident option>), readProgress: (unit -> JS.Promise<float>), putIncident: Func<string, FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, JS.Promise<unit>>, deleteIncident: (string -> JS.Promise<unit>), emitRecoveryEvent: (FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncidentEvent -> unit), scheduleRecovery: Func<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, Record<string, obj>, FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason, float, JS.Promise<unit>>, setRecovering: Func<bool, string option, JS.Promise<unit>>, exhaustChatRecovery: Func<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedChatRecoveryConfig, FSharp.CloudEdge.Runtime.Agents.Chat.RecoveryPartial, string, float, JS.Promise<unit>>, resolveRecoveryStream: (string -> FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedRecoveryStream), getPartialStreamText: (string -> FSharp.CloudEdge.Runtime.Agents.Chat.RecoveryPartial), activeChatRecoveryRootRequestId: (unit -> string option), onGiveUpBookkeepingError: Action<Chat.ChatRecoveryAdapter.OnGiveUpBookkeepingError.Phase, obj>, ?ensureInteractionStateLoaded: (unit -> unit), ?tryHandleNonChatFiberRecovery: (FiberRecoveryContext -> JS.Promise<bool>), ?isAwaitingClientInteraction: (unit -> bool), ?onShouldKeepRecoveringError: (obj -> unit)) : ChatRecoveryAdapter = jsNative
+        static member Create (resolveConfig: (unit -> FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedChatRecoveryConfig), now: (unit -> float), sweepStaleIncidents: (float -> JS.Promise<unit>), getIncident: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident option>), readProgress: (unit -> JS.Promise<float>), putIncident: Func<string, FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, JS.Promise<unit>>, deleteIncident: (string -> JS.Promise<unit>), emitRecoveryEvent: (FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncidentEvent -> unit), scheduleRecovery: Func<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, JS.Record<string, obj>, FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason, float, JS.Promise<unit>>, setRecovering: Func<bool, string option, JS.Promise<unit>>, exhaustChatRecovery: Func<FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedChatRecoveryConfig, FSharp.CloudEdge.Runtime.Agents.Chat.RecoveryPartial, string, float, JS.Promise<unit>>, resolveRecoveryStream: (string -> FSharp.CloudEdge.Runtime.Agents.Chat.ResolvedRecoveryStream), getPartialStreamText: (string -> FSharp.CloudEdge.Runtime.Agents.Chat.RecoveryPartial), activeChatRecoveryRootRequestId: (unit -> string option), onGiveUpBookkeepingError: Action<Chat.ChatRecoveryAdapter.OnGiveUpBookkeepingError.Phase, obj>, ?ensureInteractionStateLoaded: (unit -> unit), ?tryHandleNonChatFiberRecovery: (FiberRecoveryContext -> JS.Promise<bool>), ?isAwaitingClientInteraction: (unit -> bool), ?onShouldKeepRecoveringError: (obj -> unit)) : ChatRecoveryAdapter = jsNative
 
     /// <summary>
     /// Resolved orphaned-stream identity for a recovered chat turn.
@@ -8699,7 +9874,7 @@ module Chat =
         /// Connections notified of a resumable stream, excluded from live broadcast
         /// until they ACK. Host-owned (shared with the streaming loop).
         /// </summary>
-        abstract pendingResumeConnections: JS.Set<string>
+        abstract pendingResumeConnections: Fable.Core.TS.Es.Set<string>
         /// <summary>
         /// Read the pending terminal outcome (#1645), or <c>null</c> when none survives.
         /// </summary>
@@ -8717,7 +9892,7 @@ module Chat =
         /// </summary>
         abstract isConnectionPresent: (string -> bool) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (responseMessageType: string, resumableStream: FSharp.CloudEdge.Runtime.Agents.Chat.ResumableStream, continuation: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationState<FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection>, pendingResumeConnections: JS.Set<string>, pendingChatTerminal: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.PendingChatTerminal option>), persistOrphanedStream: (string -> JS.Promise<unit>), ?preStream: FSharp.CloudEdge.Runtime.Agents.Chat.PreStreamTurns<FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection>, ?isConnectionPresent: (string -> bool)) : ResumeHandshakeHost = jsNative
+        static member Create (responseMessageType: string, resumableStream: FSharp.CloudEdge.Runtime.Agents.Chat.ResumableStream, continuation: FSharp.CloudEdge.Runtime.Agents.Chat.ContinuationState<FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection>, pendingResumeConnections: Fable.Core.TS.Es.Set<string>, pendingChatTerminal: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Chat.PendingChatTerminal option>), persistOrphanedStream: (string -> JS.Promise<unit>), ?preStream: FSharp.CloudEdge.Runtime.Agents.Chat.PreStreamTurns<FSharp.CloudEdge.Runtime.Agents.Chat.ChatConnection>, ?isConnectionPresent: (string -> bool)) : ResumeHandshakeHost = jsNative
 
     /// <summary>
     /// Drives the server side of the stream-resume protocol over a
@@ -8848,7 +10023,7 @@ module Chat =
         /// </code>
         /// </summary>
         [<Import("ChatStreamStalledError.captureStackTrace", "agents/chat")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ChatStreamStalledError.prepareStackTrace", "agents/chat")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -8915,7 +10090,7 @@ module Chat =
         /// each other's progress or error state.
         /// </summary>
         [<Import("interceptAgentToolBroadcast", "agents/chat")>]
-        static member interceptAgentToolBroadcast (msg: U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, hooks: FSharp.CloudEdge.Runtime.Agents.Chat.AgentToolBroadcastHooks) : unit = jsNative
+        static member interceptAgentToolBroadcast (msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, hooks: FSharp.CloudEdge.Runtime.Agents.Chat.AgentToolBroadcastHooks) : unit = jsNative
         /// <summary>
         /// Coerce a tool part's <c>input</c> into a provider-acceptable object.
         /// <br /><br />
@@ -9086,7 +10261,7 @@ module Chat =
         /// </summary>
         /// <remarks>@throws if <c>count</c> is less than 1.</remarks>
         [<Import("buildInClauseStrings", "agents/chat")>]
-        static member buildInClauseStrings (prefix: string, count: float) : obj = jsNative
+        static member buildInClauseStrings (prefix: string, count: float) : Fable.Core.TS.Es.TemplateStringsArray = jsNative
         /// <summary>
         /// Wire protocol message type constants for the cf_agent_chat_* protocol.
         /// <br /><br />
@@ -9163,7 +10338,7 @@ module Chat =
         /// Returns <c>null</c> if no matching part was found.
         /// </summary>
         [<Import("applyToolUpdate", "agents/chat")>]
-        static member applyToolUpdate (parts: Record<string, obj>[], update: FSharp.CloudEdge.Runtime.Agents.Chat.ToolPartUpdate) : Chat.ApplyToolUpdate.Result option = jsNative
+        static member applyToolUpdate (parts: JS.Record<string, obj>[], update: FSharp.CloudEdge.Runtime.Agents.Chat.ToolPartUpdate) : Chat.ApplyToolUpdate.Result option = jsNative
         /// <summary>
         /// Build an update descriptor for applying a tool result.
         /// <br /><br />
@@ -9236,7 +10411,7 @@ module Chat =
         /// its <c>execute()</c> died with the isolate.
         /// </summary>
         [<Import("partAwaitsClientInteraction", "agents/chat")>]
-        static member partAwaitsClientInteraction (part: obj, clientResolvable: JS.Set<string>) : bool = jsNative
+        static member partAwaitsClientInteraction (part: obj, clientResolvable: Fable.Core.TS.Es.Set<string>) : bool = jsNative
         /// <summary>
         /// Names of the CLIENT-resolvable tools — the client-provided schemas from the
         /// last request, which have no server <c>execute</c>. An interrupted <c>input-available</c>
@@ -9244,7 +10419,7 @@ module Chat =
         /// <c>tool-result</c>; a server tool's cannot.
         /// </summary>
         [<Import("clientResolvableToolNames", "agents/chat")>]
-        static member clientResolvableToolNames (?tools: Chat.ClientResolvableToolNames.Tools.Item option[]) : JS.Set<string> = jsNative
+        static member clientResolvableToolNames (?tools: Chat.ClientResolvableToolNames.Tools.Item option[]) : Fable.Core.TS.Es.Set<string> = jsNative
         /// <summary>
         /// <c>true</c> when the latest assistant message is mid-batch: it carries at least
         /// one settled tool result AND at least one tool call/approval still awaiting a
@@ -9345,7 +10520,7 @@ module Chat =
         /// denial with the generic "interrupted" message.
         /// </summary>
         [<Import("toolPartHasSettledResult", "agents/chat")>]
-        static member toolPartHasSettledResult (record: Record<string, obj>) : bool = jsNative
+        static member toolPartHasSettledResult (record: JS.Record<string, obj>) : bool = jsNative
         /// <summary>
         /// Repair interrupted tool calls and normalize malformed tool inputs across a
         /// transcript. Behavior mirrors <c>@cloudflare/think</c>'s original
@@ -9376,7 +10551,7 @@ module Chat =
         [<Import("createChatFiberSnapshot", "agents/chat")>]
         static member createChatFiberSnapshot<'Kind> (__0: FSharp.CloudEdge.Runtime.Agents.Chat.CreateChatFiberSnapshot0<'Kind>) : FSharp.CloudEdge.Runtime.Agents.Chat.ChatFiberSnapshot<'Kind> = jsNative
         [<Import("wrapChatFiberSnapshot", "agents/chat")>]
-        static member wrapChatFiberSnapshot<'Kind> (key: string, snapshot: FSharp.CloudEdge.Runtime.Agents.Chat.ChatFiberSnapshot<'Kind>, user: obj) : Record<string, obj> = jsNative
+        static member wrapChatFiberSnapshot<'Kind> (key: string, snapshot: FSharp.CloudEdge.Runtime.Agents.Chat.ChatFiberSnapshot<'Kind>, user: obj) : JS.Record<string, obj> = jsNative
         [<Import("unwrapChatFiberSnapshot", "agents/chat")>]
         static member unwrapChatFiberSnapshot<'Kind> (key: string, value: obj, ?expectedKind: 'Kind) : Chat.UnwrapChatFiberSnapshot.Result<'Kind> = jsNative
         [<Import("CHAT_RECOVERY_INCIDENT_KEY_PREFIX", "agents/chat")>]
@@ -9604,7 +10779,7 @@ module Chat =
         /// <c>messageType</c> is the package's recovering wire-type enum.
         /// </summary>
         [<Import("buildChatRecoveringFrame", "agents/chat")>]
-        static member buildChatRecoveringFrame (storage: Chat.ReadChatRecoveryProgress.Storage, messageType: string, now: float) : JS.Promise<Record<string, obj> option> = jsNative
+        static member buildChatRecoveringFrame (storage: Chat.ReadChatRecoveryProgress.Storage, messageType: string, now: float) : JS.Promise<JS.Record<string, obj> option> = jsNative
         /// <summary>
         /// Set or clear the live "recovering…" status (#1620). Persists a durable record
         /// (so set/clear stay consistent across the isolates a recovery spans) and
@@ -9713,7 +10888,7 @@ module Chat =
         /// passes the source through untouched.
         /// </summary>
         [<Import("iterateWithStallWatchdog", "agents/chat")>]
-        static member iterateWithStallWatchdog<'T> (source: JS.AsyncIterable<'T>, timeoutMs: float, onStall: (unit -> unit)) : JS.AsyncGenerator<'T> = jsNative
+        static member iterateWithStallWatchdog<'T> (source: Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, timeoutMs: float, onStall: (unit -> unit)) : Fable.Core.TS.Es.AsyncGenerator<'T, obj, obj> = jsNative
         /// <summary>
         /// Converts client tool schemas to AI SDK tool format.
         /// <br /><br />
@@ -9729,7 +10904,7 @@ module Chat =
         /// <param name="options">- Optional <c>execute</c> delegate to run the tools inline</param>
         /// <returns>Record of AI SDK tools that can be spread into your tools object</returns>
         [<Import("createToolsFromClientSchemas", "agents/chat")>]
-        static member createToolsFromClientSchemas (?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?options: Chat.CreateToolsFromClientSchemas.Options) : Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>> = jsNative
+        static member createToolsFromClientSchemas (?clientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[], ?options: Chat.CreateToolsFromClientSchemas.Options) : JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>> = jsNative
 
     module AgentToolProgressEmitHooks =
         type Broadcast = delegate of requestId: string * chunkBody: string -> unit
@@ -9785,17 +10960,17 @@ module Chat =
     module ApplyToolUpdate =
         [<Interface>]
         type Result =
-            abstract parts: Record<string, obj>[] with get, set
+            abstract parts: JS.Record<string, obj>[] with get, set
             abstract index: float with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (parts: Record<string, obj>[], index: float) : Result = jsNative
+            static member Create (parts: JS.Record<string, obj>[], index: float) : Result = jsNative
 
     module BumpChatRecoveryProgress =
         type Storage =
             abstract get<'T>: key: string * ?options: obj -> JS.Promise<'T option>
-            abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<JS.Map<string, 'T>>
+            abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<Fable.Core.TS.Es.Map<string, 'T>>
             abstract put<'T>: key: string * value: 'T * ?options: obj -> JS.Promise<unit>
-            abstract put<'T>: entries: Record<string, 'T> * ?options: obj -> JS.Promise<unit>
+            abstract put<'T>: entries: JS.Record<string, 'T> * ?options: obj -> JS.Promise<unit>
 
     module ChatFiberWakeHooks =
         module ClassifyRecoveredTurn =
@@ -9821,23 +10996,6 @@ module Chat =
                 abstract recoveryData: obj with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (recoveryData: obj, ?snapshot: Chat.ClassifyRecoveredTurnInput.Snapshot) : Result = jsNative
-
-    module ChatProtocolEvent2 =
-        type Init =
-            abstract ``method``: string option with get, set
-            abstract body: string option with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
-    module ChatProtocolEvent5 =
-        module ClientTools =
-            [<Interface>]
-            type Item =
-                abstract name: string with get, set
-                abstract description: string option with get, set
-                abstract parameters: obj option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (name: string, ?description: string, ?parameters: obj) : Item = jsNative
 
     module ChatRecoveryAdapter =
         module OnGiveUpBookkeepingError =
@@ -9870,10 +11028,10 @@ module Chat =
             type Input =
                 abstract incidentId: string option with get, set
                 abstract callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback with get, set
-                abstract data: Record<string, obj> option with get, set
+                abstract data: JS.Record<string, obj> option with get, set
                 abstract maxOomRetries: float with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, maxOomRetries: float, ?incidentId: string, ?data: Record<string, obj>) : Input = jsNative
+                static member Create (callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, maxOomRetries: float, ?incidentId: string, ?data: JS.Record<string, obj>) : Input = jsNative
 
             module Result =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -9886,10 +11044,10 @@ module Chat =
             type Input =
                 abstract incidentId: string option with get, set
                 abstract callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback with get, set
-                abstract data: Record<string, obj> option with get, set
+                abstract data: JS.Record<string, obj> option with get, set
                 abstract fallbackMaxAttempts: float with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, fallbackMaxAttempts: float, ?incidentId: string, ?data: Record<string, obj>) : Input = jsNative
+                static member Create (callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, fallbackMaxAttempts: float, ?incidentId: string, ?data: JS.Record<string, obj>) : Input = jsNative
 
         module ScheduleRecovery =
             [<Interface>]
@@ -9897,10 +11055,41 @@ module Chat =
                 abstract incident: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident with get, set
                 abstract recoveryKind: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryKind with get, set
                 abstract callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback with get, set
-                abstract data: Record<string, obj> with get, set
+                abstract data: JS.Record<string, obj> with get, set
                 abstract reason: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (incident: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, recoveryKind: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryKind, callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, data: Record<string, obj>, ?reason: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason) : Input = jsNative
+                static member Create (incident: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident, recoveryKind: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryKind, callback: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleCallback, data: JS.Record<string, obj>, ?reason: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryScheduleReason) : Input = jsNative
+
+    module ChatRecoveryExhaustedContext =
+        [<Interface>]
+        type Base =
+            /// <summary>
+            /// Stable identifier for this recovery incident.
+            /// </summary>
+            abstract incidentId: string with get, set
+            /// <summary>
+            /// Stable request ID for the whole continuation chain (the recovery "root").
+            /// Unlike <c>requestId</c> — which changes on every chained continuation — this is
+            /// constant for the lifetime of the incident, so it's the right key for
+            /// per-incident budget tracking or fresh-incident detection without
+            /// re-deriving identity from message IDs.
+            /// </summary>
+            abstract recoveryRootRequestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            abstract streamId: string with get, set
+            abstract requestId: string with get, set
+            abstract partialText: string with get, set
+            abstract partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[] with get, set
+            /// <summary>
+            /// Epoch milliseconds when the underlying fiber was started. Compare
+            /// against <c>Date.now()</c> to suppress continuations for turns that have
+            /// been orphaned too long to safely replay.
+            /// </summary>
+            abstract createdAt: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, recoveryRootRequestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, streamId: string, requestId: string, partialText: string, partialParts: FSharp.CloudEdge.Runtime.Agents.Chat.MessagePart[], createdAt: float) : Base = jsNative
 
     module ChatRecoveryIncident =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -9937,12 +11126,6 @@ module Chat =
             | [<CompiledName("completed")>] Completed
             | [<CompiledName("error")>] Error
 
-    module ChunkAction6 =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type UpdateType =
-            | [<CompiledName("output-available")>] OutputAvailable
-            | [<CompiledName("output-error")>] OutputError
-
     module ClassifyAgentToolChildRecovery =
         module Result =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -9955,6 +11138,7 @@ module Chat =
         [<Interface>]
         type Snapshot =
             abstract kind: string with get, set
+            /// <remarks>TypeScript type: <c>1</c></remarks>
             abstract version: float with get, set
             abstract requestId: string with get, set
             abstract recoveryRootRequestId: string option with get, set
@@ -9963,10 +11147,15 @@ module Chat =
             abstract latestMessageRole: string option with get, set
             abstract latestUserMessageId: string option with get, set
             abstract startedAt: float with get, set
-            abstract lastBody: Record<string, obj> option with get, set
+            abstract lastBody: JS.Record<string, obj> option with get, set
             abstract lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[] option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (kind: string, version: float, requestId: string, continuation: bool, startedAt: float, ?recoveryRootRequestId: string, ?latestMessageId: string, ?latestMessageRole: string, ?latestUserMessageId: string, ?lastBody: Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : Snapshot = jsNative
+            [<ParamObject; Emit("({ version: 1, ...$0 })")>]
+            static member Create (kind: string, requestId: string, continuation: bool, startedAt: float, ?recoveryRootRequestId: string, ?latestMessageId: string, ?latestMessageRole: string, ?latestUserMessageId: string, ?lastBody: JS.Record<string, obj>, ?lastClientTools: FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema[]) : Snapshot = jsNative
+
+        module Snapshot =
+            /// <remarks>TypeScript type: <c>1</c></remarks>
+            [<Literal>]
+            let version = 1.0
 
     module CleanupStreamBuffers =
         [<Interface>]
@@ -10031,6 +11220,8 @@ module Chat =
         module Result =
             [<Interface>]
             type Item =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10041,7 +11232,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10067,26 +11258,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -10094,19 +11265,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -10137,10 +11295,12 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item = jsNative
 
             [<Interface>]
             type Item10 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10151,7 +11311,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10177,26 +11337,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -10204,14 +11344,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -10240,12 +11372,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item10 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item10 = jsNative
+
+            module Item10 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item11 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10256,7 +11396,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10282,26 +11422,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -10309,14 +11429,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -10325,7 +11438,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -10334,11 +11447,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item11 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item11 = jsNative
+
+            module Item11 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item12 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10349,7 +11469,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10375,26 +11495,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -10402,14 +11502,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -10418,7 +11511,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -10439,11 +11532,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item12 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item12 = jsNative
+
+            module Item12 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item13 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item13.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10454,7 +11554,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10480,21 +11580,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -10507,12 +11592,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
                 /// <summary>
                 /// An async function that is called with the arguments from the tool call and produces a result.
                 /// If not provided, the tool will not be executed automatically.
@@ -10550,10 +11629,12 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item13 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item13 = jsNative
 
             [<Interface>]
             type Item14 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item13.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10564,7 +11645,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10590,21 +11671,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -10617,12 +11683,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
                 /// <summary>
                 /// An async function that is called with the arguments from the tool call and produces a result.
                 /// If not provided, the tool will not be executed automatically.
@@ -10658,12 +11718,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item14 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item14 = jsNative
+
+            module Item14 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item15 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item13.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10674,7 +11742,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10700,21 +11768,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -10728,18 +11781,13 @@ module Chat =
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
                 /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
                 /// An async function that is called with the arguments from the tool call and produces a result.
                 /// If not provided, the tool will not be executed automatically.
                 /// </summary>
                 /// <remarks>@args is the input of the tool call.</remarks>
                 /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
                 abstract execute: Func<unit, obj, obj> option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -10748,7 +11796,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -10757,11 +11805,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item15 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item15 = jsNative
+
+            module Item15 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item16 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item13.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10772,7 +11827,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10798,21 +11853,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -10825,12 +11865,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
                 /// <summary>
                 /// An async function that is called with the arguments from the tool call and produces a result.
                 /// If not provided, the tool will not be executed automatically.
@@ -10838,6 +11872,7 @@ module Chat =
                 /// <remarks>@args is the input of the tool call.</remarks>
                 /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
                 abstract execute: Func<unit, obj, obj> option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -10846,7 +11881,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -10867,11 +11902,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item16 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item16 = jsNative
+
+            module Item16 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item17 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10882,7 +11924,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -10908,21 +11950,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -10935,19 +11962,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -10978,10 +11992,12 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item17 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item17 = jsNative
 
             [<Interface>]
             type Item18 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -10992,7 +12008,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11018,21 +12034,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11045,19 +12046,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -11086,12 +12074,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item18 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item18 = jsNative
+
+            module Item18 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item19 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11102,7 +12098,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11128,21 +12124,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11155,19 +12136,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -11176,7 +12145,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -11185,11 +12154,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item19 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item19 = jsNative
+
+            module Item19 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item2 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11200,7 +12176,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11226,26 +12202,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -11253,19 +12209,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -11294,12 +12237,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item2 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item2 = jsNative
+
+            module Item2 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item20 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11310,7 +12261,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11336,21 +12287,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11363,19 +12299,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -11384,7 +12308,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -11405,11 +12329,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item20 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item20 = jsNative
+
+            module Item20 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item21 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11420,7 +12351,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11446,21 +12377,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11473,14 +12389,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -11511,10 +12419,12 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item21 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item21 = jsNative
 
             [<Interface>]
             type Item22 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11525,7 +12435,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11551,21 +12461,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11578,14 +12473,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -11614,12 +12501,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item22 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item22 = jsNative
+
+            module Item22 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item23 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11630,7 +12525,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11656,21 +12551,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
                 /// </summary>
@@ -11683,14 +12563,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -11699,7 +12572,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -11708,11 +12581,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item23 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item23 = jsNative
+
+            module Item23 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item24 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11723,7 +12603,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11748,21 +12628,6 @@ module Chat =
                 /// The context is passed to execute function as part of the execution options.
                 /// </summary>
                 abstract contextSchema: obj option with get, set
-                /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
                 /// <summary>
                 /// Optional function that is called when a tool call can be started,
                 /// even if the execute function is not provided.
@@ -11776,14 +12641,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -11792,7 +12650,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -11813,11 +12671,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item24 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item24 = jsNative
+
+            module Item24 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item3 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11828,7 +12693,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11854,26 +12719,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -11881,19 +12726,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -11902,7 +12735,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -11911,11 +12744,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item3 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item3 = jsNative
+
+            module Item3 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item4 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -11926,7 +12766,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -11952,26 +12792,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -11979,19 +12799,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -12000,7 +12808,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -12021,11 +12829,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item4 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item4 = jsNative
+
+            module Item4 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item5 =
+                inherit FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -12036,7 +12851,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -12062,26 +12877,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -12089,19 +12884,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -12132,10 +12914,12 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item5 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item5 = jsNative
 
             [<Interface>]
             type Item6 =
+                inherit FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -12146,7 +12930,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -12172,26 +12956,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -12199,19 +12963,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -12240,12 +12991,20 @@ module Chat =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item6 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item6 = jsNative
+
+            module Item6 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Item7 =
+                inherit FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -12256,7 +13015,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -12282,26 +13041,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -12309,19 +13048,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -12330,7 +13057,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -12339,11 +13066,18 @@ module Chat =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item7 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item7 = jsNative
+
+            module Item7 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item8 =
+                inherit FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item17.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -12354,7 +13088,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -12380,26 +13114,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -12407,19 +13121,7 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -12428,7 +13130,7 @@ module Chat =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -12449,11 +13151,18 @@ module Chat =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item8 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item8 = jsNative
+
+            module Item8 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Item9 =
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item9.Base
+                inherit Chat.CreateToolsFromClientSchemas.Result.Item.Base2
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -12464,7 +13173,7 @@ module Chat =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -12490,26 +13199,6 @@ module Chat =
                 /// </summary>
                 abstract contextSchema: obj option with get, set
                 /// <summary>
-                /// Whether the tool needs approval before it can be executed.
-                /// </summary>
-                /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                abstract needsApproval: obj option with get, set
-                /// <summary>
-                /// Optional function that is called when the model starts generating the tool input.
-                /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                /// </summary>
-                abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when an argument streaming delta is available.
-                /// Only called when the tool is used in a streaming context.
-                /// </summary>
-                abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
-                /// Optional function that is called when a tool call can be started,
-                /// even if the execute function is not provided.
-                /// </summary>
-                abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                /// <summary>
                 /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                 /// <br /><br />
                 /// If not provided, the tool result will be sent as a JSON object.
@@ -12517,14 +13206,6 @@ module Chat =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: unit option with get, set
-                abstract outputSchema: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -12555,9 +13236,59 @@ module Chat =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item9 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (FSharp.CloudEdge.Runtime.Agents.Chat.ClientToolSchema.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item9 = jsNative
 
             module Item =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// The optional schema of the output that the tool produces.
+                    /// <br /><br />
+                    /// If not provided, the output shape will be inferred from the execute function.
+                    /// </summary>
+                    abstract outputSchema: obj option with get, set
+                    /// <summary>
+                    /// An async function that is called with the arguments from the tool call and produces a result.
+                    /// If not provided, the tool will not be executed automatically.
+                    /// </summary>
+                    /// <remarks>@args is the input of the tool call.</remarks>
+                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                    abstract execute: obj option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?outputSchema: obj, ?execute: obj) : Base = jsNative
+
+                [<Interface>]
+                type Base2 =
+                    /// <summary>
+                    /// An async function that is called with the arguments from the tool call and produces a result.
+                    /// If not provided, the tool will not be executed automatically.
+                    /// </summary>
+                    /// <remarks>@args is the input of the tool call.</remarks>
+                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                    abstract execute: obj option with get, set
+                    /// <summary>
+                    /// Whether the tool needs approval before it can be executed.
+                    /// </summary>
+                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
+                    abstract needsApproval: obj option with get, set
+                    /// <summary>
+                    /// Optional function that is called when the model starts generating the tool input.
+                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
+                    /// </summary>
+                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
+                    /// <summary>
+                    /// Optional function that is called when an argument streaming delta is available.
+                    /// Only called when the tool is used in a streaming context.
+                    /// </summary>
+                    abstract onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
+                    /// <summary>
+                    /// Optional function that is called when a tool call can be started,
+                    /// even if the execute function is not provided.
+                    /// </summary>
+                    abstract onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?execute: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (FSharp.CloudEdge.Runtime.Agents.Chat.CreateToolsFromClientSchemas.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option)) : Base2 = jsNative
+
                 module InputExamples =
                     [<Interface>]
                     type Item =
@@ -12656,6 +13387,24 @@ module Chat =
                         static member Create (toolCallId: string, input: obj, output: obj) : Options = jsNative
 
             module Item13 =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// The optional schema of the output that the tool produces.
+                    /// <br /><br />
+                    /// If not provided, the output shape will be inferred from the execute function.
+                    /// </summary>
+                    abstract outputSchema: obj option with get, set
+                    /// <summary>
+                    /// An async function that is called with the arguments from the tool call and produces a result.
+                    /// If not provided, the tool will not be executed automatically.
+                    /// </summary>
+                    /// <remarks>@args is the input of the tool call.</remarks>
+                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                    abstract execute: obj option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?outputSchema: obj, ?execute: obj) : Base = jsNative
+
                 module InputExamples =
                     [<Interface>]
                     type Item =
@@ -12744,6 +13493,27 @@ module Chat =
                         [<ParamObject; Emit("$0")>]
                         static member Create (toolCallId: string, input: obj, output: obj) : Options = jsNative
 
+            module Item17 =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// The schema of the output that the tool produces.
+                    /// <br /><br />
+                    /// Required when no execute function is provided.
+                    /// </summary>
+                    abstract outputSchema: obj option with get, set
+                    abstract execute: unit option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?outputSchema: obj, ?execute: unit) : Base = jsNative
+
+            module Item9 =
+                [<Interface>]
+                type Base =
+                    abstract execute: unit option with get, set
+                    abstract outputSchema: unit option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?execute: unit, ?outputSchema: unit) : Base = jsNative
+
     module EvaluateChatRecoveryIncidentInput =
         [<Interface>]
         type Identity =
@@ -12793,9 +13563,9 @@ module Chat =
     module ListActiveChatRecoveryIncidents =
         [<Interface>]
         type Storage =
-            abstract list: (obj option -> JS.Promise<JS.Map<string, obj>>) with get, set
+            abstract list: (obj option -> JS.Promise<Fable.Core.TS.Es.Map<string, obj>>) with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (list: (obj option -> JS.Promise<JS.Map<string, obj>>)) : Storage = jsNative
+            static member Create (list: (obj option -> JS.Promise<Fable.Core.TS.Es.Map<string, obj>>)) : Storage = jsNative
 
         module Result =
             module Item =
@@ -12805,136 +13575,6 @@ module Chat =
                     abstract incident: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident with get, set
                     [<ParamObject; Emit("$0")>]
                     static member Create (key: string, incident: FSharp.CloudEdge.Runtime.Agents.Chat.ChatRecoveryIncident) : Item = jsNative
-
-    module MessagePart12 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: unit option with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: unit option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart13 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart14 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart15 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart16 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart5 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: unit option with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: unit option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart6 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart7 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart8 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-    module MessagePart9 =
-        [<Interface>]
-        type Approval =
-            abstract id: string with get, set
-            abstract approved: bool with get, set
-            abstract descriptor: obj option with get, set
-            abstract requestReason: string option with get, set
-            abstract reason: string option with get, set
-            abstract isAutomatic: bool option with get, set
-            abstract signature: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
     module NormalizeToolInput =
         [<Interface>]
@@ -12958,12 +13598,12 @@ module Chat =
     module ReadChatRecoveryProgress =
         type Storage =
             abstract get<'T>: key: string * ?options: obj -> JS.Promise<'T option>
-            abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<JS.Map<string, 'T>>
+            abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<Fable.Core.TS.Es.Map<string, 'T>>
 
     module RecordChatTerminal =
         type Storage =
             abstract put<'T>: key: string * value: 'T * ?options: obj -> JS.Promise<unit>
-            abstract put<'T>: entries: Record<string, 'T> * ?options: obj -> JS.Promise<unit>
+            abstract put<'T>: entries: JS.Record<string, 'T> * ?options: obj -> JS.Promise<unit>
 
     module RepairInterruptedToolPartsOptions =
         module NormalizeInput =
@@ -13045,17 +13685,17 @@ module Chat =
         type Deps =
             abstract storage: Chat.SetChatRecovering.Deps.Storage with get, set
             abstract messageType: string with get, set
-            abstract broadcast: (Record<string, obj> -> unit) with get, set
+            abstract broadcast: (JS.Record<string, obj> -> unit) with get, set
             abstract now: float with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (storage: Chat.SetChatRecovering.Deps.Storage, messageType: string, broadcast: (Record<string, obj> -> unit), now: float) : Deps = jsNative
+            static member Create (storage: Chat.SetChatRecovering.Deps.Storage, messageType: string, broadcast: (JS.Record<string, obj> -> unit), now: float) : Deps = jsNative
 
         module Deps =
             type Storage =
                 abstract get<'T>: key: string * ?options: obj -> JS.Promise<'T option>
-                abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<JS.Map<string, 'T>>
+                abstract get<'T>: keys: string[] * ?options: obj -> JS.Promise<Fable.Core.TS.Es.Map<string, 'T>>
                 abstract put<'T>: key: string * value: 'T * ?options: obj -> JS.Promise<unit>
-                abstract put<'T>: entries: Record<string, 'T> * ?options: obj -> JS.Promise<unit>
+                abstract put<'T>: entries: JS.Record<string, 'T> * ?options: obj -> JS.Promise<unit>
                 abstract delete: key: string * ?options: obj -> JS.Promise<bool>
                 abstract delete: keys: string[] * ?options: obj -> JS.Promise<float>
 
@@ -13118,7 +13758,7 @@ module Chat =
 
     module SweepStaleChatRecoveryIncidents =
         type Storage =
-            abstract list: (obj option -> JS.Promise<JS.Map<string, obj>>) with get, set
+            abstract list: (obj option -> JS.Promise<Fable.Core.TS.Es.Map<string, obj>>) with get, set
             abstract delete: key: string * ?options: obj -> JS.Promise<bool>
             abstract delete: keys: string[] * ?options: obj -> JS.Promise<float>
 
@@ -13202,7 +13842,7 @@ module Chat =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -13232,7 +13872,7 @@ module ChatSdk =
     [<Interface>]
     [<Import("ChatSdkStateAgent", "agents/chat-sdk")>]
     type ChatSdkStateAgent =
-        inherit Agent<obj, obj, Record<string, obj>>
+        inherit Agent<obj, obj, JS.Record<string, obj>>
         /// <summary>
         /// Run user initialization after lifecycle components have started.
         /// </summary>
@@ -13268,9 +13908,9 @@ module ChatSdk =
         /// Runtime lifecycle and reusable durable capabilities for this Agent.
         /// </summary>
         /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
-        abstract lifecycle: Lifecycle.Lifecycle<obj, Record<string, obj>>
+        abstract lifecycle: Lifecycle.Lifecycle<obj, JS.Record<string, obj>>
         /// <remarks>@internal Ensure lifecycle startup before a native RPC implementation.</remarks>
-        abstract __unsafe_ensureInitialized: ?props: Record<string, obj> -> JS.Promise<unit>
+        abstract __unsafe_ensureInitialized: ?props: JS.Record<string, obj> -> JS.Promise<unit>
         /// <summary>
         /// Initial state for the Agent
         /// Override to provide default state values
@@ -13343,7 +13983,7 @@ module ChatSdk =
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: ChatSdk.ChatSdkStateAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+        abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: ChatSdk.ChatSdkStateAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<Schedule<'T>>
         /// <summary>
         /// Schedule a task to run repeatedly at a fixed interval.
         /// <br /><br />
@@ -13368,7 +14008,7 @@ module ChatSdk =
         /// <param name="options">Options for the scheduled task</param>
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract scheduleEvery<'T>: intervalSeconds: float * callback: ChatSdk.ChatSdkStateAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+        abstract scheduleEvery<'T>: intervalSeconds: float * callback: ChatSdk.ChatSdkStateAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<Schedule<'T>>
         /// <summary>
         /// Start a workflow and track it in this Agent's database.
         /// Automatically injects agent identity into the workflow params.
@@ -13867,9 +14507,9 @@ module Experimental =
                 abstract id: string with get, set
                 abstract role: string with get, set
                 abstract parts: FSharp.CloudEdge.Runtime.Agents.Experimental.Memory.Session.SessionMessagePart[] with get, set
-                abstract createdAt: JS.Date option with get, set
+                abstract createdAt: Fable.Core.TS.Es.Date option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (id: string, role: string, parts: FSharp.CloudEdge.Runtime.Agents.Experimental.Memory.Session.SessionMessagePart[], ?createdAt: JS.Date) : SessionMessage = jsNative
+                static member Create (id: string, role: string, parts: FSharp.CloudEdge.Runtime.Agents.Experimental.Memory.Session.SessionMessagePart[], ?createdAt: Fable.Core.TS.Es.Date) : SessionMessage = jsNative
 
             /// <summary>
             /// Options for creating a Session.
@@ -14016,9 +14656,9 @@ module Experimental =
 
             [<Interface>]
             type SqlProvider =
-                abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+                abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
                 [<ParamObject; Emit("$0")>]
-                static member Create (sql: Func<obj, U3<string, float, bool> option[], 'T[]>) : SqlProvider = jsNative
+                static member Create (sql: Func<Fable.Core.TS.Es.TemplateStringsArray, U3<string, float, bool> option[], 'T[]>) : SqlProvider = jsNative
 
             type AgentSessionProvider =
                 inherit FSharp.CloudEdge.Runtime.Agents.Experimental.Memory.Session.SessionProvider
@@ -14490,14 +15130,14 @@ module Experimental =
                 /// Get currently loaded skill keys (as "label:key" strings).
                 /// Async for the same reason as <c>unloadSkill</c> — must wait for restore.
                 /// </summary>
-                abstract getLoadedSkillKeys: unit -> JS.Promise<JS.Set<string>>
+                abstract getLoadedSkillKeys: unit -> JS.Promise<Fable.Core.TS.Es.Set<string>>
                 abstract freezeSystemPrompt: unit -> JS.Promise<string>
                 abstract refreshSystemPrompt: unit -> JS.Promise<string>
                 abstract search: query: string * ?options: Experimental.Memory.Session.Session.Search.Options -> JS.Promise<Experimental.Memory.Session.Session.Search.Result.Item.Item[]>
                 /// <summary>
                 /// Returns set_context and load_context tools.
                 /// </summary>
-                abstract tools: unit -> JS.Promise<Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>
+                abstract tools: unit -> JS.Promise<JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>
                 /// <summary>
                 /// Chainable session creation with auto-wired providers.
                 /// <br /><br />
@@ -14630,7 +15270,7 @@ module Experimental =
                 abstract compactAndSplit: sessionId: string * summary: string * ?newName: string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Experimental.Memory.Session.SessionInfo>
                 abstract addUsage: sessionId: string * inputTokens: float * outputTokens: float * cost: float -> unit
                 abstract search: query: string * ?options: Experimental.Memory.Session.SessionManager.Search.Options -> Experimental.Memory.Session.SessionManager.Search.Result.Item[]
-                abstract tools: unit -> Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>
+                abstract tools: unit -> JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>
                 abstract _touch: obj with get, set
                 /// <summary>
                 /// Chainable SessionManager creation with auto-wired context for all sessions.
@@ -14839,18 +15479,18 @@ module Experimental =
                     module Result =
                         [<Interface>]
                         type Item =
-                            abstract rows: Record<string, obj>[] with get, set
+                            abstract rows: JS.Record<string, obj>[] with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (rows: Record<string, obj>[]) : Item = jsNative
+                            static member Create (rows: JS.Record<string, obj>[]) : Item = jsNative
 
             module PostgresConnection =
                 module Execute =
                     module Result =
                         [<Interface>]
                         type Item =
-                            abstract rows: Record<string, obj>[] with get, set
+                            abstract rows: JS.Record<string, obj>[] with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (rows: Record<string, obj>[]) : Item = jsNative
+                            static member Create (rows: JS.Record<string, obj>[]) : Item = jsNative
 
             module R2SkillProvider =
                 [<Interface>]
@@ -15292,10 +15932,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                             abstract user: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                             abstract assistant: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (user: string, assistant: string) : Item = jsNative
+                                                            [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                            [<Literal>]
+                                                            let user = "user"
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                            [<Literal>]
+                                                            let assistant = "assistant"
 
                             module Item2 =
                                 module Annotations =
@@ -15314,10 +15964,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                             abstract user: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                             abstract assistant: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (user: string, assistant: string) : Item = jsNative
+                                                            [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                            [<Literal>]
+                                                            let user = "user"
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                            [<Literal>]
+                                                            let assistant = "assistant"
 
                             module Item3 =
                                 module Annotations =
@@ -15336,10 +15996,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                             abstract user: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                             abstract assistant: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (user: string, assistant: string) : Item = jsNative
+                                                            [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                            [<Literal>]
+                                                            let user = "user"
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                            [<Literal>]
+                                                            let assistant = "assistant"
 
                             module Item4 =
                                 module Annotations =
@@ -15358,10 +16028,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                             abstract user: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                             abstract assistant: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (user: string, assistant: string) : Item = jsNative
+                                                            [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                            [<Literal>]
+                                                            let user = "user"
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                            [<Literal>]
+                                                            let assistant = "assistant"
 
                                 module Icons =
                                     module Item =
@@ -15380,10 +16060,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"light"</c></remarks>
                                                             abstract light: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"dark"</c></remarks>
                                                             abstract dark: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (light: string, dark: string) : Item = jsNative
+                                                            [<Emit("({ light: 'light', dark: 'dark' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"light"</c></remarks>
+                                                            [<Literal>]
+                                                            let light = "light"
+                                                            /// <remarks>TypeScript type: <c>"dark"</c></remarks>
+                                                            [<Literal>]
+                                                            let dark = "dark"
 
                             module Item5 =
                                 module Annotations =
@@ -15402,10 +16092,20 @@ module LegacyCallToolResultSchema =
                                                     module Item =
                                                         [<Interface>]
                                                         type Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                             abstract user: string with get, set
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                             abstract assistant: string with get, set
-                                                            [<ParamObject; Emit("$0")>]
-                                                            static member Create (user: string, assistant: string) : Item = jsNative
+                                                            [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                            static member Create () : Item = jsNative
+
+                                                        module Item =
+                                                            /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                            [<Literal>]
+                                                            let user = "user"
+                                                            /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                            [<Literal>]
+                                                            let assistant = "assistant"
 
                                 module Resource =
                                     module Item =
@@ -15521,10 +16221,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                                     abstract user: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                                     abstract assistant: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (user: string, assistant: string) : Item = jsNative
+                                                                    [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let user = "user"
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let assistant = "assistant"
 
                                     module Item2 =
                                         module Annotations =
@@ -15543,10 +16253,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                                     abstract user: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                                     abstract assistant: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (user: string, assistant: string) : Item = jsNative
+                                                                    [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let user = "user"
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let assistant = "assistant"
 
                                     module Item3 =
                                         module Annotations =
@@ -15565,10 +16285,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                                     abstract user: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                                     abstract assistant: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (user: string, assistant: string) : Item = jsNative
+                                                                    [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let user = "user"
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let assistant = "assistant"
 
                                     module Item4 =
                                         module Annotations =
@@ -15587,10 +16317,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                                     abstract user: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                                     abstract assistant: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (user: string, assistant: string) : Item = jsNative
+                                                                    [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let user = "user"
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let assistant = "assistant"
 
                                         module Icons =
                                             module Item =
@@ -15609,10 +16349,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"light"</c></remarks>
                                                                     abstract light: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"dark"</c></remarks>
                                                                     abstract dark: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (light: string, dark: string) : Item = jsNative
+                                                                    [<Emit("({ light: 'light', dark: 'dark' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"light"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let light = "light"
+                                                                    /// <remarks>TypeScript type: <c>"dark"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let dark = "dark"
 
                                     module Item5 =
                                         module Annotations =
@@ -15631,10 +16381,20 @@ module LegacyCallToolResultSchema =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
                                                                     abstract user: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
                                                                     abstract assistant: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (user: string, assistant: string) : Item = jsNative
+                                                                    [<Emit("({ user: 'user', assistant: 'assistant' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"user"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let user = "user"
+                                                                    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let assistant = "assistant"
 
                                         module Resource =
                                             module Item =
@@ -15947,7 +16707,7 @@ module Lifecycle =
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     [<Interface>]
     type Lifecycle<'Env, 'Props> =
-        abstract ``__#3@#private``: obj with get, set
+        abstract ``__#2@#private``: obj with get, set
         /// <summary>
         /// Install platform fetch, alarm, and hibernating WebSocket handlers.
         /// <br /><br />
@@ -15971,7 +16731,7 @@ module Lifecycle =
         /// <param name="strings">SQL query template strings</param>
         /// <param name="values">Values to be inserted into the query</param>
         /// <returns>Array of query results</returns>
-        abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+        abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
         /// <summary>
         /// Handle an incoming request for the owning Durable Object.
         /// </summary>
@@ -16001,7 +16761,7 @@ module Lifecycle =
         /// <summary>
         /// Send a message to all connected clients, except connection ids listed in <c>without</c>
         /// </summary>
-        abstract broadcast: msg: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> unit
+        abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
         /// <summary>
         /// Get a connection by connection id
         /// </summary>
@@ -16009,7 +16769,7 @@ module Lifecycle =
         /// <summary>
         /// Get all managed connections, optionally filtered by tag.
         /// </summary>
-        abstract getConnections: ?tag: string -> obj
+        abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<Connection<'TState>, obj, obj>
         /// <summary>
         /// Recompute the physical Durable Object alarm from every capability.
         /// <br /><br />
@@ -16030,7 +16790,7 @@ module Lifecycle =
         /// </summary>
         abstract alarm: unit -> JS.Promise<unit>
         [<ParamObject; Emit("$0")>]
-        static member Create (``__#3@#private``: obj, installHandlers: (unit -> unit), ``use``: (FSharp.CloudEdge.Runtime.Agents.Lifecycle.DurableObjectCapability<'Props> -> FSharp.CloudEdge.Runtime.Agents.Lifecycle.Lifecycle<'Env, 'Props>), route: (Lifecycle.Lifecycle.Route.Envelope -> JS.Promise<obj>), sql: Func<obj, U3<string, float, bool> option[], 'T[]>, fetch: (obj -> JS.Promise<obj>), webSocketMessage: Func<obj, WSMessage, JS.Promise<unit>>, webSocketClose: Func<obj, float, string, bool, JS.Promise<unit>>, webSocketError: Func<obj, obj, JS.Promise<unit>>, start: ('Props option -> JS.Promise<unit>), name: string, broadcast: Action<U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, string[] option>, getConnection: (string -> Connection<'TState> option), getConnections: (string option -> obj), rearmAlarm: (unit -> JS.Promise<unit>), dispose: (unit -> JS.Promise<unit>), disableAlarms: (unit -> JS.Promise<unit>), alarm: (unit -> JS.Promise<unit>)) : Lifecycle<'Env, 'Props> = jsNative
+        static member Create (``__#2@#private``: obj, installHandlers: (unit -> unit), ``use``: (FSharp.CloudEdge.Runtime.Agents.Lifecycle.DurableObjectCapability<'Props> -> FSharp.CloudEdge.Runtime.Agents.Lifecycle.Lifecycle<'Env, 'Props>), route: (Lifecycle.Lifecycle.Route.Envelope -> JS.Promise<obj>), sql: Func<Fable.Core.TS.Es.TemplateStringsArray, U3<string, float, bool> option[], 'T[]>, fetch: (obj -> JS.Promise<obj>), webSocketMessage: Func<obj, WSMessage, JS.Promise<unit>>, webSocketClose: Func<obj, float, string, bool, JS.Promise<unit>>, webSocketError: Func<obj, obj, JS.Promise<unit>>, start: ('Props option -> JS.Promise<unit>), name: string, broadcast: Action<U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option>, getConnection: (string -> Connection<'TState> option), getConnections: (string option -> Fable.Core.TS.Es.Iterable<Connection<'TState>, obj, obj>), rearmAlarm: (unit -> JS.Promise<unit>), dispose: (unit -> JS.Promise<unit>), disableAlarms: (unit -> JS.Promise<unit>), alarm: (unit -> JS.Promise<unit>)) : Lifecycle<'Env, 'Props> = jsNative
         /// <summary>
         /// Construct and install a lifecycle in one explicit operation.
         /// </summary>
@@ -16064,11 +16824,11 @@ module Lifecycle =
         abstract alarm: (obj option -> JS.Promise<unit> option) option with get, set
         abstract fetch: (obj -> obj) option with get, set
         abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-        abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+        abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
         abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
         abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (lifecycle: FSharp.CloudEdge.Runtime.Agents.Lifecycle.Lifecycle<'Env, 'Props>, ctx: obj, env: 'Env, ?onStart: ('Props option -> JS.Promise<unit> option), ?onRequest: (obj -> obj), ?onAlarm: (unit -> JS.Promise<unit> option), ?getNextAlarm: (unit -> U3<float, JS.Promise<FSharp.CloudEdge.Runtime.Agents.Lifecycle.AlarmContribution>, FSharp.CloudEdge.Runtime.Agents.Lifecycle.AlarmContribution2> option), ?onConnect: OnConnect, ?onMessage: OnMessage, ?onClose: OnClose, ?onError: OnError, ?getConnectionTags: GetConnectionTags, ?alarm: (obj option -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<obj, obj, JS.Promise<unit> option>) : LifecycleObject<'Env, 'Props> = jsNative
+        static member Create (lifecycle: FSharp.CloudEdge.Runtime.Agents.Lifecycle.Lifecycle<'Env, 'Props>, ctx: obj, env: 'Env, ?onStart: ('Props option -> JS.Promise<unit> option), ?onRequest: (obj -> obj), ?onAlarm: (unit -> JS.Promise<unit> option), ?getNextAlarm: (unit -> U3<float, JS.Promise<FSharp.CloudEdge.Runtime.Agents.Lifecycle.AlarmContribution>, FSharp.CloudEdge.Runtime.Agents.Lifecycle.AlarmContribution2> option), ?onConnect: OnConnect, ?onMessage: OnMessage, ?onClose: OnClose, ?onError: OnError, ?getConnectionTags: GetConnectionTags, ?alarm: (obj option -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option>, ?webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option>, ?webSocketError: Func<obj, obj, JS.Promise<unit> option>) : LifecycleObject<'Env, 'Props> = jsNative
 
     /// <summary>
     /// Values returned by getCurrentAgent.
@@ -16167,7 +16927,7 @@ module Lifecycle =
         abstract Create<'Env, 'Props>: host: obj -> FSharp.CloudEdge.Runtime.Agents.Lifecycle.Lifecycle<'Env, 'Props>
 
 module MCPAITool =
-    type Execute = delegate of args: Record<string, obj> * options: obj option -> JS.Promise<obj>
+    type Execute = delegate of args: JS.Record<string, obj> * options: obj option -> JS.Promise<obj>
 
 module MCPClientConnection =
     [<Interface>]
@@ -16188,16 +16948,16 @@ module MCPClientConnection =
 
     [<Interface>]
     type ServerCapabilities =
-        abstract experimental: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
+        abstract experimental: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
         abstract logging: Mcp.McpClientOptions.Capabilities.Experimental.Item option with get, set
         abstract completions: Mcp.McpClientOptions.Capabilities.Experimental.Item option with get, set
         abstract prompts: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts option with get, set
         abstract resources: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Resources option with get, set
         abstract tools: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts option with get, set
         abstract tasks: MCPClientConnection.ServerCapabilities.Tasks option with get, set
-        abstract extensions: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
+        abstract extensions: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?experimental: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>, ?logging: Mcp.McpClientOptions.Capabilities.Experimental.Item, ?completions: Mcp.McpClientOptions.Capabilities.Experimental.Item, ?prompts: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?resources: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Resources, ?tools: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?tasks: MCPClientConnection.ServerCapabilities.Tasks, ?extensions: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>) : ServerCapabilities = jsNative
+        static member Create (?experimental: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>, ?logging: Mcp.McpClientOptions.Capabilities.Experimental.Item, ?completions: Mcp.McpClientOptions.Capabilities.Experimental.Item, ?prompts: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?resources: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Resources, ?tools: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?tasks: MCPClientConnection.ServerCapabilities.Tasks, ?extensions: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>) : ServerCapabilities = jsNative
 
     module CompleteAuthorization =
         [<Interface>]
@@ -16221,11 +16981,11 @@ module MCPClientConnection =
                     abstract name: string with get, set
                     abstract description: string option with get, set
                     abstract arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Arguments.Item[] option with get, set
-                    abstract _meta: Record<string, obj> option with get, set
+                    abstract _meta: JS.Record<string, obj> option with get, set
                     abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Icons.Item[] option with get, set
                     abstract title: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (name: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Arguments.Item[], ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
+                    static member Create (name: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Arguments.Item[], ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchPrompts.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
 
                 module Item =
                     module Arguments =
@@ -16257,11 +17017,11 @@ module MCPClientConnection =
                     abstract description: string option with get, set
                     abstract mimeType: string option with get, set
                     abstract annotations: MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Annotations option with get, set
-                    abstract _meta: Record<string, obj> option with get, set
+                    abstract _meta: JS.Record<string, obj> option with get, set
                     abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Icons.Item[] option with get, set
                     abstract title: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (uriTemplate: string, name: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
+                    static member Create (uriTemplate: string, name: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResourceTemplates.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
 
                 module Item =
                     [<Interface>]
@@ -16293,11 +17053,11 @@ module MCPClientConnection =
                     abstract mimeType: string option with get, set
                     abstract size: float option with get, set
                     abstract annotations: MCPClientConnection.FetchResources.Result.Item.Item.Annotations option with get, set
-                    abstract _meta: Record<string, obj> option with get, set
+                    abstract _meta: JS.Record<string, obj> option with get, set
                     abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResources.Result.Item.Item.Icons.Item[] option with get, set
                     abstract title: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: MCPClientConnection.FetchResources.Result.Item.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResources.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
+                    static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: MCPClientConnection.FetchResources.Result.Item.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchResources.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
 
                 module Item =
                     [<Interface>]
@@ -16329,11 +17089,11 @@ module MCPClientConnection =
                     abstract outputSchema: MCPClientConnection.FetchTools.Result.Item.Item.OutputSchema option with get, set
                     abstract annotations: MCPClientConnection.FetchTools.Result.Item.Item.Annotations option with get, set
                     abstract execution: MCPClientConnection.FetchTools.Result.Item.Item.Execution option with get, set
-                    abstract _meta: Record<string, obj> option with get, set
+                    abstract _meta: JS.Record<string, obj> option with get, set
                     abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchTools.Result.Item.Item.Icons.Item[] option with get, set
                     abstract title: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: MCPClientConnection.FetchTools.Result.Item.Item.InputSchema, name: string, ?description: string, ?outputSchema: MCPClientConnection.FetchTools.Result.Item.Item.OutputSchema, ?annotations: MCPClientConnection.FetchTools.Result.Item.Item.Annotations, ?execution: MCPClientConnection.FetchTools.Result.Item.Item.Execution, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchTools.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
+                    static member Create (inputSchema: MCPClientConnection.FetchTools.Result.Item.Item.InputSchema, name: string, ?description: string, ?outputSchema: MCPClientConnection.FetchTools.Result.Item.Item.OutputSchema, ?annotations: MCPClientConnection.FetchTools.Result.Item.Item.Annotations, ?execution: MCPClientConnection.FetchTools.Result.Item.Item.Execution, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.FetchTools.Result.Item.Item.Icons.Item[], ?title: string) : Item = jsNative
 
                 module Item =
                     [<Interface>]
@@ -16353,11 +17113,17 @@ module MCPClientConnection =
                         static member Create (?taskSupport: MCPClientConnection.Tools.Item.Execution.TaskSupport) : Execution = jsNative
 
                     type InputSchema =
+                        /// <remarks>TypeScript type: <c>"object"</c></remarks>
                         abstract ``type``: string with get, set
-                        abstract properties: Record<string, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, obj[], Record<string, obj>> option[], Record<string, obj>> option[], Record<string, obj>> option[], Record<string, obj>> option[], Record<string, obj>> option> option with get, set
+                        abstract properties: JS.Record<string, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, U5<string, float, bool, obj[], JS.Record<string, obj>> option[], JS.Record<string, obj>> option[], JS.Record<string, obj>> option[], JS.Record<string, obj>> option[], JS.Record<string, obj>> option> option with get, set
                         abstract required: string[] option with get, set
                         [<EmitIndexer>]
                         abstract Item: string -> obj with get, set
+
+                    module InputSchema =
+                        /// <remarks>TypeScript type: <c>"object"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "object"
 
                     type OutputSchema =
                         abstract ``$schema``: string option with get, set
@@ -16388,12 +17154,12 @@ module MCPClientConnection =
         type Item =
             abstract description: string option with get, set
             abstract arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[] option with get, set
-            abstract _meta: Record<string, obj> option with get, set
+            abstract _meta: JS.Record<string, obj> option with get, set
             abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
             abstract name: string with get, set
             abstract title: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (name: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
         module Item =
             module Arguments =
@@ -16422,12 +17188,12 @@ module MCPClientConnection =
             abstract description: string option with get, set
             abstract mimeType: string option with get, set
             abstract annotations: MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-            abstract _meta: Record<string, obj> option with get, set
+            abstract _meta: JS.Record<string, obj> option with get, set
             abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
             abstract name: string with get, set
             abstract title: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (uriTemplate: string, name: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (uriTemplate: string, name: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -16446,12 +17212,12 @@ module MCPClientConnection =
             abstract mimeType: string option with get, set
             abstract size: float option with get, set
             abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-            abstract _meta: Record<string, obj> option with get, set
+            abstract _meta: JS.Record<string, obj> option with get, set
             abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
             abstract name: string with get, set
             abstract title: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
         module Item =
             module Annotations =
@@ -16514,12 +17280,12 @@ module MCPClientConnection =
             abstract outputSchema: MCPClientConnection.Tools.Item.OutputSchema option with get, set
             abstract annotations: MCPClientConnection.Tools.Item.Annotations option with get, set
             abstract execution: MCPClientConnection.Tools.Item.Execution option with get, set
-            abstract _meta: Record<string, obj> option with get, set
+            abstract _meta: JS.Record<string, obj> option with get, set
             abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
             abstract name: string with get, set
             abstract title: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
         module Item =
             [<Interface>]
@@ -16539,11 +17305,17 @@ module MCPClientConnection =
                 static member Create (?taskSupport: MCPClientConnection.Tools.Item.Execution.TaskSupport) : Execution = jsNative
 
             type InputSchema =
+                /// <remarks>TypeScript type: <c>"object"</c></remarks>
                 abstract ``type``: string with get, set
-                abstract properties: Record<string, U5<string, float, bool, obj[], FSharp.CloudEdge.Runtime.Agents.Mcp.McpClientOptions.Capabilities.Experimental.Item> option> option with get, set
+                abstract properties: JS.Record<string, U5<string, float, bool, obj[], FSharp.CloudEdge.Runtime.Agents.Mcp.McpClientOptions.Capabilities.Experimental.Item> option> option with get, set
                 abstract required: string[] option with get, set
                 [<EmitIndexer>]
                 abstract Item: string -> obj with get, set
+
+            module InputSchema =
+                /// <remarks>TypeScript type: <c>"object"</c></remarks>
+                [<Literal>]
+                let ``type`` = "object"
 
             type OutputSchema =
                 abstract ``$schema``: string option with get, set
@@ -16650,7 +17422,7 @@ module MCPClientManager =
             /// verbatim — encode anything that is not a safe RFC 9110 field value
             /// before passing it here.
             /// </summary>
-            abstract headers: ReadonlyRecord<string, string> option with get, set
+            abstract headers: JS.ReadonlyRecord<string, string> option with get, set
             /// <summary>
             /// The tool definition to use for SEP-2243 <c>Mcp-Param-*</c> header mirroring on
             /// a 2026-07-28 connection over Streamable HTTP, AND for output-schema
@@ -16660,27 +17432,27 @@ module MCPClientManager =
             /// </summary>
             abstract toolDefinition: MCPClientConnection.Tools.Item option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: ReadonlyRecord<string, string>, ?toolDefinition: MCPClientConnection.Tools.Item) : Options = jsNative
+            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?toolDefinition: MCPClientConnection.Tools.Item) : Options = jsNative
 
         [<Interface>]
         type Params =
             abstract _meta: MCPClientManager.CallTool.Params.Meta option with get, set
             abstract task: MCPClientManager.CallTool.Params.Task option with get, set
             abstract name: string with get, set
-            abstract arguments: Record<string, obj> option with get, set
+            abstract arguments: JS.Record<string, obj> option with get, set
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, serverId: string, ?_meta: MCPClientManager.CallTool.Params.Meta, ?task: MCPClientManager.CallTool.Params.Task, ?arguments: Record<string, obj>) : Params = jsNative
+            static member Create (name: string, serverId: string, ?_meta: MCPClientManager.CallTool.Params.Meta, ?task: MCPClientManager.CallTool.Params.Task, ?arguments: JS.Record<string, obj>) : Params = jsNative
 
         [<Interface>]
         type Params2 =
             abstract _meta: MCPClientManager.CallTool.Params.Meta option with get, set
             abstract task: MCPClientManager.CallTool.Params.Task option with get, set
             abstract name: string with get, set
-            abstract arguments: Record<string, obj> option with get, set
+            abstract arguments: JS.Record<string, obj> option with get, set
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, serverId: string, ?_meta: MCPClientManager.CallTool.Params.Meta, ?task: MCPClientManager.CallTool.Params.Task, ?arguments: Record<string, obj>) : Params2 = jsNative
+            static member Create (name: string, serverId: string, ?_meta: MCPClientManager.CallTool.Params.Meta, ?task: MCPClientManager.CallTool.Params.Task, ?arguments: JS.Record<string, obj>) : Params2 = jsNative
 
         module Params =
             type Meta =
@@ -16720,40 +17492,58 @@ module MCPClientManager =
                 module Content =
                     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                     type Item =
-                        | [<CompiledName("text")>] Text of text: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: Record<string, obj> option
-                        | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: Record<string, obj> option
-                        | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: Record<string, obj> option
-                        | [<CompiledName("resource_link")>] ResourceLink of uri: string * description: string option * mimeType: string option * size: float option * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option * name: string * title: string option
-                        | [<CompiledName("resource")>] Resource of resource: U2<MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2> * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: Record<string, obj> option
+                        | [<CompiledName("text")>] Text of text: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
+                        | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
+                        | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
+                        | [<CompiledName("resource_link")>] ResourceLink of uri: string * description: string option * mimeType: string option * size: float option * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option * name: string * title: string option
+                        | [<CompiledName("resource")>] Resource of resource: U2<MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2> * annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
 
                     [<Interface>]
                     type Item2 =
+                        /// <remarks>TypeScript type: <c>"text"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract text: string with get, set
                         abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, text: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>) : Item2 = jsNative
+                        abstract _meta: JS.Record<string, obj> option with get, set
+                        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+                        static member Create (text: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item2 = jsNative
+
+                    module Item2 =
+                        /// <remarks>TypeScript type: <c>"text"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "text"
 
                     [<Interface>]
                     type Item3 =
+                        /// <remarks>TypeScript type: <c>"image"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract data: string with get, set
                         abstract mimeType: string with get, set
                         abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>) : Item3 = jsNative
+                        abstract _meta: JS.Record<string, obj> option with get, set
+                        [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
+                        static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item3 = jsNative
+
+                    module Item3 =
+                        /// <remarks>TypeScript type: <c>"image"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "image"
 
                     [<Interface>]
                     type Item4 =
+                        /// <remarks>TypeScript type: <c>"audio"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract data: string with get, set
                         abstract mimeType: string with get, set
                         abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>) : Item4 = jsNative
+                        abstract _meta: JS.Record<string, obj> option with get, set
+                        [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
+                        static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item4 = jsNative
+
+                    module Item4 =
+                        /// <remarks>TypeScript type: <c>"audio"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "audio"
 
                     [<Interface>]
                     type Item5 =
@@ -16762,41 +17552,52 @@ module MCPClientManager =
                         abstract mimeType: string option with get, set
                         abstract size: float option with get, set
                         abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
+                        abstract _meta: JS.Record<string, obj> option with get, set
                         abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
                         abstract name: string with get, set
                         abstract title: string option with get, set
+                        /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
                         abstract ``type``: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (uri: string, name: string, ``type``: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item5 = jsNative
+                        [<ParamObject; Emit("({ type: 'resource_link', ...$0 })")>]
+                        static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item5 = jsNative
+
+                    module Item5 =
+                        /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "resource_link"
 
                     [<Interface>]
                     type Item6 =
+                        /// <remarks>TypeScript type: <c>"resource"</c></remarks>
                         abstract ``type``: string with get, set
                         abstract resource: U2<MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2> with get, set
                         abstract annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, resource: U2<MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>) : Item6 = jsNative
+                        abstract _meta: JS.Record<string, obj> option with get, set
+                        [<ParamObject; Emit("({ type: 'resource', ...$0 })")>]
+                        static member Create (resource: U2<MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item6 = jsNative
 
                     module Item6 =
+                        /// <remarks>TypeScript type: <c>"resource"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "resource"
+
                         [<Interface>]
                         type Resource =
                             abstract uri: string with get, set
                             abstract mimeType: string option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
+                            abstract _meta: JS.Record<string, obj> option with get, set
                             abstract text: string with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (uri: string, text: string, ?mimeType: string, ?_meta: Record<string, obj>) : Resource = jsNative
+                            static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
 
                         [<Interface>]
                         type Resource2 =
                             abstract uri: string with get, set
                             abstract mimeType: string option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
+                            abstract _meta: JS.Record<string, obj> option with get, set
                             abstract blob: string with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: Record<string, obj>) : Resource2 = jsNative
+                            static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
 
     module Connect =
         [<Interface>]
@@ -16924,18 +17725,18 @@ module MCPClientManager =
             /// verbatim — encode anything that is not a safe RFC 9110 field value
             /// before passing it here.
             /// </summary>
-            abstract headers: ReadonlyRecord<string, string> option with get, set
+            abstract headers: JS.ReadonlyRecord<string, string> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: ReadonlyRecord<string, string>) : Options = jsNative
+            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>) : Options = jsNative
 
         [<Interface>]
         type Params =
             abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
             abstract name: string with get, set
-            abstract arguments: Record<string, string> option with get, set
+            abstract arguments: JS.Record<string, string> option with get, set
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, serverId: string, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?arguments: Record<string, string>) : Params = jsNative
+            static member Create (name: string, serverId: string, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?arguments: JS.Record<string, string>) : Params = jsNative
 
         module Result =
             type Item =
@@ -16973,93 +17774,104 @@ module MCPClientManager =
                     module Item =
                         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                         type Content =
-                            | [<CompiledName("text")>] Text of text: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations option * _meta: Record<string, obj> option
-                            | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations option * _meta: Record<string, obj> option
-                            | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations option * _meta: Record<string, obj> option
-                            | [<CompiledName("resource_link")>] ResourceLink of uri: string * name: string * description: string option * mimeType: string option * size: float option * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations option * _meta: Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[] option * title: string option
-                            | [<CompiledName("resource")>] Resource of resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option * _meta: Record<string, obj> option
+                            | [<CompiledName("text")>] Text of text: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("resource_link")>] ResourceLink of uri: string * name: string * description: string option * mimeType: string option * size: float option * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[] option * title: string option
+                            | [<CompiledName("resource")>] Resource of resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> * annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option * _meta: JS.Record<string, obj> option
 
                         [<Interface>]
                         type Content2 =
+                            /// <remarks>TypeScript type: <c>"text"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract text: string with get, set
                             abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, text: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations, ?_meta: Record<string, obj>) : Content2 = jsNative
+                            abstract _meta: JS.Record<string, obj> option with get, set
+                            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+                            static member Create (text: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations, ?_meta: JS.Record<string, obj>) : Content2 = jsNative
+
+                        module Content2 =
+                            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "text"
+
+                            [<Interface>]
+                            type Annotations =
+                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                                abstract priority: float option with get, set
+                                abstract lastModified: string option with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                         [<Interface>]
                         type Content3 =
+                            /// <remarks>TypeScript type: <c>"image"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract data: string with get, set
                             abstract mimeType: string with get, set
                             abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, data: string, mimeType: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations, ?_meta: Record<string, obj>) : Content3 = jsNative
+                            abstract _meta: JS.Record<string, obj> option with get, set
+                            [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
+                            static member Create (data: string, mimeType: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations, ?_meta: JS.Record<string, obj>) : Content3 = jsNative
+
+                        module Content3 =
+                            /// <remarks>TypeScript type: <c>"image"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "image"
+
+                            [<Interface>]
+                            type Annotations =
+                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                                abstract priority: float option with get, set
+                                abstract lastModified: string option with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                         [<Interface>]
                         type Content4 =
+                            /// <remarks>TypeScript type: <c>"audio"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract data: string with get, set
                             abstract mimeType: string with get, set
                             abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, data: string, mimeType: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations, ?_meta: Record<string, obj>) : Content4 = jsNative
+                            abstract _meta: JS.Record<string, obj> option with get, set
+                            [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
+                            static member Create (data: string, mimeType: string, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations, ?_meta: JS.Record<string, obj>) : Content4 = jsNative
+
+                        module Content4 =
+                            /// <remarks>TypeScript type: <c>"audio"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "audio"
+
+                            [<Interface>]
+                            type Annotations =
+                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                                abstract priority: float option with get, set
+                                abstract lastModified: string option with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                         [<Interface>]
                         type Content5 =
                             abstract uri: string with get, set
                             abstract name: string with get, set
+                            /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract description: string option with get, set
                             abstract mimeType: string option with get, set
                             abstract size: float option with get, set
                             abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
+                            abstract _meta: JS.Record<string, obj> option with get, set
                             abstract icons: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[] option with get, set
                             abstract title: string option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (uri: string, name: string, ``type``: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[], ?title: string) : Content5 = jsNative
-
-                        [<Interface>]
-                        type Content6 =
-                            abstract ``type``: string with get, set
-                            abstract resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> with get, set
-                            abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option with get, set
-                            abstract _meta: Record<string, obj> option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2>, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations, ?_meta: Record<string, obj>) : Content6 = jsNative
-
-                        module Content2 =
-                            [<Interface>]
-                            type Annotations =
-                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                abstract priority: float option with get, set
-                                abstract lastModified: string option with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                        module Content3 =
-                            [<Interface>]
-                            type Annotations =
-                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                abstract priority: float option with get, set
-                                abstract lastModified: string option with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                        module Content4 =
-                            [<Interface>]
-                            type Annotations =
-                                abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                abstract priority: float option with get, set
-                                abstract lastModified: string option with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (?audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+                            [<ParamObject; Emit("({ type: 'resource_link', ...$0 })")>]
+                            static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[], ?title: string) : Content5 = jsNative
 
                         module Content5 =
+                            /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "resource_link"
+
                             [<Interface>]
                             type Annotations =
                                 abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
@@ -17078,7 +17890,21 @@ module MCPClientManager =
                                     [<ParamObject; Emit("$0")>]
                                     static member Create (src: string, ?mimeType: string, ?sizes: string[], ?theme: Mcp.SSEEdgeClientTransport.Onmessage.Message4.Result.MetaIoModelcontextprotocolServerInfo.Icons.Item.Theme) : Item = jsNative
 
+                        [<Interface>]
+                        type Content6 =
+                            /// <remarks>TypeScript type: <c>"resource"</c></remarks>
+                            abstract ``type``: string with get, set
+                            abstract resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> with get, set
+                            abstract annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option with get, set
+                            abstract _meta: JS.Record<string, obj> option with get, set
+                            [<ParamObject; Emit("({ type: 'resource', ...$0 })")>]
+                            static member Create (resource: U2<MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2>, ?annotations: MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations, ?_meta: JS.Record<string, obj>) : Content6 = jsNative
+
                         module Content6 =
+                            /// <remarks>TypeScript type: <c>"resource"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "resource"
+
                             [<Interface>]
                             type Annotations =
                                 abstract audience: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
@@ -17092,18 +17918,18 @@ module MCPClientManager =
                                 abstract uri: string with get, set
                                 abstract text: string with get, set
                                 abstract mimeType: string option with get, set
-                                abstract _meta: Record<string, obj> option with get, set
+                                abstract _meta: JS.Record<string, obj> option with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (uri: string, text: string, ?mimeType: string, ?_meta: Record<string, obj>) : Resource = jsNative
+                                static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
 
                             [<Interface>]
                             type Resource2 =
                                 abstract uri: string with get, set
                                 abstract blob: string with get, set
                                 abstract mimeType: string option with get, set
-                                abstract _meta: Record<string, obj> option with get, set
+                                abstract _meta: JS.Record<string, obj> option with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: Record<string, obj>) : Resource2 = jsNative
+                                static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
 
                 module MetaIoModelcontextprotocolServerInfo =
                     module Icons =
@@ -17137,7 +17963,7 @@ module MCPClientManager =
                 inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item
                 abstract serverId: string with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (name: string, serverId: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+                static member Create (name: string, serverId: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module ListResourceTemplates =
         module Result =
@@ -17146,7 +17972,7 @@ module MCPClientManager =
                 inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item
                 abstract serverId: string with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (uriTemplate: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+                static member Create (uriTemplate: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?annotations: MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module ListResources =
         module Result =
@@ -17155,7 +17981,7 @@ module MCPClientManager =
                 inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item
                 abstract serverId: string with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (uri: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+                static member Create (uri: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module ListTools =
         [<Interface>]
@@ -17175,7 +18001,7 @@ module MCPClientManager =
                 inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Tools.Item
                 abstract serverId: string with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, serverId: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+                static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, serverId: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module ReadResource =
         [<Interface>]
@@ -17269,7 +18095,7 @@ module MCPClientManager =
             /// verbatim — encode anything that is not a safe RFC 9110 field value
             /// before passing it here.
             /// </summary>
-            abstract headers: ReadonlyRecord<string, string> option with get, set
+            abstract headers: JS.ReadonlyRecord<string, string> option with get, set
             /// <summary>
             /// <c>'use'</c> (default) serves a still-fresh cached entry without a round
             /// trip; <c>'refresh'</c> always fetches and re-stores; <c>'bypass'</c> fetches
@@ -17279,7 +18105,7 @@ module MCPClientManager =
             /// </summary>
             abstract cacheMode: CacheMode option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: ReadonlyRecord<string, string>, ?cacheMode: CacheMode) : Options = jsNative
+            static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?cacheMode: CacheMode) : Options = jsNative
 
         [<Interface>]
         type Params =
@@ -17319,18 +18145,18 @@ module MCPClientManager =
                         abstract uri: string with get, set
                         abstract text: string with get, set
                         abstract mimeType: string option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
+                        abstract _meta: JS.Record<string, obj> option with get, set
                         [<ParamObject; Emit("$0")>]
-                        static member Create (uri: string, text: string, ?mimeType: string, ?_meta: Record<string, obj>) : Item = jsNative
+                        static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Item = jsNative
 
                     [<Interface>]
                     type Item2 =
                         abstract uri: string with get, set
                         abstract blob: string with get, set
                         abstract mimeType: string option with get, set
-                        abstract _meta: Record<string, obj> option with get, set
+                        abstract _meta: JS.Record<string, obj> option with get, set
                         [<ParamObject; Emit("$0")>]
-                        static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: Record<string, obj>) : Item2 = jsNative
+                        static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Item2 = jsNative
 
                 module MetaIoModelcontextprotocolServerInfo =
                     module Icons =
@@ -17370,59 +18196,6 @@ module MCPDiscoveryResult3 =
         | [<CompiledName("error")>] Error
         | [<CompiledName("stale-session")>] StaleSession
 
-module MCPObservabilityEvent2 =
-    [<Interface>]
-    type Payload =
-        abstract serverId: string with get, set
-        abstract authUrl: string with get, set
-        abstract clientId: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (serverId: string, authUrl: string, ?clientId: string) : Payload = jsNative
-
-module MCPObservabilityEvent3 =
-    [<Interface>]
-    type Payload =
-        abstract url: string with get, set
-        abstract transport: string option with get, set
-        abstract state: string with get, set
-        abstract error: string option with get, set
-        abstract phase: MCPObservabilityEvent3.Payload.Phase option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, state: string, ?transport: string, ?error: string, ?phase: MCPObservabilityEvent3.Payload.Phase) : Payload = jsNative
-
-    module Payload =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Phase =
-            | [<CompiledName("client-close")>] ClientClose
-            | [<CompiledName("terminate-session")>] TerminateSession
-
-module MCPObservabilityEvent4 =
-    [<Interface>]
-    type Payload =
-        abstract url: string with get, set
-        abstract transport: string with get, set
-        abstract state: string with get, set
-        abstract error: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (url: string, transport: string, state: string, ?error: string) : Payload = jsNative
-
-module MCPObservabilityEvent5 =
-    [<Interface>]
-    type Payload =
-        abstract url: string option with get, set
-        abstract state: string option with get, set
-        abstract error: string option with get, set
-        abstract capability: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?url: string, ?state: string, ?error: string, ?capability: string) : Payload = jsNative
-
-module MCPObservabilityEvent6 =
-    [<Interface>]
-    type Payload =
-        abstract serverId: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (serverId: string) : Payload = jsNative
-
 module MCPServersState =
     module Prompts =
         [<Interface>]
@@ -17430,7 +18203,7 @@ module MCPServersState =
             inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, serverId: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (name: string, serverId: string, ?description: string, ?arguments: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Arguments.Item[], ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module Resources =
         [<Interface>]
@@ -17438,7 +18211,7 @@ module MCPServersState =
             inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Resources.Item
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (uri: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (uri: string, name: string, serverId: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
     module Tools =
         [<Interface>]
@@ -17446,7 +18219,7 @@ module MCPServersState =
             inherit FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Tools.Item
             abstract serverId: string with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, serverId: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
+            static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, serverId: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
 module MCPTransportOptions3 =
     type AuthProvider =
@@ -18132,24 +18905,42 @@ module Mcp =
 
     [<Interface>]
     type MCPConnectionResult2 =
+        /// <remarks>TypeScript type: <c>"failed"</c></remarks>
         abstract state: string with get, set
         abstract error: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (state: string, error: string) : MCPConnectionResult2 = jsNative
+        [<ParamObject; Emit("({ state: 'failed', ...$0 })")>]
+        static member Create (error: string) : MCPConnectionResult2 = jsNative
+
+    module MCPConnectionResult2 =
+        /// <remarks>TypeScript type: <c>"failed"</c></remarks>
+        [<Literal>]
+        let state = "failed"
 
     [<Interface>]
     type MCPConnectionResult3 =
+        /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
         abstract state: string with get, set
         abstract authUrl: string with get, set
         abstract clientId: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (state: string, authUrl: string, ?clientId: string) : MCPConnectionResult3 = jsNative
+        [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
+        static member Create (authUrl: string, ?clientId: string) : MCPConnectionResult3 = jsNative
+
+    module MCPConnectionResult3 =
+        /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
+        [<Literal>]
+        let state = "authenticating"
 
     [<Interface>]
     type MCPConnectionResult4 =
+        /// <remarks>TypeScript type: <c>"connected"</c></remarks>
         abstract state: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (state: string) : MCPConnectionResult4 = jsNative
+        [<Emit("({ state: 'connected' })")>]
+        static member Create () : MCPConnectionResult4 = jsNative
+
+    module MCPConnectionResult4 =
+        /// <remarks>TypeScript type: <c>"connected"</c></remarks>
+        [<Literal>]
+        let state = "connected"
 
     /// <remarks>
     /// @deprecated
@@ -18331,7 +19122,7 @@ module Mcp =
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: Mcp.McpAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+        abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: Mcp.McpAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.Schedule.Options -> JS.Promise<Schedule<'T>>
         /// <summary>
         /// Schedule a task to run repeatedly at a fixed interval.
         /// <br /><br />
@@ -18356,7 +19147,7 @@ module Mcp =
         /// <param name="options">Options for the scheduled task</param>
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract scheduleEvery<'T>: intervalSeconds: float * callback: Mcp.McpAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Schedule>
+        abstract scheduleEvery<'T>: intervalSeconds: float * callback: Mcp.McpAgent.Queue.Callback * ?payload: 'T * ?options: Mcp.McpAgent.ScheduleEvery.Options -> JS.Promise<Schedule<'T>>
         /// <summary>
         /// Storage key prefix for the <c>streamId -&gt; requestIds</c> mapping used
         /// to support POST stream resumption across WebSocket reconnects.
@@ -18398,12 +19189,12 @@ module Mcp =
         static member _CF_OOM_ALARM_STRIKES_KEY: obj = jsNative
 
     [<Interface>]
-    type RPCClientTransportOptions<'T when 'T :> FSharp.CloudEdge.Runtime.Agents.Mcp.McpAgent<obj, obj, Record<string, obj>>> =
+    type RPCClientTransportOptions<'T when 'T :> FSharp.CloudEdge.Runtime.Agents.Mcp.McpAgent<obj, obj, JS.Record<string, obj>>> =
         abstract ``namespace``: obj with get, set
         abstract name: string with get, set
-        abstract props: Record<string, obj> option with get, set
+        abstract props: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``namespace``: obj, name: string, ?props: Record<string, obj>) : RPCClientTransportOptions<'T> = jsNative
+        static member Create (``namespace``: obj, name: string, ?props: JS.Record<string, obj>) : RPCClientTransportOptions<'T> = jsNative
 
     [<Interface>]
     type RPCClientTransport =
@@ -18488,10 +19279,10 @@ module Mcp =
         abstract discoverResult: MCPClientConnection.Options.DiscoverResult option with get, set
         abstract retry: RetryOptions option with get, set
         abstract bindingName: string option with get, set
-        abstract props: Record<string, obj> option with get, set
+        abstract props: JS.Record<string, obj> option with get, set
         abstract capabilities: Mcp.McpClientOptions.Capabilities option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?client: Mcp.MCPServerOptions.Client, ?transport: Mcp.MCPServerOptions.Transport, ?discoverResult: MCPClientConnection.Options.DiscoverResult, ?retry: RetryOptions, ?bindingName: string, ?props: Record<string, obj>, ?capabilities: Mcp.McpClientOptions.Capabilities) : MCPServerOptions = jsNative
+        static member Create (?client: Mcp.MCPServerOptions.Client, ?transport: Mcp.MCPServerOptions.Transport, ?discoverResult: MCPClientConnection.Options.DiscoverResult, ?retry: RetryOptions, ?bindingName: string, ?props: JS.Record<string, obj>, ?capabilities: Mcp.McpClientOptions.Capabilities) : MCPServerOptions = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
     type MCPConnectionResult =
@@ -18556,9 +19347,9 @@ module Mcp =
 
     [<Interface>]
     type McpAuthContext =
-        abstract props: Record<string, obj> with get, set
+        abstract props: JS.Record<string, obj> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (props: Record<string, obj>) : McpAuthContext = jsNative
+        static member Create (props: JS.Record<string, obj>) : McpAuthContext = jsNative
 
     [<Interface>]
     type CreateStatelessMcpHandlerOptions =
@@ -18604,15 +19395,232 @@ module Mcp =
 
     [<Interface>]
     type ElicitRequest =
+        /// <remarks>TypeScript type: <c>"elicitation/create"</c></remarks>
         abstract ``method``: string with get, set
         abstract ``params``: U2<Mcp.ElicitRequest.Params, Mcp.ElicitRequest.Params2> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``method``: string, ``params``: U2<Mcp.ElicitRequest.Params, Mcp.ElicitRequest.Params2>) : ElicitRequest = jsNative
+        [<ParamObject; Emit("({ method: 'elicitation/create', ...$0 })")>]
+        static member Create (``params``: U2<Mcp.ElicitRequest.Params, Mcp.ElicitRequest.Params2>) : ElicitRequest = jsNative
+
+    module ElicitRequest =
+        /// <remarks>TypeScript type: <c>"elicitation/create"</c></remarks>
+        [<Literal>]
+        let ``method`` = "elicitation/create"
+
+        [<Interface>]
+        type Params =
+            abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
+            abstract task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task option with get, set
+            abstract mode: string option with get, set
+            abstract message: string with get, set
+            abstract requestedSchema: Mcp.ElicitRequest.Params.RequestedSchema with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (message: string, requestedSchema: Mcp.ElicitRequest.Params.RequestedSchema, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task, ?mode: string) : Params = jsNative
+
+        [<Interface>]
+        type Params2 =
+            abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
+            abstract task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task option with get, set
+            /// <remarks>TypeScript type: <c>"url"</c></remarks>
+            abstract mode: string with get, set
+            abstract message: string with get, set
+            abstract elicitationId: string with get, set
+            abstract url: string with get, set
+            [<ParamObject; Emit("({ mode: 'url', ...$0 })")>]
+            static member Create (message: string, elicitationId: string, url: string, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task) : Params2 = jsNative
+
+        module Params2 =
+            /// <remarks>TypeScript type: <c>"url"</c></remarks>
+            [<Literal>]
+            let mode = "url"
+
+        module Params =
+            type RequestedSchema =
+                /// <remarks>TypeScript type: <c>"object"</c></remarks>
+                abstract ``type``: string with get, set
+                abstract properties: JS.Record<string, U8<Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item4, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item5, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8>> with get, set
+                abstract required: string[] option with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> obj with get, set
+
+            module RequestedSchema =
+                /// <remarks>TypeScript type: <c>"object"</c></remarks>
+                [<Literal>]
+                let ``type`` = "object"
+
+                module Properties =
+                    [<Interface>]
+                    type Item =
+                        /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract ``default``: bool option with get, set
+                        [<ParamObject; Emit("({ type: 'boolean', ...$0 })")>]
+                        static member Create (?title: string, ?description: string, ?``default``: bool) : Item = jsNative
+
+                    module Item =
+                        /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "boolean"
+
+                    [<Interface>]
+                    type Item2 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract minLength: float option with get, set
+                        abstract maxLength: float option with get, set
+                        abstract format: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format option with get, set
+                        abstract ``default``: string option with get, set
+                        [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                        static member Create (?title: string, ?description: string, ?minLength: float, ?maxLength: float, ?format: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format, ?``default``: string) : Item2 = jsNative
+
+                    module Item2 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "string"
+
+                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                        type Format =
+                            | [<CompiledName("date")>] Date
+                            | [<CompiledName("date-time")>] DateTime
+                            | [<CompiledName("email")>] Email
+                            | [<CompiledName("uri")>] Uri
+
+                    [<Interface>]
+                    type Item3 =
+                        abstract ``type``: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract minimum: float option with get, set
+                        abstract maximum: float option with get, set
+                        abstract ``default``: float option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (``type``: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type, ?title: string, ?description: string, ?minimum: float, ?maximum: float, ?``default``: float) : Item3 = jsNative
+
+                    [<Interface>]
+                    type Item4 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract enum: string[] with get, set
+                        abstract enumNames: string[] option with get, set
+                        abstract ``default``: string option with get, set
+                        [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                        static member Create (enum: string[], ?title: string, ?description: string, ?enumNames: string[], ?``default``: string) : Item4 = jsNative
+
+                    module Item4 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "string"
+
+                    [<Interface>]
+                    type Item5 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract enum: string[] with get, set
+                        abstract ``default``: string option with get, set
+                        [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                        static member Create (enum: string[], ?title: string, ?description: string, ?``default``: string) : Item5 = jsNative
+
+                    module Item5 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "string"
+
+                    [<Interface>]
+                    type Item6 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract oneOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
+                        abstract ``default``: string option with get, set
+                        [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                        static member Create (oneOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[], ?title: string, ?description: string, ?``default``: string) : Item6 = jsNative
+
+                    module Item6 =
+                        /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "string"
+
+                        module OneOf =
+                            [<Interface>]
+                            type Item =
+                                abstract ``const``: string with get, set
+                                abstract title: string with get, set
+                                [<ParamObject; Emit("$0")>]
+                                static member Create (``const``: string, title: string) : Item = jsNative
+
+                    [<Interface>]
+                    type Item7 =
+                        /// <remarks>TypeScript type: <c>"array"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract minItems: float option with get, set
+                        abstract maxItems: float option with get, set
+                        abstract items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items with get, set
+                        abstract ``default``: string[] option with get, set
+                        [<ParamObject; Emit("({ type: 'array', ...$0 })")>]
+                        static member Create (items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item7 = jsNative
+
+                    module Item7 =
+                        /// <remarks>TypeScript type: <c>"array"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "array"
+
+                        [<Interface>]
+                        type Items =
+                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                            abstract ``type``: string with get, set
+                            abstract enum: string[] with get, set
+                            [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                            static member Create (enum: string[]) : Items = jsNative
+
+                        module Items =
+                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "string"
+
+                    [<Interface>]
+                    type Item8 =
+                        /// <remarks>TypeScript type: <c>"array"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract title: string option with get, set
+                        abstract description: string option with get, set
+                        abstract minItems: float option with get, set
+                        abstract maxItems: float option with get, set
+                        abstract items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items with get, set
+                        abstract ``default``: string[] option with get, set
+                        [<ParamObject; Emit("({ type: 'array', ...$0 })")>]
+                        static member Create (items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item8 = jsNative
+
+                    module Item8 =
+                        /// <remarks>TypeScript type: <c>"array"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "array"
+
+                        [<Interface>]
+                        type Items =
+                            abstract anyOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (anyOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[]) : Items = jsNative
+
+                    module Item3 =
+                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                        type Type =
+                            | [<CompiledName("integer")>] Integer
+                            | [<CompiledName("number")>] Number
 
     type ElicitResult =
         abstract _meta: Mcp.ElicitResult.Meta option with get, set
         abstract action: Mcp.McpAgent.ElicitInput.Result.Item.Action with get, set
-        abstract content: Record<string, U4<string, float, bool, string[]>> option with get, set
+        abstract content: JS.Record<string, U4<string, float, bool, string[]>> option with get, set
         [<EmitIndexer>]
         abstract Item: string -> obj with get, set
 
@@ -18646,13 +19654,6 @@ module Mcp =
         /// </remarks>
         [<Import("createMcpHandler", "agents/mcp")>]
         static member createMcpHandler (server: obj, ?options: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandlerOptions) : FSharp.CloudEdge.Runtime.Agents.Mcp.LegacyMcpHandler = jsNative
-        /// <remarks>
-        /// @deprecated
-        /// Passing an SDK v1 server to createMcpHandler is deprecated and
-        /// will be removed in the next major version. Pass an SDK v2 factory to
-        /// createMcpHandler. Use createLegacyMcpHandler only to temporarily retain
-        /// sessionful SDK v1 behavior while migrating.
-        /// </remarks>
         [<Import("createMcpHandler", "agents/mcp")>]
         static member createMcpHandler (factory: obj, ?options: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateStatelessMcpHandlerOptions) : FSharp.CloudEdge.Runtime.Agents.Mcp.StatelessMcpHandler = jsNative
         /// <remarks>
@@ -18717,7 +19718,7 @@ module Mcp =
         [<Import("RPC_DO_PREFIX", "agents/mcp")>]
         static member RPC_DO_PREFIX: string = jsNative
         [<Import("RPCClientTransport", "agents/mcp"); EmitConstructor>]
-        static member RPCClientTransport (options: FSharp.CloudEdge.Runtime.Agents.Mcp.RPCClientTransportOptions<FSharp.CloudEdge.Runtime.Agents.Mcp.McpAgent<obj, obj, Record<string, obj>>>) : FSharp.CloudEdge.Runtime.Agents.Mcp.RPCClientTransport = jsNative
+        static member RPCClientTransport (options: FSharp.CloudEdge.Runtime.Agents.Mcp.RPCClientTransportOptions<FSharp.CloudEdge.Runtime.Agents.Mcp.McpAgent<obj, obj, JS.Record<string, obj>>>) : FSharp.CloudEdge.Runtime.Agents.Mcp.RPCClientTransport = jsNative
         [<Import("RPCServerTransport", "agents/mcp"); EmitConstructor>]
         static member RPCServerTransport (?options: FSharp.CloudEdge.Runtime.Agents.Mcp.RPCServerTransportOptions) : FSharp.CloudEdge.Runtime.Agents.Mcp.RPCServerTransport = jsNative
         /// <summary>
@@ -18862,163 +19863,6 @@ module Mcp =
 
         module ReplayEventsAfter1 =
             type Send = delegate of eventId: string * message: U4<Mcp.WorkerTransport.Send.Message, Mcp.WorkerTransport.Send.Message2, Mcp.WorkerTransport.Send.Message3, Mcp.WorkerTransport.Send.Message4> -> JS.Promise<unit>
-
-    module ElicitRequest =
-        [<Interface>]
-        type Params =
-            abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
-            abstract task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task option with get, set
-            abstract mode: string option with get, set
-            abstract message: string with get, set
-            abstract requestedSchema: Mcp.ElicitRequest.Params.RequestedSchema with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (message: string, requestedSchema: Mcp.ElicitRequest.Params.RequestedSchema, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task, ?mode: string) : Params = jsNative
-
-        [<Interface>]
-        type Params2 =
-            abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
-            abstract task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task option with get, set
-            abstract mode: string with get, set
-            abstract message: string with get, set
-            abstract elicitationId: string with get, set
-            abstract url: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (mode: string, message: string, elicitationId: string, url: string, ?_meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta, ?task: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Task) : Params2 = jsNative
-
-        module Params =
-            type RequestedSchema =
-                abstract ``type``: string with get, set
-                abstract properties: Record<string, U8<Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item4, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item5, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7, Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8>> with get, set
-                abstract required: string[] option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
-
-            module RequestedSchema =
-                module Properties =
-                    [<Interface>]
-                    type Item =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract ``default``: bool option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, ?title: string, ?description: string, ?``default``: bool) : Item = jsNative
-
-                    [<Interface>]
-                    type Item2 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract minLength: float option with get, set
-                        abstract maxLength: float option with get, set
-                        abstract format: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format option with get, set
-                        abstract ``default``: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, ?title: string, ?description: string, ?minLength: float, ?maxLength: float, ?format: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format, ?``default``: string) : Item2 = jsNative
-
-                    [<Interface>]
-                    type Item3 =
-                        abstract ``type``: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract minimum: float option with get, set
-                        abstract maximum: float option with get, set
-                        abstract ``default``: float option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type, ?title: string, ?description: string, ?minimum: float, ?maximum: float, ?``default``: float) : Item3 = jsNative
-
-                    [<Interface>]
-                    type Item4 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract enum: string[] with get, set
-                        abstract enumNames: string[] option with get, set
-                        abstract ``default``: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, enum: string[], ?title: string, ?description: string, ?enumNames: string[], ?``default``: string) : Item4 = jsNative
-
-                    [<Interface>]
-                    type Item5 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract enum: string[] with get, set
-                        abstract ``default``: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, enum: string[], ?title: string, ?description: string, ?``default``: string) : Item5 = jsNative
-
-                    [<Interface>]
-                    type Item6 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract oneOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
-                        abstract ``default``: string option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, oneOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[], ?title: string, ?description: string, ?``default``: string) : Item6 = jsNative
-
-                    [<Interface>]
-                    type Item7 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract minItems: float option with get, set
-                        abstract maxItems: float option with get, set
-                        abstract items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items with get, set
-                        abstract ``default``: string[] option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item7 = jsNative
-
-                    [<Interface>]
-                    type Item8 =
-                        abstract ``type``: string with get, set
-                        abstract title: string option with get, set
-                        abstract description: string option with get, set
-                        abstract minItems: float option with get, set
-                        abstract maxItems: float option with get, set
-                        abstract items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items with get, set
-                        abstract ``default``: string[] option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``type``: string, items: Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item8 = jsNative
-
-                    module Item2 =
-                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                        type Format =
-                            | [<CompiledName("date")>] Date
-                            | [<CompiledName("date-time")>] DateTime
-                            | [<CompiledName("email")>] Email
-                            | [<CompiledName("uri")>] Uri
-
-                    module Item3 =
-                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                        type Type =
-                            | [<CompiledName("integer")>] Integer
-                            | [<CompiledName("number")>] Number
-
-                    module Item6 =
-                        module OneOf =
-                            [<Interface>]
-                            type Item =
-                                abstract ``const``: string with get, set
-                                abstract title: string with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (``const``: string, title: string) : Item = jsNative
-
-                    module Item7 =
-                        [<Interface>]
-                        type Items =
-                            abstract ``type``: string with get, set
-                            abstract enum: string[] with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: string, enum: string[]) : Items = jsNative
-
-                    module Item8 =
-                        [<Interface>]
-                        type Items =
-                            abstract anyOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (anyOf: FSharp.CloudEdge.Runtime.Agents.Mcp.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[]) : Items = jsNative
 
     module ElicitRequestSchema =
         [<Interface>]
@@ -19212,21 +20056,49 @@ module Mcp =
                                                             module Item =
                                                                 [<Interface>]
                                                                 type Item =
+                                                                    /// <remarks>TypeScript type: <c>"date"</c></remarks>
                                                                     abstract date: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"uri"</c></remarks>
                                                                     abstract uri: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"email"</c></remarks>
                                                                     abstract email: string with get, set
+                                                                    /// <remarks>TypeScript type: <c>"date-time"</c></remarks>
                                                                     abstract ``date-time``: string with get, set
-                                                                    [<ParamObject; Emit("$0")>]
-                                                                    static member Create (date: string, uri: string, email: string, ``date-time``: string) : Item = jsNative
+                                                                    [<Emit("({ date: 'date', uri: 'uri', email: 'email', 'date-time': 'date-time' })")>]
+                                                                    static member Create () : Item = jsNative
+
+                                                                module Item =
+                                                                    /// <remarks>TypeScript type: <c>"date"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let date = "date"
+                                                                    /// <remarks>TypeScript type: <c>"uri"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let uri = "uri"
+                                                                    /// <remarks>TypeScript type: <c>"email"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let email = "email"
+                                                                    /// <remarks>TypeScript type: <c>"date-time"</c></remarks>
+                                                                    [<Literal>]
+                                                                    let ``date-time`` = "date-time"
 
                                                     module Item3 =
                                                         module Type =
                                                             [<Interface>]
                                                             type Item =
+                                                                /// <remarks>TypeScript type: <c>"number"</c></remarks>
                                                                 abstract number: string with get, set
+                                                                /// <remarks>TypeScript type: <c>"integer"</c></remarks>
                                                                 abstract integer: string with get, set
-                                                                [<ParamObject; Emit("$0")>]
-                                                                static member Create (number: string, integer: string) : Item = jsNative
+                                                                [<Emit("({ number: 'number', integer: 'integer' })")>]
+                                                                static member Create () : Item = jsNative
+
+                                                            module Item =
+                                                                /// <remarks>TypeScript type: <c>"number"</c></remarks>
+                                                                [<Literal>]
+                                                                let number = "number"
+                                                                /// <remarks>TypeScript type: <c>"integer"</c></remarks>
+                                                                [<Literal>]
+                                                                let integer = "integer"
 
                             module Task =
                                 module Item =
@@ -19362,7 +20234,7 @@ module Mcp =
                 type Item =
                     abstract _meta: FSharp.CloudEdge.Runtime.Agents.Mcp.TransportState.InitializeParams.Meta option with get, set
                     abstract action: Mcp.McpAgent.ElicitInput.Result.Item.Action with get, set
-                    abstract content: Record<string, U4<string, float, bool, string[]>> option with get, set
+                    abstract content: JS.Record<string, U4<string, float, bool, string[]>> option with get, set
                     [<EmitIndexer>]
                     abstract Item: string -> obj with get, set
 
@@ -19624,78 +20496,6 @@ module Mcp =
                     | [<CompiledName("webSocketError")>] WebSocketError
                     | [<CompiledName("webSocketMessage")>] WebSocketMessage
 
-        module GetSchedule =
-            [<Interface>]
-            type Result<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, ?retry: RetryOptions) : Result<'T> = jsNative
-
-            [<Interface>]
-            type Result2<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Result2<'T> = jsNative
-
-            [<Interface>]
-            type Result3<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Result3<'T> = jsNative
-
-            [<Interface>]
-            type Result4<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Result4<'T> = jsNative
-
         module GetStreamForRequestId =
             module Result =
                 [<Interface>]
@@ -19929,10 +20729,10 @@ module Mcp =
                 abstract subject: string option with get, set
                 abstract body: string with get, set
                 abstract contentType: string option with get, set
-                abstract headers: Record<string, string> option with get, set
+                abstract headers: JS.Record<string, string> option with get, set
                 abstract secret: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: Record<string, string>, ?secret: string) : Options = jsNative
+                static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
 
             module Email =
                 type Forward = delegate of rcptTo: string * headers: obj option -> JS.Promise<obj>
@@ -19970,13 +20770,7 @@ module Mcp =
         module RunAgentTool =
             [<Interface>]
             type Options<'Input> =
-                abstract input: 'Input with get, set
-                abstract runId: string option with get, set
-                abstract parentToolCallId: string option with get, set
-                abstract displayOrder: float option with get, set
-                abstract signal: obj option with get, set
-                abstract inputPreview: obj option with get, set
-                abstract display: AgentToolDisplayMetadata option with get, set
+                inherit FSharp.CloudEdge.Runtime.Agents.Mcp.McpAgent.RunAgentTool.Options2<'Input>
                 /// <summary>
                 /// Run the sub-agent <b>detached</b>: dispatch it, let the current turn continue,
                 /// and (optionally) get a durable callback when it finishes. <c>true</c> is
@@ -20107,7 +20901,7 @@ module Mcp =
 
         module Scheduler =
             module Item =
-                type Item = delegate of payload: obj * schedule: FSharp.CloudEdge.Runtime.Agents.Scheduler.List.Result.Item.Item -> obj
+                type Item = delegate of payload: obj * schedule: FSharp.CloudEdge.Runtime.Agents.Schedule<obj> -> obj
 
         module Serve =
             [<Interface>]
@@ -20126,14 +20920,14 @@ module Mcp =
     module McpClientOptions =
         [<Interface>]
         type Capabilities =
-            abstract experimental: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
+            abstract experimental: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
             abstract sampling: Mcp.McpClientOptions.Capabilities.Sampling option with get, set
             abstract elicitation: Mcp.McpClientOptions.Capabilities.Elicitation option with get, set
             abstract roots: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts option with get, set
             abstract tasks: Mcp.McpClientOptions.Capabilities.Tasks option with get, set
-            abstract extensions: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
+            abstract extensions: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?experimental: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>, ?sampling: Mcp.McpClientOptions.Capabilities.Sampling, ?elicitation: Mcp.McpClientOptions.Capabilities.Elicitation, ?roots: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?tasks: Mcp.McpClientOptions.Capabilities.Tasks, ?extensions: Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>) : Capabilities = jsNative
+            static member Create (?experimental: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>, ?sampling: Mcp.McpClientOptions.Capabilities.Sampling, ?elicitation: Mcp.McpClientOptions.Capabilities.Elicitation, ?roots: FSharp.CloudEdge.Runtime.Agents.MCPClientConnection.ServerCapabilities.Prompts, ?tasks: Mcp.McpClientOptions.Capabilities.Tasks, ?extensions: JS.Record<string, Mcp.McpClientOptions.Capabilities.Experimental.Item>) : Capabilities = jsNative
 
         module Capabilities =
             type Elicitation =
@@ -20212,42 +21006,50 @@ module Mcp =
             type Message =
                 abstract ``method``: string with get, set
                 abstract ``params``: Mcp.SSEEdgeClientTransport.Onmessage.Message.Params option with get, set
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
                 abstract id: U2<string, float> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``method``: string, jsonrpc: string, id: U2<string, float>, ?``params``: Mcp.SSEEdgeClientTransport.Onmessage.Message.Params) : Message = jsNative
-
-            [<Interface>]
-            type Message2 =
-                abstract ``method``: string with get, set
-                abstract ``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.SSEEdgeClientTransport.Onmessage.Message.Params option with get, set
-                abstract jsonrpc: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``method``: string, jsonrpc: string, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.SSEEdgeClientTransport.Onmessage.Message.Params) : Message2 = jsNative
-
-            [<Interface>]
-            type Message3 =
-                abstract jsonrpc: string with get, set
-                abstract id: U2<string, float> option with get, set
-                abstract error: Mcp.SSEEdgeClientTransport.Onmessage.Message3.Error with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (jsonrpc: string, error: Mcp.SSEEdgeClientTransport.Onmessage.Message3.Error, ?id: U2<string, float>) : Message3 = jsNative
-
-            [<Interface>]
-            type Message4 =
-                abstract jsonrpc: string with get, set
-                abstract id: U2<string, float> with get, set
-                abstract result: Mcp.SSEEdgeClientTransport.Onmessage.Message4.Result with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (jsonrpc: string, id: U2<string, float>, result: Mcp.SSEEdgeClientTransport.Onmessage.Message4.Result) : Message4 = jsNative
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (``method``: string, id: U2<string, float>, ?``params``: Mcp.SSEEdgeClientTransport.Onmessage.Message.Params) : Message = jsNative
 
             module Message =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
+
                 type Params =
                     abstract _meta: FSharp.CloudEdge.Runtime.Agents.MCPClientManager.CallTool.Params.Meta option with get, set
                     [<EmitIndexer>]
                     abstract Item: string -> obj with get, set
 
+            [<Interface>]
+            type Message2 =
+                abstract ``method``: string with get, set
+                abstract ``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.SSEEdgeClientTransport.Onmessage.Message.Params option with get, set
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                abstract jsonrpc: string with get, set
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (``method``: string, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.SSEEdgeClientTransport.Onmessage.Message.Params) : Message2 = jsNative
+
+            module Message2 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
+
+            [<Interface>]
+            type Message3 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                abstract jsonrpc: string with get, set
+                abstract id: U2<string, float> option with get, set
+                abstract error: Mcp.SSEEdgeClientTransport.Onmessage.Message3.Error with get, set
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (error: Mcp.SSEEdgeClientTransport.Onmessage.Message3.Error, ?id: U2<string, float>) : Message3 = jsNative
+
             module Message3 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
+
                 [<Interface>]
                 type Error =
                     abstract code: float with get, set
@@ -20256,7 +21058,27 @@ module Mcp =
                     [<ParamObject; Emit("$0")>]
                     static member Create (code: float, message: string, ?data: obj) : Error = jsNative
 
+            [<Interface>]
+            type Message4 =
+                inherit Mcp.SSEEdgeClientTransport.Onmessage.Message4.Base
+                abstract result: Mcp.SSEEdgeClientTransport.Onmessage.Message4.Result with get, set
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (id: U2<string, float>, result: Mcp.SSEEdgeClientTransport.Onmessage.Message4.Result) : Message4 = jsNative
+
             module Message4 =
+                [<Interface>]
+                type Base =
+                    /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                    abstract jsonrpc: string with get, set
+                    abstract id: U2<string, float> with get, set
+                    [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                    static member Create (id: U2<string, float>) : Base = jsNative
+
+                module Base =
+                    /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                    [<Literal>]
+                    let jsonrpc = "2.0"
+
                 type Result =
                     /// <summary>
                     /// See <a href="https://modelcontextprotocol.io/specification/2026-07-28/basic/index#general-fields">MCP specification</a>
@@ -20290,9 +21112,9 @@ module Mcp =
                 abstract onresumptiontoken: (string -> unit) option with get, set
                 abstract requestSignal: obj option with get, set
                 abstract onRequestStreamEnd: (unit -> unit) option with get, set
-                abstract headers: ReadonlyRecord<string, string> option with get, set
+                abstract headers: JS.ReadonlyRecord<string, string> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: ReadonlyRecord<string, string>) : Options = jsNative
+                static member Create (?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>) : Options = jsNative
 
     module TransportState =
         [<Interface>]
@@ -20307,14 +21129,14 @@ module Mcp =
         module InitializeParams =
             [<Interface>]
             type Capabilities =
-                abstract experimental: Record<string, obj> option with get, set
+                abstract experimental: JS.Record<string, obj> option with get, set
                 abstract sampling: Mcp.TransportState.InitializeParams.Capabilities.Sampling option with get, set
                 abstract elicitation: Mcp.TransportState.InitializeParams.Capabilities.Elicitation option with get, set
                 abstract roots: Mcp.TransportState.InitializeParams.Capabilities.Roots option with get, set
                 abstract tasks: Mcp.TransportState.InitializeParams.Capabilities.Tasks option with get, set
-                abstract extensions: Record<string, obj> option with get, set
+                abstract extensions: JS.Record<string, obj> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?experimental: Record<string, obj>, ?sampling: Mcp.TransportState.InitializeParams.Capabilities.Sampling, ?elicitation: Mcp.TransportState.InitializeParams.Capabilities.Elicitation, ?roots: Mcp.TransportState.InitializeParams.Capabilities.Roots, ?tasks: Mcp.TransportState.InitializeParams.Capabilities.Tasks, ?extensions: Record<string, obj>) : Capabilities = jsNative
+                static member Create (?experimental: JS.Record<string, obj>, ?sampling: Mcp.TransportState.InitializeParams.Capabilities.Sampling, ?elicitation: Mcp.TransportState.InitializeParams.Capabilities.Elicitation, ?roots: Mcp.TransportState.InitializeParams.Capabilities.Roots, ?tasks: Mcp.TransportState.InitializeParams.Capabilities.Tasks, ?extensions: JS.Record<string, obj>) : Capabilities = jsNative
 
             [<Interface>]
             type ClientInfo =
@@ -20438,36 +21260,59 @@ module Mcp =
             type Message =
                 abstract ``method``: string with get, set
                 abstract ``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3 option with get, set
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
                 abstract id: U2<string, float> with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``method``: string, jsonrpc: string, id: U2<string, float>, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message = jsNative
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (``method``: string, id: U2<string, float>, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message = jsNative
+
+            module Message =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
 
             [<Interface>]
             type Message2 =
                 abstract ``method``: string with get, set
                 abstract ``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3 option with get, set
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``method``: string, jsonrpc: string, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message2 = jsNative
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (``method``: string, ?``params``: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message2 = jsNative
+
+            module Message2 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
 
             [<Interface>]
             type Message3 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
                 abstract id: U2<string, float> with get, set
                 abstract result: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3 with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (jsonrpc: string, id: U2<string, float>, result: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message3 = jsNative
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (id: U2<string, float>, result: FSharp.CloudEdge.Runtime.Agents.Mcp.CreateLegacyMcpHandler.Server.Item3) : Message3 = jsNative
+
+            module Message3 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
 
             [<Interface>]
             type Message4 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
                 abstract id: U2<string, float> option with get, set
                 abstract error: Mcp.WorkerTransport.Send.Message4.Error with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (jsonrpc: string, error: Mcp.WorkerTransport.Send.Message4.Error, ?id: U2<string, float>) : Message4 = jsNative
+                [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
+                static member Create (error: Mcp.WorkerTransport.Send.Message4.Error, ?id: U2<string, float>) : Message4 = jsNative
 
             module Message4 =
+                /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
+                [<Literal>]
+                let jsonrpc = "2.0"
+
                 [<Interface>]
                 type Error =
                     abstract code: float with get, set
@@ -20624,6 +21469,7 @@ module Mcp =
 module Observability =
     [<Interface>]
     type ObservabilityEvent10 =
+        /// <remarks>TypeScript type: <c>"action:pause:created"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20644,11 +21490,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent10.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent10 = jsNative
+        [<ParamObject; Emit("({ type: 'action:pause:created', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent10.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent10 = jsNative
+
+    module ObservabilityEvent10 =
+        /// <remarks>TypeScript type: <c>"action:pause:created"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:pause:created"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract executionId: string with get, set
+            abstract toolCallId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, executionId: string, toolCallId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent11 =
+        /// <remarks>TypeScript type: <c>"action:pause:rejected"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20669,11 +21529,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent11.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent11 = jsNative
+        [<ParamObject; Emit("({ type: 'action:pause:rejected', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent11.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent11 = jsNative
+
+    module ObservabilityEvent11 =
+        /// <remarks>TypeScript type: <c>"action:pause:rejected"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:pause:rejected"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract executionId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, executionId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent12 =
+        /// <remarks>TypeScript type: <c>"action:pause:swept"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20694,11 +21567,23 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent12.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent12 = jsNative
+        [<ParamObject; Emit("({ type: 'action:pause:swept', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent12.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent12 = jsNative
+
+    module ObservabilityEvent12 =
+        /// <remarks>TypeScript type: <c>"action:pause:swept"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:pause:swept"
+
+        [<Interface>]
+        type Payload =
+            abstract swept: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (swept: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent13 =
+        /// <remarks>TypeScript type: <c>"action:reply-attached"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20719,11 +21604,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent13.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent13 = jsNative
+        [<ParamObject; Emit("({ type: 'action:reply-attached', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent13.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent13 = jsNative
+
+    module ObservabilityEvent13 =
+        /// <remarks>TypeScript type: <c>"action:reply-attached"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:reply-attached"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string option with get, set
+            abstract attachmentType: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (attachmentType: string, ?action: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent14 =
+        /// <remarks>TypeScript type: <c>"agent_tool:detached:delivery_failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20744,11 +21642,33 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent14.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent14 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:detached:delivery_failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent14.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent14 = jsNative
+
+    module ObservabilityEvent14 =
+        /// <remarks>TypeScript type: <c>"agent_tool:detached:delivery_failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:detached:delivery_failed"
+
+        [<Interface>]
+        type Payload =
+            abstract runId: string with get, set
+            abstract kind: Observability.ObservabilityEvent14.Payload.Kind with get, set
+            abstract status: string with get, set
+            abstract callback: string option with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runId: string, kind: Observability.ObservabilityEvent14.Payload.Kind, status: string, error: string, ?callback: string) : Payload = jsNative
+
+        module Payload =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Kind =
+                | [<CompiledName("finish")>] Finish
+                | [<CompiledName("give_up")>] GiveUp
 
     [<Interface>]
     type ObservabilityEvent15 =
+        /// <remarks>TypeScript type: <c>"agent_tool:detached:live_count_warning"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20769,11 +21689,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent15.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent15 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:detached:live_count_warning', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent15.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent15 = jsNative
+
+    module ObservabilityEvent15 =
+        /// <remarks>TypeScript type: <c>"agent_tool:detached:live_count_warning"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:detached:live_count_warning"
+
+        [<Interface>]
+        type Payload =
+            /// <summary>
+            /// Detached runs currently holding a concurrency slot (non-terminal).
+            /// </summary>
+            abstract liveCount: float with get, set
+            abstract threshold: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (liveCount: float, threshold: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent16 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:begin"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20794,11 +21730,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent16.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent16 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:begin', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent16.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent16 = jsNative
+
+    module ObservabilityEvent16 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:begin"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:begin"
+
+        [<Interface>]
+        type Payload =
+            abstract runCount: float with get, set
+            abstract totalTimeoutMs: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runCount: float, ?totalTimeoutMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent17 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:complete"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20819,11 +21768,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent17.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent17 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:complete', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent17.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent17 = jsNative
+
+    module ObservabilityEvent17 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:complete"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:complete"
+
+        [<Interface>]
+        type Payload =
+            abstract runCount: float with get, set
+            abstract elapsedMs: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runCount: float, ?elapsedMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent18 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:deadline"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20844,11 +21806,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent18.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent18 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:deadline', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent18.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent18 = jsNative
+
+    module ObservabilityEvent18 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:deadline"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:deadline"
+
+        [<Interface>]
+        type Payload =
+            abstract runId: string with get, set
+            abstract agentType: string with get, set
+            abstract elapsedMs: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runId: string, agentType: string, ?elapsedMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent19 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20869,11 +21845,23 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent19.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent19 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent19.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent19 = jsNative
+
+    module ObservabilityEvent19 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent2 =
+        /// <remarks>TypeScript type: <c>"action:ledger:conflict"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20894,11 +21882,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent2.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent2 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:conflict', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent2.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent2 = jsNative
+
+    module ObservabilityEvent2 =
+        /// <remarks>TypeScript type: <c>"action:ledger:conflict"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:conflict"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            abstract inputHash: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent20 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:reattach"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20919,11 +21921,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent20.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent20 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:reattach', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent20.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent20 = jsNative
+
+    module ObservabilityEvent20 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:reattach"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:reattach"
+
+        [<Interface>]
+        type Payload =
+            abstract runId: string with get, set
+            abstract agentType: string with get, set
+            abstract budgetMs: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runId: string, agentType: string, budgetMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent21 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:row"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20944,11 +21960,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent21.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent21 = jsNative
+        [<ParamObject; Emit("({ type: 'agent_tool:recovery:row', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent21.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent21 = jsNative
+
+    module ObservabilityEvent21 =
+        /// <remarks>TypeScript type: <c>"agent_tool:recovery:row"</c></remarks>
+        [<Literal>]
+        let ``type`` = "agent_tool:recovery:row"
+
+        [<Interface>]
+        type Payload =
+            abstract runId: string with get, set
+            abstract agentType: string with get, set
+            abstract status: string with get, set
+            abstract reason: string option with get, set
+            abstract elapsedMs: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runId: string, agentType: string, status: string, ?reason: string, ?elapsedMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent22 =
+        /// <remarks>TypeScript type: <c>"alarm:memory_limit_reset"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20969,11 +22001,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent22.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent22 = jsNative
+        [<ParamObject; Emit("({ type: 'alarm:memory_limit_reset', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent22.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent22 = jsNative
+
+    module ObservabilityEvent22 =
+        /// <remarks>TypeScript type: <c>"alarm:memory_limit_reset"</c></remarks>
+        [<Literal>]
+        let ``type`` = "alarm:memory_limit_reset"
+
+        [<Interface>]
+        type Payload =
+            abstract strikes: float with get, set
+            abstract limit: float with get, set
+            abstract ``sealed``: bool with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (strikes: float, limit: float, ``sealed``: bool, error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent23 =
+        /// <remarks>TypeScript type: <c>"channel:delivered"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -20994,11 +22041,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent23.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent23 = jsNative
+        [<ParamObject; Emit("({ type: 'channel:delivered', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent23.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent23 = jsNative
+
+    module ObservabilityEvent23 =
+        /// <remarks>TypeScript type: <c>"channel:delivered"</c></remarks>
+        [<Literal>]
+        let ``type`` = "channel:delivered"
+
+        [<Interface>]
+        type Payload =
+            abstract channel: string with get, set
+            abstract kind: string with get, set
+            abstract turnEnded: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (channel: string, kind: string, turnEnded: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent24 =
+        /// <remarks>TypeScript type: <c>"channel:resolved"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21019,11 +22080,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent24.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent24 = jsNative
+        [<ParamObject; Emit("({ type: 'channel:resolved', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent24.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent24 = jsNative
+
+    module ObservabilityEvent24 =
+        /// <remarks>TypeScript type: <c>"channel:resolved"</c></remarks>
+        [<Literal>]
+        let ``type`` = "channel:resolved"
+
+        [<Interface>]
+        type Payload =
+            abstract channel: string with get, set
+            abstract kind: string with get, set
+            abstract requestId: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (channel: string, kind: string, ?requestId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent25 =
+        /// <remarks>TypeScript type: <c>"chat:context:compacted"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21044,11 +22119,37 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent25.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent25 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:context:compacted', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent25.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent25 = jsNative
+
+    module ObservabilityEvent25 =
+        /// <remarks>TypeScript type: <c>"chat:context:compacted"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:context:compacted"
+
+        [<Interface>]
+        type Payload =
+            /// <summary>
+            /// <c>"proactive"</c> — the pre-step token guard compacted before the next
+            /// step; <c>"reactive"</c> — a context-overflow error triggered compaction
+            /// before a retry.
+            /// </summary>
+            abstract reason: Observability.ObservabilityEvent25.Payload.Reason with get, set
+            abstract shortened: bool with get, set
+            abstract requestId: string option with get, set
+            abstract attempt: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (reason: Observability.ObservabilityEvent25.Payload.Reason, shortened: bool, ?requestId: string, ?attempt: float) : Payload = jsNative
+
+        module Payload =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Reason =
+                | [<CompiledName("proactive")>] Proactive
+                | [<CompiledName("reactive")>] Reactive
 
     [<Interface>]
     type ObservabilityEvent26 =
+        /// <remarks>TypeScript type: <c>"chat:hydration:windowed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21069,11 +22170,28 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent26.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent26 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:hydration:windowed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent26.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent26 = jsNative
+
+    module ObservabilityEvent26 =
+        /// <remarks>TypeScript type: <c>"chat:hydration:windowed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:hydration:windowed"
+
+        [<Interface>]
+        type Payload =
+            /// <summary>
+            /// Stored size of the full active path, in bytes.
+            /// </summary>
+            abstract totalContentBytes: float with get, set
+            abstract budgetBytes: float with get, set
+            abstract hydratedMessages: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (totalContentBytes: float, budgetBytes: float, hydratedMessages: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent27 =
+        /// <remarks>TypeScript type: <c>"chat:media:evicted"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21094,11 +22212,29 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent27.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent27 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:media:evicted', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent27.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent27 = jsNative
+
+    module ObservabilityEvent27 =
+        /// <remarks>TypeScript type: <c>"chat:media:evicted"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:media:evicted"
+
+        [<Interface>]
+        type Payload =
+            /// <summary>
+            /// Stored messages rewritten during this eviction pass.
+            /// </summary>
+            abstract messages: float with get, set
+            abstract parts: float with get, set
+            abstract bytes: float with get, set
+            abstract externalizedBytes: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (messages: float, parts: float, bytes: float, externalizedBytes: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent28 =
+        /// <remarks>TypeScript type: <c>"chat:onstart:degraded"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21119,11 +22255,35 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent28.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent28 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:onstart:degraded', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent28.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent28 = jsNative
+
+    module ObservabilityEvent28 =
+        /// <remarks>TypeScript type: <c>"chat:onstart:degraded"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:onstart:degraded"
+
+        [<Interface>]
+        type Payload =
+            /// <summary>
+            /// Internal onStart step that failed and was skipped so the agent
+            /// could still come up instead of bricking the DO (#1710).
+            /// </summary>
+            abstract step: Observability.ObservabilityEvent28.Payload.Step with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (step: Observability.ObservabilityEvent28.Payload.Step, error: string) : Payload = jsNative
+
+        module Payload =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Step =
+                | [<CompiledName("durable-work-recovery")>] DurableWorkRecovery
+                | [<CompiledName("scheduled-task-reconcile")>] ScheduledTaskReconcile
+                | [<CompiledName("transcript-hydration")>] TranscriptHydration
 
     [<Interface>]
     type ObservabilityEvent29 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:attempt"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21144,11 +22304,33 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent29.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent29 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:attempt', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent29.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent29 = jsNative
+
+    module ObservabilityEvent29 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:attempt"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:attempt"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
+
+        module Payload =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type RecoveryKind =
+                | [<CompiledName("continue")>] Continue
+                | [<CompiledName("retry")>] Retry
 
     [<Interface>]
     type ObservabilityEvent3 =
+        /// <remarks>TypeScript type: <c>"action:ledger:pending"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21169,11 +22351,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent3.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent3 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:pending', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent3.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent3 = jsNative
+
+    module ObservabilityEvent3 =
+        /// <remarks>TypeScript type: <c>"action:ledger:pending"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:pending"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            abstract inputHash: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent30 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:completed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21194,11 +22390,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent30.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent30 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:completed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent30.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent30 = jsNative
+
+    module ObservabilityEvent30 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:completed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:completed"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent31 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:detected"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21219,11 +22431,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent31.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent31 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:detected', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent31.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent31 = jsNative
+
+    module ObservabilityEvent31 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:detected"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:detected"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent32 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:exhausted"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21244,11 +22472,28 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent32.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent32 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:exhausted', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent32.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent32 = jsNative
+
+    module ObservabilityEvent32 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:exhausted"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:exhausted"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            abstract reason: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent33 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21269,11 +22514,28 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent33.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent33 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent33.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent33 = jsNative
+
+    module ObservabilityEvent33 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            abstract reason: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, ?reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent34 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:scheduled"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21294,11 +22556,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent34.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent34 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:scheduled', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent34.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent34 = jsNative
+
+    module ObservabilityEvent34 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:scheduled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:scheduled"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent35 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:skipped"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21319,11 +22597,28 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent35.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent35 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:recovery:skipped', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent35.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent35 = jsNative
+
+    module ObservabilityEvent35 =
+        /// <remarks>TypeScript type: <c>"chat:recovery:skipped"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:recovery:skipped"
+
+        [<Interface>]
+        type Payload =
+            abstract incidentId: string with get, set
+            abstract requestId: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
+            abstract reason: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, ?reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent36 =
+        /// <remarks>TypeScript type: <c>"chat:request:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21344,11 +22639,36 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent36.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent36 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:request:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent36.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent36 = jsNative
+
+    module ObservabilityEvent36 =
+        /// <remarks>TypeScript type: <c>"chat:request:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:request:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string option with get, set
+            abstract stage: Observability.ObservabilityEvent36.Payload.Stage with get, set
+            abstract messagesPersisted: bool option with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (stage: Observability.ObservabilityEvent36.Payload.Stage, error: string, ?requestId: string, ?messagesPersisted: bool) : Payload = jsNative
+
+        module Payload =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Stage =
+                | [<CompiledName("parse")>] Parse
+                | [<CompiledName("persist")>] Persist
+                | [<CompiledName("recovery")>] Recovery
+                | [<CompiledName("stream")>] Stream
+                | [<CompiledName("transcript")>] Transcript
+                | [<CompiledName("turn")>] Turn
 
     [<Interface>]
     type ObservabilityEvent37 =
+        /// <remarks>TypeScript type: <c>"chat:stream:stalled"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21369,11 +22689,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent37.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent37 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:stream:stalled', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent37.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent37 = jsNative
+
+    module ObservabilityEvent37 =
+        /// <remarks>TypeScript type: <c>"chat:stream:stalled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:stream:stalled"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string with get, set
+            abstract timeoutMs: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (requestId: string, timeoutMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent38 =
+        /// <remarks>TypeScript type: <c>"chat:transcript:repaired"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21394,11 +22727,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent38.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent38 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:transcript:repaired', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent38.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent38 = jsNative
+
+    module ObservabilityEvent38 =
+        /// <remarks>TypeScript type: <c>"chat:transcript:repaired"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:transcript:repaired"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string option with get, set
+            abstract removedToolCalls: float with get, set
+            abstract normalizedInputs: float with get, set
+            abstract toolCallIds: string[] option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (removedToolCalls: float, normalizedInputs: float, ?requestId: string, ?toolCallIds: string[]) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent39 =
+        /// <remarks>TypeScript type: <c>"chat:turn:finish"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21419,11 +22767,30 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent39.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent39 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:turn:finish', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent39.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent39 = jsNative
+
+    module ObservabilityEvent39 =
+        /// <remarks>TypeScript type: <c>"chat:turn:finish"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:turn:finish"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string with get, set
+            abstract trigger: string with get, set
+            abstract admission: string with get, set
+            abstract continuation: bool option with get, set
+            abstract generation: float option with get, set
+            abstract status: string with get, set
+            abstract durationMs: float with get, set
+            abstract error: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (requestId: string, trigger: string, admission: string, status: string, durationMs: float, ?continuation: bool, ?generation: float, ?error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent4 =
+        /// <remarks>TypeScript type: <c>"action:ledger:reclaimed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21444,11 +22811,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent4.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent4 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:reclaimed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent4.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent4 = jsNative
+
+    module ObservabilityEvent4 =
+        /// <remarks>TypeScript type: <c>"action:ledger:reclaimed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:reclaimed"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            abstract inputHash: string with get, set
+            abstract ageMs: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string, inputHash: string, ageMs: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent40 =
+        /// <remarks>TypeScript type: <c>"chat:turn:start"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21469,11 +22851,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent40.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent40 = jsNative
+        [<ParamObject; Emit("({ type: 'chat:turn:start', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent40.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent40 = jsNative
+
+    module ObservabilityEvent40 =
+        /// <remarks>TypeScript type: <c>"chat:turn:start"</c></remarks>
+        [<Literal>]
+        let ``type`` = "chat:turn:start"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string with get, set
+            abstract trigger: string with get, set
+            abstract admission: string with get, set
+            abstract continuation: bool option with get, set
+            abstract generation: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (requestId: string, trigger: string, admission: string, ?continuation: bool, ?generation: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent41 =
+        /// <remarks>TypeScript type: <c>"connect"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21494,11 +22892,23 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent41.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent41 = jsNative
+        [<ParamObject; Emit("({ type: 'connect', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent41.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent41 = jsNative
+
+    module ObservabilityEvent41 =
+        /// <remarks>TypeScript type: <c>"connect"</c></remarks>
+        [<Literal>]
+        let ``type`` = "connect"
+
+        [<Interface>]
+        type Payload =
+            abstract connectionId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (connectionId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent42 =
+        /// <remarks>TypeScript type: <c>"destroy"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21514,16 +22924,22 @@ module Observability =
         /// <summary>
         /// The payload of the event
         /// </summary>
-        abstract payload: Record<string, unit> with get, set
+        abstract payload: JS.Record<string, unit> with get, set
         /// <summary>
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent42 = jsNative
+        [<ParamObject; Emit("({ type: 'destroy', ...$0 })")>]
+        static member Create (payload: JS.Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent42 = jsNative
+
+    module ObservabilityEvent42 =
+        /// <remarks>TypeScript type: <c>"destroy"</c></remarks>
+        [<Literal>]
+        let ``type`` = "destroy"
 
     [<Interface>]
     type ObservabilityEvent43 =
+        /// <remarks>TypeScript type: <c>"disconnect"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21544,11 +22960,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent43.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent43 = jsNative
+        [<ParamObject; Emit("({ type: 'disconnect', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent43.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent43 = jsNative
+
+    module ObservabilityEvent43 =
+        /// <remarks>TypeScript type: <c>"disconnect"</c></remarks>
+        [<Literal>]
+        let ``type`` = "disconnect"
+
+        [<Interface>]
+        type Payload =
+            abstract connectionId: string with get, set
+            abstract code: float with get, set
+            abstract reason: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (connectionId: string, code: float, reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent44 =
+        /// <remarks>TypeScript type: <c>"email:receive"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21569,11 +22999,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent44.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent44 = jsNative
+        [<ParamObject; Emit("({ type: 'email:receive', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent44.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent44 = jsNative
+
+    module ObservabilityEvent44 =
+        /// <remarks>TypeScript type: <c>"email:receive"</c></remarks>
+        [<Literal>]
+        let ``type`` = "email:receive"
+
+        [<Interface>]
+        type Payload =
+            abstract from: string with get, set
+            abstract ``to``: string with get, set
+            abstract subject: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (from: string, ``to``: string, ?subject: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent45 =
+        /// <remarks>TypeScript type: <c>"email:reply"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21594,11 +23038,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent45.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent45 = jsNative
+        [<ParamObject; Emit("({ type: 'email:reply', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent45.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent45 = jsNative
+
+    module ObservabilityEvent45 =
+        /// <remarks>TypeScript type: <c>"email:reply"</c></remarks>
+        [<Literal>]
+        let ``type`` = "email:reply"
+
+        [<Interface>]
+        type Payload =
+            abstract from: string with get, set
+            abstract ``to``: string with get, set
+            abstract subject: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (from: string, ``to``: string, ?subject: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent46 =
+        /// <remarks>TypeScript type: <c>"email:send"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21619,11 +23077,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent46.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent46 = jsNative
+        [<ParamObject; Emit("({ type: 'email:send', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent46.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent46 = jsNative
+
+    module ObservabilityEvent46 =
+        /// <remarks>TypeScript type: <c>"email:send"</c></remarks>
+        [<Literal>]
+        let ``type`` = "email:send"
+
+        [<Interface>]
+        type Payload =
+            abstract from: string with get, set
+            abstract ``to``: U2<string, string[]> with get, set
+            abstract subject: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (from: string, ``to``: U2<string, string[]>, subject: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent47 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:attempt"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21644,11 +23116,32 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent47.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent47 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:recovery:attempt', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent47.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent47 = jsNative
+
+    module ObservabilityEvent47 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:attempt"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:recovery:attempt"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract managed: bool option with get, set
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            abstract recoveryReason: string with get, set
+            [<ParamObject; Emit("({ recoveryReason: 'interrupted', ...$0 })")>]
+            static member Create (fiberId: string, fiberName: string, ?managed: bool) : Payload = jsNative
+
+        module Payload =
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            [<Literal>]
+            let recoveryReason = "interrupted"
 
     [<Interface>]
     type ObservabilityEvent48 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:detected"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21669,11 +23162,33 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent48.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent48 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:recovery:detected', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent48.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent48 = jsNative
+
+    module ObservabilityEvent48 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:detected"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:recovery:detected"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            abstract recoveryReason: string with get, set
+            [<ParamObject; Emit("({ recoveryReason: 'interrupted', ...$0 })")>]
+            static member Create (fiberId: string, fiberName: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
+
+        module Payload =
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            [<Literal>]
+            let recoveryReason = "interrupted"
 
     [<Interface>]
     type ObservabilityEvent49 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21694,11 +23209,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent49.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent49 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:recovery:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent49.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent49 = jsNative
+
+    module ObservabilityEvent49 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:recovery:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract error: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract reason: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, error: string, ?elapsedMs: float, ?reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent5 =
+        /// <remarks>TypeScript type: <c>"action:ledger:replayed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21719,11 +23250,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent5.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent5 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:replayed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent5.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent5 = jsNative
+
+    module ObservabilityEvent5 =
+        /// <remarks>TypeScript type: <c>"action:ledger:replayed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:replayed"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            abstract inputHash: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent50 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:handled"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21744,11 +23289,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent50.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent50 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:recovery:handled', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent50.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent50 = jsNative
+
+    module ObservabilityEvent50 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:handled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:recovery:handled"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract status: string option with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, ?status: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent51 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:skipped"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21769,11 +23330,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent51.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent51 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:recovery:skipped', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent51.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent51 = jsNative
+
+    module ObservabilityEvent51 =
+        /// <remarks>TypeScript type: <c>"fiber:recovery:skipped"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:recovery:skipped"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract reason: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, reason: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent52 =
+        /// <remarks>TypeScript type: <c>"fiber:run:completed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21794,11 +23371,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent52.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent52 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:run:completed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent52.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent52 = jsNative
+
+    module ObservabilityEvent52 =
+        /// <remarks>TypeScript type: <c>"fiber:run:completed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:run:completed"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent53 =
+        /// <remarks>TypeScript type: <c>"fiber:run:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21819,11 +23411,27 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent53.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent53 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:run:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent53.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent53 = jsNative
+
+    module ObservabilityEvent53 =
+        /// <remarks>TypeScript type: <c>"fiber:run:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:run:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract error: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, error: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent54 =
+        /// <remarks>TypeScript type: <c>"fiber:run:interrupted"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21844,11 +23452,33 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent54.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent54 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:run:interrupted', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent54.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent54 = jsNative
+
+    module ObservabilityEvent54 =
+        /// <remarks>TypeScript type: <c>"fiber:run:interrupted"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:run:interrupted"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract elapsedMs: float option with get, set
+            abstract managed: bool option with get, set
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            abstract recoveryReason: string with get, set
+            [<ParamObject; Emit("({ recoveryReason: 'interrupted', ...$0 })")>]
+            static member Create (fiberId: string, fiberName: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
+
+        module Payload =
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            [<Literal>]
+            let recoveryReason = "interrupted"
 
     [<Interface>]
     type ObservabilityEvent55 =
+        /// <remarks>TypeScript type: <c>"fiber:run:started"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21869,11 +23499,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent55.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent55 = jsNative
+        [<ParamObject; Emit("({ type: 'fiber:run:started', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent55.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent55 = jsNative
+
+    module ObservabilityEvent55 =
+        /// <remarks>TypeScript type: <c>"fiber:run:started"</c></remarks>
+        [<Literal>]
+        let ``type`` = "fiber:run:started"
+
+        [<Interface>]
+        type Payload =
+            abstract fiberId: string with get, set
+            abstract fiberName: string with get, set
+            abstract managed: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fiberId: string, fiberName: string, ?managed: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent56 =
+        /// <remarks>TypeScript type: <c>"message:cancel"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21894,11 +23538,23 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent56.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent56 = jsNative
+        [<ParamObject; Emit("({ type: 'message:cancel', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent56.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent56 = jsNative
+
+    module ObservabilityEvent56 =
+        /// <remarks>TypeScript type: <c>"message:cancel"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message:cancel"
+
+        [<Interface>]
+        type Payload =
+            abstract requestId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (requestId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent57 =
+        /// <remarks>TypeScript type: <c>"message:clear"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21914,16 +23570,22 @@ module Observability =
         /// <summary>
         /// The payload of the event
         /// </summary>
-        abstract payload: Record<string, unit> with get, set
+        abstract payload: JS.Record<string, unit> with get, set
         /// <summary>
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent57 = jsNative
+        [<ParamObject; Emit("({ type: 'message:clear', ...$0 })")>]
+        static member Create (payload: JS.Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent57 = jsNative
+
+    module ObservabilityEvent57 =
+        /// <remarks>TypeScript type: <c>"message:clear"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message:clear"
 
     [<Interface>]
     type ObservabilityEvent58 =
+        /// <remarks>TypeScript type: <c>"message:error"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21944,11 +23606,23 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent58.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent58 = jsNative
+        [<ParamObject; Emit("({ type: 'message:error', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent58.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent58 = jsNative
+
+    module ObservabilityEvent58 =
+        /// <remarks>TypeScript type: <c>"message:error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message:error"
+
+        [<Interface>]
+        type Payload =
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent59 =
+        /// <remarks>TypeScript type: <c>"message:request"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21964,16 +23638,22 @@ module Observability =
         /// <summary>
         /// The payload of the event
         /// </summary>
-        abstract payload: Record<string, unit> with get, set
+        abstract payload: JS.Record<string, unit> with get, set
         /// <summary>
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent59 = jsNative
+        [<ParamObject; Emit("({ type: 'message:request', ...$0 })")>]
+        static member Create (payload: JS.Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent59 = jsNative
+
+    module ObservabilityEvent59 =
+        /// <remarks>TypeScript type: <c>"message:request"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message:request"
 
     [<Interface>]
     type ObservabilityEvent6 =
+        /// <remarks>TypeScript type: <c>"action:ledger:serialize_failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -21994,11 +23674,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent6.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent6 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:serialize_failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent6.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent6 = jsNative
+
+    module ObservabilityEvent6 =
+        /// <remarks>TypeScript type: <c>"action:ledger:serialize_failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:serialize_failed"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent60 =
+        /// <remarks>TypeScript type: <c>"message:response"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22014,16 +23707,22 @@ module Observability =
         /// <summary>
         /// The payload of the event
         /// </summary>
-        abstract payload: Record<string, unit> with get, set
+        abstract payload: JS.Record<string, unit> with get, set
         /// <summary>
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent60 = jsNative
+        [<ParamObject; Emit("({ type: 'message:response', ...$0 })")>]
+        static member Create (payload: JS.Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent60 = jsNative
+
+    module ObservabilityEvent60 =
+        /// <remarks>TypeScript type: <c>"message:response"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message:response"
 
     [<Interface>]
     type ObservabilityEvent61 =
+        /// <remarks>TypeScript type: <c>"notice:delivered"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22044,11 +23743,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent61.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent61 = jsNative
+        [<ParamObject; Emit("({ type: 'notice:delivered', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent61.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent61 = jsNative
+
+    module ObservabilityEvent61 =
+        /// <remarks>TypeScript type: <c>"notice:delivered"</c></remarks>
+        [<Literal>]
+        let ``type`` = "notice:delivered"
+
+        [<Interface>]
+        type Payload =
+            abstract channel: string with get, set
+            abstract kind: string with get, set
+            abstract informModel: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (channel: string, kind: string, informModel: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent62 =
+        /// <remarks>TypeScript type: <c>"notice:failed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22069,11 +23782,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent62.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent62 = jsNative
+        [<ParamObject; Emit("({ type: 'notice:failed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent62.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent62 = jsNative
+
+    module ObservabilityEvent62 =
+        /// <remarks>TypeScript type: <c>"notice:failed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "notice:failed"
+
+        [<Interface>]
+        type Payload =
+            abstract channel: string with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (channel: string, error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent63 =
+        /// <remarks>TypeScript type: <c>"queue:create"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22094,11 +23820,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent63.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent63 = jsNative
+        [<ParamObject; Emit("({ type: 'queue:create', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent63.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent63 = jsNative
+
+    module ObservabilityEvent63 =
+        /// <remarks>TypeScript type: <c>"queue:create"</c></remarks>
+        [<Literal>]
+        let ``type`` = "queue:create"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent64 =
+        /// <remarks>TypeScript type: <c>"queue:error"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22119,11 +23858,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent64.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent64 = jsNative
+        [<ParamObject; Emit("({ type: 'queue:error', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent64.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent64 = jsNative
+
+    module ObservabilityEvent64 =
+        /// <remarks>TypeScript type: <c>"queue:error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "queue:error"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            abstract error: string with get, set
+            abstract attempts: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string, error: string, attempts: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent65 =
+        /// <remarks>TypeScript type: <c>"queue:retry"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22144,11 +23898,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent65.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent65 = jsNative
+        [<ParamObject; Emit("({ type: 'queue:retry', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent65.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent65 = jsNative
+
+    module ObservabilityEvent65 =
+        /// <remarks>TypeScript type: <c>"queue:retry"</c></remarks>
+        [<Literal>]
+        let ``type`` = "queue:retry"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string, attempt: float, maxAttempts: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent66 =
+        /// <remarks>TypeScript type: <c>"rpc"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22169,11 +23938,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent66.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent66 = jsNative
+        [<ParamObject; Emit("({ type: 'rpc', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent66.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent66 = jsNative
+
+    module ObservabilityEvent66 =
+        /// <remarks>TypeScript type: <c>"rpc"</c></remarks>
+        [<Literal>]
+        let ``type`` = "rpc"
+
+        [<Interface>]
+        type Payload =
+            abstract ``method``: string with get, set
+            abstract streaming: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``method``: string, ?streaming: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent67 =
+        /// <remarks>TypeScript type: <c>"rpc:error"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22194,11 +23976,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent67.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent67 = jsNative
+        [<ParamObject; Emit("({ type: 'rpc:error', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent67.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent67 = jsNative
+
+    module ObservabilityEvent67 =
+        /// <remarks>TypeScript type: <c>"rpc:error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "rpc:error"
+
+        [<Interface>]
+        type Payload =
+            abstract ``method``: string with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``method``: string, error: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent68 =
+        /// <remarks>TypeScript type: <c>"schedule:cancel"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22219,11 +24014,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent68.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent68 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:cancel', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent68.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent68 = jsNative
+
+    module ObservabilityEvent68 =
+        /// <remarks>TypeScript type: <c>"schedule:cancel"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:cancel"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent69 =
+        /// <remarks>TypeScript type: <c>"schedule:create"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22244,11 +24052,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent69.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent69 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:create', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent69.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent69 = jsNative
+
+    module ObservabilityEvent69 =
+        /// <remarks>TypeScript type: <c>"schedule:create"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:create"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent7 =
+        /// <remarks>TypeScript type: <c>"action:ledger:settled"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22269,11 +24090,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent7.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent7 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:settled', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent7.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent7 = jsNative
+
+    module ObservabilityEvent7 =
+        /// <remarks>TypeScript type: <c>"action:ledger:settled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:settled"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract key: string with get, set
+            abstract inputHash: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent70 =
+        /// <remarks>TypeScript type: <c>"schedule:duplicate_warning"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22294,11 +24129,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent70.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent70 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:duplicate_warning', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent70.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent70 = jsNative
+
+    module ObservabilityEvent70 =
+        /// <remarks>TypeScript type: <c>"schedule:duplicate_warning"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:duplicate_warning"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract count: float with get, set
+            abstract ``type``: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, count: float, ``type``: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent71 =
+        /// <remarks>TypeScript type: <c>"schedule:error"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22319,11 +24168,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent71.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent71 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:error', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent71.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent71 = jsNative
+
+    module ObservabilityEvent71 =
+        /// <remarks>TypeScript type: <c>"schedule:error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:error"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            abstract error: string with get, set
+            abstract attempts: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string, error: string, attempts: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent72 =
+        /// <remarks>TypeScript type: <c>"schedule:execute"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22344,11 +24208,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent72.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent72 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:execute', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent72.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent72 = jsNative
+
+    module ObservabilityEvent72 =
+        /// <remarks>TypeScript type: <c>"schedule:execute"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:execute"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent73 =
+        /// <remarks>TypeScript type: <c>"schedule:retry"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22369,11 +24246,26 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent73.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent73 = jsNative
+        [<ParamObject; Emit("({ type: 'schedule:retry', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent73.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent73 = jsNative
+
+    module ObservabilityEvent73 =
+        /// <remarks>TypeScript type: <c>"schedule:retry"</c></remarks>
+        [<Literal>]
+        let ``type`` = "schedule:retry"
+
+        [<Interface>]
+        type Payload =
+            abstract callback: string with get, set
+            abstract id: string with get, set
+            abstract attempt: float with get, set
+            abstract maxAttempts: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (callback: string, id: string, attempt: float, maxAttempts: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent74 =
+        /// <remarks>TypeScript type: <c>"state:update"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22389,16 +24281,22 @@ module Observability =
         /// <summary>
         /// The payload of the event
         /// </summary>
-        abstract payload: Record<string, unit> with get, set
+        abstract payload: JS.Record<string, unit> with get, set
         /// <summary>
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent74 = jsNative
+        [<ParamObject; Emit("({ type: 'state:update', ...$0 })")>]
+        static member Create (payload: JS.Record<string, unit>, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent74 = jsNative
+
+    module ObservabilityEvent74 =
+        /// <remarks>TypeScript type: <c>"state:update"</c></remarks>
+        [<Literal>]
+        let ``type`` = "state:update"
 
     [<Interface>]
     type ObservabilityEvent75 =
+        /// <remarks>TypeScript type: <c>"submission:create"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22419,11 +24317,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent75.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent75 = jsNative
+        [<ParamObject; Emit("({ type: 'submission:create', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent75.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent75 = jsNative
+
+    module ObservabilityEvent75 =
+        /// <remarks>TypeScript type: <c>"submission:create"</c></remarks>
+        [<Literal>]
+        let ``type`` = "submission:create"
+
+        [<Interface>]
+        type Payload =
+            abstract submissionId: string with get, set
+            abstract requestId: string option with get, set
+            abstract idempotencyKey: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (submissionId: string, ?requestId: string, ?idempotencyKey: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent76 =
+        /// <remarks>TypeScript type: <c>"submission:error"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22444,11 +24356,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent76.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent76 = jsNative
+        [<ParamObject; Emit("({ type: 'submission:error', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent76.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent76 = jsNative
+
+    module ObservabilityEvent76 =
+        /// <remarks>TypeScript type: <c>"submission:error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "submission:error"
+
+        [<Interface>]
+        type Payload =
+            abstract submissionId: string with get, set
+            abstract requestId: string option with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (submissionId: string, error: string, ?requestId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent77 =
+        /// <remarks>TypeScript type: <c>"submission:status"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22469,11 +24395,25 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent77.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent77 = jsNative
+        [<ParamObject; Emit("({ type: 'submission:status', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent77.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent77 = jsNative
+
+    module ObservabilityEvent77 =
+        /// <remarks>TypeScript type: <c>"submission:status"</c></remarks>
+        [<Literal>]
+        let ``type`` = "submission:status"
+
+        [<Interface>]
+        type Payload =
+            abstract submissionId: string with get, set
+            abstract requestId: string option with get, set
+            abstract status: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (submissionId: string, status: string, ?requestId: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent78 =
+        /// <remarks>TypeScript type: <c>"tool:approval"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22494,11 +24434,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent78.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent78 = jsNative
+        [<ParamObject; Emit("({ type: 'tool:approval', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent78.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent78 = jsNative
+
+    module ObservabilityEvent78 =
+        /// <remarks>TypeScript type: <c>"tool:approval"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool:approval"
+
+        [<Interface>]
+        type Payload =
+            abstract toolCallId: string with get, set
+            abstract approved: bool with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (toolCallId: string, approved: bool) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent79 =
+        /// <remarks>TypeScript type: <c>"tool:result"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22519,11 +24472,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent79.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent79 = jsNative
+        [<ParamObject; Emit("({ type: 'tool:result', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent79.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent79 = jsNative
+
+    module ObservabilityEvent79 =
+        /// <remarks>TypeScript type: <c>"tool:result"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool:result"
+
+        [<Interface>]
+        type Payload =
+            abstract toolCallId: string with get, set
+            abstract toolName: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (toolCallId: string, toolName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent8 =
+        /// <remarks>TypeScript type: <c>"action:ledger:swept"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22544,11 +24510,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent8.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent8 = jsNative
+        [<ParamObject; Emit("({ type: 'action:ledger:swept', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent8.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent8 = jsNative
+
+    module ObservabilityEvent8 =
+        /// <remarks>TypeScript type: <c>"action:ledger:swept"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:ledger:swept"
+
+        [<Interface>]
+        type Payload =
+            abstract settled: float with get, set
+            abstract pending: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (settled: float, pending: float) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent80 =
+        /// <remarks>TypeScript type: <c>"workflow:approved"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22569,11 +24548,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent80.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent80 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:approved', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent80.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent80 = jsNative
+
+    module ObservabilityEvent80 =
+        /// <remarks>TypeScript type: <c>"workflow:approved"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:approved"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract reason: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent81 =
+        /// <remarks>TypeScript type: <c>"workflow:event"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22594,11 +24586,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent81.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent81 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:event', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent81.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent81 = jsNative
+
+    module ObservabilityEvent81 =
+        /// <remarks>TypeScript type: <c>"workflow:event"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:event"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract eventType: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?eventType: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent82 =
+        /// <remarks>TypeScript type: <c>"workflow:paused"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22619,11 +24624,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent82.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent82 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:paused', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent82.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent82 = jsNative
+
+    module ObservabilityEvent82 =
+        /// <remarks>TypeScript type: <c>"workflow:paused"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:paused"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract workflowName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent83 =
+        /// <remarks>TypeScript type: <c>"workflow:rejected"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22644,11 +24662,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent83.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent83 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:rejected', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent83.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent83 = jsNative
+
+    module ObservabilityEvent83 =
+        /// <remarks>TypeScript type: <c>"workflow:rejected"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:rejected"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract reason: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?reason: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent84 =
+        /// <remarks>TypeScript type: <c>"workflow:restarted"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22669,11 +24700,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent84.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent84 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:restarted', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent84.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent84 = jsNative
+
+    module ObservabilityEvent84 =
+        /// <remarks>TypeScript type: <c>"workflow:restarted"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:restarted"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract workflowName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent85 =
+        /// <remarks>TypeScript type: <c>"workflow:resumed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22694,11 +24738,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent85.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent85 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:resumed', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent85.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent85 = jsNative
+
+    module ObservabilityEvent85 =
+        /// <remarks>TypeScript type: <c>"workflow:resumed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:resumed"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract workflowName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent86 =
+        /// <remarks>TypeScript type: <c>"workflow:start"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22719,11 +24776,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent86.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent86 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:start', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent86.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent86 = jsNative
+
+    module ObservabilityEvent86 =
+        /// <remarks>TypeScript type: <c>"workflow:start"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:start"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract workflowName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent87 =
+        /// <remarks>TypeScript type: <c>"workflow:terminated"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22744,11 +24814,24 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent87.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent87 = jsNative
+        [<ParamObject; Emit("({ type: 'workflow:terminated', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent87.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent87 = jsNative
+
+    module ObservabilityEvent87 =
+        /// <remarks>TypeScript type: <c>"workflow:terminated"</c></remarks>
+        [<Literal>]
+        let ``type`` = "workflow:terminated"
+
+        [<Interface>]
+        type Payload =
+            abstract workflowId: string with get, set
+            abstract workflowName: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
 
     [<Interface>]
     type ObservabilityEvent9 =
+        /// <remarks>TypeScript type: <c>"action:pause:approved"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// The class name of the agent that emitted this event
@@ -22769,8 +24852,20 @@ module Observability =
         /// The timestamp of the event in milliseconds since epoch
         /// </summary>
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, payload: Observability.ObservabilityEvent9.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent9 = jsNative
+        [<ParamObject; Emit("({ type: 'action:pause:approved', ...$0 })")>]
+        static member Create (payload: Observability.ObservabilityEvent9.Payload, timestamp: float, ?agent: string, ?name: string) : ObservabilityEvent9 = jsNative
+
+    module ObservabilityEvent9 =
+        /// <remarks>TypeScript type: <c>"action:pause:approved"</c></remarks>
+        [<Literal>]
+        let ``type`` = "action:pause:approved"
+
+        [<Interface>]
+        type Payload =
+            abstract action: string with get, set
+            abstract executionId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (action: string, executionId: string) : Payload = jsNative
 
     [<Interface>]
     type Channels =
@@ -22832,7 +24927,7 @@ module Observability =
         | [<CompiledName("chat:turn:finish")>] ChatTurnFinish of agent: string option * name: string option * payload: Observability.ObservabilityEvent39.Payload * timestamp: float
         | [<CompiledName("chat:turn:start")>] ChatTurnStart of agent: string option * name: string option * payload: Observability.ObservabilityEvent40.Payload * timestamp: float
         | [<CompiledName("connect")>] Connect of agent: string option * name: string option * payload: Observability.ObservabilityEvent41.Payload * timestamp: float
-        | [<CompiledName("destroy")>] Destroy of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+        | [<CompiledName("destroy")>] Destroy of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
         | [<CompiledName("disconnect")>] Disconnect of agent: string option * name: string option * payload: Observability.ObservabilityEvent43.Payload * timestamp: float
         | [<CompiledName("email:receive")>] EmailReceive of agent: string option * name: string option * payload: Observability.ObservabilityEvent44.Payload * timestamp: float
         | [<CompiledName("email:reply")>] EmailReply of agent: string option * name: string option * payload: Observability.ObservabilityEvent45.Payload * timestamp: float
@@ -22852,10 +24947,10 @@ module Observability =
         | [<CompiledName("mcp:client:discover")>] McpClientDiscover of agent: string option * name: string option * payload: MCPObservabilityEvent5.Payload * timestamp: float
         | [<CompiledName("mcp:client:preconnect")>] McpClientPreconnect of agent: string option * name: string option * payload: MCPObservabilityEvent6.Payload * timestamp: float
         | [<CompiledName("message:cancel")>] MessageCancel of agent: string option * name: string option * payload: Observability.ObservabilityEvent56.Payload * timestamp: float
-        | [<CompiledName("message:clear")>] MessageClear of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+        | [<CompiledName("message:clear")>] MessageClear of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
         | [<CompiledName("message:error")>] MessageError of agent: string option * name: string option * payload: Observability.ObservabilityEvent58.Payload * timestamp: float
-        | [<CompiledName("message:request")>] MessageRequest of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
-        | [<CompiledName("message:response")>] MessageResponse of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+        | [<CompiledName("message:request")>] MessageRequest of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
+        | [<CompiledName("message:response")>] MessageResponse of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
         | [<CompiledName("notice:delivered")>] NoticeDelivered of agent: string option * name: string option * payload: Observability.ObservabilityEvent61.Payload * timestamp: float
         | [<CompiledName("notice:failed")>] NoticeFailed of agent: string option * name: string option * payload: Observability.ObservabilityEvent62.Payload * timestamp: float
         | [<CompiledName("queue:create")>] QueueCreate of agent: string option * name: string option * payload: Observability.ObservabilityEvent63.Payload * timestamp: float
@@ -22869,7 +24964,7 @@ module Observability =
         | [<CompiledName("schedule:error")>] ScheduleError of agent: string option * name: string option * payload: Observability.ObservabilityEvent71.Payload * timestamp: float
         | [<CompiledName("schedule:execute")>] ScheduleExecute of agent: string option * name: string option * payload: Observability.ObservabilityEvent72.Payload * timestamp: float
         | [<CompiledName("schedule:retry")>] ScheduleRetry of agent: string option * name: string option * payload: Observability.ObservabilityEvent73.Payload * timestamp: float
-        | [<CompiledName("state:update")>] StateUpdate of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+        | [<CompiledName("state:update")>] StateUpdate of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
         | [<CompiledName("submission:create")>] SubmissionCreate of agent: string option * name: string option * payload: Observability.ObservabilityEvent75.Payload * timestamp: float
         | [<CompiledName("submission:error")>] SubmissionError of agent: string option * name: string option * payload: Observability.ObservabilityEvent76.Payload * timestamp: float
         | [<CompiledName("submission:status")>] SubmissionStatus of agent: string option * name: string option * payload: Observability.ObservabilityEvent77.Payload * timestamp: float
@@ -22943,7 +25038,7 @@ module Observability =
         /// </summary>
         /// <returns>A function that unsubscribes the callback.</returns>
         [<Import("subscribe", "agents/observability")>]
-        static member subscribe<'K> (channelKey: 'K, callback: (U13<Observability.ChannelEventMap.AgentTool, Observability.ChannelEventMap.Channel, Observability.ChannelEventMap.Chat, Observability.ChannelEventMap.Email, Observability.ChannelEventMap.Fiber, Observability.ChannelEventMap.Lifecycle, MCPObservabilityEvent, Observability.ChannelEventMap.Message, Observability.ChannelEventMap.Rpc, Observability.ChannelEventMap.Schedule, FSharp.CloudEdge.Runtime.Agents.Observability.ObservabilityEvent74, FSharp.CloudEdge.Runtime.Agents.Observability.ObservabilityEvent38, Observability.ChannelEventMap.Workflow> -> unit)) : (unit -> unit) = jsNative
+        static member subscribe<'E> (channelKey: typekeyof<FSharp.CloudEdge.Runtime.Agents.Observability.ChannelEventMap, 'E>, callback: ('E -> unit)) : (unit -> unit) = jsNative
 
     module ChannelEventMap =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
@@ -23003,7 +25098,7 @@ module Observability =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Lifecycle =
             | [<CompiledName("connect")>] Connect of agent: string option * name: string option * payload: Observability.ObservabilityEvent41.Payload * timestamp: float
-            | [<CompiledName("destroy")>] Destroy of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+            | [<CompiledName("destroy")>] Destroy of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
             | [<CompiledName("disconnect")>] Disconnect of agent: string option * name: string option * payload: Observability.ObservabilityEvent43.Payload * timestamp: float
 
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
@@ -23021,10 +25116,10 @@ module Observability =
             | [<CompiledName("action:pause:swept")>] ActionPauseSwept of agent: string option * name: string option * payload: Observability.ObservabilityEvent12.Payload * timestamp: float
             | [<CompiledName("action:reply-attached")>] ActionReplyAttached of agent: string option * name: string option * payload: Observability.ObservabilityEvent13.Payload * timestamp: float
             | [<CompiledName("message:cancel")>] MessageCancel of agent: string option * name: string option * payload: Observability.ObservabilityEvent56.Payload * timestamp: float
-            | [<CompiledName("message:clear")>] MessageClear of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+            | [<CompiledName("message:clear")>] MessageClear of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
             | [<CompiledName("message:error")>] MessageError of agent: string option * name: string option * payload: Observability.ObservabilityEvent58.Payload * timestamp: float
-            | [<CompiledName("message:request")>] MessageRequest of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
-            | [<CompiledName("message:response")>] MessageResponse of agent: string option * name: string option * payload: Record<string, unit> * timestamp: float
+            | [<CompiledName("message:request")>] MessageRequest of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
+            | [<CompiledName("message:response")>] MessageResponse of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
             | [<CompiledName("submission:create")>] SubmissionCreate of agent: string option * name: string option * payload: Observability.ObservabilityEvent75.Payload * timestamp: float
             | [<CompiledName("submission:error")>] SubmissionError of agent: string option * name: string option * payload: Observability.ObservabilityEvent76.Payload * timestamp: float
             | [<CompiledName("submission:status")>] SubmissionStatus of agent: string option * name: string option * payload: Observability.ObservabilityEvent77.Payload * timestamp: float
@@ -23058,803 +25153,6 @@ module Observability =
             | [<CompiledName("workflow:resumed")>] WorkflowResumed of agent: string option * name: string option * payload: Observability.ObservabilityEvent85.Payload * timestamp: float
             | [<CompiledName("workflow:start")>] WorkflowStart of agent: string option * name: string option * payload: Observability.ObservabilityEvent86.Payload * timestamp: float
             | [<CompiledName("workflow:terminated")>] WorkflowTerminated of agent: string option * name: string option * payload: Observability.ObservabilityEvent87.Payload * timestamp: float
-
-    module ObservabilityEvent10 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract executionId: string with get, set
-            abstract toolCallId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, executionId: string, toolCallId: string) : Payload = jsNative
-
-    module ObservabilityEvent11 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract executionId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, executionId: string) : Payload = jsNative
-
-    module ObservabilityEvent12 =
-        [<Interface>]
-        type Payload =
-            abstract swept: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (swept: float) : Payload = jsNative
-
-    module ObservabilityEvent13 =
-        [<Interface>]
-        type Payload =
-            abstract action: string option with get, set
-            abstract attachmentType: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (attachmentType: string, ?action: string) : Payload = jsNative
-
-    module ObservabilityEvent14 =
-        [<Interface>]
-        type Payload =
-            abstract runId: string with get, set
-            abstract kind: Observability.ObservabilityEvent14.Payload.Kind with get, set
-            abstract status: string with get, set
-            abstract callback: string option with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runId: string, kind: Observability.ObservabilityEvent14.Payload.Kind, status: string, error: string, ?callback: string) : Payload = jsNative
-
-        module Payload =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Kind =
-                | [<CompiledName("finish")>] Finish
-                | [<CompiledName("give_up")>] GiveUp
-
-    module ObservabilityEvent15 =
-        [<Interface>]
-        type Payload =
-            /// <summary>
-            /// Detached runs currently holding a concurrency slot (non-terminal).
-            /// </summary>
-            abstract liveCount: float with get, set
-            abstract threshold: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (liveCount: float, threshold: float) : Payload = jsNative
-
-    module ObservabilityEvent16 =
-        [<Interface>]
-        type Payload =
-            abstract runCount: float with get, set
-            abstract totalTimeoutMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runCount: float, ?totalTimeoutMs: float) : Payload = jsNative
-
-    module ObservabilityEvent17 =
-        [<Interface>]
-        type Payload =
-            abstract runCount: float with get, set
-            abstract elapsedMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runCount: float, ?elapsedMs: float) : Payload = jsNative
-
-    module ObservabilityEvent18 =
-        [<Interface>]
-        type Payload =
-            abstract runId: string with get, set
-            abstract agentType: string with get, set
-            abstract elapsedMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runId: string, agentType: string, ?elapsedMs: float) : Payload = jsNative
-
-    module ObservabilityEvent19 =
-        [<Interface>]
-        type Payload =
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (error: string) : Payload = jsNative
-
-    module ObservabilityEvent2 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            abstract inputHash: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
-
-    module ObservabilityEvent20 =
-        [<Interface>]
-        type Payload =
-            abstract runId: string with get, set
-            abstract agentType: string with get, set
-            abstract budgetMs: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runId: string, agentType: string, budgetMs: float) : Payload = jsNative
-
-    module ObservabilityEvent21 =
-        [<Interface>]
-        type Payload =
-            abstract runId: string with get, set
-            abstract agentType: string with get, set
-            abstract status: string with get, set
-            abstract reason: string option with get, set
-            abstract elapsedMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runId: string, agentType: string, status: string, ?reason: string, ?elapsedMs: float) : Payload = jsNative
-
-    module ObservabilityEvent22 =
-        [<Interface>]
-        type Payload =
-            abstract strikes: float with get, set
-            abstract limit: float with get, set
-            abstract ``sealed``: bool with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (strikes: float, limit: float, ``sealed``: bool, error: string) : Payload = jsNative
-
-    module ObservabilityEvent23 =
-        [<Interface>]
-        type Payload =
-            abstract channel: string with get, set
-            abstract kind: string with get, set
-            abstract turnEnded: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (channel: string, kind: string, turnEnded: bool) : Payload = jsNative
-
-    module ObservabilityEvent24 =
-        [<Interface>]
-        type Payload =
-            abstract channel: string with get, set
-            abstract kind: string with get, set
-            abstract requestId: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (channel: string, kind: string, ?requestId: string) : Payload = jsNative
-
-    module ObservabilityEvent25 =
-        [<Interface>]
-        type Payload =
-            /// <summary>
-            /// <c>"proactive"</c> — the pre-step token guard compacted before the next
-            /// step; <c>"reactive"</c> — a context-overflow error triggered compaction
-            /// before a retry.
-            /// </summary>
-            abstract reason: Observability.ObservabilityEvent25.Payload.Reason with get, set
-            abstract shortened: bool with get, set
-            abstract requestId: string option with get, set
-            abstract attempt: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (reason: Observability.ObservabilityEvent25.Payload.Reason, shortened: bool, ?requestId: string, ?attempt: float) : Payload = jsNative
-
-        module Payload =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Reason =
-                | [<CompiledName("proactive")>] Proactive
-                | [<CompiledName("reactive")>] Reactive
-
-    module ObservabilityEvent26 =
-        [<Interface>]
-        type Payload =
-            /// <summary>
-            /// Stored size of the full active path, in bytes.
-            /// </summary>
-            abstract totalContentBytes: float with get, set
-            abstract budgetBytes: float with get, set
-            abstract hydratedMessages: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (totalContentBytes: float, budgetBytes: float, hydratedMessages: float) : Payload = jsNative
-
-    module ObservabilityEvent27 =
-        [<Interface>]
-        type Payload =
-            /// <summary>
-            /// Stored messages rewritten during this eviction pass.
-            /// </summary>
-            abstract messages: float with get, set
-            abstract parts: float with get, set
-            abstract bytes: float with get, set
-            abstract externalizedBytes: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (messages: float, parts: float, bytes: float, externalizedBytes: float) : Payload = jsNative
-
-    module ObservabilityEvent28 =
-        [<Interface>]
-        type Payload =
-            /// <summary>
-            /// Internal onStart step that failed and was skipped so the agent
-            /// could still come up instead of bricking the DO (#1710).
-            /// </summary>
-            abstract step: Observability.ObservabilityEvent28.Payload.Step with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (step: Observability.ObservabilityEvent28.Payload.Step, error: string) : Payload = jsNative
-
-        module Payload =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Step =
-                | [<CompiledName("durable-work-recovery")>] DurableWorkRecovery
-                | [<CompiledName("scheduled-task-reconcile")>] ScheduledTaskReconcile
-                | [<CompiledName("transcript-hydration")>] TranscriptHydration
-
-    module ObservabilityEvent29 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
-
-        module Payload =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type RecoveryKind =
-                | [<CompiledName("continue")>] Continue
-                | [<CompiledName("retry")>] Retry
-
-    module ObservabilityEvent3 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            abstract inputHash: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
-
-    module ObservabilityEvent30 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
-
-    module ObservabilityEvent31 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
-
-    module ObservabilityEvent32 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            abstract reason: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, reason: string) : Payload = jsNative
-
-    module ObservabilityEvent33 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            abstract reason: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, ?reason: string) : Payload = jsNative
-
-    module ObservabilityEvent34 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind) : Payload = jsNative
-
-    module ObservabilityEvent35 =
-        [<Interface>]
-        type Payload =
-            abstract incidentId: string with get, set
-            abstract requestId: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            abstract recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind with get, set
-            abstract reason: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (incidentId: string, requestId: string, attempt: float, maxAttempts: float, recoveryKind: Observability.ObservabilityEvent29.Payload.RecoveryKind, ?reason: string) : Payload = jsNative
-
-    module ObservabilityEvent36 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string option with get, set
-            abstract stage: Observability.ObservabilityEvent36.Payload.Stage with get, set
-            abstract messagesPersisted: bool option with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (stage: Observability.ObservabilityEvent36.Payload.Stage, error: string, ?requestId: string, ?messagesPersisted: bool) : Payload = jsNative
-
-        module Payload =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Stage =
-                | [<CompiledName("parse")>] Parse
-                | [<CompiledName("persist")>] Persist
-                | [<CompiledName("recovery")>] Recovery
-                | [<CompiledName("stream")>] Stream
-                | [<CompiledName("transcript")>] Transcript
-                | [<CompiledName("turn")>] Turn
-
-    module ObservabilityEvent37 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string with get, set
-            abstract timeoutMs: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (requestId: string, timeoutMs: float) : Payload = jsNative
-
-    module ObservabilityEvent38 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string option with get, set
-            abstract removedToolCalls: float with get, set
-            abstract normalizedInputs: float with get, set
-            abstract toolCallIds: string[] option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (removedToolCalls: float, normalizedInputs: float, ?requestId: string, ?toolCallIds: string[]) : Payload = jsNative
-
-    module ObservabilityEvent39 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string with get, set
-            abstract trigger: string with get, set
-            abstract admission: string with get, set
-            abstract continuation: bool option with get, set
-            abstract generation: float option with get, set
-            abstract status: string with get, set
-            abstract durationMs: float with get, set
-            abstract error: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (requestId: string, trigger: string, admission: string, status: string, durationMs: float, ?continuation: bool, ?generation: float, ?error: string) : Payload = jsNative
-
-    module ObservabilityEvent4 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            abstract inputHash: string with get, set
-            abstract ageMs: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string, inputHash: string, ageMs: float) : Payload = jsNative
-
-    module ObservabilityEvent40 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string with get, set
-            abstract trigger: string with get, set
-            abstract admission: string with get, set
-            abstract continuation: bool option with get, set
-            abstract generation: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (requestId: string, trigger: string, admission: string, ?continuation: bool, ?generation: float) : Payload = jsNative
-
-    module ObservabilityEvent41 =
-        [<Interface>]
-        type Payload =
-            abstract connectionId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (connectionId: string) : Payload = jsNative
-
-    module ObservabilityEvent43 =
-        [<Interface>]
-        type Payload =
-            abstract connectionId: string with get, set
-            abstract code: float with get, set
-            abstract reason: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (connectionId: string, code: float, reason: string) : Payload = jsNative
-
-    module ObservabilityEvent44 =
-        [<Interface>]
-        type Payload =
-            abstract from: string with get, set
-            abstract ``to``: string with get, set
-            abstract subject: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (from: string, ``to``: string, ?subject: string) : Payload = jsNative
-
-    module ObservabilityEvent45 =
-        [<Interface>]
-        type Payload =
-            abstract from: string with get, set
-            abstract ``to``: string with get, set
-            abstract subject: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (from: string, ``to``: string, ?subject: string) : Payload = jsNative
-
-    module ObservabilityEvent46 =
-        [<Interface>]
-        type Payload =
-            abstract from: string with get, set
-            abstract ``to``: U2<string, string[]> with get, set
-            abstract subject: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (from: string, ``to``: U2<string, string[]>, subject: string) : Payload = jsNative
-
-    module ObservabilityEvent47 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract managed: bool option with get, set
-            abstract recoveryReason: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, recoveryReason: string, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent48 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            abstract recoveryReason: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, recoveryReason: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent49 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract error: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract reason: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, error: string, ?elapsedMs: float, ?reason: string) : Payload = jsNative
-
-    module ObservabilityEvent5 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            abstract inputHash: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
-
-    module ObservabilityEvent50 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract status: string option with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, ?status: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent51 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract reason: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, reason: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent52 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent53 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract error: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, error: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent54 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract elapsedMs: float option with get, set
-            abstract managed: bool option with get, set
-            abstract recoveryReason: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, recoveryReason: string, ?elapsedMs: float, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent55 =
-        [<Interface>]
-        type Payload =
-            abstract fiberId: string with get, set
-            abstract fiberName: string with get, set
-            abstract managed: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fiberId: string, fiberName: string, ?managed: bool) : Payload = jsNative
-
-    module ObservabilityEvent56 =
-        [<Interface>]
-        type Payload =
-            abstract requestId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (requestId: string) : Payload = jsNative
-
-    module ObservabilityEvent58 =
-        [<Interface>]
-        type Payload =
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (error: string) : Payload = jsNative
-
-    module ObservabilityEvent6 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string) : Payload = jsNative
-
-    module ObservabilityEvent61 =
-        [<Interface>]
-        type Payload =
-            abstract channel: string with get, set
-            abstract kind: string with get, set
-            abstract informModel: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (channel: string, kind: string, informModel: bool) : Payload = jsNative
-
-    module ObservabilityEvent62 =
-        [<Interface>]
-        type Payload =
-            abstract channel: string with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (channel: string, error: string) : Payload = jsNative
-
-    module ObservabilityEvent63 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string) : Payload = jsNative
-
-    module ObservabilityEvent64 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            abstract error: string with get, set
-            abstract attempts: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string, error: string, attempts: float) : Payload = jsNative
-
-    module ObservabilityEvent65 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string, attempt: float, maxAttempts: float) : Payload = jsNative
-
-    module ObservabilityEvent66 =
-        [<Interface>]
-        type Payload =
-            abstract ``method``: string with get, set
-            abstract streaming: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``method``: string, ?streaming: bool) : Payload = jsNative
-
-    module ObservabilityEvent67 =
-        [<Interface>]
-        type Payload =
-            abstract ``method``: string with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``method``: string, error: string) : Payload = jsNative
-
-    module ObservabilityEvent68 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string) : Payload = jsNative
-
-    module ObservabilityEvent69 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string) : Payload = jsNative
-
-    module ObservabilityEvent7 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract key: string with get, set
-            abstract inputHash: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, key: string, inputHash: string) : Payload = jsNative
-
-    module ObservabilityEvent70 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract count: float with get, set
-            abstract ``type``: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, count: float, ``type``: string) : Payload = jsNative
-
-    module ObservabilityEvent71 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            abstract error: string with get, set
-            abstract attempts: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string, error: string, attempts: float) : Payload = jsNative
-
-    module ObservabilityEvent72 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string) : Payload = jsNative
-
-    module ObservabilityEvent73 =
-        [<Interface>]
-        type Payload =
-            abstract callback: string with get, set
-            abstract id: string with get, set
-            abstract attempt: float with get, set
-            abstract maxAttempts: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (callback: string, id: string, attempt: float, maxAttempts: float) : Payload = jsNative
-
-    module ObservabilityEvent75 =
-        [<Interface>]
-        type Payload =
-            abstract submissionId: string with get, set
-            abstract requestId: string option with get, set
-            abstract idempotencyKey: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (submissionId: string, ?requestId: string, ?idempotencyKey: string) : Payload = jsNative
-
-    module ObservabilityEvent76 =
-        [<Interface>]
-        type Payload =
-            abstract submissionId: string with get, set
-            abstract requestId: string option with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (submissionId: string, error: string, ?requestId: string) : Payload = jsNative
-
-    module ObservabilityEvent77 =
-        [<Interface>]
-        type Payload =
-            abstract submissionId: string with get, set
-            abstract requestId: string option with get, set
-            abstract status: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (submissionId: string, status: string, ?requestId: string) : Payload = jsNative
-
-    module ObservabilityEvent78 =
-        [<Interface>]
-        type Payload =
-            abstract toolCallId: string with get, set
-            abstract approved: bool with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (toolCallId: string, approved: bool) : Payload = jsNative
-
-    module ObservabilityEvent79 =
-        [<Interface>]
-        type Payload =
-            abstract toolCallId: string with get, set
-            abstract toolName: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (toolCallId: string, toolName: string) : Payload = jsNative
-
-    module ObservabilityEvent8 =
-        [<Interface>]
-        type Payload =
-            abstract settled: float with get, set
-            abstract pending: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (settled: float, pending: float) : Payload = jsNative
-
-    module ObservabilityEvent80 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract reason: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?reason: string) : Payload = jsNative
-
-    module ObservabilityEvent81 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract eventType: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?eventType: string) : Payload = jsNative
-
-    module ObservabilityEvent82 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract workflowName: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
-
-    module ObservabilityEvent83 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract reason: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?reason: string) : Payload = jsNative
-
-    module ObservabilityEvent84 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract workflowName: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
-
-    module ObservabilityEvent85 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract workflowName: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
-
-    module ObservabilityEvent86 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract workflowName: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
-
-    module ObservabilityEvent87 =
-        [<Interface>]
-        type Payload =
-            abstract workflowId: string with get, set
-            abstract workflowName: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowId: string, ?workflowName: string) : Payload = jsNative
-
-    module ObservabilityEvent9 =
-        [<Interface>]
-        type Payload =
-            abstract action: string with get, set
-            abstract executionId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (action: string, executionId: string) : Payload = jsNative
 
 module ParseSubAgentPath =
     [<Interface>]
@@ -24335,10 +25633,10 @@ module RouteSubAgentRequest =
 module ScheduleCriteria =
     [<Interface>]
     type TimeRange =
-        abstract start: JS.Date option with get, set
-        abstract ``end``: JS.Date option with get, set
+        abstract start: Fable.Core.TS.Es.Date option with get, set
+        abstract ``end``: Fable.Core.TS.Es.Date option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?start: JS.Date, ?``end``: JS.Date) : TimeRange = jsNative
+        static member Create (?start: Fable.Core.TS.Es.Date, ?``end``: Fable.Core.TS.Es.Date) : TimeRange = jsNative
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Type =
@@ -24357,241 +25655,6 @@ module Scheduler =
             [<ParamObject; Emit("$0")>]
             static member Create (callbacks: string[], ``sealed``: bool, ?nextTime: float) : Options = jsNative
 
-    module DONOTUSEWILLREMOVEGetSchedule =
-        [<Interface>]
-        type Result<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: RetryOptions option with get, set
-            /// <summary>
-            /// One-time execution at a specific date.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, ?retry: RetryOptions) : Result<'T> = jsNative
-
-        [<Interface>]
-        type Result2<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: RetryOptions option with get, set
-            /// <summary>
-            /// One-time execution after a relative delay.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract delayInSeconds: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Result2<'T> = jsNative
-
-        [<Interface>]
-        type Result3<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: RetryOptions option with get, set
-            /// <summary>
-            /// Recurring execution from a cron expression.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract cron: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Result3<'T> = jsNative
-
-        [<Interface>]
-        type Result4<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: RetryOptions option with get, set
-            /// <summary>
-            /// Recurring execution at a fixed interval.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract intervalSeconds: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Result4<'T> = jsNative
-
-    module Every =
-        module Result =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float
-                | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * delayInSeconds: float
-                | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * cron: string
-                | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * intervalSeconds: float
-
-            [<Interface>]
-            type Item2 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, ?retry: RetryOptions) : Item2 = jsNative
-
-            [<Interface>]
-            type Item3 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Item3 = jsNative
-
-            [<Interface>]
-            type Item4 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Item4 = jsNative
-
-            [<Interface>]
-            type Item5 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Item5 = jsNative
-
-    module Get =
-        module Result =
-            [<Interface>]
-            type Item =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, ?retry: RetryOptions) : Item = jsNative
-
-            [<Interface>]
-            type Item2 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Item2 = jsNative
-
-            [<Interface>]
-            type Item3 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Item3 = jsNative
-
-            [<Interface>]
-            type Item4 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Item4 = jsNative
-
-    module List =
-        module Result =
-            module Item =
-                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float
-                    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * delayInSeconds: float
-                    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * cron: string
-                    | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * intervalSeconds: float
-
     module Set =
         [<Interface>]
         type Options =
@@ -24607,85 +25670,6 @@ module Scheduler =
             abstract idempotent: bool option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?retry: RetryOptions, ?idempotent: bool) : Options = jsNative
-
-        module Result =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float
-                | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * delayInSeconds: float
-                | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * cron: string
-                | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: RetryOptions option * time: float * intervalSeconds: float
-
-            [<Interface>]
-            type Item2 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, ?retry: RetryOptions) : Item2 = jsNative
-
-            [<Interface>]
-            type Item3 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, delayInSeconds: float, ?retry: RetryOptions) : Item3 = jsNative
-
-            [<Interface>]
-            type Item4 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, cron: string, ?retry: RetryOptions) : Item4 = jsNative
-
-            [<Interface>]
-            type Item5 =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: obj with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, intervalSeconds: float, ?retry: RetryOptions) : Item5 = jsNative
 
 module SendEmailOptions =
     [<Interface>]
@@ -24711,11 +25695,11 @@ module Skills =
         abstract compatibility: string option with get, set
         abstract license: string option with get, set
         abstract allowedTools: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract sourceId: string option with get, set
         abstract version: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (name: string, description: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>, ?sourceId: string, ?version: string) : SkillDescriptor = jsNative
+        static member Create (name: string, description: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>, ?sourceId: string, ?version: string) : SkillDescriptor = jsNative
 
     [<Interface>]
     type SkillContent =
@@ -24724,7 +25708,7 @@ module Skills =
         abstract rawContent: string option with get, set
         abstract resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillResourceDescriptor[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (body: string, name: string, description: string, ?rawContent: string, ?resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillResourceDescriptor[], ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>, ?sourceId: string, ?version: string) : SkillContent = jsNative
+        static member Create (body: string, name: string, description: string, ?rawContent: string, ?resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillResourceDescriptor[], ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>, ?sourceId: string, ?version: string) : SkillContent = jsNative
 
     [<Interface>]
     type SkillResourceDescriptor =
@@ -24773,7 +25757,7 @@ module Skills =
         /// <summary>
         /// Text bundled resources by relative path (e.g. <c>references/style-guide.md</c>).
         /// </summary>
-        abstract files: Record<string, string> with get, set
+        abstract files: JS.Record<string, string> with get, set
         /// <summary>
         /// Workspace access, gated by the runner's <c>workspace</c> permission.
         /// </summary>
@@ -24787,7 +25771,7 @@ module Skills =
         /// </summary>
         abstract output: Skills.SkillRunContext.Output with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (skill: FSharp.CloudEdge.Runtime.Agents.Skills.SkillDescriptor, files: Record<string, string>, workspace: Skills.SkillRunContext.Workspace, tools: Skills.SkillRunContext.Tools, output: Skills.SkillRunContext.Output) : SkillRunContext = jsNative
+        static member Create (skill: FSharp.CloudEdge.Runtime.Agents.Skills.SkillDescriptor, files: JS.Record<string, string>, workspace: Skills.SkillRunContext.Workspace, tools: Skills.SkillRunContext.Tools, output: Skills.SkillRunContext.Output) : SkillRunContext = jsNative
 
     [<Interface>]
     type SkillScriptRequest =
@@ -24832,11 +25816,11 @@ module Skills =
         abstract compatibility: string option with get, set
         abstract license: string option with get, set
         abstract allowedTools: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract version: string option with get, set
         abstract resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillManifestResource[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (name: string, description: string, body: string, ?rawContent: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>, ?version: string, ?resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillManifestResource[]) : SkillManifestEntry = jsNative
+        static member Create (name: string, description: string, body: string, ?rawContent: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>, ?version: string, ?resources: FSharp.CloudEdge.Runtime.Agents.Skills.SkillManifestResource[]) : SkillManifestEntry = jsNative
 
     [<Interface>]
     type SkillManifest =
@@ -24893,12 +25877,13 @@ module Skills =
         abstract network: bool option with get, set
         abstract workspace: Skills.WorkerSkillScriptRunnerOptions.Workspace option with get, set
         abstract workspaceInstance: FSharp.CloudEdge.Runtime.Agents.Skills.SkillWorkspace option with get, set
-        abstract tools: U2<Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>, (unit -> U2<JS.Promise<Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>, Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>)> option with get, set
+        abstract tools: U2<JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>, (unit -> U2<JS.Promise<JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>, JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>)> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (loader: obj, ?timeout: float, ?network: bool, ?workspace: Skills.WorkerSkillScriptRunnerOptions.Workspace, ?workspaceInstance: FSharp.CloudEdge.Runtime.Agents.Skills.SkillWorkspace, ?tools: U2<Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>, (unit -> U2<JS.Promise<Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>, Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>)>) : WorkerSkillScriptRunnerOptions = jsNative
+        static member Create (loader: obj, ?timeout: float, ?network: bool, ?workspace: Skills.WorkerSkillScriptRunnerOptions.Workspace, ?workspaceInstance: FSharp.CloudEdge.Runtime.Agents.Skills.SkillWorkspace, ?tools: U2<JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>, (unit -> U2<JS.Promise<JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>, JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>>)>) : WorkerSkillScriptRunnerOptions = jsNative
 
     [<Interface>]
     type SkillRegistry =
+        /// <remarks>TypeScript type: <c>"think_skills"</c></remarks>
         abstract contextLabel: string
         /// <summary>
         /// Non-fatal diagnostics collected during the most recent load or
@@ -24920,9 +25905,14 @@ module Skills =
         abstract resolveResourceTarget: obj with get, set
         abstract readResource: obj with get, set
         abstract readSkillResources: obj with get, set
-        abstract tools: unit -> Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>
-        [<ParamObject; Emit("$0")>]
-        static member Create (contextLabel: string, warnings: string[], sources: obj, scriptRunner: obj, descriptors: obj, sourceBySkill: obj, loaded: obj, fingerprint: string, load: (unit -> JS.Promise<unit>), refresh: (unit -> JS.Promise<unit>), snapshot: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Skills.SkillRegistrySnapshot>), systemPrompt: (unit -> JS.Promise<string option>), loadSkill: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Skills.SkillContent option>), resolveResourceTarget: obj, readResource: obj, readSkillResources: obj, tools: (unit -> Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>)) : SkillRegistry = jsNative
+        abstract tools: unit -> JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>
+        [<ParamObject; Emit("({ contextLabel: 'think_skills', ...$0 })")>]
+        static member Create (warnings: string[], sources: obj, scriptRunner: obj, descriptors: obj, sourceBySkill: obj, loaded: obj, fingerprint: string, load: (unit -> JS.Promise<unit>), refresh: (unit -> JS.Promise<unit>), snapshot: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Skills.SkillRegistrySnapshot>), systemPrompt: (unit -> JS.Promise<string option>), loadSkill: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.Skills.SkillContent option>), resolveResourceTarget: obj, readResource: obj, readSkillResources: obj, tools: (unit -> JS.Record<string, U24<Chat.CreateToolsFromClientSchemas.Result.Item, Chat.CreateToolsFromClientSchemas.Result.Item2, Chat.CreateToolsFromClientSchemas.Result.Item3, Chat.CreateToolsFromClientSchemas.Result.Item4, Chat.CreateToolsFromClientSchemas.Result.Item5, Chat.CreateToolsFromClientSchemas.Result.Item6, Chat.CreateToolsFromClientSchemas.Result.Item7, Chat.CreateToolsFromClientSchemas.Result.Item8, Chat.CreateToolsFromClientSchemas.Result.Item9, Chat.CreateToolsFromClientSchemas.Result.Item10, Chat.CreateToolsFromClientSchemas.Result.Item11, Chat.CreateToolsFromClientSchemas.Result.Item12, Chat.CreateToolsFromClientSchemas.Result.Item13, Chat.CreateToolsFromClientSchemas.Result.Item14, Chat.CreateToolsFromClientSchemas.Result.Item15, Chat.CreateToolsFromClientSchemas.Result.Item16, Chat.CreateToolsFromClientSchemas.Result.Item17, Chat.CreateToolsFromClientSchemas.Result.Item18, Chat.CreateToolsFromClientSchemas.Result.Item19, Chat.CreateToolsFromClientSchemas.Result.Item20, Chat.CreateToolsFromClientSchemas.Result.Item21, Chat.CreateToolsFromClientSchemas.Result.Item22, Chat.CreateToolsFromClientSchemas.Result.Item23, Chat.CreateToolsFromClientSchemas.Result.Item24>>)) : SkillRegistry = jsNative
+
+    module SkillRegistry =
+        /// <remarks>TypeScript type: <c>"think_skills"</c></remarks>
+        [<Literal>]
+        let contextLabel = "think_skills"
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -24963,9 +25953,9 @@ module Skills =
             abstract compatibility: string option with get, set
             abstract license: string option with get, set
             abstract allowedTools: string option with get, set
-            abstract metadata: Record<string, obj> option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (name: string, description: string, body: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>) : Result = jsNative
+            static member Create (name: string, description: string, body: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>) : Result = jsNative
 
     module R2SkillSourceOptions =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -25038,12 +26028,12 @@ module Skills =
 module SubAgentConnectionBridge =
     [<Interface>]
     type Implements =
-        abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit> option
+        abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option
         abstract close: ?code: float * ?reason: string -> JS.Promise<unit> option
         abstract setState: state: obj -> obj
-        abstract broadcast: ownerPath: SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[] * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> JS.Promise<unit> option
+        abstract broadcast: ownerPath: SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
         [<ParamObject; Emit("$0")>]
-        static member Create (send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit> option), close: Func<float option, string option, JS.Promise<unit> option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[], U3<string, JS.ArrayBuffer, JS.ArrayBufferView>, string[] option, JS.Promise<unit> option>) : Implements = jsNative
+        static member Create (send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option), close: Func<float option, string option, JS.Promise<unit> option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[], U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option, JS.Promise<unit> option>) : Implements = jsNative
 
     module Broadcast =
         module OwnerPath =
@@ -25071,281 +26061,6 @@ module TailAgentToolRun =
         abstract signal: obj option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?afterSequence: float, ?signal: obj) : Options = jsNative
-
-module ToolResultOutput7 =
-    module Value =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("text")>] Text of text: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("file")>] File of data: obj * mediaType: string * filename: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-url")>] FileUrl of url: string * mediaType: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-id")>] FileId of fileId: U2<string, Record<string, string>> * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-reference")>] FileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, Record<string, string>> * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-file-reference")>] ImageFileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: Record<string, obj> option
-            | [<CompiledName("custom")>] Custom of providerOptions: Record<string, obj> option
-
-        [<Interface>]
-        type Item10 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Image that is referenced using a provider file id.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, fileId: U2<string, Record<string, string>>, ?providerOptions: Record<string, obj>) : Item10 = jsNative
-
-        [<Interface>]
-        type Item11 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific references for the image file.
-            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: Record<string, obj>) : Item11 = jsNative
-
-        [<Interface>]
-        type Item12 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ?providerOptions: Record<string, obj>) : Item12 = jsNative
-
-        [<Interface>]
-        type Item2 =
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Text content.
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string, ?providerOptions: Record<string, obj>) : Item2 = jsNative
-
-        [<Interface>]
-        type Item3 =
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// File data as a tagged discriminated union:
-            /// <br /><br />
-            /// - <c>{ type: 'data', data }</c>: raw bytes
-            ///   (base64 string, Uint8Array, ArrayBuffer, Buffer)
-            /// - <c>{ type: 'url', url }</c>: a URL that points to the file
-            /// - <c>{ type: 'reference', reference }</c>: a provider reference
-            ///   from <c>uploadFile</c>
-            /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline
-            ///   text document)
-            /// </summary>
-            abstract data: obj with get, set
-            /// <summary>
-            /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
-            /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
-            /// <br /><br />
-            /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
-            /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
-            /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
-            /// <c>detectMediaType</c>) to resolve the field according to their API
-            /// requirements.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: obj, mediaType: string, ?filename: string, ?providerOptions: Record<string, obj>) : Item3 = jsNative
-
-        [<Interface>]
-        type Item4 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType + tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded media data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: string, mediaType: string, ?filename: string, ?providerOptions: Record<string, obj>) : Item4 = jsNative
-
-        [<Interface>]
-        type Item5 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType and tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the file.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, url: string, ?mediaType: string, ?providerOptions: Record<string, obj>) : Item5 = jsNative
-
-        [<Interface>]
-        type Item6 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// ID of the file.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, fileId: U2<string, Record<string, string>>, ?providerOptions: Record<string, obj>) : Item6 = jsNative
-
-        [<Interface>]
-        type Item7 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific references for the file.
-            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: Record<string, obj>) : Item7 = jsNative
-
-        [<Interface>]
-        type Item8 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType (e.g. 'image' or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded image data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: string, mediaType: string, ?providerOptions: Record<string, obj>) : Item8 = jsNative
-
-        [<Interface>]
-        type Item9 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the image.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, url: string, ?providerOptions: Record<string, obj>) : Item9 = jsNative
-
-        module Item7 =
-            type ProviderReference =
-                abstract ``type``: unit option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> string with get, set
 
 /// <summary>agents/workflows</summary>
 module Workflows =
@@ -25391,7 +26106,7 @@ module Workflows =
         /// Performs a shallow merge and broadcasts to all connected clients.
         /// </summary>
         /// <param name="partialState">- Partial state to merge</param>
-        abstract mergeAgentState: partialState: Record<string, obj> -> JS.Promise<unit>
+        abstract mergeAgentState: partialState: JS.Record<string, obj> -> JS.Promise<unit>
         /// <summary>
         /// Reset the Agent's state to its initialState (durable).
         /// Broadcasts the reset state to all connected clients.
@@ -25432,71 +26147,87 @@ module Workflows =
     /// </summary>
     [<Interface>]
     type WorkflowProgressCallback<'P> =
-        /// <summary>
-        /// Workflow binding name
-        /// </summary>
-        abstract workflowName: string with get, set
-        abstract workflowId: string with get, set
+        inherit Workflows.WorkflowProgressCallback.Base
+        /// <remarks>TypeScript type: <c>"progress"</c></remarks>
         abstract ``type``: string with get, set
-        abstract timestamp: float with get, set
         abstract progress: 'P with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, progress: 'P) : WorkflowProgressCallback<'P> = jsNative
+        [<ParamObject; Emit("({ type: 'progress', ...$0 })")>]
+        static member Create (workflowName: string, workflowId: string, timestamp: float, progress: 'P) : WorkflowProgressCallback<'P> = jsNative
+
+    module WorkflowProgressCallback =
+        /// <remarks>TypeScript type: <c>"progress"</c></remarks>
+        [<Literal>]
+        let ``type`` = "progress"
+
+        [<Interface>]
+        type Base =
+            /// <summary>
+            /// Workflow binding name
+            /// </summary>
+            abstract workflowName: string with get, set
+            abstract workflowId: string with get, set
+            abstract ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType with get, set
+            abstract timestamp: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowName: string, workflowId: string, ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType, timestamp: float) : Base = jsNative
 
     /// <summary>
     /// Complete callback - workflow finished successfully
     /// </summary>
     [<Interface>]
     type WorkflowCompleteCallback =
-        /// <summary>
-        /// Workflow binding name
-        /// </summary>
-        abstract workflowName: string with get, set
-        abstract workflowId: string with get, set
+        inherit Workflows.WorkflowProgressCallback.Base
+        /// <remarks>TypeScript type: <c>"complete"</c></remarks>
         abstract ``type``: string with get, set
-        abstract timestamp: float with get, set
         abstract result: obj option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, ?result: obj) : WorkflowCompleteCallback = jsNative
+        [<ParamObject; Emit("({ type: 'complete', ...$0 })")>]
+        static member Create (workflowName: string, workflowId: string, timestamp: float, ?result: obj) : WorkflowCompleteCallback = jsNative
+
+    module WorkflowCompleteCallback =
+        /// <remarks>TypeScript type: <c>"complete"</c></remarks>
+        [<Literal>]
+        let ``type`` = "complete"
 
     /// <summary>
     /// Error callback - workflow encountered an error
     /// </summary>
     [<Interface>]
     type WorkflowErrorCallback =
-        /// <summary>
-        /// Workflow binding name
-        /// </summary>
-        abstract workflowName: string with get, set
-        abstract workflowId: string with get, set
+        inherit Workflows.WorkflowProgressCallback.Base
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
         abstract ``type``: string with get, set
-        abstract timestamp: float with get, set
         abstract error: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, error: string) : WorkflowErrorCallback = jsNative
+        [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+        static member Create (workflowName: string, workflowId: string, timestamp: float, error: string) : WorkflowErrorCallback = jsNative
+
+    module WorkflowErrorCallback =
+        /// <remarks>TypeScript type: <c>"error"</c></remarks>
+        [<Literal>]
+        let ``type`` = "error"
 
     /// <summary>
     /// Event callback - custom event from workflow
     /// </summary>
     [<Interface>]
     type WorkflowEventCallback =
-        /// <summary>
-        /// Workflow binding name
-        /// </summary>
-        abstract workflowName: string with get, set
-        abstract workflowId: string with get, set
+        inherit Workflows.WorkflowProgressCallback.Base
+        /// <remarks>TypeScript type: <c>"event"</c></remarks>
         abstract ``type``: string with get, set
-        abstract timestamp: float with get, set
         abstract ``event``: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, ``event``: obj) : WorkflowEventCallback = jsNative
+        [<ParamObject; Emit("({ type: 'event', ...$0 })")>]
+        static member Create (workflowName: string, workflowId: string, timestamp: float, ``event``: obj) : WorkflowEventCallback = jsNative
+
+    module WorkflowEventCallback =
+        /// <remarks>TypeScript type: <c>"event"</c></remarks>
+        [<Literal>]
+        let ``type`` = "event"
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type WorkflowCallback =
+    type WorkflowCallback<'P> =
         | [<CompiledName("complete")>] Complete of workflowName: string * workflowId: string * timestamp: float * result: obj option
         | [<CompiledName("error")>] Error of workflowName: string * workflowId: string * timestamp: float * error: string
         | [<CompiledName("event")>] Event of workflowName: string * workflowId: string * timestamp: float * ``event``: obj
-        | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: obj
+        | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: 'P
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type WorkflowStatus =
@@ -25540,11 +26271,11 @@ module Workflows =
         /// Custom workflow instance ID (auto-generated if not provided)
         /// </summary>
         abstract id: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract agentBinding: string option with get, set
         abstract retention: Workflows.RunWorkflowOptions.Retention option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?id: string, ?metadata: Record<string, obj>, ?agentBinding: string, ?retention: Workflows.RunWorkflowOptions.Retention) : RunWorkflowOptions = jsNative
+        static member Create (?id: string, ?metadata: JS.Record<string, obj>, ?agentBinding: string, ?retention: Workflows.RunWorkflowOptions.Retention) : RunWorkflowOptions = jsNative
 
     /// <summary>
     /// Event payload for sendWorkflowEvent()
@@ -25571,13 +26302,13 @@ module Workflows =
         abstract workflowId: string with get, set
         abstract workflowName: string with get, set
         abstract status: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract error: Workflows.WorkflowInfo.Error option with get, set
-        abstract createdAt: JS.Date with get, set
-        abstract updatedAt: JS.Date with get, set
-        abstract completedAt: JS.Date option with get, set
+        abstract createdAt: Fable.Core.TS.Es.Date with get, set
+        abstract updatedAt: Fable.Core.TS.Es.Date with get, set
+        abstract completedAt: Fable.Core.TS.Es.Date option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (id: string, workflowId: string, workflowName: string, status: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus, createdAt: JS.Date, updatedAt: JS.Date, ?metadata: Record<string, obj>, ?error: Workflows.WorkflowInfo.Error, ?completedAt: JS.Date) : WorkflowInfo = jsNative
+        static member Create (id: string, workflowId: string, workflowName: string, status: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus, createdAt: Fable.Core.TS.Es.Date, updatedAt: Fable.Core.TS.Es.Date, ?metadata: JS.Record<string, obj>, ?error: Workflows.WorkflowInfo.Error, ?completedAt: Fable.Core.TS.Es.Date) : WorkflowInfo = jsNative
 
     /// <summary>
     /// Criteria for querying tracked workflows
@@ -25589,12 +26320,12 @@ module Workflows =
         /// </summary>
         abstract status: U2<string, FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus[]> option with get, set
         abstract workflowName: string option with get, set
-        abstract metadata: Record<string, U3<string, float, bool>> option with get, set
+        abstract metadata: JS.Record<string, U3<string, float, bool>> option with get, set
         abstract limit: float option with get, set
         abstract orderBy: Workflows.WorkflowQueryCriteria.OrderBy option with get, set
         abstract cursor: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?status: U2<string, FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus[]>, ?workflowName: string, ?metadata: Record<string, U3<string, float, bool>>, ?limit: float, ?orderBy: Workflows.WorkflowQueryCriteria.OrderBy, ?cursor: string) : WorkflowQueryCriteria = jsNative
+        static member Create (?status: U2<string, FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowStatus[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?limit: float, ?orderBy: Workflows.WorkflowQueryCriteria.OrderBy, ?cursor: string) : WorkflowQueryCriteria = jsNative
 
     /// <summary>
     /// Paginated result from getWorkflows()
@@ -25620,9 +26351,9 @@ module Workflows =
         /// </summary>
         abstract approved: bool with get, set
         abstract reason: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (approved: bool, ?reason: string, ?metadata: Record<string, obj>) : ApprovalEventPayload = jsNative
+        static member Create (approved: bool, ?reason: string, ?metadata: JS.Record<string, obj>) : ApprovalEventPayload = jsNative
 
     /// <summary>
     /// Options for waitForApproval()
@@ -25701,7 +26432,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("WorkflowRejectedError.captureStackTrace", "agents/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("WorkflowRejectedError.prepareStackTrace", "agents/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -25728,7 +26459,7 @@ module Workflows =
     /// <remarks>@template ProgressType - Type for progress reporting (defaults to DefaultProgress)</remarks>
     /// <remarks>@template Env - Environment type (defaults to Cloudflare.Env)</remarks>
     [<Interface>]
-    type AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Agent<obj, obj, Record<string, obj>>> =
+    type AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Agent<obj, obj, JS.Record<string, obj>>> =
         /// <summary>
         /// The Agent stub - initialized before run() is called.
         /// Use this.agent to access the Agent's RPC methods.
@@ -25816,7 +26547,7 @@ module Workflows =
         /// Send a notification to the Agent via RPC.
         /// </summary>
         /// <param name="callback">- Callback payload to send</param>
-        abstract notifyAgent: callback: Agent.OnWorkflowCallback.Callback -> JS.Promise<unit>
+        abstract notifyAgent: callback: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallback<FSharp.CloudEdge.Runtime.Agents.Workflows.DefaultProgress> -> JS.Promise<unit>
         /// <summary>
         /// Report progress to the Agent with typed progress data.
         /// Triggers onWorkflowProgress() on the Agent.
@@ -25864,7 +26595,7 @@ module Workflows =
         abstract env: 'Env with get, set
         abstract run: ``event``: Workflows.AgentWorkflow.Run.Event * step: obj -> JS.Promise<obj>
         [<ParamObject; Emit("$0")>]
-        static member Create (_workflowId: obj, _workflowName: obj, __agentInitCalled: obj, _errorReported: obj, _initAgent: obj, _initFacetAgent: obj, _runWithErrorReporting: obj, _disposeAgent: obj, _wrapStep: obj, extendStep: Func<FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep, obj, FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep>, agent: obj, workflowId: string, workflowName: string, _autoReportError: obj, notifyAgent: (Agent.OnWorkflowCallback.Callback -> JS.Promise<unit>), reportProgress: ('ProgressType -> JS.Promise<unit>), broadcastToClients: (obj -> unit), waitForApproval: Func<FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep, FSharp.CloudEdge.Runtime.Agents.Workflows.WaitForApprovalOptions option, JS.Promise<'T>>, ctx: obj, env: 'Env, run: Func<Workflows.AgentWorkflow.Run.Event, obj, JS.Promise<obj>>, ?_agent: obj) : AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
+        static member Create (_workflowId: obj, _workflowName: obj, __agentInitCalled: obj, _errorReported: obj, _initAgent: obj, _initFacetAgent: obj, _runWithErrorReporting: obj, _disposeAgent: obj, _wrapStep: obj, extendStep: Func<FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep, obj, FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep>, agent: obj, workflowId: string, workflowName: string, _autoReportError: obj, notifyAgent: (FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallback<FSharp.CloudEdge.Runtime.Agents.Workflows.DefaultProgress> -> JS.Promise<unit>), reportProgress: ('ProgressType -> JS.Promise<unit>), broadcastToClients: (obj -> unit), waitForApproval: Func<FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflowStep, FSharp.CloudEdge.Runtime.Agents.Workflows.WaitForApprovalOptions option, JS.Promise<'T>>, ctx: obj, env: 'Env, run: Func<Workflows.AgentWorkflow.Run.Event, obj, JS.Promise<obj>>, ?_agent: obj) : AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -25882,19 +26613,33 @@ module Workflows =
         /// <remarks>@template ProgressType - Type for progress reporting (defaults to DefaultProgress)</remarks>
         /// <remarks>@template Env - Environment type (defaults to Cloudflare.Env)</remarks>
         [<Import("AgentWorkflow", "agents/workflows"); EmitConstructor>]
-        static member AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Agent<obj, obj, Record<string, obj>>> (ctx: obj, env: 'Env) : FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
+        static member AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Agent<obj, obj, JS.Record<string, obj>>> (ctx: obj, env: 'Env) : FSharp.CloudEdge.Runtime.Agents.Workflows.AgentWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
 
     module AgentWorkflow =
+        module Base =
+            module Item =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// Name/ID of the Agent that started this workflow
+                    /// </summary>
+                    abstract __agentName: string with get, set
+                    abstract __agentBinding: string with get, set
+                    abstract __workflowName: string with get, set
+                    abstract __agentOrigin: AgentWorkflowOrigin option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (__agentName: string, __agentBinding: string, __workflowName: string, ?__agentOrigin: AgentWorkflowOrigin) : Base = jsNative
+
         module Run =
             [<Interface>]
             type Event =
                 abstract payload: Workflows.AgentWorkflow.Run.Event.Payload
-                abstract timestamp: JS.Date
+                abstract timestamp: Fable.Core.TS.Es.Date
                 abstract instanceId: string
                 abstract workflowName: string
                 abstract schedule: obj option
                 [<ParamObject; Emit("$0")>]
-                static member Create (payload: Workflows.AgentWorkflow.Run.Event.Payload, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: obj) : Event = jsNative
+                static member Create (payload: Workflows.AgentWorkflow.Run.Event.Payload, timestamp: Fable.Core.TS.Es.Date, instanceId: string, workflowName: string, ?schedule: obj) : Event = jsNative
 
             module Event =
                 [<Interface>]
@@ -25912,26 +26657,31 @@ module Workflows =
     module AgentWorkflowStep =
         type Sleep = delegate of name: string * duration: U2<float, string> -> JS.Promise<unit>
 
-        type SleepUntil = delegate of name: string * timestamp: U2<float, JS.Date> -> JS.Promise<unit>
+        type SleepUntil = delegate of name: string * timestamp: U2<float, Fable.Core.TS.Es.Date> -> JS.Promise<unit>
 
         module Do =
             [<Interface>]
             type Config =
-                abstract timeout: U2<float, string> option with get, set
-                abstract sensitive: string option with get, set
+                inherit Workflows.AgentWorkflowStep.Do.Config.Base
                 abstract retries: Workflows.AgentWorkflowStep.Do.Config.Retries with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (retries: Workflows.AgentWorkflowStep.Do.Config.Retries, ?timeout: U2<float, string>, ?sensitive: string) : Config = jsNative
 
             [<Interface>]
             type Config2 =
-                abstract timeout: U2<float, string> option with get, set
-                abstract sensitive: string option with get, set
+                inherit Workflows.AgentWorkflowStep.Do.Config.Base
                 abstract retries: Workflows.AgentWorkflowStep.Do.Config2.Retries option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (?timeout: U2<float, string>, ?sensitive: string, ?retries: Workflows.AgentWorkflowStep.Do.Config2.Retries) : Config2 = jsNative
 
             module Config =
+                [<Interface>]
+                type Base =
+                    abstract timeout: U2<float, string> option with get, set
+                    abstract sensitive: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?timeout: U2<float, string>, ?sensitive: string) : Base = jsNative
+
                 [<Interface>]
                 type Retries =
                     abstract limit: float with get, set
@@ -26038,7 +26788,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -26140,7 +26890,7 @@ type SqlErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -26160,36 +26910,6 @@ type SqlErrorConstructor =
     /// </summary>
     [<EmitConstructor>]
     abstract Create: query: string * cause: obj -> SqlError
-
-[<Erase>]
-type U13<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13> =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
 
 [<Erase>]
 type U24<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14, 't15, 't16, 't17, 't18, 't19, 't20, 't21, 't22, 't23, 't24> =

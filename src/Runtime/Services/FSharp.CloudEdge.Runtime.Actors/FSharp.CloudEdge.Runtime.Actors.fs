@@ -173,7 +173,7 @@ type Actor<'E> =
     /// <param name="strings">SQL query template strings</param>
     /// <param name="values">Values to be inserted into the query</param>
     /// <returns>Array of query results</returns>
-    abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+    abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
     /// <summary>
     /// Tracks the last access time of an actor instance.
     /// </summary>
@@ -281,13 +281,13 @@ type SQLSchemaMigrations =
 type Sockets<'P> =
     abstract parent: obj with get, set
     abstract context: obj with get, set
-    abstract connections: JS.Map<string, Sockets.Connections.Item> with get, set
+    abstract connections: Fable.Core.TS.Es.Map<string, Sockets.Connections.Item> with get, set
     abstract message: message: string * ?``to``: U2<string, RecipientType[]> * ?exclude: RecipientType[] -> unit
     abstract webSocketMessage: ws: Sockets.Connections.Item * message: obj -> JS.Promise<unit>
     abstract webSocketClose: ws: Sockets.Connections.Item * code: float -> JS.Promise<unit>
     abstract acceptWebSocket: request: obj -> Sockets.AcceptWebSocket.Result
     [<ParamObject; Emit("$0")>]
-    static member Create (parent: obj, context: obj, connections: JS.Map<string, Sockets.Connections.Item>, message: Action<string, U2<string, RecipientType[]> option, RecipientType[] option>, webSocketMessage: Func<Sockets.Connections.Item, obj, JS.Promise<unit>>, webSocketClose: Func<Sockets.Connections.Item, float, JS.Promise<unit>>, acceptWebSocket: (obj -> Sockets.AcceptWebSocket.Result)) : Sockets<'P> = jsNative
+    static member Create (parent: obj, context: obj, connections: Fable.Core.TS.Es.Map<string, Sockets.Connections.Item>, message: Action<string, U2<string, RecipientType[]> option, RecipientType[] option>, webSocketMessage: Func<Sockets.Connections.Item, obj, JS.Promise<unit>>, webSocketClose: Func<Sockets.Connections.Item, float, JS.Promise<unit>>, acceptWebSocket: (obj -> Sockets.AcceptWebSocket.Result)) : Sockets<'P> = jsNative
 
 [<Interface>]
 type SqlStorage =
@@ -297,11 +297,17 @@ type SqlStorage =
 
 [<Interface>]
 type StudioQueryRequest =
+    /// <remarks>TypeScript type: <c>"query"</c></remarks>
     abstract ``type``: string with get, set
     abstract statement: string with get, set
     abstract ``params``: obj[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, statement: string, ?``params``: obj[]) : StudioQueryRequest = jsNative
+    [<ParamObject; Emit("({ type: 'query', ...$0 })")>]
+    static member Create (statement: string, ?``params``: obj[]) : StudioQueryRequest = jsNative
+
+module StudioQueryRequest =
+    /// <remarks>TypeScript type: <c>"query"</c></remarks>
+    [<Literal>]
+    let ``type`` = "query"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type StudioRequest =
@@ -310,11 +316,17 @@ type StudioRequest =
 
 [<Interface>]
 type StudioTransactionRequest =
+    /// <remarks>TypeScript type: <c>"transaction"</c></remarks>
     abstract ``type``: string with get, set
     abstract statements: string[] with get, set
     abstract ``params``: obj[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, statements: string[], ?``params``: obj[]) : StudioTransactionRequest = jsNative
+    [<ParamObject; Emit("({ type: 'transaction', ...$0 })")>]
+    static member Create (statements: string[], ?``params``: obj[]) : StudioTransactionRequest = jsNative
+
+module StudioTransactionRequest =
+    /// <remarks>TypeScript type: <c>"transaction"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transaction"
 
 [<Interface>]
 type TryNOptions =
@@ -371,7 +383,7 @@ type Exports =
     /// Supports deep tracking of nested object properties.
     /// </summary>
     [<Import("Persist", "@cloudflare/actors")>]
-    static member Persist (target: unit, context: obj) : unit = jsNative
+    static member Persist<'T, 'V> (target: unit, context: Fable.Core.TS.Es.ClassFieldDecoratorContext<'T, 'V>) : unit = jsNative
     [<Import("RetryConditionAlways", "@cloudflare/actors")>]
     static member RetryConditionAlways () : bool = jsNative
     [<Import("RetryConditionNever", "@cloudflare/actors")>]
@@ -438,10 +450,10 @@ module ActorConfiguration =
 /// <summary>@cloudflare/actors/alarms</summary>
 module Alarms =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-    type Schedule =
-        | [<CompiledName("scheduled")>] Scheduled of id: string * callback: obj * payload: obj * identifier: string * time: float
-        | [<CompiledName("delayed")>] Delayed of id: string * callback: obj * payload: obj * identifier: string * time: float * delayInSeconds: float
-        | [<CompiledName("cron")>] Cron of id: string * callback: obj * payload: obj * identifier: string * time: float * cron: string
+    type Schedule<'T, 'K> =
+        | [<CompiledName("scheduled")>] Scheduled of id: string * callback: 'K * payload: 'T * identifier: string * time: float
+        | [<CompiledName("delayed")>] Delayed of id: string * callback: 'K * payload: 'T * identifier: string * time: float * delayInSeconds: float
+        | [<CompiledName("cron")>] Cron of id: string * callback: 'K * payload: 'T * identifier: string * time: float * cron: string
 
     [<Interface>]
     type Schedule2<'K, 'T> =
@@ -464,13 +476,22 @@ module Alarms =
         /// <summary>
         /// Type of schedule for one-time execution at a specific time
         /// </summary>
+        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Timestamp when the task should execute
         /// </summary>
         abstract time: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, ``type``: string, time: float) : Schedule2<'K, 'T> = jsNative
+        [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, time: float) : Schedule2<'K, 'T> = jsNative
+
+    module Schedule2 =
+        /// <summary>
+        /// Type of schedule for one-time execution at a specific time
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+        [<Literal>]
+        let ``type`` = "scheduled"
 
     [<Interface>]
     type Schedule3<'K, 'T> =
@@ -493,6 +514,7 @@ module Alarms =
         /// <summary>
         /// Type of schedule for delayed execution
         /// </summary>
+        /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Timestamp when the task should execute
@@ -502,8 +524,16 @@ module Alarms =
         /// Number of seconds to delay execution
         /// </summary>
         abstract delayInSeconds: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, ``type``: string, time: float, delayInSeconds: float) : Schedule3<'K, 'T> = jsNative
+        [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
+        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, time: float, delayInSeconds: float) : Schedule3<'K, 'T> = jsNative
+
+    module Schedule3 =
+        /// <summary>
+        /// Type of schedule for delayed execution
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
+        [<Literal>]
+        let ``type`` = "delayed"
 
     [<Interface>]
     type Schedule4<'K, 'T> =
@@ -526,6 +556,7 @@ module Alarms =
         /// <summary>
         /// Type of schedule for recurring execution based on cron expression
         /// </summary>
+        /// <remarks>TypeScript type: <c>"cron"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Timestamp for the next execution
@@ -535,8 +566,16 @@ module Alarms =
         /// Cron expression defining the schedule
         /// </summary>
         abstract cron: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, ``type``: string, time: float, cron: string) : Schedule4<'K, 'T> = jsNative
+        [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
+        static member Create (id: string, callback: 'K, payload: 'T, identifier: string, time: float, cron: string) : Schedule4<'K, 'T> = jsNative
+
+    module Schedule4 =
+        /// <summary>
+        /// Type of schedule for recurring execution based on cron expression
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"cron"</c></remarks>
+        [<Literal>]
+        let ``type`` = "cron"
 
     [<Interface>]
     type Alarms<'P> =
@@ -551,21 +590,21 @@ module Alarms =
         /// <param name="callback">Name of the method to call</param>
         /// <param name="payload">Data to pass to the callback</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: obj * ?payload: 'T -> JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Alarms.GetSchedules.Result.Item>
+        abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: obj * ?payload: 'T -> JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string>>
         /// <summary>
         /// Get a scheduled task by ID
         /// </summary>
         /// <remarks>@template T Type of the payload data</remarks>
         /// <param name="id">ID of the scheduled task</param>
         /// <returns>The Schedule object or undefined if not found</returns>
-        abstract getSchedule<'T>: id: string -> JS.Promise<U3<Alarms.Alarms.GetSchedule.Result.Item<'T>, Alarms.Alarms.GetSchedule.Result.Item2<'T>, Alarms.Alarms.GetSchedule.Result.Item3<'T>> option>
+        abstract getSchedule<'T>: id: string -> JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string> option>
         /// <summary>
         /// Get scheduled tasks matching the given criteria
         /// </summary>
         /// <remarks>@template T Type of the payload data</remarks>
         /// <param name="criteria">Criteria to filter schedules</param>
         /// <returns>Array of matching Schedule objects</returns>
-        abstract getSchedules: ?criteria: Alarms.Alarms.GetSchedules.Criteria -> Alarms.Alarms.GetSchedules.Result.Item[]
+        abstract getSchedules<'T>: ?criteria: Alarms.Alarms.GetSchedules.Criteria -> FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string>[]
         /// <summary>
         /// Cancel a scheduled task
         /// </summary>
@@ -581,10 +620,10 @@ module Alarms =
         /// <param name="strings">SQL query template strings</param>
         /// <param name="values">Values to be inserted into the query</param>
         /// <returns>Array of query results</returns>
-        abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+        abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
         abstract _tryCatch: obj with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (parent: obj, schedule: Func<U3<string, float, JS.Date>, obj, 'T option, JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Alarms.GetSchedules.Result.Item>>, getSchedule: (string -> JS.Promise<U3<Alarms.Alarms.GetSchedule.Result.Item<'T>, Alarms.Alarms.GetSchedule.Result.Item2<'T>, Alarms.Alarms.GetSchedule.Result.Item3<'T>> option>), getSchedules: (Alarms.Alarms.GetSchedules.Criteria option -> Alarms.Alarms.GetSchedules.Result.Item[]), cancelSchedule: (string -> JS.Promise<bool>), _scheduleNextAlarm: obj, alarm: (obj option -> JS.Promise<unit>), sql: Func<obj, U3<string, float, bool> option[], 'T[]>, _tryCatch: obj, ?storage: obj, ?actorName: string) : Alarms<'P> = jsNative
+        static member Create (parent: obj, schedule: Func<U3<string, float, Fable.Core.TS.Es.Date>, obj, 'T option, JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string>>>, getSchedule: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string> option>), getSchedules: (Alarms.Alarms.GetSchedules.Criteria option -> FSharp.CloudEdge.Runtime.Actors.Alarms.Schedule<'T, string>[]), cancelSchedule: (string -> JS.Promise<bool>), _scheduleNextAlarm: obj, alarm: (obj option -> JS.Promise<unit>), sql: Func<Fable.Core.TS.Es.TemplateStringsArray, U3<string, float, bool> option[], 'T[]>, _tryCatch: obj, ?storage: obj, ?actorName: string) : Alarms<'P> = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -593,103 +632,6 @@ module Alarms =
         static member Alarms<'P> (ctx: obj option, parent: 'P) : FSharp.CloudEdge.Runtime.Actors.Alarms.Alarms<'P> = jsNative
 
     module Alarms =
-        module GetSchedule =
-            module Result =
-                [<Interface>]
-                type Item<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for one-time execution at a specific time
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp when the task should execute
-                    /// </summary>
-                    abstract time: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float) : Item<'T> = jsNative
-
-                [<Interface>]
-                type Item2<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for delayed execution
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp when the task should execute
-                    /// </summary>
-                    abstract time: float with get, set
-                    /// <summary>
-                    /// Number of seconds to delay execution
-                    /// </summary>
-                    abstract delayInSeconds: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float, delayInSeconds: float) : Item2<'T> = jsNative
-
-                [<Interface>]
-                type Item3<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for recurring execution based on cron expression
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp for the next execution
-                    /// </summary>
-                    abstract time: float with get, set
-                    /// <summary>
-                    /// Cron expression defining the schedule
-                    /// </summary>
-                    abstract cron: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float, cron: string) : Item3<'T> = jsNative
-
         module GetSchedules =
             [<Interface>]
             type Criteria =
@@ -702,118 +644,16 @@ module Alarms =
             module Criteria =
                 [<Interface>]
                 type TimeRange =
-                    abstract start: JS.Date option with get, set
-                    abstract ``end``: JS.Date option with get, set
+                    abstract start: Fable.Core.TS.Es.Date option with get, set
+                    abstract ``end``: Fable.Core.TS.Es.Date option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?start: JS.Date, ?``end``: JS.Date) : TimeRange = jsNative
+                    static member Create (?start: Fable.Core.TS.Es.Date, ?``end``: Fable.Core.TS.Es.Date) : TimeRange = jsNative
 
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type Type =
                     | [<CompiledName("cron")>] Cron
                     | [<CompiledName("delayed")>] Delayed
                     | [<CompiledName("scheduled")>] Scheduled
-
-            module Result =
-                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * identifier: string * time: float
-                    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * identifier: string * time: float * delayInSeconds: float
-                    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * identifier: string * time: float * cron: string
-
-                [<Interface>]
-                type Item2<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for one-time execution at a specific time
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp when the task should execute
-                    /// </summary>
-                    abstract time: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float) : Item2<'T> = jsNative
-
-                [<Interface>]
-                type Item3<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for delayed execution
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp when the task should execute
-                    /// </summary>
-                    abstract time: float with get, set
-                    /// <summary>
-                    /// Number of seconds to delay execution
-                    /// </summary>
-                    abstract delayInSeconds: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float, delayInSeconds: float) : Item3<'T> = jsNative
-
-                [<Interface>]
-                type Item4<'T> =
-                    /// <summary>
-                    /// Unique identifier for the schedule
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// Name of the method to be called
-                    /// </summary>
-                    abstract callback: string with get, set
-                    /// <summary>
-                    /// Data to be passed to the callback
-                    /// </summary>
-                    abstract payload: 'T with get, set
-                    /// <summary>
-                    /// Actor identifier
-                    /// </summary>
-                    abstract identifier: string with get, set
-                    /// <summary>
-                    /// Type of schedule for recurring execution based on cron expression
-                    /// </summary>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// Timestamp for the next execution
-                    /// </summary>
-                    abstract time: float with get, set
-                    /// <summary>
-                    /// Cron expression defining the schedule
-                    /// </summary>
-                    abstract cron: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: 'T, identifier: string, ``type``: string, time: float, cron: string) : Item4<'T> = jsNative
 
 module Entrypoint =
     module Fetch =
@@ -1333,7 +1173,7 @@ module Sockets =
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
             /// </summary>
-            abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+            abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
             /// <summary>
             /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
             /// <br /><br />
@@ -1391,7 +1231,7 @@ module Sockets =
             /// </summary>
             abstract dispatchEvent: ``event``: obj -> bool
             [<ParamObject; Emit("$0")>]
-            static member Create (accept: (obj option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Sockets.Connections.Item.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), ?url: string, ?protocol: string, ?extensions: string) : Item = jsNative
+            static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Sockets.Connections.Item.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), ?url: string, ?protocol: string, ?extensions: string) : Item = jsNative
 
         module Item =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1445,7 +1285,7 @@ module Storage =
         /// <param name="strings">SQL query template strings</param>
         /// <param name="values">Values to be inserted into the query</param>
         /// <returns>Array of query results</returns>
-        abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+        abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
         /// <summary>
         /// Executes a SQL query and formats the results based on the specified options.
         /// </summary>
@@ -1455,7 +1295,7 @@ module Storage =
         abstract runMigrations: unit -> JS.Promise<Storage.Storage.RunMigrations.Result.Item option>
         abstract __studio: cmd: StudioRequest -> JS.Promise<obj>
         [<ParamObject; Emit("$0")>]
-        static member Create (_migrationsArray: obj, hasRanMigrations: bool, migrations: SQLSchemaMigration[], executeRawQuery: obj, sql: Func<obj, U3<string, float, bool> option[], 'T[]>, query: obj, runMigrations: (unit -> JS.Promise<Storage.Storage.RunMigrations.Result.Item option>), __studio: (StudioRequest -> JS.Promise<obj>), ?raw: obj, ?sqlStorage: SqlStorage, ?_migrations: SQLSchemaMigrations) : Storage = jsNative
+        static member Create (_migrationsArray: obj, hasRanMigrations: bool, migrations: SQLSchemaMigration[], executeRawQuery: obj, sql: Func<Fable.Core.TS.Es.TemplateStringsArray, U3<string, float, bool> option[], 'T[]>, query: obj, runMigrations: (unit -> JS.Promise<Storage.Storage.RunMigrations.Result.Item option>), __studio: (StudioRequest -> JS.Promise<obj>), ?raw: obj, ?sqlStorage: SqlStorage, ?_migrations: SQLSchemaMigrations) : Storage = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]

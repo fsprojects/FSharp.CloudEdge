@@ -37,9 +37,9 @@ type VoiceDiagnosticsOptions =
 type VoiceDiagnosticEvent =
     abstract ``event``: string with get, set
     abstract timestamp: float with get, set
-    abstract data: Record<string, obj> option with get, set
+    abstract data: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``event``: string, timestamp: float, ?data: Record<string, obj>) : VoiceDiagnosticEvent = jsNative
+    static member Create (``event``: string, timestamp: float, ?data: JS.Record<string, obj>) : VoiceDiagnosticEvent = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type VoiceTurnSource =
@@ -184,11 +184,17 @@ type VoiceModelFinishReason =
 [<Interface>]
 type VoiceCompletionOutcome =
     abstract code: VoiceCompletionOutcomeCode with get, set
+    /// <remarks>TypeScript type: <c>"llm"</c></remarks>
     abstract stage: string with get, set
     abstract finishReason: VoiceModelFinishReason option with get, set
     abstract partialOutput: bool with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (code: VoiceCompletionOutcomeCode, stage: string, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceCompletionOutcome = jsNative
+    [<ParamObject; Emit("({ stage: 'llm', ...$0 })")>]
+    static member Create (code: VoiceCompletionOutcomeCode, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceCompletionOutcome = jsNative
+
+module VoiceCompletionOutcome =
+    /// <remarks>TypeScript type: <c>"llm"</c></remarks>
+    [<Literal>]
+    let stage = "llm"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type VoiceClientMessage =
@@ -202,153 +208,285 @@ type VoiceClientMessage =
 
 [<Interface>]
 type VoiceClientMessage2 =
+    /// <remarks>TypeScript type: <c>"hello"</c></remarks>
     abstract ``type``: string with get, set
     abstract protocol_version: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?protocol_version: float) : VoiceClientMessage2 = jsNative
+    [<ParamObject; Emit("({ type: 'hello', ...$0 })")>]
+    static member Create (?protocol_version: float) : VoiceClientMessage2 = jsNative
+
+module VoiceClientMessage2 =
+    /// <remarks>TypeScript type: <c>"hello"</c></remarks>
+    [<Literal>]
+    let ``type`` = "hello"
 
 [<Interface>]
 type VoiceClientMessage3 =
+    /// <remarks>TypeScript type: <c>"start_call"</c></remarks>
     abstract ``type``: string with get, set
     abstract preferred_format: VoiceAudioFormat option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?preferred_format: VoiceAudioFormat) : VoiceClientMessage3 = jsNative
+    [<ParamObject; Emit("({ type: 'start_call', ...$0 })")>]
+    static member Create (?preferred_format: VoiceAudioFormat) : VoiceClientMessage3 = jsNative
+
+module VoiceClientMessage3 =
+    /// <remarks>TypeScript type: <c>"start_call"</c></remarks>
+    [<Literal>]
+    let ``type`` = "start_call"
 
 [<Interface>]
 type VoiceClientMessage4 =
+    /// <remarks>TypeScript type: <c>"end_call"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : VoiceClientMessage4 = jsNative
+    [<Emit("({ type: 'end_call' })")>]
+    static member Create () : VoiceClientMessage4 = jsNative
+
+module VoiceClientMessage4 =
+    /// <remarks>TypeScript type: <c>"end_call"</c></remarks>
+    [<Literal>]
+    let ``type`` = "end_call"
 
 [<Interface>]
 type VoiceClientMessage5 =
+    /// <remarks>TypeScript type: <c>"start_of_speech"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : VoiceClientMessage5 = jsNative
+    [<Emit("({ type: 'start_of_speech' })")>]
+    static member Create () : VoiceClientMessage5 = jsNative
+
+module VoiceClientMessage5 =
+    /// <remarks>TypeScript type: <c>"start_of_speech"</c></remarks>
+    [<Literal>]
+    let ``type`` = "start_of_speech"
 
 [<Interface>]
 type VoiceClientMessage6 =
+    /// <remarks>TypeScript type: <c>"end_of_speech"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : VoiceClientMessage6 = jsNative
+    [<Emit("({ type: 'end_of_speech' })")>]
+    static member Create () : VoiceClientMessage6 = jsNative
+
+module VoiceClientMessage6 =
+    /// <remarks>TypeScript type: <c>"end_of_speech"</c></remarks>
+    [<Literal>]
+    let ``type`` = "end_of_speech"
 
 [<Interface>]
 type VoiceClientMessage7 =
+    /// <remarks>TypeScript type: <c>"interrupt"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : VoiceClientMessage7 = jsNative
+    [<Emit("({ type: 'interrupt' })")>]
+    static member Create () : VoiceClientMessage7 = jsNative
+
+module VoiceClientMessage7 =
+    /// <remarks>TypeScript type: <c>"interrupt"</c></remarks>
+    [<Literal>]
+    let ``type`` = "interrupt"
 
 [<Interface>]
 type VoiceClientMessage8 =
+    /// <remarks>TypeScript type: <c>"text_message"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string) : VoiceClientMessage8 = jsNative
+    [<ParamObject; Emit("({ type: 'text_message', ...$0 })")>]
+    static member Create (text: string) : VoiceClientMessage8 = jsNative
+
+module VoiceClientMessage8 =
+    /// <remarks>TypeScript type: <c>"text_message"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text_message"
 
 type VoiceServerMessage = U14<VoiceServerMessage2, VoiceServerMessage3, VoiceServerMessage4, VoiceServerMessage5, VoiceServerMessage6, VoiceServerMessage7, VoiceServerMessage8, VoiceServerMessage9, VoiceServerMessage10, VoiceServerMessage11, VoiceServerMessage12, VoiceServerMessage13, VoiceServerMessage14, VoiceServerMessage15>
 
 [<Interface>]
 type VoiceServerMessage10 =
+    /// <remarks>TypeScript type: <c>"playback_interrupt"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : VoiceServerMessage10 = jsNative
+    [<Emit("({ type: 'playback_interrupt' })")>]
+    static member Create () : VoiceServerMessage10 = jsNative
+
+module VoiceServerMessage10 =
+    /// <remarks>TypeScript type: <c>"playback_interrupt"</c></remarks>
+    [<Literal>]
+    let ``type`` = "playback_interrupt"
 
 [<Interface>]
 type VoiceServerMessage11 =
+    /// <remarks>TypeScript type: <c>"metrics"</c></remarks>
     abstract ``type``: string with get, set
     abstract llm_ms: float with get, set
     abstract tts_ms: float with get, set
     abstract first_audio_ms: float with get, set
     abstract total_ms: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, llm_ms: float, tts_ms: float, first_audio_ms: float, total_ms: float) : VoiceServerMessage11 = jsNative
+    [<ParamObject; Emit("({ type: 'metrics', ...$0 })")>]
+    static member Create (llm_ms: float, tts_ms: float, first_audio_ms: float, total_ms: float) : VoiceServerMessage11 = jsNative
+
+module VoiceServerMessage11 =
+    /// <remarks>TypeScript type: <c>"metrics"</c></remarks>
+    [<Literal>]
+    let ``type`` = "metrics"
 
 [<Interface>]
 type VoiceServerMessage12 =
     inherit VoiceDiagnosticEvent
+    /// <remarks>TypeScript type: <c>"diagnostic"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ``event``: string, timestamp: float, ?data: Record<string, obj>) : VoiceServerMessage12 = jsNative
+    [<ParamObject; Emit("({ type: 'diagnostic', ...$0 })")>]
+    static member Create (``event``: string, timestamp: float, ?data: JS.Record<string, obj>) : VoiceServerMessage12 = jsNative
+
+module VoiceServerMessage12 =
+    /// <remarks>TypeScript type: <c>"diagnostic"</c></remarks>
+    [<Literal>]
+    let ``type`` = "diagnostic"
 
 [<Interface>]
 type VoiceServerMessage13 =
     inherit VoiceTurnMetrics
+    /// <remarks>TypeScript type: <c>"turn_metrics"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, turnId: string, source: VoiceTurnSource, outcome: VoiceTurnOutcome, turnTotalMs: float, ?speechStartToFirstInterimMs: float, ?speechStartToFinalMs: float, ?afterTranscribeMs: float, ?modelToFirstTextMs: float, ?exposedReasoningMs: float, ?modelStreamConsumptionMs: float, ?finalInputToFirstAudioMs: float, ?ttsToFirstAudioMs: float, ?ttsWallMs: float, ?ttsWorkMs: float) : VoiceServerMessage13 = jsNative
+    [<ParamObject; Emit("({ type: 'turn_metrics', ...$0 })")>]
+    static member Create (turnId: string, source: VoiceTurnSource, outcome: VoiceTurnOutcome, turnTotalMs: float, ?speechStartToFirstInterimMs: float, ?speechStartToFinalMs: float, ?afterTranscribeMs: float, ?modelToFirstTextMs: float, ?exposedReasoningMs: float, ?modelStreamConsumptionMs: float, ?finalInputToFirstAudioMs: float, ?ttsToFirstAudioMs: float, ?ttsWallMs: float, ?ttsWorkMs: float) : VoiceServerMessage13 = jsNative
+
+module VoiceServerMessage13 =
+    /// <remarks>TypeScript type: <c>"turn_metrics"</c></remarks>
+    [<Literal>]
+    let ``type`` = "turn_metrics"
 
 [<Interface>]
 type VoiceServerMessage14 =
     inherit VoiceCompletionOutcome
+    /// <remarks>TypeScript type: <c>"completion_outcome"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, code: VoiceCompletionOutcomeCode, stage: string, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceServerMessage14 = jsNative
+    [<ParamObject; Emit("({ type: 'completion_outcome', stage: 'llm', ...$0 })")>]
+    static member Create (code: VoiceCompletionOutcomeCode, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceServerMessage14 = jsNative
+
+module VoiceServerMessage14 =
+    /// <remarks>TypeScript type: <c>"completion_outcome"</c></remarks>
+    [<Literal>]
+    let ``type`` = "completion_outcome"
 
 [<Interface>]
 type VoiceServerMessage15 =
     inherit VoiceError
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, message: string, ?code: VoiceErrorCode, ?stage: string, ?retryable: bool) : VoiceServerMessage15 = jsNative
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member Create (message: string, ?code: VoiceErrorCode, ?stage: string, ?retryable: bool) : VoiceServerMessage15 = jsNative
+
+module VoiceServerMessage15 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error"
 
 [<Interface>]
 type VoiceServerMessage2 =
+    /// <remarks>TypeScript type: <c>"welcome"</c></remarks>
     abstract ``type``: string with get, set
     abstract protocol_version: float with get, set
     abstract diagnostics: VoiceServerMessage2.Diagnostics option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, protocol_version: float, ?diagnostics: VoiceServerMessage2.Diagnostics) : VoiceServerMessage2 = jsNative
+    [<ParamObject; Emit("({ type: 'welcome', ...$0 })")>]
+    static member Create (protocol_version: float, ?diagnostics: VoiceServerMessage2.Diagnostics) : VoiceServerMessage2 = jsNative
+
+module VoiceServerMessage2 =
+    /// <remarks>TypeScript type: <c>"welcome"</c></remarks>
+    [<Literal>]
+    let ``type`` = "welcome"
+
+    [<Interface>]
+    type Diagnostics =
+        abstract browser_console: bool with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (browser_console: bool) : Diagnostics = jsNative
 
 [<Interface>]
 type VoiceServerMessage3 =
+    /// <remarks>TypeScript type: <c>"status"</c></remarks>
     abstract ``type``: string with get, set
     abstract status: VoiceStatus with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, status: VoiceStatus) : VoiceServerMessage3 = jsNative
+    [<ParamObject; Emit("({ type: 'status', ...$0 })")>]
+    static member Create (status: VoiceStatus) : VoiceServerMessage3 = jsNative
+
+module VoiceServerMessage3 =
+    /// <remarks>TypeScript type: <c>"status"</c></remarks>
+    [<Literal>]
+    let ``type`` = "status"
 
 [<Interface>]
 type VoiceServerMessage4 =
+    /// <remarks>TypeScript type: <c>"audio_config"</c></remarks>
     abstract ``type``: string with get, set
     abstract format: VoiceAudioFormat with get, set
     abstract sampleRate: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, format: VoiceAudioFormat, ?sampleRate: float) : VoiceServerMessage4 = jsNative
+    [<ParamObject; Emit("({ type: 'audio_config', ...$0 })")>]
+    static member Create (format: VoiceAudioFormat, ?sampleRate: float) : VoiceServerMessage4 = jsNative
+
+module VoiceServerMessage4 =
+    /// <remarks>TypeScript type: <c>"audio_config"</c></remarks>
+    [<Literal>]
+    let ``type`` = "audio_config"
 
 [<Interface>]
 type VoiceServerMessage5 =
+    /// <remarks>TypeScript type: <c>"transcript"</c></remarks>
     abstract ``type``: string with get, set
     abstract role: VoiceRole with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, role: VoiceRole, text: string) : VoiceServerMessage5 = jsNative
+    [<ParamObject; Emit("({ type: 'transcript', ...$0 })")>]
+    static member Create (role: VoiceRole, text: string) : VoiceServerMessage5 = jsNative
+
+module VoiceServerMessage5 =
+    /// <remarks>TypeScript type: <c>"transcript"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transcript"
 
 [<Interface>]
 type VoiceServerMessage6 =
+    /// <remarks>TypeScript type: <c>"transcript_start"</c></remarks>
     abstract ``type``: string with get, set
     abstract role: VoiceRole with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, role: VoiceRole) : VoiceServerMessage6 = jsNative
+    [<ParamObject; Emit("({ type: 'transcript_start', ...$0 })")>]
+    static member Create (role: VoiceRole) : VoiceServerMessage6 = jsNative
+
+module VoiceServerMessage6 =
+    /// <remarks>TypeScript type: <c>"transcript_start"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transcript_start"
 
 [<Interface>]
 type VoiceServerMessage7 =
+    /// <remarks>TypeScript type: <c>"transcript_delta"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string) : VoiceServerMessage7 = jsNative
+    [<ParamObject; Emit("({ type: 'transcript_delta', ...$0 })")>]
+    static member Create (text: string) : VoiceServerMessage7 = jsNative
+
+module VoiceServerMessage7 =
+    /// <remarks>TypeScript type: <c>"transcript_delta"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transcript_delta"
 
 [<Interface>]
 type VoiceServerMessage8 =
+    /// <remarks>TypeScript type: <c>"transcript_end"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string) : VoiceServerMessage8 = jsNative
+    [<ParamObject; Emit("({ type: 'transcript_end', ...$0 })")>]
+    static member Create (text: string) : VoiceServerMessage8 = jsNative
+
+module VoiceServerMessage8 =
+    /// <remarks>TypeScript type: <c>"transcript_end"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transcript_end"
 
 [<Interface>]
 type VoiceServerMessage9 =
+    /// <remarks>TypeScript type: <c>"transcript_interim"</c></remarks>
     abstract ``type``: string with get, set
     abstract text: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, text: string) : VoiceServerMessage9 = jsNative
+    [<ParamObject; Emit("({ type: 'transcript_interim', ...$0 })")>]
+    static member Create (text: string) : VoiceServerMessage9 = jsNative
+
+module VoiceServerMessage9 =
+    /// <remarks>TypeScript type: <c>"transcript_interim"</c></remarks>
+    [<Literal>]
+    let ``type`` = "transcript_interim"
 
 /// <summary>
 /// Compact compatibility summary for successful, non-empty speech turns.
@@ -396,15 +534,15 @@ type TranscriptMessage =
 
 [<Interface>]
 type TTSProvider =
-    abstract synthesize: text: string * ?signal: obj -> JS.Promise<JS.ArrayBuffer option>
+    abstract synthesize: text: string * ?signal: obj -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>
     [<ParamObject; Emit("$0")>]
-    static member Create (synthesize: Func<string, obj option, JS.Promise<JS.ArrayBuffer option>>) : TTSProvider = jsNative
+    static member Create (synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>) : TTSProvider = jsNative
 
 [<Interface>]
 type StreamingTTSProvider =
-    abstract synthesizeStream: text: string * ?signal: obj -> JS.AsyncGenerator<JS.ArrayBuffer>
+    abstract synthesizeStream: text: string * ?signal: obj -> Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (synthesizeStream: Func<string, obj option, JS.AsyncGenerator<JS.ArrayBuffer>>) : StreamingTTSProvider = jsNative
+    static member Create (synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : StreamingTTSProvider = jsNative
 
 /// <summary>
 /// Continuous speech-to-text provider.
@@ -477,7 +615,7 @@ type TranscriberSession =
     /// Feed raw PCM audio (16kHz mono 16-bit LE).
     /// Fire-and-forget — the session buffers internally as needed.
     /// </summary>
-    abstract feed: chunk: JS.ArrayBuffer -> unit
+    abstract feed: chunk: Fable.Core.TS.Es.ArrayBuffer -> unit
     /// <summary>
     /// Resolves when the session is ready to accept audio and emit transcripts.
     /// Optional so existing custom transcribers can start synchronously.
@@ -500,7 +638,7 @@ type TranscriberSession =
     /// </summary>
     abstract close: unit -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (feed: (JS.ArrayBuffer -> unit), close: (unit -> unit), ?waitUntilReady: (unit -> JS.Promise<unit>), ?updateAgentContext: (string -> unit)) : TranscriberSession = jsNative
+    static member Create (feed: (Fable.Core.TS.Es.ArrayBuffer -> unit), close: (unit -> unit), ?waitUntilReady: (unit -> JS.Promise<unit>), ?updateAgentContext: (string -> unit)) : TranscriberSession = jsNative
 
 /// <summary>
 /// Pluggable audio input source for VoiceClient.
@@ -559,9 +697,9 @@ type VoiceAudioInput =
     /// path (e.g. SFU WebSocket adapter in production), this can be left
     /// unused — the audio will arrive on a separate connection.
     /// </summary>
-    abstract onAudioData: (JS.ArrayBuffer -> unit) option with get, set
+    abstract onAudioData: (Fable.Core.TS.Es.ArrayBuffer -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (start: (unit -> JS.Promise<unit>), stop: (unit -> unit), ?onAudioLevel: (float -> unit), ?onAudioData: (JS.ArrayBuffer -> unit)) : VoiceAudioInput = jsNative
+    static member Create (start: (unit -> JS.Promise<unit>), stop: (unit -> unit), ?onAudioLevel: (float -> unit), ?onAudioData: (Fable.Core.TS.Es.ArrayBuffer -> unit)) : VoiceAudioInput = jsNative
 
 /// <summary>
 /// Details a transport can provide when its connection closes.
@@ -584,11 +722,11 @@ type VoiceTransport =
     /// <summary>
     /// Send a JSON-serializable message to the server.
     /// </summary>
-    abstract sendJSON: data: Record<string, obj> -> unit
+    abstract sendJSON: data: JS.Record<string, obj> -> unit
     /// <summary>
     /// Send raw binary audio to the server.
     /// </summary>
-    abstract sendBinary: data: JS.ArrayBuffer -> unit
+    abstract sendBinary: data: Fable.Core.TS.Es.ArrayBuffer -> unit
     /// <summary>
     /// Open the connection.
     /// </summary>
@@ -609,7 +747,7 @@ type VoiceTransport =
     /// </summary>
     abstract onmessage: (obj -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (sendJSON: (Record<string, obj> -> unit), sendBinary: (JS.ArrayBuffer -> unit), connect: (unit -> unit), disconnect: (unit -> unit), connected: bool, ?onopen: (unit -> unit), ?onclose: (VoiceTransportCloseInfo option -> unit), ?onerror: (obj option -> unit), ?onmessage: (obj -> unit)) : VoiceTransport = jsNative
+    static member Create (sendJSON: (JS.Record<string, obj> -> unit), sendBinary: (Fable.Core.TS.Es.ArrayBuffer -> unit), connect: (unit -> unit), disconnect: (unit -> unit), connected: bool, ?onopen: (unit -> unit), ?onclose: (VoiceTransportCloseInfo option -> unit), ?onerror: (obj option -> unit), ?onmessage: (obj -> unit)) : VoiceTransport = jsNative
 
 [<Interface>]
 type TextReadableStream =
@@ -620,7 +758,7 @@ type TextReadableStream =
 /// <summary>
 /// Union of every source type that iterateText accepts.
 /// </summary>
-type TextSource = U3<string, JS.AsyncIterable<obj>, TextReadableStream>
+type TextSource = U3<string, Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, TextReadableStream>
 
 /// <summary>
 /// Sentence chunker — accumulates streaming text and yields complete sentences.
@@ -691,9 +829,9 @@ type WorkersAITTSOptions =
 
 [<Interface>]
 type AiLike =
-    abstract run: model: string * input: Record<string, obj> * ?options: Record<string, obj> -> JS.Promise<obj>
+    abstract run: model: string * input: JS.Record<string, obj> * ?options: JS.Record<string, obj> -> JS.Promise<obj>
     [<ParamObject; Emit("$0")>]
-    static member Create (run: Func<string, Record<string, obj>, Record<string, obj> option, JS.Promise<obj>>) : AiLike = jsNative
+    static member Create (run: Func<string, JS.Record<string, obj>, JS.Record<string, obj> option, JS.Promise<obj>>) : AiLike = jsNative
 
 /// <summary>
 /// Workers AI text-to-speech provider.
@@ -713,7 +851,7 @@ type WorkersAITTS =
     inherit TTSProvider
     abstract ``__#2@#private``: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``__#2@#private``: obj, synthesize: Func<string, obj option, JS.Promise<JS.ArrayBuffer option>>) : WorkersAITTS = jsNative
+    static member Create (``__#2@#private``: obj, synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>) : WorkersAITTS = jsNative
 
 [<Interface>]
 type WorkersAIFluxSTTOptions =
@@ -915,14 +1053,14 @@ type VoiceAgentMixinMembers =
     abstract onInterrupt: connection: VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option
     abstract afterTranscribe: transcript: string * connection: VoiceTurnContext.Connection<obj> -> U2<string, JS.Promise<string option>> option
     abstract beforeSynthesize: text: string * connection: VoiceTurnContext.Connection<obj> -> U2<string, JS.Promise<string option>> option
-    abstract afterSynthesize: audio: JS.ArrayBuffer option * text: string * connection: VoiceTurnContext.Connection<obj> -> U2<JS.ArrayBuffer, JS.Promise<JS.ArrayBuffer option>> option
+    abstract afterSynthesize: audio: Fable.Core.TS.Es.ArrayBuffer option * text: string * connection: VoiceTurnContext.Connection<obj> -> U2<Fable.Core.TS.Es.ArrayBuffer, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>> option
     abstract saveMessage: role: VoiceAgentMixinMembers.SaveMessage.Role * text: string -> unit
     abstract getConversationHistory: ?limit: float -> VoiceAgentMixinMembers.GetConversationHistory.Result.Item[]
     abstract forceEndCall: connection: VoiceTurnContext.Connection<obj> -> unit
     abstract speak: connection: VoiceTurnContext.Connection<obj> * text: string -> JS.Promise<unit>
     abstract speakAll: text: string -> JS.Promise<unit>
     [<ParamObject; Emit("$0")>]
-    static member Create (onTurn: Func<string, VoiceTurnContext, JS.Promise<TextSource>>, createTranscriber: (VoiceTurnContext.Connection<obj> -> Transcriber option), beforeCallStart: (VoiceTurnContext.Connection<obj> -> U2<bool, JS.Promise<bool>>), onCallStart: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onCallEnd: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onInterrupt: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), afterTranscribe: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, beforeSynthesize: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, afterSynthesize: Func<JS.ArrayBuffer option, string, VoiceTurnContext.Connection<obj>, U2<JS.ArrayBuffer, JS.Promise<JS.ArrayBuffer option>> option>, saveMessage: Action<VoiceAgentMixinMembers.SaveMessage.Role, string>, getConversationHistory: (float option -> VoiceAgentMixinMembers.GetConversationHistory.Result.Item[]), forceEndCall: (VoiceTurnContext.Connection<obj> -> unit), speak: Func<VoiceTurnContext.Connection<obj>, string, JS.Promise<unit>>, speakAll: (string -> JS.Promise<unit>), ?transcriber: Transcriber, ?tts: VoiceAgentMixinMembers.Tts) : VoiceAgentMixinMembers = jsNative
+    static member Create (onTurn: Func<string, VoiceTurnContext, JS.Promise<TextSource>>, createTranscriber: (VoiceTurnContext.Connection<obj> -> Transcriber option), beforeCallStart: (VoiceTurnContext.Connection<obj> -> U2<bool, JS.Promise<bool>>), onCallStart: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onCallEnd: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onInterrupt: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), afterTranscribe: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, beforeSynthesize: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, afterSynthesize: Func<Fable.Core.TS.Es.ArrayBuffer option, string, VoiceTurnContext.Connection<obj>, U2<Fable.Core.TS.Es.ArrayBuffer, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>> option>, saveMessage: Action<VoiceAgentMixinMembers.SaveMessage.Role, string>, getConversationHistory: (float option -> VoiceAgentMixinMembers.GetConversationHistory.Result.Item[]), forceEndCall: (VoiceTurnContext.Connection<obj> -> unit), speak: Func<VoiceTurnContext.Connection<obj>, string, JS.Promise<unit>>, speakAll: (string -> JS.Promise<unit>), ?transcriber: Transcriber, ?tts: VoiceAgentMixinMembers.Tts) : VoiceAgentMixinMembers = jsNative
 
 type VoiceAgentMixinMembersConstructor =
     [<EmitConstructor>]
@@ -950,7 +1088,7 @@ type Exports =
     /// - <c>AsyncIterable&lt;string&gt;</c> → re-yields each chunk.
     /// </summary>
     [<Import("iterateText", "@cloudflare/voice")>]
-    static member iterateText (source: TextSource) : JS.AsyncGenerator<string> = jsNative
+    static member iterateText (source: TextSource) : Fable.Core.TS.Es.AsyncGenerator<string, obj, obj> = jsNative
     /// <summary>
     /// Sentence chunker — accumulates streaming text and yields complete sentences.
     /// <br /><br />
@@ -1010,22 +1148,22 @@ type Exports =
     /// Extract the PCM payload from a protobuf Packet message.
     /// </summary>
     [<Import("extractPayloadFromProtobuf", "@cloudflare/voice")>]
-    static member extractPayloadFromProtobuf (data: JS.ArrayBuffer) : obj option = jsNative
+    static member extractPayloadFromProtobuf (data: Fable.Core.TS.Es.ArrayBuffer) : obj option = jsNative
     /// <summary>
     /// Encode PCM payload into a protobuf Packet message (for ingest/buffer mode — just payload).
     /// </summary>
     [<Import("encodePayloadToProtobuf", "@cloudflare/voice")>]
-    static member encodePayloadToProtobuf (payload: obj) : JS.ArrayBuffer = jsNative
+    static member encodePayloadToProtobuf (payload: obj) : Fable.Core.TS.Es.ArrayBuffer = jsNative
     /// <summary>
     /// Downsample 48kHz stereo interleaved PCM to 16kHz mono PCM (both 16-bit LE).
     /// </summary>
     [<Import("downsample48kStereoTo16kMono", "@cloudflare/voice")>]
-    static member downsample48kStereoTo16kMono (stereo48k: obj) : JS.ArrayBuffer = jsNative
+    static member downsample48kStereoTo16kMono (stereo48k: obj) : Fable.Core.TS.Es.ArrayBuffer = jsNative
     /// <summary>
     /// Upsample 16kHz mono PCM to 48kHz stereo interleaved PCM (both 16-bit LE).
     /// </summary>
     [<Import("upsample16kMonoTo48kStereo", "@cloudflare/voice")>]
-    static member upsample16kMonoTo48kStereo (mono16k: JS.ArrayBuffer) : obj = jsNative
+    static member upsample16kMonoTo48kStereo (mono16k: Fable.Core.TS.Es.ArrayBuffer) : obj = jsNative
     [<Import("sfuFetch", "@cloudflare/voice")>]
     static member sfuFetch (config: SFUConfig, path: string, body: obj) : JS.Promise<obj> = jsNative
     [<Import("createSFUSession", "@cloudflare/voice")>]
@@ -1186,9 +1324,9 @@ module VoiceAgentMixinMembers =
     [<Interface>]
     type Tts =
         inherit TTSProvider
-        abstract synthesizeStream: Func<string, obj option, JS.AsyncGenerator<JS.ArrayBuffer>> option with get, set
+        inherit VoiceAgentMixinMembers.Tts.Base
         [<ParamObject; Emit("$0")>]
-        static member Create (synthesize: Func<string, obj option, JS.Promise<JS.ArrayBuffer option>>, ?synthesizeStream: Func<string, obj option, JS.AsyncGenerator<JS.ArrayBuffer>>) : Tts = jsNative
+        static member Create (synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>, ?synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : Tts = jsNative
 
     module GetConversationHistory =
         module Result =
@@ -1205,12 +1343,12 @@ module VoiceAgentMixinMembers =
             | [<CompiledName("assistant")>] Assistant
             | [<CompiledName("user")>] User
 
-module VoiceServerMessage2 =
-    [<Interface>]
-    type Diagnostics =
-        abstract browser_console: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (browser_console: bool) : Diagnostics = jsNative
+    module Tts =
+        [<Interface>]
+        type Base =
+            abstract synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>> option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : Base = jsNative
 
 module VoiceTurnContext =
     [<Interface>]
@@ -1221,7 +1359,7 @@ module VoiceTurnContext =
         /// <br /><br />
         /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
         /// </summary>
-        abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+        abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
         /// <summary>
         /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
         /// <br /><br />
@@ -1313,7 +1451,7 @@ module VoiceTurnContext =
         /// </summary>
         abstract tags: string[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (accept: (obj option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: VoiceTurnContext.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (obj option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
+        static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: VoiceTurnContext.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (obj option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
 
     module Connection =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

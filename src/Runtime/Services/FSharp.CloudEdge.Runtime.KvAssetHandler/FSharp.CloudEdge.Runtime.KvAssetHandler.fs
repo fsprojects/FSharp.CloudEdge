@@ -40,14 +40,14 @@ type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
 type Options =
     abstract cacheControl: U2<Options.CacheControl, (obj -> Options.CacheControl)> with get, set
     abstract ASSET_NAMESPACE: obj with get, set
-    abstract ASSET_MANIFEST: U2<string, Record<string, string>> with get, set
+    abstract ASSET_MANIFEST: U2<string, JS.Record<string, string>> with get, set
     abstract mapRequestToAsset: Options.MapRequestToAsset option with get, set
     abstract defaultMimeType: string with get, set
     abstract defaultDocument: string with get, set
     abstract pathIsEncoded: bool with get, set
     abstract defaultETag: Options.MapRequestToAsset.Options.DefaultETag with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (cacheControl: U2<Options.CacheControl, (obj -> Options.CacheControl)>, ASSET_NAMESPACE: obj, ASSET_MANIFEST: U2<string, Record<string, string>>, defaultMimeType: string, defaultDocument: string, pathIsEncoded: bool, defaultETag: Options.MapRequestToAsset.Options.DefaultETag, ?mapRequestToAsset: Options.MapRequestToAsset) : Options = jsNative
+    static member Create (cacheControl: U2<Options.CacheControl, (obj -> Options.CacheControl)>, ASSET_NAMESPACE: obj, ASSET_MANIFEST: U2<string, JS.Record<string, string>>, defaultMimeType: string, defaultDocument: string, pathIsEncoded: bool, defaultETag: Options.MapRequestToAsset.Options.DefaultETag, ?mapRequestToAsset: Options.MapRequestToAsset) : Options = jsNative
 
 [<Interface>]
 type KVError =
@@ -598,14 +598,14 @@ module Options =
         type Options =
             abstract cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (obj -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)> option with get, set
             abstract ASSET_NAMESPACE: obj option with get, set
-            abstract ASSET_MANIFEST: U2<string, Record<string, string>> option with get, set
+            abstract ASSET_MANIFEST: U2<string, JS.Record<string, string>> option with get, set
             abstract mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset option with get, set
             abstract defaultMimeType: string option with get, set
             abstract defaultDocument: string option with get, set
             abstract pathIsEncoded: bool option with get, set
             abstract defaultETag: Options.MapRequestToAsset.Options.DefaultETag option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (obj -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)>, ?ASSET_NAMESPACE: obj, ?ASSET_MANIFEST: U2<string, Record<string, string>>, ?mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset, ?defaultMimeType: string, ?defaultDocument: string, ?pathIsEncoded: bool, ?defaultETag: Options.MapRequestToAsset.Options.DefaultETag) : Options = jsNative
+            static member Create (?cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (obj -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)>, ?ASSET_NAMESPACE: obj, ?ASSET_MANIFEST: U2<string, JS.Record<string, string>>, ?mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset, ?defaultMimeType: string, ?defaultDocument: string, ?pathIsEncoded: bool, ?defaultETag: Options.MapRequestToAsset.Options.DefaultETag) : Options = jsNative
 
         module Options =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

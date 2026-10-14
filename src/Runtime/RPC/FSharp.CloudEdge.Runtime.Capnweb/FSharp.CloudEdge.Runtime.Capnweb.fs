@@ -34,17 +34,13 @@ type MapValuePlaceholder<'T> =
 [<Erase>]
 type RpcCompatible<'T> = private RpcCompatible__ of obj
 
-[<Interface>]
 type RpcCompatible2 =
     inherit StubBase<RpcTargetBranded>
     abstract __RPC_TARGET_BRAND: unit
     abstract map<'V>: callback: (RpcCompatible2.Map.Callback.Value -> 'V) -> RpcCompatible2.Map.Result<'V>
     abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
     abstract dup: unit -> RpcCompatible2
-    [<ParamObject; Emit("$0")>]
-    static member Create (map: ((RpcCompatible2.Map.Callback.Value -> 'V) -> RpcCompatible2.Map.Result<'V>), __RPC_STUB_BRAND: RpcTargetBranded, dup: (unit -> RpcCompatible2), onRpcBroken: ((obj -> unit) -> unit)) : RpcCompatible2 = jsNative
 
-[<Interface>]
 type RpcCompatible3 =
     inherit StubBase<(unit[] -> obj)>
     abstract map<'V>: callback: (RpcCompatible3.Map.Callback.Value -> 'V) -> RpcCompatible3.Map.Result<'V>
@@ -52,8 +48,6 @@ type RpcCompatible3 =
     abstract dup: unit -> RpcCompatible3
     [<Emit("$0($1...)")>]
     abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-    [<ParamObject; Emit("$0")>]
-    static member Create (map: ((RpcCompatible3.Map.Callback.Value -> 'V) -> RpcCompatible3.Map.Result<'V>), __RPC_STUB_BRAND: (unit[] -> obj), dup: (unit -> RpcCompatible3), onRpcBroken: ((obj -> unit) -> unit)) : RpcCompatible3 = jsNative
 
 [<Interface>]
 type RpcTargetBranded =
@@ -61,13 +55,12 @@ type RpcTargetBranded =
     [<ParamObject; Emit("$0")>]
     static member Create () : RpcTargetBranded = jsNative
 
-[<Interface>]
 type StubBase<'T> =
     abstract __RPC_STUB_BRAND: 'T with get, set
     abstract dup: unit -> StubBase<'T>
     abstract onRpcBroken: callback: (obj -> unit) -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (__RPC_STUB_BRAND: 'T, dup: (unit -> StubBase<'T>), onRpcBroken: ((obj -> unit) -> unit)) : StubBase<'T> = jsNative
+    [<Emit("$0[Symbol.dispose]()")>]
+    abstract SymbolDispose: unit -> unit
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type EncodingLevel =
@@ -939,24 +932,29 @@ module RpcCompatible2 =
             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result<'V>
             abstract __RPC_STUB_BRAND: 'V[] with get, set
             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<'V>
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
             [<EmitIndexer>]
             abstract Item: float -> obj with get, set
 
         module Callback =
-            [<Interface>]
             type Value =
+                inherit RpcCompatible2.Map.Callback.Value.Base
                 inherit MapValuePlaceholder<RpcTargetBranded>
-                abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
-                abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result) with get, set
-                abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<obj>) with get, set
-                abstract __RPC_TARGET_BRAND: unit
-                [<ParamObject; Emit("$0")>]
-                static member Create (__RPC_STUB_BRAND: RpcTargetBranded, dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<obj>)) : Value = jsNative
 
             module Value =
+                type Base =
+                    abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
+                    abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result) with get, set
+                    abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                    abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<obj>) with get, set
+                    abstract __RPC_TARGET_BRAND: unit
+                    [<Emit("$0[Symbol.dispose]")>]
+                    abstract SymbolDispose: (unit -> unit) with get
+                    [<Emit("$0[Symbol.dispose] = $1")>]
+                    abstract SymbolDispose: (unit -> unit) with set
+
                 module Dup =
-                    [<Interface>]
                     type Result =
                         inherit StubBase<RpcTargetBranded>
                         /// <summary>
@@ -983,8 +981,8 @@ module RpcCompatible2 =
                         abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<'V>
                         abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``then``: Func<(RpcCompatible2 -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'TResult, RpcCompatible2>>), ``finally``: ((unit -> unit) option -> JS.Promise<RpcCompatible2>), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<'V>), __RPC_STUB_BRAND: RpcTargetBranded, dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit)) : Result = jsNative
+                        [<Emit("$0[Symbol.toStringTag]")>]
+                        abstract SymbolToStringTag: string
 
         module Result =
             module Map =
@@ -1013,6 +1011,8 @@ module RpcCompatible2 =
                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result<'V>
                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result<'V>
+                    [<Emit("$0[Symbol.toStringTag]")>]
+                    abstract SymbolToStringTag: string
                     [<EmitIndexer>]
                     abstract Item: float -> obj with get, set
 
@@ -1043,6 +1043,8 @@ module RpcCompatible2 =
                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result<'V>
+                            [<Emit("$0[Symbol.toStringTag]")>]
+                            abstract SymbolToStringTag: string
                             [<EmitIndexer>]
                             abstract Item: float -> obj with get, set
 
@@ -1073,6 +1075,8 @@ module RpcCompatible2 =
                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                    abstract SymbolToStringTag: string
                                     [<EmitIndexer>]
                                     abstract Item: float -> obj with get, set
 
@@ -1103,6 +1107,8 @@ module RpcCompatible2 =
                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                            abstract SymbolToStringTag: string
                                             [<EmitIndexer>]
                                             abstract Item: float -> obj with get, set
 
@@ -1133,6 +1139,8 @@ module RpcCompatible2 =
                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                    abstract SymbolToStringTag: string
                                                     [<EmitIndexer>]
                                                     abstract Item: float -> obj with get, set
 
@@ -1163,6 +1171,8 @@ module RpcCompatible2 =
                                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                            abstract SymbolToStringTag: string
                                                             [<EmitIndexer>]
                                                             abstract Item: float -> obj with get, set
 
@@ -1193,6 +1203,8 @@ module RpcCompatible2 =
                                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                                    abstract SymbolToStringTag: string
                                                                     [<EmitIndexer>]
                                                                     abstract Item: float -> obj with get, set
 
@@ -1223,6 +1235,8 @@ module RpcCompatible2 =
                                                                             abstract map: callback: obj -> obj
                                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                                            abstract SymbolToStringTag: string
                                                                             [<EmitIndexer>]
                                                                             abstract Item: float -> obj with get, set
 
@@ -1253,25 +1267,30 @@ module RpcCompatible3 =
             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result<'V>
             abstract __RPC_STUB_BRAND: 'V[] with get, set
             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<'V>
+            [<Emit("$0[Symbol.toStringTag]")>]
+            abstract SymbolToStringTag: string
             [<EmitIndexer>]
             abstract Item: float -> obj with get, set
 
         module Callback =
-            [<Interface>]
             type Value =
+                inherit RpcCompatible3.Map.Callback.Value.Base
                 inherit MapValuePlaceholder<(unit[] -> obj)>
-                abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
-                abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result) with get, set
-                abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<obj>) with get, set
                 [<Emit("$0($1...)")>]
                 abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-                [<ParamObject; Emit("$0")>]
-                static member Create (__RPC_STUB_BRAND: (unit[] -> obj), dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<obj>)) : Value = jsNative
 
             module Value =
+                type Base =
+                    abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
+                    abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result) with get, set
+                    abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                    abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<obj>) with get, set
+                    [<Emit("$0[Symbol.dispose]")>]
+                    abstract SymbolDispose: (unit -> unit) with get
+                    [<Emit("$0[Symbol.dispose] = $1")>]
+                    abstract SymbolDispose: (unit -> unit) with set
+
                 module Dup =
-                    [<Interface>]
                     type Result =
                         inherit StubBase<(unit[] -> obj)>
                         /// <summary>
@@ -1297,13 +1316,12 @@ module RpcCompatible3 =
                         abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<'V>
                         abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result
+                        [<Emit("$0[Symbol.toStringTag]")>]
+                        abstract SymbolToStringTag: string
                         [<Emit("$0($1...)")>]
                         abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``then``: Func<(RpcCompatible3 -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'TResult, RpcCompatible3>>), ``finally``: ((unit -> unit) option -> JS.Promise<RpcCompatible3>), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<'V>), __RPC_STUB_BRAND: (unit[] -> obj), dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit)) : Result = jsNative
 
                     module Result =
-                        [<Interface>]
                         type Result =
                             inherit StubBase<obj>
                             /// <summary>
@@ -1329,8 +1347,8 @@ module RpcCompatible3 =
                             abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result<'V>
                             abstract __RPC_STUB_BRAND: obj with get, set
                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``then``: Func<(obj -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<obj>), ``finally``: ((unit -> unit) option -> JS.Promise<obj>), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result<'V>), __RPC_STUB_BRAND: obj, dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result), onRpcBroken: ((obj -> unit) -> unit)) : Result = jsNative
+                            [<Emit("$0[Symbol.toStringTag]")>]
+                            abstract SymbolToStringTag: string
 
                         module Result =
                             module Map =
@@ -1359,23 +1377,28 @@ module RpcCompatible3 =
                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V>
                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result<'V>
+                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                    abstract SymbolToStringTag: string
                                     [<EmitIndexer>]
                                     abstract Item: float -> obj with get, set
 
                                 module Callback =
-                                    [<Interface>]
                                     type Value =
+                                        inherit FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Base
                                         inherit MapValuePlaceholder<obj>
-                                        abstract __RPC_STUB_BRAND: obj with get, set
-                                        abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result) with get, set
-                                        abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                                        abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<obj>) with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (__RPC_STUB_BRAND: obj, dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<obj>)) : Value = jsNative
 
                                     module Value =
+                                        type Base =
+                                            abstract __RPC_STUB_BRAND: obj with get, set
+                                            abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result) with get, set
+                                            abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                                            abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<obj>) with get, set
+                                            [<Emit("$0[Symbol.dispose]")>]
+                                            abstract SymbolDispose: (unit -> unit) with get
+                                            [<Emit("$0[Symbol.dispose] = $1")>]
+                                            abstract SymbolDispose: (unit -> unit) with set
+
                                         module Dup =
-                                            [<Interface>]
                                             type Result =
                                                 inherit StubBase<obj>
                                                 /// <summary>
@@ -1401,8 +1424,8 @@ module RpcCompatible3 =
                                                 abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<'V>
                                                 abstract __RPC_STUB_BRAND: obj with get, set
                                                 abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result
-                                                [<ParamObject; Emit("$0")>]
-                                                static member Create (``then``: Func<(FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value -> U2<'TResult1, JS.Promise<'TResult1>>) option, (obj -> U2<'TResult2, JS.Promise<'TResult2>>) option, JS.Promise<U2<'TResult1, 'TResult2>>>, catch: ((obj -> U2<'TResult, JS.Promise<'TResult>>) option -> JS.Promise<U2<'TResult, FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>>), ``finally``: ((unit -> unit) option -> JS.Promise<FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>), map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<'V>), __RPC_STUB_BRAND: obj, dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result), onRpcBroken: ((obj -> unit) -> unit)) : Result = jsNative
+                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                abstract SymbolToStringTag: string
 
                                             module Result =
                                                 module Map =
@@ -1431,6 +1454,8 @@ module RpcCompatible3 =
                                                         abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result<'V>
                                                         abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<'V>
+                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                        abstract SymbolToStringTag: string
                                                         [<EmitIndexer>]
                                                         abstract Item: float -> obj with get, set
 
@@ -1461,6 +1486,8 @@ module RpcCompatible3 =
                                                                 abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                 abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                 abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result<'V>
+                                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                                abstract SymbolToStringTag: string
                                                                 [<EmitIndexer>]
                                                                 abstract Item: float -> obj with get, set
 
@@ -1491,6 +1518,8 @@ module RpcCompatible3 =
                                                                         abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                         abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                                        abstract SymbolToStringTag: string
                                                                         [<EmitIndexer>]
                                                                         abstract Item: float -> obj with get, set
 
@@ -1521,6 +1550,8 @@ module RpcCompatible3 =
                                                                                 abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                 abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                 abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                abstract SymbolToStringTag: string
                                                                                 [<EmitIndexer>]
                                                                                 abstract Item: float -> obj with get, set
 
@@ -1551,6 +1582,8 @@ module RpcCompatible3 =
                                                                                         abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                         abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                        abstract SymbolToStringTag: string
                                                                                         [<EmitIndexer>]
                                                                                         abstract Item: float -> obj with get, set
 
@@ -1581,6 +1614,8 @@ module RpcCompatible3 =
                                                                                                 abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                                 abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                                 abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                                abstract SymbolToStringTag: string
                                                                                                 [<EmitIndexer>]
                                                                                                 abstract Item: float -> obj with get, set
 
@@ -1611,13 +1646,16 @@ module RpcCompatible3 =
                                                                                                         abstract map: callback: obj -> obj
                                                                                                         abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                                         abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                                        abstract SymbolToStringTag: string
                                                                                                         [<EmitIndexer>]
                                                                                                         abstract Item: float -> obj with get, set
 
                                                 module Then =
                                                     module Onfulfilled =
                                                         type Value =
-                                                            interface end
+                                                            [<Emit("$0[Symbol.dispose]()")>]
+                                                            abstract SymbolDispose: unit -> unit
 
                                 module Result =
                                     module Map =
@@ -1646,6 +1684,8 @@ module RpcCompatible3 =
                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V>
                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V>
+                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                            abstract SymbolToStringTag: string
                                             [<EmitIndexer>]
                                             abstract Item: float -> obj with get, set
 
@@ -1676,6 +1716,8 @@ module RpcCompatible3 =
                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                    abstract SymbolToStringTag: string
                                                     [<EmitIndexer>]
                                                     abstract Item: float -> obj with get, set
 
@@ -1706,6 +1748,8 @@ module RpcCompatible3 =
                                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                            abstract SymbolToStringTag: string
                                                             [<EmitIndexer>]
                                                             abstract Item: float -> obj with get, set
 
@@ -1736,6 +1780,8 @@ module RpcCompatible3 =
                                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                                    abstract SymbolToStringTag: string
                                                                     [<EmitIndexer>]
                                                                     abstract Item: float -> obj with get, set
 
@@ -1766,6 +1812,8 @@ module RpcCompatible3 =
                                                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                                            abstract SymbolToStringTag: string
                                                                             [<EmitIndexer>]
                                                                             abstract Item: float -> obj with get, set
 
@@ -1796,6 +1844,8 @@ module RpcCompatible3 =
                                                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                    abstract SymbolToStringTag: string
                                                                                     [<EmitIndexer>]
                                                                                     abstract Item: float -> obj with get, set
 
@@ -1826,6 +1876,8 @@ module RpcCompatible3 =
                                                                                             abstract map: callback: (obj -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result
                                                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                            abstract SymbolToStringTag: string
                                                                                             [<EmitIndexer>]
                                                                                             abstract Item: float -> obj with get, set
 
@@ -1856,6 +1908,10 @@ module RpcCompatible3 =
                                                                                                     abstract __RPC_STUB_BRAND: obj with get, set
                                                                                                     abstract dup: obj with get, set
                                                                                                     abstract onRpcBroken: callback: (obj -> unit) -> unit
+                                                                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                                                                    abstract SymbolToStringTag: string
+                                                                                                    [<Emit("$0[Symbol.dispose]()")>]
+                                                                                                    abstract SymbolDispose: unit -> unit
                                                                                                     [<EmitIndexer>]
                                                                                                     abstract Item: float -> obj with get, set
 
@@ -1886,6 +1942,8 @@ module RpcCompatible3 =
                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result<'V>
                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result<'V>
+                    [<Emit("$0[Symbol.toStringTag]")>]
+                    abstract SymbolToStringTag: string
                     [<EmitIndexer>]
                     abstract Item: float -> obj with get, set
 
@@ -1916,6 +1974,8 @@ module RpcCompatible3 =
                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result<'V>
+                            [<Emit("$0[Symbol.toStringTag]")>]
+                            abstract SymbolToStringTag: string
                             [<EmitIndexer>]
                             abstract Item: float -> obj with get, set
 
@@ -1946,6 +2006,8 @@ module RpcCompatible3 =
                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                    abstract SymbolToStringTag: string
                                     [<EmitIndexer>]
                                     abstract Item: float -> obj with get, set
 
@@ -1976,6 +2038,8 @@ module RpcCompatible3 =
                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                            abstract SymbolToStringTag: string
                                             [<EmitIndexer>]
                                             abstract Item: float -> obj with get, set
 
@@ -2006,6 +2070,8 @@ module RpcCompatible3 =
                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                    abstract SymbolToStringTag: string
                                                     [<EmitIndexer>]
                                                     abstract Item: float -> obj with get, set
 
@@ -2036,6 +2102,8 @@ module RpcCompatible3 =
                                                             abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                            abstract SymbolToStringTag: string
                                                             [<EmitIndexer>]
                                                             abstract Item: float -> obj with get, set
 
@@ -2066,6 +2134,8 @@ module RpcCompatible3 =
                                                                     abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                     abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                     abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                    [<Emit("$0[Symbol.toStringTag]")>]
+                                                                    abstract SymbolToStringTag: string
                                                                     [<EmitIndexer>]
                                                                     abstract Item: float -> obj with get, set
 
@@ -2096,6 +2166,8 @@ module RpcCompatible3 =
                                                                             abstract map: callback: obj -> obj
                                                                             abstract __RPC_STUB_BRAND: 'V[] with get, set
                                                                             abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                                                            abstract SymbolToStringTag: string
                                                                             [<EmitIndexer>]
                                                                             abstract Item: float -> obj with get, set
 

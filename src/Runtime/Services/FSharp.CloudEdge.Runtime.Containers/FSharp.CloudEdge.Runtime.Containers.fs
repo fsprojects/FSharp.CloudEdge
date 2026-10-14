@@ -72,10 +72,10 @@ type Container<'Env> =
     abstract defaultPort: float option with get, set
     abstract requiredPorts: float[] option with get, set
     abstract sleepAfter: U2<string, float> with get, set
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     abstract interceptHttps: bool with get, set
     abstract allowedHosts: string[] option with get, set
     abstract deniedHosts: string[] option with get, set
@@ -276,7 +276,7 @@ type Container<'Env> =
     /// <param name="callback">Name of the method to call</param>
     /// <param name="payload">Data to pass to the callback</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U2<float, JS.Date> * callback: string * ?payload: 'T -> JS.Promise<Container.Schedule.Result.Item>
+    abstract schedule<'T>: ``when``: U2<float, Fable.Core.TS.Es.Date> * callback: string * ?payload: 'T -> JS.Promise<Container.Schedule.Result.Item<'T>>
     /// <summary>
     /// Send a request to the container (HTTP or WebSocket) using standard fetch API signature
     /// <br /><br />
@@ -388,7 +388,7 @@ type Container<'Env> =
     /// Schedule the next alarm based on upcoming tasks
     /// </summary>
     abstract scheduleNextAlarm: ?ms: float -> JS.Promise<unit>
-    abstract listSchedules: name: string -> JS.Promise<FSharp.CloudEdge.Runtime.Containers.Container.Schedule.Result.Item[]>
+    abstract listSchedules<'T>: name: string -> JS.Promise<Container.Schedule.Result.Item<'T>[]>
     abstract toSchedule: obj with get, set
     /// <summary>
     /// Get a scheduled task by ID
@@ -396,27 +396,27 @@ type Container<'Env> =
     /// <remarks>@template T Type of the payload data</remarks>
     /// <param name="id">ID of the scheduled task</param>
     /// <returns>The Schedule object or undefined if not found</returns>
-    abstract getSchedule<'T>: id: string -> JS.Promise<U2<Container.GetSchedule.Result.Item<'T>, Container.GetSchedule.Result.Item2<'T>> option>
+    abstract getSchedule<'T>: id: string -> JS.Promise<Container.Schedule.Result.Item<'T> option>
     abstract isActivityExpired: obj with get, set
     abstract __DURABLE_OBJECT_BRAND: unit
     abstract ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> with get, set
     abstract env: 'Env with get, set
     abstract connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, obj, JS.Promise<unit> option> option with get, set
     static member outboundByHost
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outboundHandlers
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outbound
         with get (): BivarianceHack2 option = jsNative
         and set (_: BivarianceHack2 option): unit = jsNative
     static member outboundProxies
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outboundProxy
         with get (): BivarianceHack2 option = jsNative
         and set (_: BivarianceHack2 option): unit = jsNative
@@ -439,10 +439,16 @@ type State2 =
 [<Interface>]
 type State3 =
     abstract lastChange: float with get, set
+    /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
     abstract status: string with get, set
     abstract exitCode: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (lastChange: float, status: string, ?exitCode: float) : State3 = jsNative
+    [<ParamObject; Emit("({ status: 'stopped_with_code', ...$0 })")>]
+    static member Create (lastChange: float, ?exitCode: float) : State3 = jsNative
+
+module State3 =
+    /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
+    [<Literal>]
+    let status = "stopped_with_code"
 
 /// <summary>
 /// Message structure for communication with containers
@@ -474,7 +480,7 @@ type ContainerOptions =
     /// <summary>
     /// Environment variables to pass to the container
     /// </summary>
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     /// <summary>
     /// Custom entrypoint to override container default
     /// </summary>
@@ -484,7 +490,7 @@ type ContainerOptions =
     /// </summary>
     abstract enableInternet: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?defaultPort: float, ?sleepAfter: U2<string, float>, ?envVars: Record<string, string>, ?entrypoint: string[], ?enableInternet: bool) : ContainerOptions = jsNative
+    static member Create (?id: string, ?defaultPort: float, ?sleepAfter: U2<string, float>, ?envVars: JS.Record<string, string>, ?entrypoint: string[], ?enableInternet: bool) : ContainerOptions = jsNative
 
 type ContainerEventHandler = (unit -> JS.Promise<unit> option)
 
@@ -496,7 +502,7 @@ type ContainerStartConfigOptions =
     /// <summary>
     /// Environment variables to pass to the container
     /// </summary>
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     /// <summary>
     /// Custom entrypoint to override container default
     /// </summary>
@@ -508,9 +514,9 @@ type ContainerStartConfigOptions =
     /// <summary>
     /// Key-value metadata labels attached to the container for metrics/observability
     /// </summary>
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?envVars: Record<string, string>, ?entrypoint: string[], ?enableInternet: bool, ?labels: Record<string, string>) : ContainerStartConfigOptions = jsNative
+    static member Create (?envVars: JS.Record<string, string>, ?entrypoint: string[], ?enableInternet: bool, ?labels: JS.Record<string, string>) : ContainerStartConfigOptions = jsNative
 
 /// <summary>
 /// Options for waitForPort()
@@ -591,68 +597,12 @@ type Exports =
     static member switchPort (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, port: float) : FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> = jsNative
 
 module Container =
-    module GetSchedule =
-        module Result =
-            [<Interface>]
-            type Item<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for one-time execution at a specific time
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item<'T> = jsNative
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for delayed execution
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                /// <summary>
-                /// Number of seconds to delay execution
-                /// </summary>
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item2<'T> = jsNative
-
     module Schedule =
         module Result =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: obj * time: float
-                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: obj * time: float * delayInSeconds: float
+            type Item<'T> =
+                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: 'T * time: float
+                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: 'T * time: float * delayInSeconds: float
 
             [<Interface>]
             type Item2<'T> =
@@ -671,13 +621,22 @@ module Container =
                 /// <summary>
                 /// Type of schedule for one-time execution at a specific time
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// Timestamp when the task should execute
                 /// </summary>
                 abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item2<'T> = jsNative
+                [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+                static member Create (taskId: string, callback: string, payload: 'T, time: float) : Item2<'T> = jsNative
+
+            module Item2 =
+                /// <summary>
+                /// Type of schedule for one-time execution at a specific time
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+                [<Literal>]
+                let ``type`` = "scheduled"
 
             [<Interface>]
             type Item3<'T> =
@@ -696,6 +655,7 @@ module Container =
                 /// <summary>
                 /// Type of schedule for delayed execution
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// Timestamp when the task should execute
@@ -705,8 +665,16 @@ module Container =
                 /// Number of seconds to delay execution
                 /// </summary>
                 abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item3<'T> = jsNative
+                [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
+                static member Create (taskId: string, callback: string, payload: 'T, time: float, delayInSeconds: float) : Item3<'T> = jsNative
+
+            module Item3 =
+                /// <summary>
+                /// Type of schedule for delayed execution
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
+                [<Literal>]
+                let ``type`` = "delayed"
 
     module SetOutboundByHosts =
         type Handlers<'Params> =
@@ -720,13 +688,13 @@ module ContainerProxy =
             abstract enableInternet: bool option with get, set
             abstract containerId: string with get, set
             abstract className: string with get, set
-            abstract outboundByHostOverrides: Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>> option with get, set
+            abstract outboundByHostOverrides: JS.Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>> option with get, set
             abstract outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj> option with get, set
             abstract allowedHosts: string[] option with get, set
             abstract deniedHosts: string[] option with get, set
             abstract interceptAll: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (containerId: string, className: string, ?enableInternet: bool, ?outboundByHostOverrides: Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>>, ?outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>, ?allowedHosts: string[], ?deniedHosts: string[], ?interceptAll: bool) : Item = jsNative
+            static member Create (containerId: string, className: string, ?enableInternet: bool, ?outboundByHostOverrides: JS.Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>>, ?outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>, ?allowedHosts: string[], ?deniedHosts: string[], ?interceptAll: bool) : Item = jsNative
 
         module Item =
             module OutboundByHostOverrides =
@@ -748,10 +716,10 @@ module StopParams =
         | [<CompiledName("runtime_signal")>] RuntimeSignal
 
 type ContainerConstructor =
-    abstract outboundByHost: Record<string, BivarianceHack2> option with get, set
-    abstract outboundHandlers: Record<string, BivarianceHack2> option with get, set
+    abstract outboundByHost: JS.Record<string, BivarianceHack2> option with get, set
+    abstract outboundHandlers: JS.Record<string, BivarianceHack2> option with get, set
     abstract outbound: BivarianceHack2 option with get, set
-    abstract outboundProxies: Record<string, BivarianceHack2> option with get, set
+    abstract outboundProxies: JS.Record<string, BivarianceHack2> option with get, set
     abstract outboundProxy: BivarianceHack2 option with get, set
     [<EmitConstructor>]
     abstract Create<'Env>: ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> * env: 'Env * ?options: ContainerOptions -> Container<'Env>

@@ -77,10 +77,10 @@ type StateArchiveExtractResult =
 type StateBackend =
     abstract getCapabilities: unit -> JS.Promise<StateCapabilities>
     abstract readFile: path: string -> JS.Promise<string>
-    abstract readFileBytes: path: string -> JS.Promise<JS.Uint8Array>
+    abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     abstract writeFile: path: string * content: string -> JS.Promise<unit>
-    abstract writeFileBytes: path: string * content: JS.Uint8Array -> JS.Promise<unit>
-    abstract appendFile: path: string * content: U2<string, JS.Uint8Array> -> JS.Promise<unit>
+    abstract writeFileBytes: path: string * content: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> JS.Promise<unit>
+    abstract appendFile: path: string * content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract readJson: path: string -> JS.Promise<obj>
     abstract writeJson: path: string * value: obj * ?options: StateJsonWriteOptions -> JS.Promise<unit>
     abstract queryJson: path: string * query: string -> JS.Promise<obj>
@@ -210,9 +210,9 @@ type StateFindEntry =
     abstract ``type``: StateEntryType with get, set
     abstract depth: float with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (path: string, name: string, ``type``: StateEntryType, depth: float, size: float, mtime: JS.Date) : StateFindEntry = jsNative
+    static member Create (path: string, name: string, ``type``: StateEntryType, depth: float, size: float, mtime: Fable.Core.TS.Es.Date) : StateFindEntry = jsNative
 
 [<Interface>]
 type StateFindOptions =
@@ -224,10 +224,10 @@ type StateFindOptions =
     abstract empty: bool option with get, set
     abstract sizeMin: float option with get, set
     abstract sizeMax: float option with get, set
-    abstract mtimeAfter: U2<string, JS.Date> option with get, set
-    abstract mtimeBefore: U2<string, JS.Date> option with get, set
+    abstract mtimeAfter: U2<string, Fable.Core.TS.Es.Date> option with get, set
+    abstract mtimeBefore: U2<string, Fable.Core.TS.Es.Date> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?name: string, ?pathPattern: string, ?``type``: U2<string, StateEntryType[]>, ?minDepth: float, ?maxDepth: float, ?empty: bool, ?sizeMin: float, ?sizeMax: float, ?mtimeAfter: U2<string, JS.Date>, ?mtimeBefore: U2<string, JS.Date>) : StateFindOptions = jsNative
+    static member Create (?name: string, ?pathPattern: string, ?``type``: U2<string, StateEntryType[]>, ?minDepth: float, ?maxDepth: float, ?empty: bool, ?sizeMin: float, ?sizeMax: float, ?mtimeAfter: U2<string, Fable.Core.TS.Es.Date>, ?mtimeBefore: U2<string, Fable.Core.TS.Es.Date>) : StateFindOptions = jsNative
 
 [<Interface>]
 type StateHashOptions =
@@ -242,18 +242,30 @@ type StateJsonUpdateOperation =
 
 [<Interface>]
 type StateJsonUpdateOperation2 =
+    /// <remarks>TypeScript type: <c>"set"</c></remarks>
     abstract op: string with get, set
     abstract path: string with get, set
     abstract value: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (op: string, path: string, value: obj) : StateJsonUpdateOperation2 = jsNative
+    [<ParamObject; Emit("({ op: 'set', ...$0 })")>]
+    static member Create (path: string, value: obj) : StateJsonUpdateOperation2 = jsNative
+
+module StateJsonUpdateOperation2 =
+    /// <remarks>TypeScript type: <c>"set"</c></remarks>
+    [<Literal>]
+    let op = "set"
 
 [<Interface>]
 type StateJsonUpdateOperation3 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
     abstract op: string with get, set
     abstract path: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (op: string, path: string) : StateJsonUpdateOperation3 = jsNative
+    [<ParamObject; Emit("({ op: 'delete', ...$0 })")>]
+    static member Create (path: string) : StateJsonUpdateOperation3 = jsNative
+
+module StateJsonUpdateOperation3 =
+    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
+    [<Literal>]
+    let op = "delete"
 
 [<Interface>]
 type StateJsonUpdateResult =
@@ -294,13 +306,19 @@ type StatePlannedEdit =
 
 [<Interface>]
 type StateReplaceEditInstruction =
+    /// <remarks>TypeScript type: <c>"replace"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract search: string with get, set
     abstract replacement: string with get, set
     abstract options: StateSearchOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, search: string, replacement: string, ?options: StateSearchOptions) : StateReplaceEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'replace', ...$0 })")>]
+    static member Create (path: string, search: string, replacement: string, ?options: StateSearchOptions) : StateReplaceEditInstruction = jsNative
+
+module StateReplaceEditInstruction =
+    /// <remarks>TypeScript type: <c>"replace"</c></remarks>
+    [<Literal>]
+    let kind = "replace"
 
 [<Interface>]
 type StateReplaceInFilesOptions =
@@ -348,10 +366,10 @@ type StateSearchOptions =
 type StateStat =
     abstract ``type``: StateEntryType with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     abstract mode: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: StateEntryType, size: float, mtime: JS.Date, ?mode: float) : StateStat = jsNative
+    static member Create (``type``: StateEntryType, size: float, mtime: Fable.Core.TS.Es.Date, ?mode: float) : StateStat = jsNative
 
 [<Interface>]
 type StateTextMatch =
@@ -392,20 +410,32 @@ type StateTreeSummary =
 
 [<Interface>]
 type StateWriteEditInstruction =
+    /// <remarks>TypeScript type: <c>"write"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract content: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, content: string) : StateWriteEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'write', ...$0 })")>]
+    static member Create (path: string, content: string) : StateWriteEditInstruction = jsNative
+
+module StateWriteEditInstruction =
+    /// <remarks>TypeScript type: <c>"write"</c></remarks>
+    [<Literal>]
+    let kind = "write"
 
 [<Interface>]
 type StateWriteJsonEditInstruction =
+    /// <remarks>TypeScript type: <c>"writeJson"</c></remarks>
     abstract kind: string with get, set
     abstract path: string with get, set
     abstract value: obj with get, set
     abstract options: StateJsonWriteOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (kind: string, path: string, value: obj, ?options: StateJsonWriteOptions) : StateWriteJsonEditInstruction = jsNative
+    [<ParamObject; Emit("({ kind: 'writeJson', ...$0 })")>]
+    static member Create (path: string, value: obj, ?options: StateJsonWriteOptions) : StateWriteJsonEditInstruction = jsNative
+
+module StateWriteJsonEditInstruction =
+    /// <remarks>TypeScript type: <c>"writeJson"</c></remarks>
+    [<Literal>]
+    let kind = "writeJson"
 
 /// <summary>
 /// Workspace — durable file storage backed by SQLite + optional R2.
@@ -544,8 +574,8 @@ type WorkspaceFsLike =
     abstract lstat: (string -> JS.Promise<FileInfo option>) with get, set
     abstract stat: (string -> JS.Promise<FileInfo option>) with get, set
     abstract readFile: (string -> JS.Promise<string option>) with get, set
-    abstract readFileBytes: (string -> JS.Promise<JS.Uint8Array option>) with get, set
-    abstract writeFileBytes: Func<string, U2<JS.ArrayBuffer, JS.Uint8Array>, string option, JS.Promise<unit>> with get, set
+    abstract readFileBytes: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option>) with get, set
+    abstract writeFileBytes: Func<string, U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string option, JS.Promise<unit>> with get, set
     abstract writeFile: Func<string, string, string option, JS.Promise<unit>> with get, set
     abstract appendFile: Func<string, string, string option, JS.Promise<unit>> with get, set
     abstract exists: (string -> JS.Promise<bool>) with get, set
@@ -556,7 +586,7 @@ type WorkspaceFsLike =
     abstract cp: Func<string, string, WorkspaceFsLike.Cp.Opts option, JS.Promise<unit>> with get, set
     abstract mv: Func<string, string, WorkspaceFsLike.Mv.Opts option, JS.Promise<unit>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), lstat: (string -> JS.Promise<FileInfo option>), stat: (string -> JS.Promise<FileInfo option>), readFile: (string -> JS.Promise<string option>), readFileBytes: (string -> JS.Promise<JS.Uint8Array option>), writeFileBytes: Func<string, U2<JS.ArrayBuffer, JS.Uint8Array>, string option, JS.Promise<unit>>, writeFile: Func<string, string, string option, JS.Promise<unit>>, appendFile: Func<string, string, string option, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), readDir: Func<string option, WorkspaceFsLike.ReadDir.Opts option, JS.Promise<FileInfo[]>>, glob: (string -> JS.Promise<FileInfo[]>), mkdir: Func<string, WorkspaceFsLike.Mkdir.Opts option, float option, JS.Promise<unit>>, rm: Func<string, WorkspaceFsLike.Rm.Opts option, JS.Promise<unit>>, cp: Func<string, string, WorkspaceFsLike.Cp.Opts option, JS.Promise<unit>>, mv: Func<string, string, WorkspaceFsLike.Mv.Opts option, JS.Promise<unit>>) : WorkspaceFsLike = jsNative
+    static member Create (symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), lstat: (string -> JS.Promise<FileInfo option>), stat: (string -> JS.Promise<FileInfo option>), readFile: (string -> JS.Promise<string option>), readFileBytes: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option>), writeFileBytes: Func<string, U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string option, JS.Promise<unit>>, writeFile: Func<string, string, string option, JS.Promise<unit>>, appendFile: Func<string, string, string option, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), readDir: Func<string option, WorkspaceFsLike.ReadDir.Opts option, JS.Promise<FileInfo[]>>, glob: (string -> JS.Promise<FileInfo[]>), mkdir: Func<string, WorkspaceFsLike.Mkdir.Opts option, float option, JS.Promise<unit>>, rm: Func<string, WorkspaceFsLike.Rm.Opts option, JS.Promise<unit>>, cp: Func<string, string, WorkspaceFsLike.Cp.Opts option, JS.Promise<unit>>, mv: Func<string, string, WorkspaceFsLike.Mv.Opts option, JS.Promise<unit>>) : WorkspaceFsLike = jsNative
 
 type Workspace =
     abstract sql: obj
@@ -582,8 +612,8 @@ type Workspace =
     abstract lstat: path: string -> JS.Promise<FileInfo option>
     abstract stat: path: string -> JS.Promise<FileInfo option>
     abstract readFile: path: string -> JS.Promise<string option>
-    abstract readFileBytes: path: string -> JS.Promise<JS.Uint8Array option>
-    abstract writeFileBytes: path: string * data: U2<JS.ArrayBuffer, JS.Uint8Array> * ?mimeType: string -> JS.Promise<unit>
+    abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option>
+    abstract writeFileBytes: path: string * data: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?mimeType: string -> JS.Promise<unit>
     abstract writeFile: path: string * content: string * ?mimeType: string -> JS.Promise<unit>
     abstract readFileStream: path: string -> JS.Promise<obj option>
     abstract writeFileStream: path: string * stream: obj * ?mimeType: string -> JS.Promise<unit>
@@ -603,7 +633,7 @@ type Workspace =
     /// <remarks>@internal</remarks>
     abstract _getAllPaths: unit -> JS.Promise<string[]>
     /// <remarks>@internal</remarks>
-    abstract _updateModifiedAt: path: string * mtime: JS.Date -> JS.Promise<unit>
+    abstract _updateModifiedAt: path: string * mtime: Fable.Core.TS.Es.Date -> JS.Promise<unit>
     abstract ensureParentDir: obj with get, set
     abstract deleteDescendants: obj with get, set
 
@@ -623,15 +653,15 @@ type CpOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?recursive: bool) : CpOptions = jsNative
 
-type FileContent = U2<string, JS.Uint8Array>
+type FileContent = U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 [<Interface>]
 type FileInit =
     abstract content: FileContent with get, set
     abstract mode: float option with get, set
-    abstract mtime: JS.Date option with get, set
+    abstract mtime: Fable.Core.TS.Es.Date option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (content: FileContent, ?mode: float, ?mtime: JS.Date) : FileInit = jsNative
+    static member Create (content: FileContent, ?mode: float, ?mtime: Fable.Core.TS.Es.Date) : FileInit = jsNative
 
 [<Interface>]
 type FileSystemDirent =
@@ -650,13 +680,13 @@ type InMemoryFs =
     inherit FileSystem
     abstract tree: obj with get, set
     abstract writeFileSync: path: string * content: FileContent * ?options: U2<string, WriteFileOptions> * ?metadata: InMemoryFs.WriteFileSync.Metadata -> unit
-    abstract writeFileLazy: path: string * ``lazy``: (unit -> U3<string, JS.Promise<U2<string, JS.Uint8Array>>, JS.Uint8Array>) * ?metadata: InMemoryFs.WriteFileLazy.Metadata -> unit
+    abstract writeFileLazy: path: string * ``lazy``: (unit -> U3<string, JS.Promise<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) * ?metadata: InMemoryFs.WriteFileLazy.Metadata -> unit
     abstract mkdirSync: path: string * ?options: MkdirOptions -> unit
     abstract readFile: path: string * ?options: U2<string, ReadFileOptions> -> JS.Promise<string>
     abstract writeFile: path: string * content: string * ?options: U2<string, WriteFileOptions> -> JS.Promise<unit>
     abstract link: existingPath: string * newPath: string -> JS.Promise<unit>
     abstract chmod: path: string * mode: float -> JS.Promise<unit>
-    abstract utimes: path: string * _atime: JS.Date * mtime: JS.Date -> JS.Promise<unit>
+    abstract utimes: path: string * _atime: Fable.Core.TS.Es.Date * mtime: Fable.Core.TS.Es.Date -> JS.Promise<unit>
     abstract resolveNode: obj with get, set
     abstract locate: obj with get, set
     abstract canonicalize: obj with get, set
@@ -719,7 +749,7 @@ type WorkspaceFileSystem =
     abstract cp: src: string * dest: string * ?options: WorkspaceFileSystem.Cp.Options -> JS.Promise<unit>
     abstract realpath: path: string * ?_depth: float -> JS.Promise<string>
     [<ParamObject; Emit("$0")>]
-    static member Create (ws: obj, readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<JS.Uint8Array>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, JS.Uint8Array, JS.Promise<unit>>, appendFile: Func<string, U2<string, JS.Uint8Array>, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, WorkspaceFileSystem.Mkdir.Options option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, WorkspaceFileSystem.Rm.Options option, JS.Promise<unit>>, cp: Func<string, string, WorkspaceFileSystem.Cp.Options option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: Func<string, float option, JS.Promise<string>>, resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : WorkspaceFileSystem = jsNative
+    static member Create (ws: obj, readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Promise<unit>>, appendFile: Func<string, U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, WorkspaceFileSystem.Mkdir.Options option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, WorkspaceFileSystem.Rm.Options option, JS.Promise<unit>>, cp: Func<string, string, WorkspaceFileSystem.Cp.Options option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: Func<string, float option, JS.Promise<string>>, resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : WorkspaceFileSystem = jsNative
 
 /// <summary>
 /// Stat result returned by FileSystem.stat / FileSystem.lstat.
@@ -728,10 +758,10 @@ type WorkspaceFileSystem =
 type FsStat =
     abstract ``type``: FileSystemEntryType with get, set
     abstract size: float with get, set
-    abstract mtime: JS.Date with get, set
+    abstract mtime: Fable.Core.TS.Es.Date with get, set
     abstract mode: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``type``: FileSystemEntryType, size: float, mtime: JS.Date, ?mode: float) : FsStat = jsNative
+    static member Create (``type``: FileSystemEntryType, size: float, mtime: Fable.Core.TS.Es.Date, ?mode: float) : FsStat = jsNative
 
 /// <summary>
 /// Minimal filesystem abstraction. Both <c>InMemoryFs</c> and the
@@ -747,10 +777,10 @@ type FsStat =
 [<Interface>]
 type FileSystem =
     abstract readFile: path: string -> JS.Promise<string>
-    abstract readFileBytes: path: string -> JS.Promise<JS.Uint8Array>
+    abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     abstract writeFile: path: string * content: string -> JS.Promise<unit>
-    abstract writeFileBytes: path: string * content: JS.Uint8Array -> JS.Promise<unit>
-    abstract appendFile: path: string * content: U2<string, JS.Uint8Array> -> JS.Promise<unit>
+    abstract writeFileBytes: path: string * content: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> JS.Promise<unit>
+    abstract appendFile: path: string * content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract exists: path: string -> JS.Promise<bool>
     /// <summary>
     /// Follows symlinks. Throws ENOENT if path does not exist.
@@ -772,9 +802,9 @@ type FileSystem =
     abstract resolvePath: ``base``: string * path: string -> string
     abstract glob: pattern: string -> JS.Promise<string[]>
     [<ParamObject; Emit("$0")>]
-    static member Create (readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<JS.Uint8Array>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, JS.Uint8Array, JS.Promise<unit>>, appendFile: Func<string, U2<string, JS.Uint8Array>, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, MkdirOptions option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, RmOptions option, JS.Promise<unit>>, cp: Func<string, string, CpOptions option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: (string -> JS.Promise<string>), resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : FileSystem = jsNative
+    static member Create (readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Promise<unit>>, appendFile: Func<string, U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, MkdirOptions option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, RmOptions option, JS.Promise<unit>>, cp: Func<string, string, CpOptions option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: (string -> JS.Promise<string>), resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : FileSystem = jsNative
 
-type InitialFiles = Record<string, U4<string, FileInit, (unit -> U3<string, JS.Promise<U2<string, JS.Uint8Array>>, JS.Uint8Array>), JS.Uint8Array>>
+type InitialFiles = JS.Record<string, U4<string, FileInit, (unit -> U3<string, JS.Promise<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -828,17 +858,17 @@ module InMemoryFs =
         [<Interface>]
         type Metadata =
             abstract mode: float option with get, set
-            abstract mtime: JS.Date option with get, set
+            abstract mtime: Fable.Core.TS.Es.Date option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?mode: float, ?mtime: JS.Date) : Metadata = jsNative
+            static member Create (?mode: float, ?mtime: Fable.Core.TS.Es.Date) : Metadata = jsNative
 
     module WriteFileSync =
         [<Interface>]
         type Metadata =
             abstract mode: float option with get, set
-            abstract mtime: JS.Date option with get, set
+            abstract mtime: Fable.Core.TS.Es.Date option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?mode: float, ?mtime: JS.Date) : Metadata = jsNative
+            static member Create (?mode: float, ?mtime: Fable.Core.TS.Es.Date) : Metadata = jsNative
 
 module StateArchiveEntry =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

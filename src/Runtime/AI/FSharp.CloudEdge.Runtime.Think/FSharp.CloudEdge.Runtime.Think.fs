@@ -127,13 +127,13 @@ type FetchBindingTarget =
     /// <summary>
     /// Fixed, server-side headers. Never settable by the model, never echoed.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     /// <summary>
     /// Base URL used to resolve relative paths. Defaults to <c>https://binding.local</c>.
     /// </summary>
     abstract baseUrl: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: FetchBindingTarget.Binding, allowlist: string[], ?description: string, ?headers: Record<string, string>, ?baseUrl: string) : FetchBindingTarget = jsNative
+    static member Create (binding: FetchBindingTarget.Binding, allowlist: string[], ?description: string, ?headers: JS.Record<string, string>, ?baseUrl: string) : FetchBindingTarget = jsNative
 
 [<Interface>]
 type CreateFetchToolsOptions =
@@ -147,7 +147,7 @@ type CreateFetchToolsOptions =
     /// Named binding targets. Each entry generates a <c>fetch_&lt;name&gt;</c> tool with the
     /// binding, allowlist, and fixed headers baked in.
     /// </summary>
-    abstract bindings: Record<string, FetchBindingTarget> option with get, set
+    abstract bindings: JS.Record<string, FetchBindingTarget> option with get, set
     /// <summary>
     /// Hard download cap in bytes. Default 1_000_000.
     /// </summary>
@@ -192,15 +192,15 @@ type CreateFetchToolsOptions =
     /// </summary>
     abstract onEvent: (FetchToolEvent -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?allowlist: string[], ?bindings: Record<string, FetchBindingTarget>, ?maxBytes: float, ?maxModelChars: float, ?spillToWorkspace: bool, ?workspace: Tools.Fetch.FetchWorkspace, ?timeoutMs: float, ?response: FetchResponseMode, ?followRedirects: FetchRedirectPolicy, ?modelHeaderAllowlist: string[], ?defaultAccept: string, ?onEvent: (FetchToolEvent -> unit)) : CreateFetchToolsOptions = jsNative
+    static member Create (?allowlist: string[], ?bindings: JS.Record<string, FetchBindingTarget>, ?maxBytes: float, ?maxModelChars: float, ?spillToWorkspace: bool, ?workspace: Tools.Fetch.FetchWorkspace, ?timeoutMs: float, ?response: FetchResponseMode, ?followRedirects: FetchRedirectPolicy, ?modelHeaderAllowlist: string[], ?defaultAccept: string, ?onEvent: (FetchToolEvent -> unit)) : CreateFetchToolsOptions = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ToolResultOutput =
-    | [<CompiledName("text")>] Text of value: string * providerOptions: Record<string, obj> option
-    | [<CompiledName("json")>] Json of value: obj option * providerOptions: Record<string, obj> option
-    | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: Record<string, obj> option
-    | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: Record<string, obj> option
-    | [<CompiledName("error-json")>] ErrorJson of value: obj option * providerOptions: Record<string, obj> option
+    | [<CompiledName("text")>] Text of value: string * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("json")>] Json of value: obj option * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: JS.Record<string, obj> option
+    | [<CompiledName("error-json")>] ErrorJson of value: obj option * providerOptions: JS.Record<string, obj> option
     | [<CompiledName("content")>] Content of value: ToolResultOutput7.Value.Item[]
 
 [<Interface>]
@@ -208,31 +208,47 @@ type ToolResultOutput2 =
     /// <summary>
     /// Text tool output that should be directly sent to the API.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: string with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: string, ?providerOptions: Record<string, obj>) : ToolResultOutput2 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member Create (value: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput2 = jsNative
+
+module ToolResultOutput2 =
+    /// <summary>
+    /// Text tool output that should be directly sent to the API.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "text"
 
 [<Interface>]
 type ToolResultOutput3 =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: obj option with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?value: obj, ?providerOptions: Record<string, obj>) : ToolResultOutput3 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
+    static member Create (?value: obj, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput3 = jsNative
+
+module ToolResultOutput3 =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
+    [<Literal>]
+    let ``type`` = "json"
 
 [<Interface>]
 type ToolResultOutput4 =
     /// <summary>
     /// Type when the user has denied the execution of the tool call.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
     abstract ``type``: string with get, set
     /// <summary>
     /// Optional reason for the execution denial.
@@ -241,38 +257,451 @@ type ToolResultOutput4 =
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?reason: string, ?providerOptions: Record<string, obj>) : ToolResultOutput4 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
+    static member Create (?reason: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput4 = jsNative
+
+module ToolResultOutput4 =
+    /// <summary>
+    /// Type when the user has denied the execution of the tool call.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
+    [<Literal>]
+    let ``type`` = "execution-denied"
 
 [<Interface>]
 type ToolResultOutput5 =
+    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: string with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: string, ?providerOptions: Record<string, obj>) : ToolResultOutput5 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
+    static member Create (value: string, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput5 = jsNative
+
+module ToolResultOutput5 =
+    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error-text"
 
 [<Interface>]
 type ToolResultOutput6 =
+    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: obj option with get, set
     /// <summary>
     /// Provider-specific options.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?value: obj, ?providerOptions: Record<string, obj>) : ToolResultOutput6 = jsNative
+    abstract providerOptions: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ type: 'error-json', ...$0 })")>]
+    static member Create (?value: obj, ?providerOptions: JS.Record<string, obj>) : ToolResultOutput6 = jsNative
+
+module ToolResultOutput6 =
+    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error-json"
 
 [<Interface>]
 type ToolResultOutput7 =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
     abstract ``type``: string with get, set
     abstract value: ToolResultOutput7.Value.Item[] with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, value: ToolResultOutput7.Value.Item[]) : ToolResultOutput7 = jsNative
+    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
+    static member Create (value: ToolResultOutput7.Value.Item[]) : ToolResultOutput7 = jsNative
+
+module ToolResultOutput7 =
+    /// <remarks>TypeScript type: <c>"content"</c></remarks>
+    [<Literal>]
+    let ``type`` = "content"
+
+    module Value =
+        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+        type Item =
+            | [<CompiledName("text")>] Text of text: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file")>] File of data: obj * mediaType: string * filename: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-url")>] FileUrl of url: string * mediaType: string option * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-id")>] FileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("file-reference")>] FileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("image-file-reference")>] ImageFileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: JS.Record<string, obj> option
+            | [<CompiledName("custom")>] Custom of providerOptions: JS.Record<string, obj> option
+
+        [<Interface>]
+        type Item10 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Image that is referenced using a provider file id.
+            /// <br /><br />
+            /// If you use multiple providers, you need to
+            /// specify the provider specific ids using
+            /// the Record option. The key is the provider
+            /// name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract fileId: U2<string, JS.Record<string, string>> with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-file-id', ...$0 })")>]
+            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: JS.Record<string, obj>) : Item10 = jsNative
+
+        module Item10 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-file-id"
+
+        [<Interface>]
+        type Item11 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-reference"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific references for the image file.
+            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-file-reference', ...$0 })")>]
+            static member Create (providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: JS.Record<string, obj>) : Item11 = jsNative
+
+        module Item11 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-file-reference"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-file-reference"
+
+        [<Interface>]
+        type Item12 =
+            /// <summary>
+            /// Custom content part. This can be used to implement
+            /// provider-specific content parts.
+            /// </summary>
+            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+            static member Create (?providerOptions: JS.Record<string, obj>) : Item12 = jsNative
+
+        module Item12 =
+            /// <summary>
+            /// Custom content part. This can be used to implement
+            /// provider-specific content parts.
+            /// </summary>
+            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+            [<Literal>]
+            let ``type`` = "custom"
+
+        [<Interface>]
+        type Item2 =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Text content.
+            /// </summary>
+            abstract text: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+            static member Create (text: string, ?providerOptions: JS.Record<string, obj>) : Item2 = jsNative
+
+        module Item2 =
+            /// <remarks>TypeScript type: <c>"text"</c></remarks>
+            [<Literal>]
+            let ``type`` = "text"
+
+        [<Interface>]
+        type Item3 =
+            /// <remarks>TypeScript type: <c>"file"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// File data as a tagged discriminated union:
+            /// <br /><br />
+            /// - <c>{ type: 'data', data }</c>: raw bytes
+            ///   (base64 string, Uint8Array, ArrayBuffer, Buffer)
+            /// - <c>{ type: 'url', url }</c>: a URL that points to the file
+            /// - <c>{ type: 'reference', reference }</c>: a provider reference
+            ///   from <c>uploadFile</c>
+            /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline
+            ///   text document)
+            /// </summary>
+            abstract data: obj with get, set
+            /// <summary>
+            /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
+            /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
+            /// <br /><br />
+            /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
+            /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
+            /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
+            /// <c>detectMediaType</c>) to resolve the field according to their API
+            /// requirements.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Optional filename of the file.
+            /// </summary>
+            abstract filename: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+            static member Create (data: obj, mediaType: string, ?filename: string, ?providerOptions: JS.Record<string, obj>) : Item3 = jsNative
+
+        module Item3 =
+            /// <remarks>TypeScript type: <c>"file"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file"
+
+        [<Interface>]
+        type Item4 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType + tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Base-64 encoded media data.
+            /// </summary>
+            abstract data: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Optional filename of the file.
+            /// </summary>
+            abstract filename: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-data', ...$0 })")>]
+            static member Create (data: string, mediaType: string, ?filename: string, ?providerOptions: JS.Record<string, obj>) : Item4 = jsNative
+
+        module Item4 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType + tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-data"
+
+        [<Interface>]
+        type Item5 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType and tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// URL of the file.
+            /// </summary>
+            abstract url: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string option with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-url', ...$0 })")>]
+            static member Create (url: string, ?mediaType: string, ?providerOptions: JS.Record<string, obj>) : Item5 = jsNative
+
+        module Item5 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType and tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-url"
+
+        [<Interface>]
+        type Item6 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// ID of the file.
+            /// <br /><br />
+            /// If you use multiple providers, you need to
+            /// specify the provider specific ids using
+            /// the Record option. The key is the provider
+            /// name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract fileId: U2<string, JS.Record<string, string>> with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-id', ...$0 })")>]
+            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: JS.Record<string, obj>) : Item6 = jsNative
+
+        module Item6 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-id"
+
+        [<Interface>]
+        type Item7 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-reference"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Provider-specific references for the file.
+            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
+            /// </summary>
+            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'file-reference', ...$0 })")>]
+            static member Create (providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: JS.Record<string, obj>) : Item7 = jsNative
+
+        module Item7 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with tagged data instead:
+            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"file-reference"</c></remarks>
+            [<Literal>]
+            let ``type`` = "file-reference"
+
+            type ProviderReference =
+                abstract ``type``: unit option with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> string with get, set
+
+        [<Interface>]
+        type Item8 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType (e.g. 'image' or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// Base-64 encoded image data.
+            /// </summary>
+            abstract data: string with get, set
+            /// <summary>
+            /// IANA media type.
+            /// </summary>
+            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
+            abstract mediaType: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-data', ...$0 })")>]
+            static member Create (data: string, mediaType: string, ?providerOptions: JS.Record<string, obj>) : Item8 = jsNative
+
+        module Item8 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with mediaType (e.g. 'image' or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-data"
+
+        [<Interface>]
+        type Item9 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
+            abstract ``type``: string with get, set
+            /// <summary>
+            /// URL of the image.
+            /// </summary>
+            abstract url: string with get, set
+            /// <summary>
+            /// Provider-specific options.
+            /// </summary>
+            abstract providerOptions: JS.Record<string, obj> option with get, set
+            [<ParamObject; Emit("({ type: 'image-url', ...$0 })")>]
+            static member Create (url: string, ?providerOptions: JS.Record<string, obj>) : Item9 = jsNative
+
+        module Item9 =
+            /// <remarks>
+            /// @deprecated
+            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
+            /// <c>image/*</c> subtype) and tagged data instead:
+            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
+            /// </remarks>
+            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
+            [<Literal>]
+            let ``type`` = "image-url"
 
 [<Interface>]
 type MediaEvictionConfig =
@@ -340,10 +769,10 @@ type IsExpectedDeliveryCompletion = delegate of error: obj * callback: Messenger
 
 [<Interface>]
 type ChannelDeliverySurface =
-    abstract post: message: U3<string, JS.AsyncIterable<string>, ChannelDeliverySurface.Post.Message> -> JS.Promise<obj>
+    abstract post: message: U3<string, Fable.Core.TS.Es.AsyncIterable<string, obj, obj>, ChannelDeliverySurface.Post.Message> -> JS.Promise<obj>
     abstract startTyping: (string option -> JS.Promise<unit>) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (post: (U3<string, JS.AsyncIterable<string>, ChannelDeliverySurface.Post.Message> -> JS.Promise<obj>), ?startTyping: (string option -> JS.Promise<unit>)) : ChannelDeliverySurface = jsNative
+    static member Create (post: (U3<string, Fable.Core.TS.Es.AsyncIterable<string, obj, obj>, ChannelDeliverySurface.Post.Message> -> JS.Promise<obj>), ?startTyping: (string option -> JS.Promise<unit>)) : ChannelDeliverySurface = jsNative
 
 /// <summary>
 /// How events arrive for a channel. A discriminated union so <c>web</c>/<c>voice</c> do
@@ -354,22 +783,40 @@ type ChannelIngress = U3<ChannelIngress2, ChannelIngress3, ChannelIngress4>
 
 [<Interface>]
 type ChannelIngress2 =
+    /// <remarks>TypeScript type: <c>"websocket"</c></remarks>
     abstract transport: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (transport: string) : ChannelIngress2 = jsNative
+    [<Emit("({ transport: 'websocket' })")>]
+    static member Create () : ChannelIngress2 = jsNative
+
+module ChannelIngress2 =
+    /// <remarks>TypeScript type: <c>"websocket"</c></remarks>
+    [<Literal>]
+    let transport = "websocket"
 
 [<Interface>]
 type ChannelIngress3 =
+    /// <remarks>TypeScript type: <c>"voice"</c></remarks>
     abstract transport: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (transport: string) : ChannelIngress3 = jsNative
+    [<Emit("({ transport: 'voice' })")>]
+    static member Create () : ChannelIngress3 = jsNative
+
+module ChannelIngress3 =
+    /// <remarks>TypeScript type: <c>"voice"</c></remarks>
+    [<Literal>]
+    let transport = "voice"
 
 [<Interface>]
 type ChannelIngress4 =
     inherit Messengers.MessengerDefinition
+    /// <remarks>TypeScript type: <c>"webhook"</c></remarks>
     abstract transport: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (transport: string, adapter: obj, adapterName: string, provider: string, userName: string, ?capabilities: ChannelCapabilities, ?channelSpeakerLabel: Messengers.ChannelSpeakerLabel, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?keyShard: (string -> string option), ?path: string, ?respondTo: Messengers.MessengerRespondTo[], ?shardKey: (string -> string), ?subscribeOnMention: bool, ?toEvent: (Messengers.ChatSdkMessengerEventInput -> U2<Messengers.MessengerEvent, JS.Promise<Messengers.MessengerEvent>>), ?verifyWebhook: U2<bool, (obj -> obj)>) : ChannelIngress4 = jsNative
+    [<ParamObject; Emit("({ transport: 'webhook', ...$0 })")>]
+    static member Create (adapter: obj, adapterName: string, provider: string, userName: string, ?capabilities: ChannelCapabilities, ?channelSpeakerLabel: Messengers.ChannelSpeakerLabel, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?keyShard: (string -> string option), ?path: string, ?respondTo: Messengers.MessengerRespondTo[], ?shardKey: (string -> string), ?subscribeOnMention: bool, ?toEvent: (Messengers.ChatSdkMessengerEventInput -> U2<Messengers.MessengerEvent, JS.Promise<Messengers.MessengerEvent>>), ?verifyWebhook: U2<bool, (obj -> obj)>) : ChannelIngress4 = jsNative
+
+module ChannelIngress4 =
+    /// <remarks>TypeScript type: <c>"webhook"</c></remarks>
+    [<Literal>]
+    let transport = "webhook"
 
 /// <summary>
 /// Turn-scoped context the runtime sets when a turn resolves to a channel. For
@@ -403,23 +850,23 @@ type ChannelDefinition =
     /// <summary>
     /// Narrow the assembled tool set for this channel.
     /// </summary>
-    abstract tools: (Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>) option with get, set
+    abstract tools: (JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>) option with get, set
     /// <summary>
     /// Per-channel cap on model steps for a turn.
     /// </summary>
     abstract maxTurns: float option with get, set
     abstract ingress: ChannelIngress with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (kind: ChannelKind, ingress: ChannelIngress, ?capabilities: ChannelCapabilities, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?instructions: U2<string, (ChannelContext -> U2<string, JS.Promise<string>>)>, ?tools: (Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>), ?maxTurns: float) : ChannelDefinition = jsNative
+    static member Create (kind: ChannelKind, ingress: ChannelIngress, ?capabilities: ChannelCapabilities, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?instructions: U2<string, (ChannelContext -> U2<string, JS.Promise<string>>)>, ?tools: (JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>), ?maxTurns: float) : ChannelDefinition = jsNative
 
-type ThinkChannels = Record<string, ChannelDefinition>
+type ThinkChannels = JS.Record<string, ChannelDefinition>
 
 [<Interface>]
 type NormalizedChannelDefinition =
     inherit ChannelDefinition
     abstract id: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (kind: ChannelKind, ingress: ChannelIngress, id: string, ?capabilities: ChannelCapabilities, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?instructions: U2<string, (ChannelContext -> U2<string, JS.Promise<string>>)>, ?tools: (Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>), ?maxTurns: float) : NormalizedChannelDefinition = jsNative
+    static member Create (kind: ChannelKind, ingress: ChannelIngress, id: string, ?capabilities: ChannelCapabilities, ?conversation: U2<string, Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?instructions: U2<string, (ChannelContext -> U2<string, JS.Promise<string>>)>, ?tools: (JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>), ?maxTurns: float) : NormalizedChannelDefinition = jsNative
 
 /// <summary>
 /// A best-effort internal <c>onStart</c> step that failed on this wake and was
@@ -496,10 +943,10 @@ type StreamCallback =
 /// </summary>
 [<Interface>]
 type StreamableResult =
-    abstract toUIMessageStream: ?options: StreamableResult.ToUIMessageStream.Options -> JS.AsyncIterable<obj>
+    abstract toUIMessageStream: ?options: StreamableResult.ToUIMessageStream.Options -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>
     abstract output: JS.Promise<obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (toUIMessageStream: (StreamableResult.ToUIMessageStream.Options option -> JS.AsyncIterable<obj>), ?output: JS.Promise<obj>) : StreamableResult = jsNative
+    static member Create (toUIMessageStream: (StreamableResult.ToUIMessageStream.Options option -> Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>), ?output: JS.Promise<obj>) : StreamableResult = jsNative
 
 /// <summary>
 /// Options for a chat turn (sub-agent RPC entry point).
@@ -546,9 +993,9 @@ type ChatOptions =
     /// for facts like "which authenticated principal initiated this turn" without
     /// resorting to mutable agent-wide state.
     /// </summary>
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?signal: obj, ?clientTools: obj[], ?onClientToolCall: obj, ?channel: string, ?metadata: Record<string, obj>) : ChatOptions = jsNative
+    static member Create (?signal: obj, ?clientTools: obj[], ?onClientToolCall: obj, ?channel: string, ?metadata: JS.Record<string, obj>) : ChatOptions = jsNative
 
 /// <summary>
 /// Input accepted by Think.runTurn.
@@ -579,10 +1026,10 @@ type RunTurnWait =
     inherit RunTurnBase
     abstract mode: string option with get, set
     abstract continuation: bool option with get, set
-    abstract body: Record<string, obj> option with get, set
+    abstract body: JS.Record<string, obj> option with get, set
     abstract signal: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?mode: string, ?continuation: bool, ?body: Record<string, obj>, ?signal: obj, ?input: TurnInputMessages, ?channel: string) : RunTurnWait = jsNative
+    static member Create (?mode: string, ?continuation: bool, ?body: JS.Record<string, obj>, ?signal: obj, ?input: TurnInputMessages, ?channel: string) : RunTurnWait = jsNative
 
 /// <summary>
 /// Options for Think.runTurn with <c>mode: "submit"</c>.
@@ -590,12 +1037,18 @@ type RunTurnWait =
 [<Interface>]
 type RunTurnSubmit =
     inherit RunTurnBase
+    /// <remarks>TypeScript type: <c>"submit"</c></remarks>
     abstract mode: string with get, set
     abstract submissionId: string option with get, set
     abstract idempotencyKey: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (mode: string, ?submissionId: string, ?idempotencyKey: string, ?metadata: Record<string, obj>, ?input: TurnInputMessages, ?channel: string) : RunTurnSubmit = jsNative
+    abstract metadata: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ mode: 'submit', ...$0 })")>]
+    static member Create (?submissionId: string, ?idempotencyKey: string, ?metadata: JS.Record<string, obj>, ?input: TurnInputMessages, ?channel: string) : RunTurnSubmit = jsNative
+
+module RunTurnSubmit =
+    /// <remarks>TypeScript type: <c>"submit"</c></remarks>
+    [<Literal>]
+    let mode = "submit"
 
 /// <summary>
 /// Options for Think.runTurn with <c>mode: "stream"</c>.
@@ -603,13 +1056,19 @@ type RunTurnSubmit =
 [<Interface>]
 type RunTurnStream =
     inherit RunTurnBase
+    /// <remarks>TypeScript type: <c>"stream"</c></remarks>
     abstract mode: string with get, set
     abstract callback: StreamCallback with get, set
     abstract clientTools: obj[] option with get, set
     abstract onClientToolCall: obj option with get, set
     abstract signal: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (mode: string, callback: StreamCallback, ?clientTools: obj[], ?onClientToolCall: obj, ?signal: obj, ?input: TurnInputMessages, ?channel: string) : RunTurnStream = jsNative
+    [<ParamObject; Emit("({ mode: 'stream', ...$0 })")>]
+    static member Create (callback: StreamCallback, ?clientTools: obj[], ?onClientToolCall: obj, ?signal: obj, ?input: TurnInputMessages, ?channel: string) : RunTurnStream = jsNative
+
+module RunTurnStream =
+    /// <remarks>TypeScript type: <c>"stream"</c></remarks>
+    [<Literal>]
+    let mode = "stream"
 
 type RunTurnOptions = U3<RunTurnStream, RunTurnSubmit, RunTurnWait>
 
@@ -650,7 +1109,7 @@ type ActionContext =
     /// <summary>
     /// The agent instance currently executing the action.
     /// </summary>
-    abstract agent: Think<obj, obj, Record<string, obj>> with get, set
+    abstract agent: Think<obj, obj, JS.Record<string, obj>> with get, set
     abstract env: obj with get, set
     /// <summary>
     /// Current turn request id.
@@ -674,7 +1133,7 @@ type ActionContext =
     /// </summary>
     abstract attachReply: attachment: ReplyAttachment -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (agent: Think<obj, obj, Record<string, obj>>, env: obj, requestId: string, toolCallId: string, messages: obj[], signal: obj, attachReply: (ReplyAttachment -> unit)) : ActionContext = jsNative
+    static member Create (agent: Think<obj, obj, JS.Record<string, obj>>, env: obj, requestId: string, toolCallId: string, messages: obj[], signal: obj, attachReply: (ReplyAttachment -> unit)) : ActionContext = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentToolChildRunStatus =
@@ -765,42 +1224,66 @@ type ExtensionEntrypoint =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type FiberRecoveryResult =
-    | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: Record<string, obj> option
+    | [<CompiledName("completed")>] Completed of snapshot: obj option * metadata: JS.Record<string, obj> option
     | [<CompiledName("error")>] Error of error: obj option * snapshot: obj option
     | [<CompiledName("aborted")>] Aborted of reason: string option * snapshot: obj option
     | [<CompiledName("interrupted")>] Interrupted of reason: string option * snapshot: obj option
 
 [<Interface>]
 type FiberRecoveryResult2 =
+    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
     abstract status: string with get, set
     abstract snapshot: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?snapshot: obj, ?metadata: Record<string, obj>) : FiberRecoveryResult2 = jsNative
+    abstract metadata: JS.Record<string, obj> option with get, set
+    [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
+    static member Create (?snapshot: obj, ?metadata: JS.Record<string, obj>) : FiberRecoveryResult2 = jsNative
+
+module FiberRecoveryResult2 =
+    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
+    [<Literal>]
+    let status = "completed"
 
 [<Interface>]
 type FiberRecoveryResult3 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract status: string with get, set
     abstract error: obj option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?error: obj, ?snapshot: obj) : FiberRecoveryResult3 = jsNative
+    [<ParamObject; Emit("({ status: 'error', ...$0 })")>]
+    static member Create (?error: obj, ?snapshot: obj) : FiberRecoveryResult3 = jsNative
+
+module FiberRecoveryResult3 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let status = "error"
 
 [<Interface>]
 type FiberRecoveryResult4 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
     abstract status: string with get, set
     abstract reason: string option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?reason: string, ?snapshot: obj) : FiberRecoveryResult4 = jsNative
+    [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
+    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult4 = jsNative
+
+module FiberRecoveryResult4 =
+    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
+    [<Literal>]
+    let status = "aborted"
 
 [<Interface>]
 type FiberRecoveryResult5 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
     abstract status: string with get, set
     abstract reason: string option with get, set
     abstract snapshot: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (status: string, ?reason: string, ?snapshot: obj) : FiberRecoveryResult5 = jsNative
+    [<ParamObject; Emit("({ status: 'interrupted', ...$0 })")>]
+    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult5 = jsNative
+
+module FiberRecoveryResult5 =
+    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+    [<Literal>]
+    let status = "interrupted"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type FiberStatus =
@@ -813,31 +1296,55 @@ type FiberStatus =
 
 [<Interface>]
 type MessageConcurrency2 =
+    /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
     abstract strategy: string with get, set
     abstract debounceMs: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (strategy: string, ?debounceMs: float) : MessageConcurrency2 = jsNative
+    [<ParamObject; Emit("({ strategy: 'debounce', ...$0 })")>]
+    static member Create (?debounceMs: float) : MessageConcurrency2 = jsNative
+
+module MessageConcurrency2 =
+    /// <remarks>TypeScript type: <c>"debounce"</c></remarks>
+    [<Literal>]
+    let strategy = "debounce"
 
 [<Interface>]
 type ReplyAttachment2 =
+    /// <remarks>TypeScript type: <c>"voice_note"</c></remarks>
     abstract ``type``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string) : ReplyAttachment2 = jsNative
+    [<Emit("({ type: 'voice_note' })")>]
+    static member Create () : ReplyAttachment2 = jsNative
+
+module ReplyAttachment2 =
+    /// <remarks>TypeScript type: <c>"voice_note"</c></remarks>
+    [<Literal>]
+    let ``type`` = "voice_note"
 
 [<Interface>]
 type ReplyAttachment3 =
+    /// <remarks>TypeScript type: <c>"email_draft"</c></remarks>
     abstract ``type``: string with get, set
     abstract subject: string option with get, set
     abstract ``to``: string[] option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, ?subject: string, ?``to``: string[]) : ReplyAttachment3 = jsNative
+    [<ParamObject; Emit("({ type: 'email_draft', ...$0 })")>]
+    static member Create (?subject: string, ?``to``: string[]) : ReplyAttachment3 = jsNative
+
+module ReplyAttachment3 =
+    /// <remarks>TypeScript type: <c>"email_draft"</c></remarks>
+    [<Literal>]
+    let ``type`` = "email_draft"
 
 [<Interface>]
 type ReplyAttachment4 =
+    /// <remarks>TypeScript type: <c>"card"</c></remarks>
     abstract ``type``: string with get, set
     abstract payload: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, payload: obj) : ReplyAttachment4 = jsNative
+    [<ParamObject; Emit("({ type: 'card', ...$0 })")>]
+    static member Create (payload: obj) : ReplyAttachment4 = jsNative
+
+module ReplyAttachment4 =
+    /// <remarks>TypeScript type: <c>"card"</c></remarks>
+    [<Literal>]
+    let ``type`` = "card"
 
 type ReplyAttachment5 =
     abstract ``type``: string with get, set
@@ -846,69 +1353,63 @@ type ReplyAttachment5 =
 
 [<Interface>]
 type ThinkScheduledTask2 =
-    abstract handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option) with get, set
-    abstract prompt: unit option with get, set
+    inherit ThinkScheduledTask2.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: ThinkIntervalSchedule with get, set
     abstract timezone: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: ThinkIntervalSchedule, ?prompt: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: unit) : ThinkScheduledTask2 = jsNative
+    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: ThinkIntervalSchedule, ?prompt: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: unit) : ThinkScheduledTask2 = jsNative
 
 [<Interface>]
 type ThinkScheduledTask3 =
-    abstract handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option) with get, set
-    abstract prompt: unit option with get, set
+    inherit ThinkScheduledTask2.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: ThinkWallClockSchedule with get, set
     abstract timezone: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: ThinkWallClockSchedule, ?prompt: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: string) : ThinkScheduledTask3 = jsNative
+    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: ThinkWallClockSchedule, ?prompt: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: string) : ThinkScheduledTask3 = jsNative
 
 [<Interface>]
 type ThinkScheduledTask4 =
-    abstract handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option) with get, set
-    abstract prompt: unit option with get, set
+    inherit ThinkScheduledTask2.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: string with get, set
     abstract timezone: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: string, ?prompt: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: string) : ThinkScheduledTask4 = jsNative
+    static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), schedule: string, ?prompt: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: string) : ThinkScheduledTask4 = jsNative
 
 [<Interface>]
 type ThinkScheduledTask5 =
-    abstract prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)> with get, set
-    abstract handler: unit option with get, set
+    inherit ThinkScheduledTask5.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: ThinkIntervalSchedule with get, set
     abstract timezone: unit option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: ThinkIntervalSchedule, ?handler: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: unit) : ThinkScheduledTask5 = jsNative
+    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: ThinkIntervalSchedule, ?handler: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: unit) : ThinkScheduledTask5 = jsNative
 
 [<Interface>]
 type ThinkScheduledTask6 =
-    abstract prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)> with get, set
-    abstract handler: unit option with get, set
+    inherit ThinkScheduledTask5.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: ThinkWallClockSchedule with get, set
     abstract timezone: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: ThinkWallClockSchedule, ?handler: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: string) : ThinkScheduledTask6 = jsNative
+    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: ThinkWallClockSchedule, ?handler: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: string) : ThinkScheduledTask6 = jsNative
 
 [<Interface>]
 type ThinkScheduledTask7 =
-    abstract prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)> with get, set
-    abstract handler: unit option with get, set
+    inherit ThinkScheduledTask5.Base
     abstract retry: obj option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract schedule: string with get, set
     abstract timezone: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: string, ?handler: unit, ?retry: obj, ?metadata: Record<string, obj>, ?timezone: string) : ThinkScheduledTask7 = jsNative
+    static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, schedule: string, ?handler: unit, ?retry: obj, ?metadata: JS.Record<string, obj>, ?timezone: string) : ThinkScheduledTask7 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type TransportType =
@@ -955,10 +1456,10 @@ type ActionAuthorizationContext =
     abstract requiredPermissions: string[] with get, set
     abstract grantedPermissions: string[] option with get, set
     abstract messages: obj[] with get, set
-    abstract agent: Think<obj, obj, Record<string, obj>> with get, set
+    abstract agent: Think<obj, obj, JS.Record<string, obj>> with get, set
     abstract env: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (requestId: string, toolCallId: string, action: string, kind: ActionKind, input: obj, requiredPermissions: string[], messages: obj[], agent: Think<obj, obj, Record<string, obj>>, env: obj, ?grantedPermissions: string[]) : ActionAuthorizationContext = jsNative
+    static member Create (requestId: string, toolCallId: string, action: string, kind: ActionKind, input: obj, requiredPermissions: string[], messages: obj[], agent: Think<obj, obj, JS.Record<string, obj>>, env: obj, ?grantedPermissions: string[]) : ActionAuthorizationContext = jsNative
 
 [<Interface>]
 type ActionApprovalDescriptor =
@@ -2538,19 +3039,19 @@ type ThinkScheduledTaskSchedule = string
 type ThinkScheduledTaskContext =
     abstract taskId: string with get, set
     abstract scheduledFor: float with get, set
-    abstract scheduledForDate: JS.Date with get, set
+    abstract scheduledForDate: Fable.Core.TS.Es.Date with get, set
     abstract occurrenceKey: string with get, set
     abstract idempotencyKey: string with get, set
     abstract schedule: string with get, set
     abstract scheduleKind: ThinkScheduledTaskContext.ScheduleKind with get, set
     abstract timezone: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (taskId: string, scheduledFor: float, scheduledForDate: JS.Date, occurrenceKey: string, idempotencyKey: string, schedule: string, scheduleKind: ThinkScheduledTaskContext.ScheduleKind, ?timezone: string, ?metadata: Record<string, obj>) : ThinkScheduledTaskContext = jsNative
+    static member Create (taskId: string, scheduledFor: float, scheduledForDate: Fable.Core.TS.Es.Date, occurrenceKey: string, idempotencyKey: string, schedule: string, scheduleKind: ThinkScheduledTaskContext.ScheduleKind, ?timezone: string, ?metadata: JS.Record<string, obj>) : ThinkScheduledTaskContext = jsNative
 
 type ThinkScheduledTask = U6<ThinkScheduledTask2, ThinkScheduledTask3, ThinkScheduledTask4, ThinkScheduledTask5, ThinkScheduledTask6, ThinkScheduledTask7>
 
-type ThinkScheduledTasks = Record<string, ThinkScheduledTask>
+type ThinkScheduledTasks = JS.Record<string, ThinkScheduledTask>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ThinkSubmissionStatus =
@@ -2565,10 +3066,10 @@ type ThinkSubmissionStatus =
 type SubmitMessagesOptions =
     abstract submissionId: string option with get, set
     abstract idempotencyKey: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract channel: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?submissionId: string, ?idempotencyKey: string, ?metadata: Record<string, obj>, ?channel: string) : SubmitMessagesOptions = jsNative
+    static member Create (?submissionId: string, ?idempotencyKey: string, ?metadata: JS.Record<string, obj>, ?channel: string) : SubmitMessagesOptions = jsNative
 
 [<Interface>]
 type ThinkSubmissionInspection =
@@ -2577,19 +3078,19 @@ type ThinkSubmissionInspection =
     abstract requestId: string option with get, set
     abstract status: ThinkSubmissionStatus with get, set
     abstract error: string option with get, set
-    abstract metadata: Record<string, obj> option with get, set
+    abstract metadata: JS.Record<string, obj> option with get, set
     abstract createdAt: float with get, set
     abstract startedAt: float option with get, set
     abstract completedAt: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (submissionId: string, status: ThinkSubmissionStatus, createdAt: float, ?idempotencyKey: string, ?requestId: string, ?error: string, ?metadata: Record<string, obj>, ?startedAt: float, ?completedAt: float) : ThinkSubmissionInspection = jsNative
+    static member Create (submissionId: string, status: ThinkSubmissionStatus, createdAt: float, ?idempotencyKey: string, ?requestId: string, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?completedAt: float) : ThinkSubmissionInspection = jsNative
 
 [<Interface>]
 type SubmitMessagesResult =
     inherit ThinkSubmissionInspection
     abstract accepted: bool with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (submissionId: string, status: ThinkSubmissionStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?requestId: string, ?error: string, ?metadata: Record<string, obj>, ?startedAt: float, ?completedAt: float) : SubmitMessagesResult = jsNative
+    static member Create (submissionId: string, status: ThinkSubmissionStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?requestId: string, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?completedAt: float) : SubmitMessagesResult = jsNative
 
 [<Interface>]
 type ListSubmissionsOptions =
@@ -2601,10 +3102,10 @@ type ListSubmissionsOptions =
 [<Interface>]
 type DeleteSubmissionsOptions =
     abstract status: U2<string, ThinkSubmissionStatus[]> option with get, set
-    abstract completedBefore: JS.Date option with get, set
+    abstract completedBefore: Fable.Core.TS.Es.Date option with get, set
     abstract limit: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?status: U2<string, ThinkSubmissionStatus[]>, ?completedBefore: JS.Date, ?limit: float) : DeleteSubmissionsOptions = jsNative
+    static member Create (?status: U2<string, ThinkSubmissionStatus[]>, ?completedBefore: Fable.Core.TS.Es.Date, ?limit: float) : DeleteSubmissionsOptions = jsNative
 
 /// <summary>
 /// A chat turn request. Built automatically by each entry path
@@ -2628,7 +3129,7 @@ type TurnInput =
     /// <summary>
     /// Custom body fields from the client request.
     /// </summary>
-    abstract body: Record<string, obj> option with get, set
+    abstract body: JS.Record<string, obj> option with get, set
     /// <summary>
     /// Internal workflow prompt configuration, never sourced from client body.
     /// </summary>
@@ -2638,7 +3139,7 @@ type TurnInput =
     /// </summary>
     abstract continuation: bool with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (continuation: bool, ?signal: obj, ?clientTools: obj[], ?clientToolExecutor: obj, ?body: Record<string, obj>, ?workflowPrompt: TurnInput.WorkflowPrompt) : TurnInput = jsNative
+    static member Create (continuation: bool, ?signal: obj, ?clientTools: obj[], ?clientToolExecutor: obj, ?body: JS.Record<string, obj>, ?workflowPrompt: TurnInput.WorkflowPrompt) : TurnInput = jsNative
 
 /// <summary>
 /// Context passed to the <c>beforeTurn</c> hook.
@@ -2657,7 +3158,7 @@ type TurnContext =
     /// <summary>
     /// Merged tool set (workspace + getTools + session + MCP + client + caller).
     /// </summary>
-    abstract tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> with get, set
+    abstract tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> with get, set
     /// <summary>
     /// The language model from getModel().
     /// </summary>
@@ -2669,9 +3170,9 @@ type TurnContext =
     /// <summary>
     /// Custom body fields from the client request.
     /// </summary>
-    abstract body: Record<string, obj> option with get, set
+    abstract body: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (system: string, messages: obj[], tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, model: obj, continuation: bool, ?body: Record<string, obj>) : TurnContext = jsNative
+    static member Create (system: string, messages: obj[], tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, model: obj, continuation: bool, ?body: JS.Record<string, obj>) : TurnContext = jsNative
 
 /// <summary>
 /// Configuration returned by the <c>beforeTurn</c> hook to override defaults.
@@ -2697,7 +3198,7 @@ type TurnConfig =
     /// <summary>
     /// Extra tools to merge (additive — spread on top of existing tools).
     /// </summary>
-    abstract tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
+    abstract tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
     /// <summary>
     /// Limit which tools the model can call (AI SDK activeTools).
     /// </summary>
@@ -2773,11 +3274,11 @@ type TurnConfig =
     /// <summary>
     /// Additional HTTP headers for provider requests on this turn.
     /// </summary>
-    abstract headers: Record<string, string option> option with get, set
+    abstract headers: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Provider-specific options (AI SDK providerOptions).
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
+    abstract providerOptions: JS.Record<string, obj> option with get, set
     /// <summary>
     /// Optional AI SDK telemetry configuration for this turn.
     /// <br /><br />
@@ -2951,13 +3452,13 @@ type PrepareStepContext =
     /// <summary>
     /// User-defined runtime context.
     /// </summary>
-    abstract runtimeContext: Record<string, obj> with get, set
+    abstract runtimeContext: JS.Record<string, obj> with get, set
     /// <summary>
     /// The sandbox environment that the step is operating in.
     /// </summary>
     abstract experimental_sandbox: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (steps: obj[], stepNumber: float, model: obj, messages: obj[], initialMessages: obj[], responseMessages: obj[], toolsContext: obj, runtimeContext: Record<string, obj>, ?instructions: obj, ?initialInstructions: obj, ?experimental_sandbox: obj) : PrepareStepContext = jsNative
+    static member Create (steps: obj[], stepNumber: float, model: obj, messages: obj[], initialMessages: obj[], responseMessages: obj[], toolsContext: obj, runtimeContext: JS.Record<string, obj>, ?instructions: obj, ?initialInstructions: obj, ?experimental_sandbox: obj) : PrepareStepContext = jsNative
 
 /// <summary>
 /// Configuration returned by <c>beforeStep</c> to override defaults for the
@@ -3010,9 +3511,9 @@ type ToolCallContext<'TOOLS> = private ToolCallContext__ of obj
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("action", CaseRules.None)>]
 type ToolCallDecision =
-    | [<CompiledName("allow")>] Allow of input: Record<string, obj> option
+    | [<CompiledName("allow")>] Allow of input: JS.Record<string, obj> option
     | [<CompiledName("block")>] Block of reason: string option
-    | [<CompiledName("substitute")>] Substitute of output: obj * input: Record<string, obj> option
+    | [<CompiledName("substitute")>] Substitute of output: obj * input: JS.Record<string, obj> option
 
 /// <summary>
 /// Context passed to the <c>afterToolCall</c> hook after a tool executes.
@@ -3071,10 +3572,10 @@ type StepContext<'TOOLS> = private StepContext__ of obj
 /// tool-input-delta, tool-result, raw).
 /// </summary>
 [<Interface>]
-type ChunkContext =
+type ChunkContext<'TOOLS> =
     abstract chunk: obj with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (chunk: obj) : ChunkContext = jsNative
+    static member Create (chunk: obj) : ChunkContext<'TOOLS> = jsNative
 
 /// <remarks>
 /// @internal
@@ -3142,7 +3643,7 @@ type Think<'Env, 'State, 'Props> =
     /// <summary>
     /// Handle a message from a hibernating WebSocket connection.
     /// </summary>
-    abstract onMessage: _connection: Think.OnConnect.Connection<obj> * _message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit> option
+    abstract onMessage: _connection: Think.OnConnect.Connection<obj> * _message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option
     /// <summary>
     /// Handle a hibernating WebSocket connection closing.
     /// </summary>
@@ -3292,7 +3793,7 @@ type Think<'Env, 'State, 'Props> =
     /// Emit an observability event with auto-generated timestamp.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _emit: ``type``: Think.Emit.Type * ?payload: Record<string, obj> -> unit
+    abstract _emit: ``type``: Think.Emit.Type * ?payload: JS.Record<string, obj> -> unit
     /// <summary>
     /// Run SDK work under a stable parent for platform child spans.
     /// </summary>
@@ -3304,7 +3805,7 @@ type Think<'Env, 'State, 'Props> =
     /// <param name="strings">SQL query template strings</param>
     /// <param name="values">Values to be inserted into the query</param>
     /// <returns>Array of query results</returns>
-    abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+    abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
     abstract _schemaInitialization: obj with get, set
     /// <summary>
     /// Create all internal tables and run migrations if needed.
@@ -3564,7 +4065,7 @@ type Think<'Env, 'State, 'Props> =
     abstract _lifecycleRouteAddress: obj with get, set
     abstract _routeLifecycleToRoot: obj with get, set
     abstract _routeLifecycleToTarget: obj with get, set
-    abstract ``__#10@#private``: obj with get, set
+    abstract ``__#2@#private``: obj with get, set
     abstract _activeChatRecoveryRootRequestId: obj with get, set
     /// <summary>
     /// Whether Think automatically converts connected MCP tools to AI SDK tools
@@ -4034,7 +4535,7 @@ type Think<'Env, 'State, 'Props> =
     abstract _drainingWorkflowNotifications: obj with get, set
     abstract _submissionAbortControllers: obj with get, set
     abstract _programmaticStreamErrors: obj with get, set
-    abstract broadcast: msg: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> unit
+    abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
     /// <summary>
     /// Resolve the agent-tool run whose turn owns a request id, or null when the
     /// request is not an agent-tool turn. Falls back to the persisted child-run
@@ -4192,11 +4693,11 @@ type Think<'Env, 'State, 'Props> =
     /// <summary>
     /// Return the tools available to the assistant.
     /// </summary>
-    abstract getTools: unit -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>
+    abstract getTools: unit -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>
     /// <summary>
     /// Return action descriptors compiled into tools for the assistant.
     /// </summary>
-    abstract getActions: unit -> U2<JS.Promise<Record<string, Action<obj, obj>>>, Record<string, Action<obj, obj>>>
+    abstract getActions: unit -> U2<JS.Promise<JS.Record<string, Action<obj, obj>>>, JS.Record<string, Action<obj, obj>>>
     /// <summary>
     /// Return messenger integrations that should be routed through this Think agent.
     /// </summary>
@@ -4231,7 +4732,7 @@ type Think<'Env, 'State, 'Props> =
     /// value; client-supplied message metadata can never populate it (reserved
     /// keys are stripped at intake). <c>undefined</c> when the turn carried none.
     /// </summary>
-    abstract activeTurnMetadata: Record<string, obj> option
+    abstract activeTurnMetadata: JS.Record<string, obj> option
     /// <summary>
     /// Resolve a channel id to a turn-scoped ChannelContext, if registered.
     /// </summary>
@@ -4593,7 +5094,7 @@ type Think<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract beforeStep: _ctx: Think.BeforeStep.Ctx -> U2<JS.Promise<StepConfig<Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>> option>, StepConfig<Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>>> option
+    abstract beforeStep: _ctx: Think.BeforeStep.Ctx -> U2<JS.Promise<StepConfig<JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>> option>, StepConfig<JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>>> option
     /// <summary>
     /// Called <b>before</b> the tool's <c>execute</c> function runs. Think wraps
     /// every tool's <c>execute</c> so it can consult this hook and act on the
@@ -5419,7 +5920,7 @@ type Think<'Env, 'State, 'Props> =
     /// Pass <c>options.signal</c> to cancel the continuation from outside —
     /// matches the saveMessages contract.
     /// </summary>
-    abstract continueLastTurn: ?body: Record<string, obj> * ?options: Think.ContinueLastTurn.Options -> JS.Promise<SaveMessagesResult>
+    abstract continueLastTurn: ?body: JS.Record<string, obj> * ?options: Think.ContinueLastTurn.Options -> JS.Promise<SaveMessagesResult>
     abstract _retryLastUserTurn: obj with get, set
     abstract _setupProtocolHandlers: obj with get, set
     abstract _handleProtocolEvent: obj with get, set
@@ -6237,7 +6738,7 @@ type Think<'Env, 'State, 'Props> =
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: Think.Queue.Callback * ?payload: 'T * ?options: Think.Schedule.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Think.Think.GetSchedules.Result.Item>
+    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: Think.Queue.Callback * ?payload: 'T * ?options: Think.Schedule.Options -> JS.Promise<Think.Scheduler.Item.Item.Schedule<'T>>
     /// <summary>
     /// Schedule a task to run repeatedly at a fixed interval.
     /// <br /><br />
@@ -6262,7 +6763,7 @@ type Think<'Env, 'State, 'Props> =
     /// <param name="options">Options for the scheduled task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract scheduleEvery<'T>: intervalSeconds: float * callback: Think.Queue.Callback * ?payload: 'T * ?options: Think.ScheduleEvery.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Think.Think.GetSchedules.Result.Item>
+    abstract scheduleEvery<'T>: intervalSeconds: float * callback: Think.Queue.Callback * ?payload: 'T * ?options: Think.ScheduleEvery.Options -> JS.Promise<Think.Scheduler.Item.Item.Schedule<'T>>
     /// <summary>
     /// Get a scheduled task by ID
     /// </summary>
@@ -6274,7 +6775,7 @@ type Think<'Env, 'State, 'Props> =
     /// Use {@link getScheduleById}. This synchronous API cannot cross
     /// Durable Object boundaries and throws inside sub-agents.
     /// </remarks>
-    abstract getSchedule<'T>: id: string -> U4<Think.GetSchedule.Result<'T>, Think.GetSchedule.Result2<'T>, Think.GetSchedule.Result3<'T>, Think.GetSchedule.Result4<'T>> option
+    abstract getSchedule<'T>: id: string -> Think.Scheduler.Item.Item.Schedule<'T> option
     /// <summary>
     /// Get a scheduled task by ID.
     /// <br /><br />
@@ -6283,7 +6784,7 @@ type Think<'Env, 'State, 'Props> =
     /// </summary>
     /// <param name="id">ID of the scheduled task</param>
     /// <returns>The Schedule object or undefined if not found</returns>
-    abstract getScheduleById: id: string -> JS.Promise<Think.Scheduler.Item.Item.Schedule option>
+    abstract getScheduleById: id: string -> JS.Promise<Think.Scheduler.Item.Item.Schedule<obj> option>
     /// <summary>
     /// Get scheduled tasks matching the given criteria
     /// </summary>
@@ -6295,7 +6796,7 @@ type Think<'Env, 'State, 'Props> =
     /// Use {@link listSchedules}. This synchronous API cannot cross
     /// Durable Object boundaries and throws inside sub-agents.
     /// </remarks>
-    abstract getSchedules: ?criteria: obj -> Think.GetSchedules.Result.Item[]
+    abstract getSchedules<'T>: ?criteria: obj -> Think.Scheduler.Item.Item.Schedule<'T>[]
     /// <summary>
     /// List scheduled tasks matching the given criteria.
     /// <br /><br />
@@ -6304,7 +6805,7 @@ type Think<'Env, 'State, 'Props> =
     /// </summary>
     /// <param name="criteria">Criteria to filter schedules</param>
     /// <returns>Array of matching Schedule objects</returns>
-    abstract listSchedules: ?criteria: obj -> JS.Promise<Think.Scheduler.Item.Item.Schedule[]>
+    abstract listSchedules: ?criteria: obj -> JS.Promise<Think.Scheduler.Item.Item.Schedule<obj>[]>
     /// <summary>
     /// Cancel a scheduled task.
     /// <br /><br />
@@ -6550,7 +7051,7 @@ type Think<'Env, 'State, 'Props> =
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     abstract fetch: request: obj -> JS.Promise<obj>
     abstract getConnection<'TState>: id: string -> Think.OnConnect.Connection<'TState> option
-    abstract getConnections: ?tag: string -> obj
+    abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<Think.OnConnect.Connection<'TState>, obj, obj>
     abstract _cf_activeSubAgentBridge: obj with get, set
     /// <summary>
     /// Route a virtual sub-agent connection operation through its live frame
@@ -6570,9 +7071,9 @@ type Think<'Env, 'State, 'Props> =
     abstract _cf_routeSubAgentBroadcast: obj with get, set
     abstract _cf_reportSubAgentConnectionOperationFailure: obj with get, set
     abstract _cf_broadcastToParentSubAgent: obj with get, set
-    abstract _cf_broadcastToSubAgent: ownerPath: obj[] * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> JS.Promise<unit>
+    abstract _cf_broadcastToSubAgent: ownerPath: obj[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit>
     abstract _cf_subAgentConnectionMetas: ownerPath: obj[] -> JS.Promise<obj[]>
-    abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit>
+    abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract _cf_closeSubAgentConnection: connectionId: string * ?code: float * ?reason: string -> JS.Promise<unit>
     abstract _cf_setSubAgentConnectionState: connectionId: string * state: obj -> JS.Promise<obj>
     abstract _cf_subAgentConnectionMetaForPath: obj with get, set
@@ -6596,7 +7097,7 @@ type Think<'Env, 'State, 'Props> =
     abstract _cf_forwardSubAgentWebSocketClose: obj with get, set
     abstract _cf_resolveSubAgentConnection: obj with get, set
     abstract _cf_handleSubAgentWebSocketConnect: bridge: obj * meta: obj -> JS.Promise<unit>
-    abstract _cf_handleSubAgentWebSocketMessage: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * bridge: obj * meta: obj * ?replyBridge: obj -> JS.Promise<unit>
+    abstract _cf_handleSubAgentWebSocketMessage: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * bridge: obj * meta: obj * ?replyBridge: obj -> JS.Promise<unit>
     abstract _cf_handleSubAgentWebSocketClose: code: float * reason: string * wasClean: bool * bridge: obj * meta: obj -> JS.Promise<unit>
     abstract _cf_runWithSubAgentBridge: obj with get, set
     abstract _cf_createSubAgentBridgeConnection: obj with get, set
@@ -7146,7 +7647,7 @@ type Think<'Env, 'State, 'Props> =
     /// Get all methods marked as callable on this Agent
     /// </summary>
     /// <returns>A map of method names to their metadata</returns>
-    abstract getCallableMethods: unit -> JS.Map<string, obj>
+    abstract getCallableMethods: unit -> Fable.Core.TS.Es.Map<string, obj>
     /// <summary>
     /// Start a workflow and track it in this Agent's database.
     /// Automatically injects agent identity into the workflow params.
@@ -7446,7 +7947,7 @@ type Think<'Env, 'State, 'Props> =
     /// Override this to handle all callback types in one place.
     /// </summary>
     /// <param name="callback">- The callback payload</param>
-    abstract onWorkflowCallback: callback: Think.OnWorkflowCallback.Callback -> JS.Promise<unit>
+    abstract onWorkflowCallback: callback: Think.OnWorkflowCallback.Callback<obj> -> JS.Promise<unit>
     /// <summary>
     /// Called when a workflow reports progress.
     /// Override to handle progress updates.
@@ -7483,7 +7984,7 @@ type Think<'Env, 'State, 'Props> =
     /// Handle a workflow callback via RPC.
     /// </summary>
     /// <remarks>@internal - Called by AgentWorkflow, do not call directly</remarks>
-    abstract _workflow_handleCallback: callback: Think.OnWorkflowCallback.Callback -> JS.Promise<unit>
+    abstract _workflow_handleCallback: callback: Think.OnWorkflowCallback.Callback<obj> -> JS.Promise<unit>
     /// <summary>
     /// Broadcast a message to all connected clients via RPC.
     /// </summary>
@@ -7569,7 +8070,7 @@ type Think<'Env, 'State, 'Props> =
     abstract ctx: obj with get, set
     abstract env: 'Env with get, set
     abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
     /// <summary>
@@ -7737,31 +8238,7 @@ type ChatRecoveryOptions = obj
 /// </summary>
 [<Interface>]
 type ChatRecoveryExhaustedContext =
-    /// <summary>
-    /// Stable identifier for this recovery incident.
-    /// </summary>
-    abstract incidentId: string with get, set
-    /// <summary>
-    /// Stable request ID for the whole continuation chain (the recovery "root").
-    /// Unlike <c>requestId</c> — which changes on every chained continuation — this is
-    /// constant for the lifetime of the incident, so it's the right key for
-    /// per-incident budget tracking or fresh-incident detection without
-    /// re-deriving identity from message IDs.
-    /// </summary>
-    abstract recoveryRootRequestId: string with get, set
-    abstract attempt: float with get, set
-    abstract maxAttempts: float with get, set
-    abstract recoveryKind: ChatRecoveryExhaustedContext.RecoveryKind with get, set
-    abstract streamId: string with get, set
-    abstract requestId: string with get, set
-    abstract partialText: string with get, set
-    abstract partialParts: obj[] with get, set
-    /// <summary>
-    /// Epoch milliseconds when the underlying fiber was started. Compare
-    /// against <c>Date.now()</c> to suppress continuations for turns that have
-    /// been orphaned too long to safely replay.
-    /// </summary>
-    abstract createdAt: float with get, set
+    inherit ChatRecoveryExhaustedContext.Base
     /// <summary>
     /// Why recovery stopped. One of:
     /// - <c>max_attempts_exceeded</c> — the per-incident attempt budget was spent.
@@ -7868,10 +8345,11 @@ type TypedToolCall<'TOOLS> = private TypedToolCall__ of obj
 
 [<Interface>]
 type TypedToolCall2 =
+    /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
     abstract ``type``: string with get, set
     abstract toolCallId: string with get, set
     abstract providerExecuted: bool option with get, set
-    abstract providerMetadata: Record<string, obj> option with get, set
+    abstract providerMetadata: JS.Record<string, obj> option with get, set
     abstract toolMetadata: obj option with get, set
     abstract toolName: string with get, set
     abstract input: obj with get, set
@@ -7886,8 +8364,13 @@ type TypedToolCall2 =
     /// The error that caused the tool call to be invalid.
     /// </summary>
     abstract error: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj) : TypedToolCall2 = jsNative
+    [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+    static member Create (toolCallId: string, toolName: string, input: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj) : TypedToolCall2 = jsNative
+
+module TypedToolCall2 =
+    /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+    [<Literal>]
+    let ``type`` = "tool-call"
 
 [<Erase>]
 type TypedToolResult<'TOOLS> = private TypedToolResult__ of obj
@@ -7992,7 +8475,7 @@ type PrepareStepResult2<'RUNTIME_CONTEXT> =
     /// Can be used to pass provider-specific configuration such as
     /// container IDs for Anthropic's code execution.
     /// </summary>
-    abstract providerOptions: Record<string, obj> option with get, set
+    abstract providerOptions: JS.Record<string, obj> option with get, set
     /// <summary>
     /// Maximum number of tokens to generate.
     /// </summary>
@@ -8055,7 +8538,7 @@ type PrepareStepResult2<'RUNTIME_CONTEXT> =
     /// </summary>
     abstract reasoning: PrepareStepResult2.Reasoning option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?model: obj, ?toolChoice: U2<string, PrepareStepResult2.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?instructions: obj, ?system: obj, ?messages: obj[], ?toolsContext: obj, ?runtimeContext: 'RUNTIME_CONTEXT, ?experimental_sandbox: obj, ?providerOptions: Record<string, obj>, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: PrepareStepResult2.Reasoning) : PrepareStepResult2<'RUNTIME_CONTEXT> = jsNative
+    static member Create (?model: obj, ?toolChoice: U2<string, PrepareStepResult2.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?instructions: obj, ?system: obj, ?messages: obj[], ?toolsContext: obj, ?runtimeContext: 'RUNTIME_CONTEXT, ?experimental_sandbox: obj, ?providerOptions: JS.Record<string, obj>, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: PrepareStepResult2.Reasoning) : PrepareStepResult2<'RUNTIME_CONTEXT> = jsNative
 
 /// <summary>
 /// A predicate that decides whether a tool-calling loop should stop after the
@@ -8206,6 +8689,36 @@ module ChatErrorContext =
         | [<CompiledName("turn")>] Turn
 
 module ChatRecoveryExhaustedContext =
+    [<Interface>]
+    type Base =
+        /// <summary>
+        /// Stable identifier for this recovery incident.
+        /// </summary>
+        abstract incidentId: string with get, set
+        /// <summary>
+        /// Stable request ID for the whole continuation chain (the recovery "root").
+        /// Unlike <c>requestId</c> — which changes on every chained continuation — this is
+        /// constant for the lifetime of the incident, so it's the right key for
+        /// per-incident budget tracking or fresh-incident detection without
+        /// re-deriving identity from message IDs.
+        /// </summary>
+        abstract recoveryRootRequestId: string with get, set
+        abstract attempt: float with get, set
+        abstract maxAttempts: float with get, set
+        abstract recoveryKind: FSharp.CloudEdge.Runtime.Think.ChatRecoveryExhaustedContext.RecoveryKind with get, set
+        abstract streamId: string with get, set
+        abstract requestId: string with get, set
+        abstract partialText: string with get, set
+        abstract partialParts: obj[] with get, set
+        /// <summary>
+        /// Epoch milliseconds when the underlying fiber was started. Compare
+        /// against <c>Date.now()</c> to suppress continuations for turns that have
+        /// been orphaned too long to safely replay.
+        /// </summary>
+        abstract createdAt: float with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (incidentId: string, recoveryRootRequestId: string, attempt: float, maxAttempts: float, recoveryKind: FSharp.CloudEdge.Runtime.Think.ChatRecoveryExhaustedContext.RecoveryKind, streamId: string, requestId: string, partialText: string, partialParts: obj[], createdAt: float) : Base = jsNative
+
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type RecoveryKind =
         | [<CompiledName("continue")>] Continue
@@ -8233,14 +8746,20 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : Item10 = jsNative
+            [<ParamObject; Emit("({ state: 'input-available', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : Item10 = jsNative
+
+        module Item10 =
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+            [<Literal>]
+            let state = "input-available"
 
         [<Interface>]
         type Item11 =
@@ -8255,14 +8774,32 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item11.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item11.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item11 = jsNative
+            [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item11.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item11 = jsNative
+
+        module Item11 =
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+            [<Literal>]
+            let state = "approval-requested"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: unit option with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: unit option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item12 =
@@ -8277,14 +8814,32 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item12.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item12.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item12 = jsNative
+            [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item12.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item12 = jsNative
+
+        module Item12 =
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+            [<Literal>]
+            let state = "approval-responded"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item13 =
@@ -8299,16 +8854,34 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: obj with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
-            abstract resultProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+            abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
             abstract preliminary: bool option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item13.Approval option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?preliminary: bool, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item13.Approval) : Item13 = jsNative
+            [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?preliminary: bool, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item13.Approval) : Item13 = jsNative
+
+        module Item13 =
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+            [<Literal>]
+            let state = "output-available"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item14 =
@@ -8323,16 +8896,34 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract rawInput: obj option with get, set
             abstract output: unit option with get, set
             abstract errorText: string with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
-            abstract resultProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+            abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item14.Approval option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item14.Approval) : Item14 = jsNative
+            [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item14.Approval) : Item14 = jsNative
+
+        module Item14 =
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+            [<Literal>]
+            let state = "output-error"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item15 =
@@ -8347,17 +8938,36 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item15.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item15.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item15 = jsNative
+            [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item15.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item15 = jsNative
+
+        module Item15 =
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+            [<Literal>]
+            let state = "output-denied"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item2 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8373,17 +8983,27 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
             abstract state: string with get, set
             abstract input: obj option with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : Item2 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-streaming', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : Item2 = jsNative
+
+        module Item2 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+            [<Literal>]
+            let state = "input-streaming"
 
         [<Interface>]
         type Item3 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8399,17 +9019,27 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : Item3 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-available', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : Item3 = jsNative
+
+        module Item3 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+            [<Literal>]
+            let state = "input-available"
 
         [<Interface>]
         type Item4 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8425,17 +9055,39 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item4.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item4.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item4 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-requested', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item4.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item4 = jsNative
+
+        module Item4 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+            [<Literal>]
+            let state = "approval-requested"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: unit option with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: unit option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item5 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8451,17 +9103,39 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item5.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item5.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item5 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-responded', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item5.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item5 = jsNative
+
+        module Item5 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+            [<Literal>]
+            let state = "approval-responded"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item6 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8477,19 +9151,41 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: obj with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
-            abstract resultProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+            abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
             abstract preliminary: bool option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item6.Approval option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?preliminary: bool, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item6.Approval) : Item6 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-available', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?preliminary: bool, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item6.Approval) : Item6 = jsNative
+
+        module Item6 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+            [<Literal>]
+            let state = "output-available"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item7 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8505,18 +9201,40 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: string with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
-            abstract resultProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
+            abstract resultProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item7.Approval option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: Record<string, obj>, ?resultProviderMetadata: Record<string, obj>, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item7.Approval) : Item7 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-error', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: JS.Record<string, obj>, ?resultProviderMetadata: JS.Record<string, obj>, ?approval: ChatRecoveryExhaustedContext.PartialParts.Item7.Approval) : Item7 = jsNative
+
+        module Item7 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+            [<Literal>]
+            let state = "output-error"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item8 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
             abstract ``type``: string with get, set
             /// <summary>
             /// Name of the tool that is being called.
@@ -8532,14 +9250,35 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
             abstract state: string with get, set
             abstract input: obj with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: ChatRecoveryExhaustedContext.PartialParts.Item8.Approval with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolName: string, toolCallId: string, state: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item8.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>) : Item8 = jsNative
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-denied', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, approval: ChatRecoveryExhaustedContext.PartialParts.Item8.Approval, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>) : Item8 = jsNative
+
+        module Item8 =
+            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+            [<Literal>]
+            let ``type`` = "dynamic-tool"
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+            [<Literal>]
+            let state = "output-denied"
+
+            [<Interface>]
+            type Approval =
+                abstract id: string with get, set
+                abstract approved: bool with get, set
+                abstract descriptor: obj option with get, set
+                abstract requestReason: string option with get, set
+                abstract reason: string option with get, set
+                abstract isAutomatic: bool option with get, set
+                abstract signature: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
         [<Interface>]
         type Item9 =
@@ -8554,144 +9293,20 @@ module ChatRecoveryExhaustedContext =
             /// Whether the tool call was executed by the provider.
             /// </summary>
             abstract providerExecuted: bool option with get, set
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
             abstract state: string with get, set
             abstract input: obj option with get, set
             abstract output: unit option with get, set
             abstract errorText: unit option with get, set
-            abstract callProviderMetadata: Record<string, obj> option with get, set
+            abstract callProviderMetadata: JS.Record<string, obj> option with get, set
             abstract approval: unit option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, state: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: Record<string, obj>, ?approval: unit) : Item9 = jsNative
+            [<ParamObject; Emit("({ state: 'input-streaming', ...$0 })")>]
+            static member Create (``type``: string, toolCallId: string, ?title: string, ?toolMetadata: obj, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, obj>, ?approval: unit) : Item9 = jsNative
 
-        module Item11 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: unit option with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: unit option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item12 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item13 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item14 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item15 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item4 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: unit option with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: unit option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item5 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item6 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item7 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
-
-        module Item8 =
-            [<Interface>]
-            type Approval =
-                abstract id: string with get, set
-                abstract approved: bool with get, set
-                abstract descriptor: obj option with get, set
-                abstract requestReason: string option with get, set
-                abstract reason: string option with get, set
-                abstract isAutomatic: bool option with get, set
-                abstract signature: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
+        module Item9 =
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+            [<Literal>]
+            let state = "input-streaming"
 
 module ContextOverflowConfig =
     [<Interface>]
@@ -8729,7 +9344,7 @@ module Extensions =
         abstract getSessionInfo: unit -> JS.Promise<Extensions.HostBridgeLoopback.GetSessionInfo.Result.Item>
         abstract __WORKER_ENTRYPOINT_BRAND: unit
         abstract ctx: obj with get, set
-        abstract env: Record<string, obj> with get, set
+        abstract env: JS.Record<string, obj> with get, set
         abstract email: (obj -> JS.Promise<unit> option) option with get, set
         abstract fetch: (obj -> obj) option with get, set
         abstract connect: (obj -> JS.Promise<unit> option) option with get, set
@@ -8740,7 +9355,7 @@ module Extensions =
         abstract test: (obj -> JS.Promise<unit> option) option with get, set
         abstract trace: (obj[] -> JS.Promise<unit> option) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``__#1@#private``: obj, _permissions: obj, _getAgent: obj, readFile: (string -> JS.Promise<string option>), writeFile: Func<string, string, JS.Promise<unit>>, deleteFile: (string -> JS.Promise<bool>), listFiles: (string -> JS.Promise<Extensions.HostBridgeLoopback.ListFiles.Result.Item.Item[]>), getContext: (string -> JS.Promise<string option>), setContext: Func<string, string, JS.Promise<unit>>, getMessages: (float option -> JS.Promise<Extensions.HostBridgeLoopback.GetMessages.Result.Item.Item[]>), sendMessage: (string -> JS.Promise<unit>), getSessionInfo: (unit -> JS.Promise<Extensions.HostBridgeLoopback.GetSessionInfo.Result.Item>), ctx: obj, env: Record<string, obj>, ?email: (obj -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?queue: (obj -> JS.Promise<unit> option), ?scheduled: (obj -> JS.Promise<unit> option), ?tail: (obj[] -> JS.Promise<unit> option), ?tailStream: (obj -> obj), ?test: (obj -> JS.Promise<unit> option), ?trace: (obj[] -> JS.Promise<unit> option)) : HostBridgeLoopback = jsNative
+        static member Create (``__#1@#private``: obj, _permissions: obj, _getAgent: obj, readFile: (string -> JS.Promise<string option>), writeFile: Func<string, string, JS.Promise<unit>>, deleteFile: (string -> JS.Promise<bool>), listFiles: (string -> JS.Promise<Extensions.HostBridgeLoopback.ListFiles.Result.Item.Item[]>), getContext: (string -> JS.Promise<string option>), setContext: Func<string, string, JS.Promise<unit>>, getMessages: (float option -> JS.Promise<Extensions.HostBridgeLoopback.GetMessages.Result.Item.Item[]>), sendMessage: (string -> JS.Promise<unit>), getSessionInfo: (unit -> JS.Promise<Extensions.HostBridgeLoopback.GetSessionInfo.Result.Item>), ctx: obj, env: JS.Record<string, obj>, ?email: (obj -> JS.Promise<unit> option), ?fetch: (obj -> obj), ?connect: (obj -> JS.Promise<unit> option), ?queue: (obj -> JS.Promise<unit> option), ?scheduled: (obj -> JS.Promise<unit> option), ?tail: (obj[] -> JS.Promise<unit> option), ?tailStream: (obj -> obj), ?test: (obj -> JS.Promise<unit> option), ?trace: (obj[] -> JS.Promise<unit> option)) : HostBridgeLoopback = jsNative
 
     /// <summary>
     /// A readonly context provider backed by an extension Worker.
@@ -8921,7 +9536,7 @@ module Extensions =
 
     [<Interface>]
     type ExtensionManager =
-        abstract ``__#2@#private``: obj with get, set
+        abstract ``__#3@#private``: obj with get, set
         /// <summary>
         /// Restore extensions from DO storage after hibernation.
         /// <br /><br />
@@ -8965,15 +9580,15 @@ module Extensions =
         /// Tool names are prefixed with the sanitized extension name to avoid
         /// collisions: e.g. extension "github" with tool "create_pr" → "github_create_pr".
         /// </summary>
-        abstract getTools: unit -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>
+        abstract getTools: unit -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>
         [<ParamObject; Emit("$0")>]
-        static member Create (``__#2@#private``: obj, restore: (unit -> JS.Promise<unit>), load: Func<FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionManifest, string, JS.Promise<FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionInfo>>, unload: (string -> JS.Promise<bool>), onUnload: (Extensions.ExtensionManager.OnUnload.Cb -> unit), getContextLabels: (unit -> Extensions.ExtensionManager.GetContextLabels.Result.Item[]), getManifest: (string -> FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionManifest option), getHookSubscribers: (string -> Extensions.ExtensionManager.GetHookSubscribers.Result.Item[]), list: (unit -> FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionInfo[]), getTools: (unit -> Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>)) : ExtensionManager = jsNative
+        static member Create (``__#3@#private``: obj, restore: (unit -> JS.Promise<unit>), load: Func<FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionManifest, string, JS.Promise<FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionInfo>>, unload: (string -> JS.Promise<bool>), onUnload: (Extensions.ExtensionManager.OnUnload.Cb -> unit), getContextLabels: (unit -> Extensions.ExtensionManager.GetContextLabels.Result.Item[]), getManifest: (string -> FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionManifest option), getHookSubscribers: (string -> Extensions.ExtensionManager.GetHookSubscribers.Result.Item[]), list: (unit -> FSharp.CloudEdge.Runtime.Think.Extensions.ExtensionInfo[]), getTools: (unit -> JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>)) : ExtensionManager = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
         [<Import("HostBridgeLoopback", "@cloudflare/think/extensions"); EmitConstructor>]
-        static member HostBridgeLoopback (ctx: obj, env: Record<string, obj>) : FSharp.CloudEdge.Runtime.Think.Extensions.HostBridgeLoopback = jsNative
+        static member HostBridgeLoopback (ctx: obj, env: JS.Record<string, obj>) : FSharp.CloudEdge.Runtime.Think.Extensions.HostBridgeLoopback = jsNative
         /// <summary>
         /// A readonly context provider backed by an extension Worker.
         /// Delegates <c>get()</c> to the extension's <c>contextGet</c> RPC method.
@@ -9090,11 +9705,17 @@ module Extensions =
     module ExtensionToolDescriptor =
         [<Interface>]
         type InputSchema =
+            /// <remarks>TypeScript type: <c>"object"</c></remarks>
             abstract ``type``: string with get, set
-            abstract properties: Record<string, obj> with get, set
+            abstract properties: JS.Record<string, obj> with get, set
             abstract required: string[] option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, properties: Record<string, obj>, ?required: string[]) : InputSchema = jsNative
+            [<ParamObject; Emit("({ type: 'object', ...$0 })")>]
+            static member Create (properties: JS.Record<string, obj>, ?required: string[]) : InputSchema = jsNative
+
+        module InputSchema =
+            /// <remarks>TypeScript type: <c>"object"</c></remarks>
+            [<Literal>]
+            let ``type`` = "object"
 
     module HostBridgeLoopback =
         module Fetch =
@@ -9601,17 +10222,29 @@ module FetchResult2 =
 module Messengers =
     [<Interface>]
     type MessengerConversationTarget2 =
+        /// <remarks>TypeScript type: <c>"self"</c></remarks>
         abstract target: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (target: string) : MessengerConversationTarget2 = jsNative
+        [<Emit("({ target: 'self' })")>]
+        static member Create () : MessengerConversationTarget2 = jsNative
+
+    module MessengerConversationTarget2 =
+        /// <remarks>TypeScript type: <c>"self"</c></remarks>
+        [<Literal>]
+        let target = "self"
 
     [<Interface>]
     type MessengerConversationTarget3 =
         abstract agentClass: obj option with get, set
         abstract name: string with get, set
+        /// <remarks>TypeScript type: <c>"subagent"</c></remarks>
         abstract target: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, target: string, ?agentClass: obj) : MessengerConversationTarget3 = jsNative
+        [<ParamObject; Emit("({ target: 'subagent', ...$0 })")>]
+        static member Create (name: string, ?agentClass: obj) : MessengerConversationTarget3 = jsNative
+
+    module MessengerConversationTarget3 =
+        /// <remarks>TypeScript type: <c>"subagent"</c></remarks>
+        [<Literal>]
+        let target = "subagent"
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type MessengerEventKind =
@@ -9633,8 +10266,8 @@ module Messengers =
 
     [<Interface>]
     type MessengerAttachment =
-        abstract data: JS.ArrayBuffer option with get, set
-        abstract fetch: (unit -> JS.Promise<JS.ArrayBuffer>) option with get, set
+        abstract data: Fable.Core.TS.Es.ArrayBuffer option with get, set
+        abstract fetch: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>) option with get, set
         /// <summary>
         /// Platform-specific metadata needed to re-fetch the attachment after the
         /// event has been serialized (e.g. across a sub-agent Durable Object hop).
@@ -9642,7 +10275,7 @@ module Messengers =
         /// etc. — that survive serialization even when <c>fetch</c>, <c>data</c>, and <c>raw</c>
         /// cannot, so a downstream agent can reconstruct the download closure.
         /// </summary>
-        abstract fetchMetadata: Record<string, string> option with get, set
+        abstract fetchMetadata: JS.Record<string, string> option with get, set
         abstract id: string option with get, set
         abstract mediaType: string option with get, set
         abstract name: string option with get, set
@@ -9651,7 +10284,7 @@ module Messengers =
         abstract text: string option with get, set
         abstract url: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?data: JS.ArrayBuffer, ?fetch: (unit -> JS.Promise<JS.ArrayBuffer>), ?fetchMetadata: Record<string, string>, ?id: string, ?mediaType: string, ?name: string, ?raw: obj, ?size: float, ?text: string, ?url: string) : MessengerAttachment = jsNative
+        static member Create (?data: Fable.Core.TS.Es.ArrayBuffer, ?fetch: (unit -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer>), ?fetchMetadata: JS.Record<string, string>, ?id: string, ?mediaType: string, ?name: string, ?raw: obj, ?size: float, ?text: string, ?url: string) : MessengerAttachment = jsNative
 
     [<Interface>]
     type MessengerThread =
@@ -9668,14 +10301,14 @@ module Messengers =
     type MessengerMessage =
         abstract attachments: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAttachment[] with get, set
         abstract author: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAuthor with get, set
-        abstract createdAt: JS.Date option with get, set
+        abstract createdAt: Fable.Core.TS.Es.Date option with get, set
         abstract id: string with get, set
         abstract isMention: bool option with get, set
         abstract providerMessageId: string with get, set
         abstract raw: obj option with get, set
         abstract text: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (attachments: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAttachment[], author: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAuthor, id: string, providerMessageId: string, text: string, ?createdAt: JS.Date, ?isMention: bool, ?raw: obj) : MessengerMessage = jsNative
+        static member Create (attachments: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAttachment[], author: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerAuthor, id: string, providerMessageId: string, text: string, ?createdAt: Fable.Core.TS.Es.Date, ?isMention: bool, ?raw: obj) : MessengerMessage = jsNative
 
     [<Interface>]
     type MessengerAction =
@@ -9746,7 +10379,7 @@ module Messengers =
         abstract textSoFar: unit -> string
         abstract visibleLimitReached: unit -> bool
         abstract visibleText: unit -> string
-        abstract stream: unit -> JS.AsyncIterable<string>
+        abstract stream: unit -> Fable.Core.TS.Es.AsyncIterable<string, obj, obj>
         abstract pushVisibleText: obj with get, set
         abstract wake: obj with get, set
         abstract markVisibleStarted: obj with get, set
@@ -9764,9 +10397,15 @@ module Messengers =
         abstract stage: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerReplyStage with get, set
         abstract tag: DeliveryTag option with get, set
         abstract thread: obj option with get, set
+        /// <remarks>TypeScript type: <c>"think:messenger-reply"</c></remarks>
         abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``event``: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerEvent, stage: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerReplyStage, ``type``: string, ?tag: DeliveryTag, ?thread: obj) : MessengerReplySnapshot = jsNative
+        [<ParamObject; Emit("({ type: 'think:messenger-reply', ...$0 })")>]
+        static member Create (``event``: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerEvent, stage: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerReplyStage, ?tag: DeliveryTag, ?thread: obj) : MessengerReplySnapshot = jsNative
+
+    module MessengerReplySnapshot =
+        /// <remarks>TypeScript type: <c>"think:messenger-reply"</c></remarks>
+        [<Literal>]
+        let ``type`` = "think:messenger-reply"
 
     [<Interface>]
     type MessengerDeliveryTarget =
@@ -9815,7 +10454,7 @@ module Messengers =
         /// <summary>
         /// Handle a message from a hibernating WebSocket connection.
         /// </summary>
-        abstract onMessage: _connection: Think.OnConnect.Connection<obj> * _message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit> option
+        abstract onMessage: _connection: Think.OnConnect.Connection<obj> * _message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option
         /// <summary>
         /// Handle a hibernating WebSocket connection closing.
         /// </summary>
@@ -9825,7 +10464,7 @@ module Messengers =
         /// </summary>
         abstract getConnectionTags: _connection: Think.OnConnect.Connection<obj> * _context: obj -> U2<string[], JS.Promise<string[]>>
         /// <remarks>@internal Ensure lifecycle startup before a native RPC implementation.</remarks>
-        abstract __unsafe_ensureInitialized: ?props: Record<string, obj> -> JS.Promise<unit>
+        abstract __unsafe_ensureInitialized: ?props: JS.Record<string, obj> -> JS.Promise<unit>
         abstract _state: obj with get, set
         abstract _disposables: obj with get, set
         abstract _destroyed: obj with get, set
@@ -9965,7 +10604,7 @@ module Messengers =
         /// Emit an observability event with auto-generated timestamp.
         /// </summary>
         /// <remarks>@internal</remarks>
-        abstract _emit: ``type``: Think.Emit.Type * ?payload: Record<string, obj> -> unit
+        abstract _emit: ``type``: Think.Emit.Type * ?payload: JS.Record<string, obj> -> unit
         /// <summary>
         /// Run SDK work under a stable parent for platform child spans.
         /// </summary>
@@ -9977,7 +10616,7 @@ module Messengers =
         /// <param name="strings">SQL query template strings</param>
         /// <param name="values">Values to be inserted into the query</param>
         /// <returns>Array of query results</returns>
-        abstract sql<'T>: strings: obj * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
+        abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
         abstract _schemaInitialization: obj with get, set
         /// <summary>
         /// Create all internal tables and run migrations if needed.
@@ -10300,7 +10939,7 @@ module Messengers =
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract schedule<'T>: ``when``: U3<string, float, JS.Date> * callback: Messengers.ThinkMessengerStateAgent.Queue.Callback * ?payload: 'T * ?options: Think.Schedule.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Think.Think.GetSchedules.Result.Item>
+        abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: Messengers.ThinkMessengerStateAgent.Queue.Callback * ?payload: 'T * ?options: Think.Schedule.Options -> JS.Promise<Think.Scheduler.Item.Item.Schedule<'T>>
         /// <summary>
         /// Schedule a task to run repeatedly at a fixed interval.
         /// <br /><br />
@@ -10325,7 +10964,7 @@ module Messengers =
         /// <param name="options">Options for the scheduled task</param>
         /// <param name="options.retry">Retry options for the callback execution</param>
         /// <returns>Schedule object representing the scheduled task</returns>
-        abstract scheduleEvery<'T>: intervalSeconds: float * callback: Messengers.ThinkMessengerStateAgent.Queue.Callback * ?payload: 'T * ?options: Think.ScheduleEvery.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Think.Think.GetSchedules.Result.Item>
+        abstract scheduleEvery<'T>: intervalSeconds: float * callback: Messengers.ThinkMessengerStateAgent.Queue.Callback * ?payload: 'T * ?options: Think.ScheduleEvery.Options -> JS.Promise<Think.Scheduler.Item.Item.Schedule<'T>>
         /// <summary>
         /// Get a scheduled task by ID
         /// </summary>
@@ -10337,7 +10976,7 @@ module Messengers =
         /// Use {@link getScheduleById}. This synchronous API cannot cross
         /// Durable Object boundaries and throws inside sub-agents.
         /// </remarks>
-        abstract getSchedule<'T>: id: string -> U4<Think.GetSchedule.Result<'T>, Think.GetSchedule.Result2<'T>, Think.GetSchedule.Result3<'T>, Think.GetSchedule.Result4<'T>> option
+        abstract getSchedule<'T>: id: string -> Think.Scheduler.Item.Item.Schedule<'T> option
         /// <summary>
         /// Get a scheduled task by ID.
         /// <br /><br />
@@ -10346,7 +10985,7 @@ module Messengers =
         /// </summary>
         /// <param name="id">ID of the scheduled task</param>
         /// <returns>The Schedule object or undefined if not found</returns>
-        abstract getScheduleById: id: string -> JS.Promise<Think.Scheduler.Item.Item.Schedule option>
+        abstract getScheduleById: id: string -> JS.Promise<Think.Scheduler.Item.Item.Schedule<obj> option>
         /// <summary>
         /// Get scheduled tasks matching the given criteria
         /// </summary>
@@ -10358,7 +10997,7 @@ module Messengers =
         /// Use {@link listSchedules}. This synchronous API cannot cross
         /// Durable Object boundaries and throws inside sub-agents.
         /// </remarks>
-        abstract getSchedules: ?criteria: obj -> Think.GetSchedules.Result.Item[]
+        abstract getSchedules<'T>: ?criteria: obj -> Think.Scheduler.Item.Item.Schedule<'T>[]
         /// <summary>
         /// List scheduled tasks matching the given criteria.
         /// <br /><br />
@@ -10367,7 +11006,7 @@ module Messengers =
         /// </summary>
         /// <param name="criteria">Criteria to filter schedules</param>
         /// <returns>Array of matching Schedule objects</returns>
-        abstract listSchedules: ?criteria: obj -> JS.Promise<Think.Scheduler.Item.Item.Schedule[]>
+        abstract listSchedules: ?criteria: obj -> JS.Promise<Think.Scheduler.Item.Item.Schedule<obj>[]>
         /// <summary>
         /// Cancel a scheduled task.
         /// <br /><br />
@@ -10645,9 +11284,9 @@ module Messengers =
         /// </summary>
         /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
         abstract fetch: request: obj -> JS.Promise<obj>
-        abstract broadcast: msg: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> unit
+        abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
         abstract getConnection<'TState>: id: string -> Think.OnConnect.Connection<'TState> option
-        abstract getConnections: ?tag: string -> obj
+        abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<Think.OnConnect.Connection<'TState>, obj, obj>
         abstract _cf_activeSubAgentBridge: obj with get, set
         /// <summary>
         /// Route a virtual sub-agent connection operation through its live frame
@@ -10667,9 +11306,9 @@ module Messengers =
         abstract _cf_routeSubAgentBroadcast: obj with get, set
         abstract _cf_reportSubAgentConnectionOperationFailure: obj with get, set
         abstract _cf_broadcastToParentSubAgent: obj with get, set
-        abstract _cf_broadcastToSubAgent: ownerPath: obj[] * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * ?without: string[] -> JS.Promise<unit>
+        abstract _cf_broadcastToSubAgent: ownerPath: obj[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit>
         abstract _cf_subAgentConnectionMetas: ownerPath: obj[] -> JS.Promise<obj[]>
-        abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> JS.Promise<unit>
+        abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
         abstract _cf_closeSubAgentConnection: connectionId: string * ?code: float * ?reason: string -> JS.Promise<unit>
         abstract _cf_setSubAgentConnectionState: connectionId: string * state: obj -> JS.Promise<obj>
         abstract _cf_subAgentConnectionMetaForPath: obj with get, set
@@ -10693,7 +11332,7 @@ module Messengers =
         abstract _cf_forwardSubAgentWebSocketClose: obj with get, set
         abstract _cf_resolveSubAgentConnection: obj with get, set
         abstract _cf_handleSubAgentWebSocketConnect: bridge: obj * meta: obj -> JS.Promise<unit>
-        abstract _cf_handleSubAgentWebSocketMessage: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> * bridge: obj * meta: obj * ?replyBridge: obj -> JS.Promise<unit>
+        abstract _cf_handleSubAgentWebSocketMessage: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * bridge: obj * meta: obj * ?replyBridge: obj -> JS.Promise<unit>
         abstract _cf_handleSubAgentWebSocketClose: code: float * reason: string * wasClean: bool * bridge: obj * meta: obj -> JS.Promise<unit>
         abstract _cf_runWithSubAgentBridge: obj with get, set
         abstract _cf_createSubAgentBridgeConnection: obj with get, set
@@ -11300,7 +11939,7 @@ module Messengers =
         /// Get all methods marked as callable on this Agent
         /// </summary>
         /// <returns>A map of method names to their metadata</returns>
-        abstract getCallableMethods: unit -> JS.Map<string, obj>
+        abstract getCallableMethods: unit -> Fable.Core.TS.Es.Map<string, obj>
         /// <summary>
         /// Start a workflow and track it in this Agent's database.
         /// Automatically injects agent identity into the workflow params.
@@ -11600,7 +12239,7 @@ module Messengers =
         /// Override this to handle all callback types in one place.
         /// </summary>
         /// <param name="callback">- The callback payload</param>
-        abstract onWorkflowCallback: callback: Think.OnWorkflowCallback.Callback -> JS.Promise<unit>
+        abstract onWorkflowCallback: callback: Think.OnWorkflowCallback.Callback<obj> -> JS.Promise<unit>
         /// <summary>
         /// Called when a workflow reports progress.
         /// Override to handle progress updates.
@@ -11637,7 +12276,7 @@ module Messengers =
         /// Handle a workflow callback via RPC.
         /// </summary>
         /// <remarks>@internal - Called by AgentWorkflow, do not call directly</remarks>
-        abstract _workflow_handleCallback: callback: Think.OnWorkflowCallback.Callback -> JS.Promise<unit>
+        abstract _workflow_handleCallback: callback: Think.OnWorkflowCallback.Callback<obj> -> JS.Promise<unit>
         /// <summary>
         /// Broadcast a message to all connected clients via RPC.
         /// </summary>
@@ -11754,7 +12393,7 @@ module Messengers =
         abstract ctx: obj with get, set
         abstract env: obj with get, set
         abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-        abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+        abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
         abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
         abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
         /// <summary>
@@ -11823,7 +12462,7 @@ module Messengers =
         [<ParamObject; Emit("$0")>]
         static member Create (adapter: obj, adapterName: string, provider: string, userName: string, ?capabilities: ChannelCapabilities, ?channelSpeakerLabel: FSharp.CloudEdge.Runtime.Think.Messengers.ChannelSpeakerLabel, ?conversation: U2<string, FSharp.CloudEdge.Runtime.Think.Messengers.MessengerConversationResolver>, ?delivery: ChannelDeliveryPolicy, ?keyShard: (string -> string option), ?path: string, ?respondTo: FSharp.CloudEdge.Runtime.Think.Messengers.MessengerRespondTo[], ?shardKey: (string -> string), ?subscribeOnMention: bool, ?toEvent: (FSharp.CloudEdge.Runtime.Think.Messengers.ChatSdkMessengerEventInput -> U2<FSharp.CloudEdge.Runtime.Think.Messengers.MessengerEvent, JS.Promise<FSharp.CloudEdge.Runtime.Think.Messengers.MessengerEvent>>), ?verifyWebhook: U2<bool, (obj -> obj)>) : MessengerDefinition = jsNative
 
-    type ThinkMessengers = Record<string, FSharp.CloudEdge.Runtime.Think.Messengers.MessengerDefinition>
+    type ThinkMessengers = JS.Record<string, FSharp.CloudEdge.Runtime.Think.Messengers.MessengerDefinition>
 
     [<Interface>]
     type NormalizedMessengerDefinition =
@@ -12276,10 +12915,16 @@ module PrepareStepResult2 =
 
     [<Interface>]
     type ToolChoice =
+        /// <remarks>TypeScript type: <c>"tool"</c></remarks>
         abstract ``type``: string with get, set
         abstract toolName: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: obj) : ToolChoice = jsNative
+        [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
+        static member Create (toolName: obj) : ToolChoice = jsNative
+
+    module ToolChoice =
+        /// <remarks>TypeScript type: <c>"tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool"
 
 module StreamableResult =
     module ToUIMessageStream =
@@ -12317,7 +12962,7 @@ module Think =
         /// Named binding targets. Each entry generates a <c>fetch_&lt;name&gt;</c> tool with the
         /// binding, allowlist, and fixed headers baked in.
         /// </summary>
-        abstract bindings: Record<string, FetchBindingTarget> option with get, set
+        abstract bindings: JS.Record<string, FetchBindingTarget> option with get, set
         /// <summary>
         /// Hard download cap in bytes. Default 1_000_000.
         /// </summary>
@@ -12354,7 +12999,7 @@ module Think =
         /// </summary>
         abstract defaultAccept: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?allowlist: string[], ?bindings: Record<string, FetchBindingTarget>, ?maxBytes: float, ?maxModelChars: float, ?spillToWorkspace: bool, ?timeoutMs: float, ?response: FetchResponseMode, ?followRedirects: FetchRedirectPolicy, ?modelHeaderAllowlist: string[], ?defaultAccept: string) : FetchTools = jsNative
+        static member Create (?allowlist: string[], ?bindings: JS.Record<string, FetchBindingTarget>, ?maxBytes: float, ?maxModelChars: float, ?spillToWorkspace: bool, ?timeoutMs: float, ?response: FetchResponseMode, ?followRedirects: FetchRedirectPolicy, ?modelHeaderAllowlist: string[], ?defaultAccept: string) : FetchTools = jsNative
 
     [<Interface>]
     type LastHydration =
@@ -12409,9 +13054,15 @@ module Think =
             [<Interface>]
             type Item =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
                 abstract state: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string) : Item = jsNative
+                [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
+                static member Create (id: string) : Item = jsNative
+
+            module Item =
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
+                [<Literal>]
+                let state = "ready"
 
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
             type Item2 =
@@ -12421,25 +13072,39 @@ module Think =
             [<Interface>]
             type Item22 =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
                 abstract state: string with get, set
                 abstract authUrl: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string, authUrl: string) : Item22 = jsNative
+                [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
+                static member Create (id: string, authUrl: string) : Item22 = jsNative
+
+            module Item22 =
+                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
+                [<Literal>]
+                let state = "authenticating"
 
             [<Interface>]
             type Item23 =
                 abstract id: string with get, set
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
                 abstract state: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, state: string) : Item23 = jsNative
+                [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
+                static member Create (id: string) : Item23 = jsNative
+
+            module Item23 =
+                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
+                [<Literal>]
+                let state = "ready"
 
     module AfterToolCall =
         [<Interface>]
         type Ctx =
+            inherit Think.AfterToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12447,22 +13112,47 @@ module Think =
             abstract invalid: bool option with get, set
             abstract error: unit option with get, set
             abstract title: string option with get, set
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract toolExecutionMs: float
-            abstract durationMs: float
             abstract toolOutput: Think.AfterToolCall.Ctx.ToolOutput
             abstract success: bool
             abstract output: obj
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx.ToolOutput, success: bool, output: obj, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string, ?stepNumber: float) : Ctx = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx.ToolOutput, success: bool, output: obj, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string, ?stepNumber: float) : Ctx = jsNative
+
+        module Ctx =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
+
+            [<Interface>]
+            type Base =
+                abstract stepNumber: float option
+                abstract messages: obj[]
+                abstract toolExecutionMs: float
+                abstract durationMs: float
+                [<ParamObject; Emit("$0")>]
+                static member Create (messages: obj[], toolExecutionMs: float, durationMs: float, ?stepNumber: float) : Base = jsNative
+
+            [<Interface>]
+            type ToolOutput =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                abstract ``type``: string with get, set
+                abstract output: obj with get, set
+                [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+                static member Create (output: obj) : ToolOutput = jsNative
+
+            module ToolOutput =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-result"
 
         [<Interface>]
         type Ctx2 =
+            inherit Think.AfterToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12470,22 +13160,38 @@ module Think =
             abstract invalid: bool option with get, set
             abstract error: unit
             abstract title: string option with get, set
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract toolExecutionMs: float
-            abstract durationMs: float
             abstract toolOutput: Think.AfterToolCall.Ctx2.ToolOutput
             abstract success: bool
             abstract output: unit option
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx2.ToolOutput, success: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?title: string, ?stepNumber: float, ?output: unit) : Ctx2 = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx2.ToolOutput, success: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?title: string, ?stepNumber: float, ?output: unit) : Ctx2 = jsNative
+
+        module Ctx2 =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
+
+            [<Interface>]
+            type ToolOutput =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
+                abstract ``type``: string with get, set
+                abstract error: obj with get, set
+                [<ParamObject; Emit("({ type: 'tool-error', ...$0 })")>]
+                static member Create (error: obj) : ToolOutput = jsNative
+
+            module ToolOutput =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-error"
 
         [<Interface>]
         type Ctx3 =
+            inherit Think.AfterToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12500,22 +13206,25 @@ module Think =
             /// The error that caused the tool call to be invalid.
             /// </summary>
             abstract error: unit option with get, set
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract toolExecutionMs: float
-            abstract durationMs: float
             abstract toolOutput: Think.AfterToolCall.Ctx.ToolOutput
             abstract success: bool
             abstract output: obj
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, dynamic: bool, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx.ToolOutput, success: bool, output: obj, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: unit, ?stepNumber: float) : Ctx3 = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, dynamic: bool, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx.ToolOutput, success: bool, output: obj, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: unit, ?stepNumber: float) : Ctx3 = jsNative
+
+        module Ctx3 =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
 
         [<Interface>]
         type Ctx4 =
+            inherit Think.AfterToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12530,39 +13239,24 @@ module Think =
             /// The error that caused the tool call to be invalid.
             /// </summary>
             abstract error: obj with get, set
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract toolExecutionMs: float
-            abstract durationMs: float
             abstract toolOutput: Think.AfterToolCall.Ctx2.ToolOutput
             abstract success: bool
             abstract output: unit option
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, dynamic: bool, error: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx2.ToolOutput, success: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?stepNumber: float, ?output: unit) : Ctx4 = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, dynamic: bool, error: obj, messages: obj[], toolExecutionMs: float, durationMs: float, toolOutput: Think.AfterToolCall.Ctx2.ToolOutput, success: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?stepNumber: float, ?output: unit) : Ctx4 = jsNative
 
-        module Ctx =
-            [<Interface>]
-            type ToolOutput =
-                abstract ``type``: string with get, set
-                abstract output: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, output: obj) : ToolOutput = jsNative
-
-        module Ctx2 =
-            [<Interface>]
-            type ToolOutput =
-                abstract ``type``: string with get, set
-                abstract error: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, error: obj) : ToolOutput = jsNative
+        module Ctx4 =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
 
     module ApproveWorkflow =
         [<Interface>]
         type Data =
             abstract reason: string option with get, set
-            abstract metadata: Record<string, obj> option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?reason: string, ?metadata: Record<string, obj>) : Data = jsNative
+            static member Create (?reason: string, ?metadata: JS.Record<string, obj>) : Data = jsNative
 
     module BeforeStep =
         [<Interface>]
@@ -12607,21 +13301,23 @@ module Think =
             /// <summary>
             /// User-defined runtime context.
             /// </summary>
-            abstract runtimeContext: Record<string, obj> with get, set
+            abstract runtimeContext: JS.Record<string, obj> with get, set
             /// <summary>
             /// The sandbox environment that the step is operating in.
             /// </summary>
             abstract experimental_sandbox: obj option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (steps: obj[], stepNumber: float, model: obj, messages: obj[], initialMessages: obj[], responseMessages: obj[], toolsContext: obj, runtimeContext: Record<string, obj>, ?instructions: obj, ?initialInstructions: obj, ?experimental_sandbox: obj) : Ctx = jsNative
+            static member Create (steps: obj[], stepNumber: float, model: obj, messages: obj[], initialMessages: obj[], responseMessages: obj[], toolsContext: obj, runtimeContext: JS.Record<string, obj>, ?instructions: obj, ?initialInstructions: obj, ?experimental_sandbox: obj) : Ctx = jsNative
 
     module BeforeToolCall =
         [<Interface>]
         type Ctx =
+            inherit Think.BeforeToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12629,21 +13325,33 @@ module Think =
             abstract invalid: bool option with get, set
             abstract error: unit option with get, set
             abstract title: string option with get, set
-            /// <summary>
-            /// Zero-based index of the current step where this tool call occurs.
-            /// </summary>
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract abortSignal: obj option
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, messages: obj[], ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string, ?stepNumber: float, ?abortSignal: obj) : Ctx = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, messages: obj[], ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string, ?stepNumber: float, ?abortSignal: obj) : Ctx = jsNative
+
+        module Ctx =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
+
+            [<Interface>]
+            type Base =
+                /// <summary>
+                /// Zero-based index of the current step where this tool call occurs.
+                /// </summary>
+                abstract stepNumber: float option
+                abstract messages: obj[]
+                abstract abortSignal: obj option
+                [<ParamObject; Emit("$0")>]
+                static member Create (messages: obj[], ?stepNumber: float, ?abortSignal: obj) : Base = jsNative
 
         [<Interface>]
         type Ctx2 =
+            inherit Think.BeforeToolCall.Ctx.Base
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
             abstract ``type``: string with get, set
             abstract toolCallId: string with get, set
             abstract providerExecuted: bool option with get, set
-            abstract providerMetadata: Record<string, obj> option with get, set
+            abstract providerMetadata: JS.Record<string, obj> option with get, set
             abstract toolMetadata: obj option with get, set
             abstract toolName: string with get, set
             abstract input: obj with get, set
@@ -12658,37 +13366,54 @@ module Think =
             /// The error that caused the tool call to be invalid.
             /// </summary>
             abstract error: obj option with get, set
-            /// <summary>
-            /// Zero-based index of the current step where this tool call occurs.
-            /// </summary>
-            abstract stepNumber: float option
-            abstract messages: obj[]
-            abstract abortSignal: obj option
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, dynamic: bool, messages: obj[], ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj, ?stepNumber: float, ?abortSignal: obj) : Ctx2 = jsNative
+            [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+            static member Create (toolCallId: string, toolName: string, input: obj, dynamic: bool, messages: obj[], ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj, ?stepNumber: float, ?abortSignal: obj) : Ctx2 = jsNative
+
+        module Ctx2 =
+            /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+            [<Literal>]
+            let ``type`` = "tool-call"
 
         module Result =
             [<Interface>]
             type Item =
+                /// <remarks>TypeScript type: <c>"allow"</c></remarks>
                 abstract action: string with get, set
-                abstract input: Record<string, obj> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (action: string, ?input: Record<string, obj>) : Item = jsNative
+                abstract input: JS.Record<string, obj> option with get, set
+                [<ParamObject; Emit("({ action: 'allow', ...$0 })")>]
+                static member Create (?input: JS.Record<string, obj>) : Item = jsNative
+
+            module Item =
+                /// <remarks>TypeScript type: <c>"allow"</c></remarks>
+                [<Literal>]
+                let action = "allow"
 
             [<Interface>]
             type Item2 =
+                /// <remarks>TypeScript type: <c>"block"</c></remarks>
                 abstract action: string with get, set
                 abstract reason: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (action: string, ?reason: string) : Item2 = jsNative
+                [<ParamObject; Emit("({ action: 'block', ...$0 })")>]
+                static member Create (?reason: string) : Item2 = jsNative
+
+            module Item2 =
+                /// <remarks>TypeScript type: <c>"block"</c></remarks>
+                [<Literal>]
+                let action = "block"
 
             [<Interface>]
             type Item3 =
+                /// <remarks>TypeScript type: <c>"substitute"</c></remarks>
                 abstract action: string with get, set
                 abstract output: obj with get, set
-                abstract input: Record<string, obj> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (action: string, output: obj, ?input: Record<string, obj>) : Item3 = jsNative
+                abstract input: JS.Record<string, obj> option with get, set
+                [<ParamObject; Emit("({ action: 'substitute', ...$0 })")>]
+                static member Create (output: obj, ?input: JS.Record<string, obj>) : Item3 = jsNative
+
+            module Item3 =
+                /// <remarks>TypeScript type: <c>"substitute"</c></remarks>
+                [<Literal>]
+                let action = "substitute"
 
     module CfInitAsFacet =
         module ParentPath =
@@ -12714,11 +13439,11 @@ module Think =
             abstract targetAssistantId: string option with get, set
             abstract originalRequestId: string option with get, set
             abstract incidentId: string option with get, set
-            abstract lastBody: Record<string, obj> option with get, set
+            abstract lastBody: JS.Record<string, obj> option with get, set
             abstract lastClientTools: obj[] option with get, set
             abstract recoveredRequestId: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?targetAssistantId: string, ?originalRequestId: string, ?incidentId: string, ?lastBody: Record<string, obj>, ?lastClientTools: obj[], ?recoveredRequestId: string) : Data = jsNative
+            static member Create (?targetAssistantId: string, ?originalRequestId: string, ?incidentId: string, ?lastBody: JS.Record<string, obj>, ?lastClientTools: obj[], ?recoveredRequestId: string) : Data = jsNative
 
     module ChatRecoveryRetry =
         [<Interface>]
@@ -12726,11 +13451,11 @@ module Think =
             abstract targetUserId: string option with get, set
             abstract originalRequestId: string option with get, set
             abstract incidentId: string option with get, set
-            abstract lastBody: Record<string, obj> option with get, set
+            abstract lastBody: JS.Record<string, obj> option with get, set
             abstract lastClientTools: obj[] option with get, set
             abstract recoveredRequestId: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?targetUserId: string, ?originalRequestId: string, ?incidentId: string, ?lastBody: Record<string, obj>, ?lastClientTools: obj[], ?recoveredRequestId: string) : Data = jsNative
+            static member Create (?targetUserId: string, ?originalRequestId: string, ?incidentId: string, ?lastBody: JS.Record<string, obj>, ?lastClientTools: obj[], ?recoveredRequestId: string) : Data = jsNative
 
     module ClassifyChatError =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -12778,18 +13503,24 @@ module Think =
     module DeleteWorkflows =
         [<Interface>]
         type Criteria =
-            /// <summary>
-            /// Filter by status
-            /// </summary>
-            abstract status: U2<string, Think.DeleteWorkflows.Criteria.Status.Item[]> option with get, set
-            abstract workflowName: string option with get, set
-            abstract metadata: Record<string, U3<string, float, bool>> option with get, set
-            abstract cursor: string option with get, set
-            abstract createdBefore: JS.Date option with get, set
+            inherit Think.DeleteWorkflows.Criteria.Base
+            abstract createdBefore: Fable.Core.TS.Es.Date option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, Think.DeleteWorkflows.Criteria.Status.Item[]>, ?workflowName: string, ?metadata: Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: JS.Date) : Criteria = jsNative
+            static member Create (?status: U2<string, Think.DeleteWorkflows.Criteria.Status.Item[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: Fable.Core.TS.Es.Date) : Criteria = jsNative
 
         module Criteria =
+            [<Interface>]
+            type Base =
+                /// <summary>
+                /// Filter by status
+                /// </summary>
+                abstract status: U2<string, Think.DeleteWorkflows.Criteria.Status.Item[]> option with get, set
+                abstract workflowName: string option with get, set
+                abstract metadata: JS.Record<string, U3<string, float, bool>> option with get, set
+                abstract cursor: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?status: U2<string, Think.DeleteWorkflows.Criteria.Status.Item[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string) : Base = jsNative
+
             module Status =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type Item =
@@ -12977,158 +13708,6 @@ module Think =
                 [<ParamObject; Emit("$0")>]
                 static member Create (time: float, exclusive: bool) : Item = jsNative
 
-    module GetSchedule =
-        [<Interface>]
-        type Result<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: obj option with get, set
-            /// <summary>
-            /// One-time execution at a specific date.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, ?retry: obj) : Result<'T> = jsNative
-
-        [<Interface>]
-        type Result2<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: obj option with get, set
-            /// <summary>
-            /// One-time execution after a relative delay.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract delayInSeconds: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float, ?retry: obj) : Result2<'T> = jsNative
-
-        [<Interface>]
-        type Result3<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: obj option with get, set
-            /// <summary>
-            /// Recurring execution from a cron expression.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract cron: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, cron: string, ?retry: obj) : Result3<'T> = jsNative
-
-        [<Interface>]
-        type Result4<'T> =
-            /// <summary>
-            /// Unique schedule identifier.
-            /// </summary>
-            abstract id: string with get, set
-            abstract callback: string with get, set
-            abstract payload: 'T with get, set
-            abstract retry: obj option with get, set
-            /// <summary>
-            /// Recurring execution at a fixed interval.
-            /// </summary>
-            abstract ``type``: string with get, set
-            abstract time: float with get, set
-            abstract intervalSeconds: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, intervalSeconds: float, ?retry: obj) : Result4<'T> = jsNative
-
-    module GetSchedules =
-        module Result =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: obj option * time: float
-                | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: obj option * time: float * delayInSeconds: float
-                | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: obj option * time: float * cron: string
-                | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: obj option * time: float * intervalSeconds: float
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: obj option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, ?retry: obj) : Item2<'T> = jsNative
-
-            [<Interface>]
-            type Item3<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: obj option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float, ?retry: obj) : Item3<'T> = jsNative
-
-            [<Interface>]
-            type Item4<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: obj option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, cron: string, ?retry: obj) : Item4<'T> = jsNative
-
-            [<Interface>]
-            type Item5<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: obj option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, callback: string, payload: 'T, ``type``: string, time: float, intervalSeconds: float, ?retry: obj) : Item5<'T> = jsNative
-
     module HostGetMessages =
         module Result =
             module Item =
@@ -13196,20 +13775,28 @@ module Think =
         module Ctx =
             [<Interface>]
             type Chunk =
+                /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract toolName: string with get, set
                 abstract providerExecuted: bool option with get, set
                 abstract dynamic: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Chunk = jsNative
+                [<ParamObject; Emit("({ type: 'tool-output-denied', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Chunk = jsNative
+
+            module Chunk =
+                /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-output-denied"
 
             [<Interface>]
             type Chunk2 =
+                /// <remarks>TypeScript type: <c>"source"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The type of source - URL sources reference web content.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"url"</c></remarks>
                 abstract sourceType: string with get, set
                 /// <summary>
                 /// The ID of the source.
@@ -13226,16 +13813,29 @@ module Think =
                 /// <summary>
                 /// Additional provider metadata for the source.
                 /// </summary>
-                abstract providerMetadata: Record<string, obj> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, sourceType: string, id: string, url: string, ?title: string, ?providerMetadata: Record<string, obj>) : Chunk2 = jsNative
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
+                [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+                static member Create (id: string, url: string, ?title: string, ?providerMetadata: JS.Record<string, obj>) : Chunk2 = jsNative
+
+            module Chunk2 =
+                /// <remarks>TypeScript type: <c>"source"</c></remarks>
+                [<Literal>]
+                let ``type`` = "source"
+                /// <summary>
+                /// The type of source - URL sources reference web content.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"url"</c></remarks>
+                [<Literal>]
+                let sourceType = "url"
 
             [<Interface>]
             type Chunk3 =
+                /// <remarks>TypeScript type: <c>"source"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The type of source - document sources reference files/documents.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"document"</c></remarks>
                 abstract sourceType: string with get, set
                 /// <summary>
                 /// The ID of the source.
@@ -13256,78 +13856,114 @@ module Think =
                 /// <summary>
                 /// Additional provider metadata for the source.
                 /// </summary>
-                abstract providerMetadata: Record<string, obj> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, sourceType: string, id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: Record<string, obj>) : Chunk3 = jsNative
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
+                [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+                static member Create (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: JS.Record<string, obj>) : Chunk3 = jsNative
+
+            module Chunk3 =
+                /// <remarks>TypeScript type: <c>"source"</c></remarks>
+                [<Literal>]
+                let ``type`` = "source"
+                /// <summary>
+                /// The type of source - document sources reference files/documents.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"document"</c></remarks>
+                [<Literal>]
+                let sourceType = "document"
 
             [<Interface>]
             type Chunk4 =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
                 abstract output: obj with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract dynamic: bool with get, set
                 abstract preliminary: bool option with get, set
                 abstract title: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, output: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?preliminary: bool, ?title: string) : Chunk4 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, output: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?preliminary: bool, ?title: string) : Chunk4 = jsNative
+
+            module Chunk4 =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-result"
 
             [<Interface>]
             type Chunk5 =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
                 abstract output: obj with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract dynamic: bool option with get, set
                 abstract preliminary: bool option with get, set
                 abstract title: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?preliminary: bool, ?title: string) : Chunk5 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?preliminary: bool, ?title: string) : Chunk5 = jsNative
+
+            module Chunk5 =
+                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-result"
 
             [<Interface>]
             type Chunk6 =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
                 abstract error: obj with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract dynamic: bool with get, set
                 abstract title: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, error: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string) : Chunk6 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-error', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, error: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string) : Chunk6 = jsNative
+
+            module Chunk6 =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-error"
 
             [<Interface>]
             type Chunk7 =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
                 abstract error: obj with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract dynamic: bool option with get, set
                 abstract title: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, error: obj, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?title: string) : Chunk7 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-error', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, error: obj, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?title: string) : Chunk7 = jsNative
+
+            module Chunk7 =
+                /// <remarks>TypeScript type: <c>"tool-error"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-error"
 
             [<Interface>]
             type Chunk8 =
+                /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
@@ -13335,15 +13971,21 @@ module Think =
                 abstract invalid: bool option with get, set
                 abstract error: unit option with get, set
                 abstract title: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string) : Chunk8 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string) : Chunk8 = jsNative
+
+            module Chunk8 =
+                /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-call"
 
             [<Interface>]
             type Chunk9 =
+                /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
                 abstract ``type``: string with get, set
                 abstract toolCallId: string with get, set
                 abstract providerExecuted: bool option with get, set
-                abstract providerMetadata: Record<string, obj> option with get, set
+                abstract providerMetadata: JS.Record<string, obj> option with get, set
                 abstract toolMetadata: obj option with get, set
                 abstract toolName: string with get, set
                 abstract input: obj with get, set
@@ -13358,8 +14000,13 @@ module Think =
                 /// The error that caused the tool call to be invalid.
                 /// </summary>
                 abstract error: obj option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, toolCallId: string, toolName: string, input: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj) : Chunk9 = jsNative
+                [<ParamObject; Emit("({ type: 'tool-call', ...$0 })")>]
+                static member Create (toolCallId: string, toolName: string, input: obj, dynamic: bool, ?providerExecuted: bool, ?providerMetadata: JS.Record<string, obj>, ?toolMetadata: obj, ?title: string, ?invalid: bool, ?error: obj) : Chunk9 = jsNative
+
+            module Chunk9 =
+                /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+                [<Literal>]
+                let ``type`` = "tool-call"
 
     module OnConnect =
         [<Interface>]
@@ -13370,7 +14017,7 @@ module Think =
             /// <br /><br />
             /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
             /// </summary>
-            abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+            abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
             /// <summary>
             /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
             /// <br /><br />
@@ -13462,7 +14109,7 @@ module Think =
             /// </summary>
             abstract tags: string[] with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (accept: (obj option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Think.OnConnect.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (obj option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
+            static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Think.OnConnect.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (obj option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
 
         module Connection =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -13484,11 +14131,11 @@ module Think =
 
     module OnWorkflowCallback =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Callback =
+        type Callback<'P> =
             | [<CompiledName("complete")>] Complete of workflowName: string * workflowId: string * timestamp: float * result: obj option
             | [<CompiledName("error")>] Error of workflowName: string * workflowId: string * timestamp: float * error: string
             | [<CompiledName("event")>] Event of workflowName: string * workflowId: string * timestamp: float * ``event``: obj
-            | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: obj
+            | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: 'P
 
         [<Interface>]
         type Callback2 =
@@ -13497,11 +14144,17 @@ module Think =
             /// </summary>
             abstract workflowName: string with get, set
             abstract workflowId: string with get, set
+            /// <remarks>TypeScript type: <c>"complete"</c></remarks>
             abstract ``type``: string with get, set
             abstract timestamp: float with get, set
             abstract result: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, ?result: obj) : Callback2 = jsNative
+            [<ParamObject; Emit("({ type: 'complete', ...$0 })")>]
+            static member Create (workflowName: string, workflowId: string, timestamp: float, ?result: obj) : Callback2 = jsNative
+
+        module Callback2 =
+            /// <remarks>TypeScript type: <c>"complete"</c></remarks>
+            [<Literal>]
+            let ``type`` = "complete"
 
         [<Interface>]
         type Callback3 =
@@ -13510,11 +14163,17 @@ module Think =
             /// </summary>
             abstract workflowName: string with get, set
             abstract workflowId: string with get, set
+            /// <remarks>TypeScript type: <c>"error"</c></remarks>
             abstract ``type``: string with get, set
             abstract timestamp: float with get, set
             abstract error: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, error: string) : Callback3 = jsNative
+            [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+            static member Create (workflowName: string, workflowId: string, timestamp: float, error: string) : Callback3 = jsNative
+
+        module Callback3 =
+            /// <remarks>TypeScript type: <c>"error"</c></remarks>
+            [<Literal>]
+            let ``type`` = "error"
 
         [<Interface>]
         type Callback4 =
@@ -13523,11 +14182,17 @@ module Think =
             /// </summary>
             abstract workflowName: string with get, set
             abstract workflowId: string with get, set
+            /// <remarks>TypeScript type: <c>"event"</c></remarks>
             abstract ``type``: string with get, set
             abstract timestamp: float with get, set
             abstract ``event``: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, ``event``: obj) : Callback4 = jsNative
+            [<ParamObject; Emit("({ type: 'event', ...$0 })")>]
+            static member Create (workflowName: string, workflowId: string, timestamp: float, ``event``: obj) : Callback4 = jsNative
+
+        module Callback4 =
+            /// <remarks>TypeScript type: <c>"event"</c></remarks>
+            [<Literal>]
+            let ``type`` = "event"
 
         [<Interface>]
         type Callback5<'P> =
@@ -13536,11 +14201,17 @@ module Think =
             /// </summary>
             abstract workflowName: string with get, set
             abstract workflowId: string with get, set
+            /// <remarks>TypeScript type: <c>"progress"</c></remarks>
             abstract ``type``: string with get, set
             abstract timestamp: float with get, set
             abstract progress: 'P with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowName: string, workflowId: string, ``type``: string, timestamp: float, progress: 'P) : Callback5<'P> = jsNative
+            [<ParamObject; Emit("({ type: 'progress', ...$0 })")>]
+            static member Create (workflowName: string, workflowId: string, timestamp: float, progress: 'P) : Callback5<'P> = jsNative
+
+        module Callback5 =
+            /// <remarks>TypeScript type: <c>"progress"</c></remarks>
+            [<Literal>]
+            let ``type`` = "progress"
 
     module Queue =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -13815,10 +14486,10 @@ module Think =
             abstract subject: string option with get, set
             abstract body: string with get, set
             abstract contentType: string option with get, set
-            abstract headers: Record<string, string> option with get, set
+            abstract headers: JS.Record<string, string> option with get, set
             abstract secret: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: Record<string, string>, ?secret: string) : Options = jsNative
+            static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
 
     module ReportProgress =
         [<Interface>]
@@ -13932,82 +14603,118 @@ module Think =
         module Item =
             module Item =
                 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-                type Schedule =
-                    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: obj * retry: obj option * time: float
-                    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: obj * retry: obj option * time: float * delayInSeconds: float
-                    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: obj * retry: obj option * time: float * cron: string
-                    | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: obj * retry: obj option * time: float * intervalSeconds: float
+                type Schedule<'T> =
+                    | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: 'T * retry: obj option * time: float
+                    | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: 'T * retry: obj option * time: float * delayInSeconds: float
+                    | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: 'T * retry: obj option * time: float * cron: string
+                    | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: 'T * retry: obj option * time: float * intervalSeconds: float
 
                 [<Interface>]
-                type Schedule2 =
+                type Schedule2<'T> =
                     /// <summary>
                     /// Unique schedule identifier.
                     /// </summary>
                     abstract id: string with get, set
                     abstract callback: string with get, set
-                    abstract payload: obj with get, set
+                    abstract payload: 'T with get, set
                     abstract retry: obj option with get, set
                     /// <summary>
                     /// One-time execution at a specific date.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
                     abstract ``type``: string with get, set
                     abstract time: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, ?retry: obj) : Schedule2 = jsNative
+                    [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+                    static member Create (id: string, callback: string, payload: 'T, time: float, ?retry: obj) : Schedule2<'T> = jsNative
+
+                module Schedule2 =
+                    /// <summary>
+                    /// One-time execution at a specific date.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "scheduled"
 
                 [<Interface>]
-                type Schedule3 =
+                type Schedule3<'T> =
                     /// <summary>
                     /// Unique schedule identifier.
                     /// </summary>
                     abstract id: string with get, set
                     abstract callback: string with get, set
-                    abstract payload: obj with get, set
+                    abstract payload: 'T with get, set
                     abstract retry: obj option with get, set
                     /// <summary>
                     /// One-time execution after a relative delay.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
                     abstract ``type``: string with get, set
                     abstract time: float with get, set
                     abstract delayInSeconds: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, delayInSeconds: float, ?retry: obj) : Schedule3 = jsNative
+                    [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
+                    static member Create (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: obj) : Schedule3<'T> = jsNative
+
+                module Schedule3 =
+                    /// <summary>
+                    /// One-time execution after a relative delay.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "delayed"
 
                 [<Interface>]
-                type Schedule4 =
+                type Schedule4<'T> =
                     /// <summary>
                     /// Unique schedule identifier.
                     /// </summary>
                     abstract id: string with get, set
                     abstract callback: string with get, set
-                    abstract payload: obj with get, set
+                    abstract payload: 'T with get, set
                     abstract retry: obj option with get, set
                     /// <summary>
                     /// Recurring execution from a cron expression.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>"cron"</c></remarks>
                     abstract ``type``: string with get, set
                     abstract time: float with get, set
                     abstract cron: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, cron: string, ?retry: obj) : Schedule4 = jsNative
+                    [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
+                    static member Create (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: obj) : Schedule4<'T> = jsNative
+
+                module Schedule4 =
+                    /// <summary>
+                    /// Recurring execution from a cron expression.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"cron"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "cron"
 
                 [<Interface>]
-                type Schedule5 =
+                type Schedule5<'T> =
                     /// <summary>
                     /// Unique schedule identifier.
                     /// </summary>
                     abstract id: string with get, set
                     abstract callback: string with get, set
-                    abstract payload: obj with get, set
+                    abstract payload: 'T with get, set
                     abstract retry: obj option with get, set
                     /// <summary>
                     /// Recurring execution at a fixed interval.
                     /// </summary>
+                    /// <remarks>TypeScript type: <c>"interval"</c></remarks>
                     abstract ``type``: string with get, set
                     abstract time: float with get, set
                     abstract intervalSeconds: float with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, callback: string, payload: obj, ``type``: string, time: float, intervalSeconds: float, ?retry: obj) : Schedule5 = jsNative
+                    [<ParamObject; Emit("({ type: 'interval', ...$0 })")>]
+                    static member Create (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: obj) : Schedule5<'T> = jsNative
+
+                module Schedule5 =
+                    /// <summary>
+                    /// Recurring execution at a fixed interval.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"interval"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "interval"
 
     module StartAgentToolRun =
         [<Interface>]
@@ -14042,13 +14749,13 @@ module Think =
                 abstract status: FiberStatus with get, set
                 abstract snapshot: obj option with get, set
                 abstract error: string option with get, set
-                abstract metadata: Record<string, obj> option with get, set
+                abstract metadata: JS.Record<string, obj> option with get, set
                 abstract createdAt: float with get, set
                 abstract startedAt: float option with get, set
                 abstract settledAt: float option with get, set
                 abstract accepted: bool with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
+                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
 
     module StartResumableStream =
         [<Interface>]
@@ -14079,286 +14786,27 @@ module Think =
             | [<CompiledName("reset")>] Reset
             | [<CompiledName("set")>] Set
 
+module ThinkScheduledTask2 =
+    [<Interface>]
+    type Base =
+        abstract handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option) with get, set
+        abstract prompt: unit option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (handler: (ThinkScheduledTaskContext -> JS.Promise<unit> option), ?prompt: unit) : Base = jsNative
+
+module ThinkScheduledTask5 =
+    [<Interface>]
+    type Base =
+        abstract prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)> with get, set
+        abstract handler: unit option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (prompt: U2<string, (unit -> U2<string, JS.Promise<string>>)>, ?handler: unit) : Base = jsNative
+
 module ThinkScheduledTaskContext =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type ScheduleKind =
         | [<CompiledName("interval")>] Interval
         | [<CompiledName("wall-clock")>] WallClock
-
-module ToolResultOutput7 =
-    module Value =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("text")>] Text of text: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("file")>] File of data: obj * mediaType: string * filename: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-url")>] FileUrl of url: string * mediaType: string option * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-id")>] FileId of fileId: U2<string, Record<string, string>> * providerOptions: Record<string, obj> option
-            | [<CompiledName("file-reference")>] FileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, Record<string, string>> * providerOptions: Record<string, obj> option
-            | [<CompiledName("image-file-reference")>] ImageFileReference of providerReference: ToolResultOutput7.Value.Item7.ProviderReference * providerOptions: Record<string, obj> option
-            | [<CompiledName("custom")>] Custom of providerOptions: Record<string, obj> option
-
-        [<Interface>]
-        type Item10 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Image that is referenced using a provider file id.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, fileId: U2<string, Record<string, string>>, ?providerOptions: Record<string, obj>) : Item10 = jsNative
-
-        [<Interface>]
-        type Item11 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific references for the image file.
-            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: Record<string, obj>) : Item11 = jsNative
-
-        [<Interface>]
-        type Item12 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, ?providerOptions: Record<string, obj>) : Item12 = jsNative
-
-        [<Interface>]
-        type Item2 =
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Text content.
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, text: string, ?providerOptions: Record<string, obj>) : Item2 = jsNative
-
-        [<Interface>]
-        type Item3 =
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// File data as a tagged discriminated union:
-            /// <br /><br />
-            /// - <c>{ type: 'data', data }</c>: raw bytes
-            ///   (base64 string, Uint8Array, ArrayBuffer, Buffer)
-            /// - <c>{ type: 'url', url }</c>: a URL that points to the file
-            /// - <c>{ type: 'reference', reference }</c>: a provider reference
-            ///   from <c>uploadFile</c>
-            /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline
-            ///   text document)
-            /// </summary>
-            abstract data: obj with get, set
-            /// <summary>
-            /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
-            /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
-            /// <br /><br />
-            /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
-            /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
-            /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
-            /// <c>detectMediaType</c>) to resolve the field according to their API
-            /// requirements.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: obj, mediaType: string, ?filename: string, ?providerOptions: Record<string, obj>) : Item3 = jsNative
-
-        [<Interface>]
-        type Item4 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType + tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'data', data } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded media data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: string, mediaType: string, ?filename: string, ?providerOptions: Record<string, obj>) : Item4 = jsNative
-
-        [<Interface>]
-        type Item5 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType and tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'url', url: new URL(url) } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the file.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, url: string, ?mediaType: string, ?providerOptions: Record<string, obj>) : Item5 = jsNative
-
-        [<Interface>]
-        type Item6 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// ID of the file.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, fileId: U2<string, Record<string, string>>, ?providerOptions: Record<string, obj>) : Item6 = jsNative
-
-        [<Interface>]
-        type Item7 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with tagged data instead:
-            /// <c>{ type: 'file', mediaType, data: { type: 'reference', reference } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific references for the file.
-            /// The key is the provider name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract providerReference: ToolResultOutput7.Value.Item7.ProviderReference with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, providerReference: ToolResultOutput7.Value.Item7.ProviderReference, ?providerOptions: Record<string, obj>) : Item7 = jsNative
-
-        [<Interface>]
-        type Item8 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with mediaType (e.g. 'image' or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'data', data } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded image data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, data: string, mediaType: string, ?providerOptions: Record<string, obj>) : Item8 = jsNative
-
-        [<Interface>]
-        type Item9 =
-            /// <remarks>
-            /// @deprecated
-            /// Use 'file' with <c>mediaType: 'image'</c> (or a specific
-            /// <c>image/*</c> subtype) and tagged data instead:
-            /// <c>{ type: 'file', mediaType: 'image', data: { type: 'url', url: new URL(url) } }</c>.
-            /// </remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the image.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: Record<string, obj> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, url: string, ?providerOptions: Record<string, obj>) : Item9 = jsNative
-
-        module Item7 =
-            type ProviderReference =
-                abstract ``type``: unit option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> string with get, set
 
 module Tools =
     /// <summary>@cloudflare/think/tools/execute</summary>
@@ -14398,7 +14846,7 @@ module Tools =
             /// requires approval. Tools without an <c>execute</c> function (client-side /
             /// provider-executed) are skipped — the sandbox can't call them.
             /// </summary>
-            abstract tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
+            abstract tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
             /// <summary>
             /// StateBackend exposed as <c>state.*</c> inside the sandbox — the full
             /// filesystem API (readFile, writeFile, glob, searchFiles, replaceInFiles,
@@ -14471,7 +14919,7 @@ module Tools =
             /// </summary>
             abstract name: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (ctx: obj, ?tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, ?state: obj, ?browser: obj, ?session: obj, ?connectors: obj[], ?executor: obj, ?loader: obj, ?timeout: float, ?globalOutbound: FetchBindingTarget.Binding, ?description: string, ?name: string) : CreateExecuteToolOptions = jsNative
+            static member Create (ctx: obj, ?tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, ?state: obj, ?browser: obj, ?session: obj, ?connectors: obj[], ?executor: obj, ?loader: obj, ?timeout: float, ?globalOutbound: FetchBindingTarget.Binding, ?description: string, ?name: string) : CreateExecuteToolOptions = jsNative
 
         /// <summary>
         /// The execute tool's moving parts, for hosts that need more than the tool:
@@ -14589,7 +15037,7 @@ module Tools =
                 /// requires approval. Tools without an <c>execute</c> function (client-side /
                 /// provider-executed) are skipped — the sandbox can't call them.
                 /// </summary>
-                abstract tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
+                abstract tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> option with get, set
                 /// <summary>
                 /// StateBackend exposed as <c>state.*</c> inside the sandbox — the full
                 /// filesystem API (readFile, writeFile, glob, searchFiles, replaceInFiles,
@@ -14662,11 +15110,12 @@ module Tools =
                 /// </summary>
                 abstract name: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?tools: Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, ?state: obj, ?browser: obj, ?session: obj, ?connectors: obj[], ?executor: obj, ?loader: obj, ?timeout: float, ?globalOutbound: FetchBindingTarget.Binding, ?description: string, ?name: string) : Overrides = jsNative
+                static member Create (?tools: JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>>, ?state: obj, ?browser: obj, ?session: obj, ?connectors: obj[], ?executor: obj, ?loader: obj, ?timeout: float, ?globalOutbound: FetchBindingTarget.Binding, ?description: string, ?name: string) : Overrides = jsNative
 
         module ExecuteRuntime =
             [<Interface>]
             type Tool =
+                inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -14677,7 +15126,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -14731,19 +15180,6 @@ module Tools =
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
                 /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
-                /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
                 /// Included in the tool definition sent to the language model so it can
@@ -14773,10 +15209,11 @@ module Tools =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Tool = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Tool = jsNative
 
             [<Interface>]
             type Tool2 =
+                inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -14787,7 +15224,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -14840,19 +15277,6 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -14881,12 +15305,19 @@ module Tools =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Tool2 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Tool2 = jsNative
+
+            module Tool2 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Tool3 =
+                inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -14897,7 +15328,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -14950,19 +15381,7 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -14971,7 +15390,7 @@ module Tools =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -14980,11 +15399,17 @@ module Tools =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Tool3 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Tool3 = jsNative
+
+            module Tool3 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Tool4 =
+                inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -14995,7 +15420,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -15048,19 +15473,7 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The optional schema of the output that the tool produces.
-                /// <br /><br />
-                /// If not provided, the output shape will be inferred from the execute function.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                /// <summary>
-                /// An async function that is called with the arguments from the tool call and produces a result.
-                /// If not provided, the tool will not be executed automatically.
-                /// </summary>
-                /// <remarks>@args is the input of the tool call.</remarks>
-                /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                abstract execute: obj option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -15069,7 +15482,7 @@ module Tools =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -15090,11 +15503,17 @@ module Tools =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Tool4 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Tool4 = jsNative
+
+            module Tool4 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Tool5 =
+                inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -15105,7 +15524,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -15158,13 +15577,6 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -15195,10 +15607,11 @@ module Tools =
                 abstract supportsDeferredResults: unit option with get, set
                 abstract ``type``: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Tool5 = jsNative
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Tool5 = jsNative
 
             [<Interface>]
             type Tool6 =
+                inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -15209,7 +15622,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -15262,13 +15675,6 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                abstract execute: unit option with get, set
                 /// <summary>
                 /// Optional description of what the tool does.
                 /// <br /><br />
@@ -15297,12 +15703,19 @@ module Tools =
                 abstract isProviderExecuted: unit option with get, set
                 abstract args: unit option with get, set
                 abstract supportsDeferredResults: unit option with get, set
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                 abstract ``type``: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Tool6 = jsNative
+                [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Tool6 = jsNative
+
+            module Tool6 =
+                /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic"
 
             [<Interface>]
             type Tool7 =
+                inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -15313,7 +15726,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -15366,13 +15779,7 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -15381,7 +15788,7 @@ module Tools =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -15390,11 +15797,17 @@ module Tools =
                 /// </summary>
                 abstract isProviderExecuted: bool with get, set
                 abstract supportsDeferredResults: unit option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Tool7 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Tool7 = jsNative
+
+            module Tool7 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
             [<Interface>]
             type Tool8 =
+                inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
                 /// <summary>
                 /// An optional title of the tool.
                 /// </summary>
@@ -15405,7 +15818,7 @@ module Tools =
                 /// to the provider from the AI SDK and enable provider-specific
                 /// functionality that can be fully encapsulated in the provider.
                 /// </summary>
-                abstract providerOptions: Record<string, obj> option with get, set
+                abstract providerOptions: JS.Record<string, obj> option with get, set
                 /// <summary>
                 /// Optional metadata about the tool itself (e.g. its source).
                 /// <br /><br />
@@ -15458,13 +15871,7 @@ module Tools =
                 /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                 /// </summary>
                 abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                /// <summary>
-                /// The schema of the output that the tool produces.
-                /// <br /><br />
-                /// Required when no execute function is provided.
-                /// </summary>
-                abstract outputSchema: obj option with get, set
-                abstract execute: unit option with get, set
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -15473,7 +15880,7 @@ module Tools =
                 /// <summary>
                 /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                 /// </summary>
-                abstract args: Record<string, obj> with get, set
+                abstract args: JS.Record<string, obj> with get, set
                 abstract description: unit option with get, set
                 abstract strict: unit option with get, set
                 abstract inputExamples: unit option with get, set
@@ -15494,8 +15901,13 @@ module Tools =
                 /// </summary>
                 /// <defaultValue>false</defaultValue>
                 abstract supportsDeferredResults: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Tool8 = jsNative
+                [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Tool8 = jsNative
+
+            module Tool8 =
+                /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                [<Literal>]
+                let ``type`` = "provider"
 
     /// <summary>@cloudflare/think/tools/extensions</summary>
     module Extensions =
@@ -15534,7 +15946,7 @@ module Tools =
             /// </code>
             /// </example>
             [<Import("createExtensionTools", "@cloudflare/think/tools/extensions")>]
-            static member createExtensionTools (options: FSharp.CloudEdge.Runtime.Think.Tools.Extensions.ExtensionToolsOptions) : Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
+            static member createExtensionTools (options: FSharp.CloudEdge.Runtime.Think.Tools.Extensions.ExtensionToolsOptions) : JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
 
     /// <summary>@cloudflare/think/tools/fetch</summary>
     module Fetch =
@@ -15576,12 +15988,14 @@ module Tools =
             /// </code>
             /// </example>
             [<Import("createFetchTools", "@cloudflare/think/tools/fetch")>]
-            static member createFetchTools (options: CreateFetchToolsOptions) : Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
+            static member createFetchTools (options: CreateFetchToolsOptions) : JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
 
         module CreateFetchTools =
             module Result =
                 [<Interface>]
                 type Item =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -15592,7 +16006,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -15618,26 +16032,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -15645,19 +16039,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: obj option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -15688,10 +16069,12 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item = jsNative
 
                 [<Interface>]
                 type Item10 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -15702,7 +16085,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -15728,26 +16111,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -15755,14 +16118,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -15791,12 +16146,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item10 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item10 = jsNative
+
+                module Item10 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item11 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -15807,7 +16170,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -15833,26 +16196,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -15860,14 +16203,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -15876,7 +16212,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -15885,11 +16221,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item11 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item11 = jsNative
+
+                module Item11 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item12 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -15900,7 +16243,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -15926,26 +16269,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -15953,14 +16276,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -15969,7 +16285,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -15990,11 +16306,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item12 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item12 = jsNative
+
+                module Item12 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item13 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item13.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16005,7 +16328,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16031,21 +16354,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16058,12 +16366,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
                     /// <summary>
                     /// An async function that is called with the arguments from the tool call and produces a result.
                     /// If not provided, the tool will not be executed automatically.
@@ -16101,10 +16403,12 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item13 = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item13 = jsNative
 
                 [<Interface>]
                 type Item14 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item13.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16115,7 +16419,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16141,21 +16445,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16168,12 +16457,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
                     /// <summary>
                     /// An async function that is called with the arguments from the tool call and produces a result.
                     /// If not provided, the tool will not be executed automatically.
@@ -16209,12 +16492,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item14 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item14 = jsNative
+
+                module Item14 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item15 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item13.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16225,7 +16516,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16251,21 +16542,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16279,18 +16555,13 @@ module Tools =
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
                     /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
                     /// An async function that is called with the arguments from the tool call and produces a result.
                     /// If not provided, the tool will not be executed automatically.
                     /// </summary>
                     /// <remarks>@args is the input of the tool call.</remarks>
                     /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
                     abstract execute: Func<unit, obj, obj> option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -16299,7 +16570,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -16308,11 +16579,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item15 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item15 = jsNative
+
+                module Item15 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item16 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item13.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16323,7 +16601,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16349,21 +16627,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16376,12 +16639,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
                     /// <summary>
                     /// An async function that is called with the arguments from the tool call and produces a result.
                     /// If not provided, the tool will not be executed automatically.
@@ -16389,6 +16646,7 @@ module Tools =
                     /// <remarks>@args is the input of the tool call.</remarks>
                     /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
                     abstract execute: Func<unit, obj, obj> option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -16397,7 +16655,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -16418,11 +16676,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item16 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: Func<unit, obj, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item16 = jsNative
+
+                module Item16 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item17 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16433,7 +16698,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16459,21 +16724,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16486,19 +16736,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -16529,10 +16766,12 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item17 = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item17 = jsNative
 
                 [<Interface>]
                 type Item18 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16543,7 +16782,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16569,21 +16808,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16596,19 +16820,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -16637,12 +16848,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item18 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item18 = jsNative
+
+                module Item18 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item19 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16653,7 +16872,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16679,21 +16898,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -16706,19 +16910,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -16727,7 +16919,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -16736,11 +16928,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item19 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item19 = jsNative
+
+                module Item19 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item2 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16751,7 +16950,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16777,26 +16976,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -16804,19 +16983,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: obj option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -16845,12 +17011,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item2 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item2 = jsNative
+
+                module Item2 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item20 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16861,7 +17035,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16886,21 +17060,6 @@ module Tools =
                     /// The context is passed to execute function as part of the execution options.
                     /// </summary>
                     abstract contextSchema: obj option with get, set
-                    /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
                     /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
@@ -16914,19 +17073,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -16935,7 +17082,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -16956,11 +17103,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item20 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item20 = jsNative
+
+                module Item20 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item21 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -16971,7 +17125,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -16997,21 +17151,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -17024,14 +17163,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -17062,10 +17193,12 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item21 = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item21 = jsNative
 
                 [<Interface>]
                 type Item22 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17076,7 +17209,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17102,21 +17235,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -17129,14 +17247,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -17165,12 +17275,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item22 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item22 = jsNative
+
+                module Item22 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item23 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17181,7 +17299,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17207,21 +17325,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
                     /// </summary>
@@ -17234,14 +17337,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17250,7 +17346,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -17259,11 +17355,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item23 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item23 = jsNative
+
+                module Item23 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item24 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17274,7 +17377,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17299,21 +17402,6 @@ module Tools =
                     /// The context is passed to execute function as part of the execution options.
                     /// </summary>
                     abstract contextSchema: obj option with get, set
-                    /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
                     /// <summary>
                     /// Optional function that is called when a tool call can be started,
                     /// even if the execute function is not provided.
@@ -17327,14 +17415,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17343,7 +17424,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -17364,11 +17445,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item24 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item24 = jsNative
+
+                module Item24 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item3 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17379,7 +17467,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17405,26 +17493,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17432,19 +17500,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: obj option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17453,7 +17509,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -17462,11 +17518,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item3 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item3 = jsNative
+
+                module Item3 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item4 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17477,7 +17540,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17503,26 +17566,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17530,19 +17573,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The optional schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// If not provided, the output shape will be inferred from the execute function.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: obj option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17551,7 +17582,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -17572,11 +17603,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item4 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: obj, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item4 = jsNative
+
+                module Item4 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item5 =
+                    inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17587,7 +17625,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17613,26 +17651,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17640,19 +17658,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -17683,10 +17688,12 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item5 = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item5 = jsNative
 
                 [<Interface>]
                 type Item6 =
+                    inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17697,7 +17704,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17723,26 +17730,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17750,19 +17737,6 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
                     /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
@@ -17791,12 +17765,20 @@ module Tools =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
                     abstract ``type``: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item6 = jsNative
+                    [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item6 = jsNative
+
+                module Item6 =
+                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Item7 =
+                    inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17807,7 +17789,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17833,26 +17815,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17860,19 +17822,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17881,7 +17831,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -17890,11 +17840,18 @@ module Tools =
                     /// </summary>
                     abstract isProviderExecuted: bool with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item7 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item7 = jsNative
+
+                module Item7 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item8 =
+                    inherit FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item17.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -17905,7 +17862,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -17931,26 +17888,6 @@ module Tools =
                     /// </summary>
                     abstract contextSchema: obj option with get, set
                     /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
                     /// If not provided, the tool result will be sent as a JSON object.
@@ -17958,19 +17895,7 @@ module Tools =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <summary>
-                    /// The schema of the output that the tool produces.
-                    /// <br /><br />
-                    /// Required when no execute function is provided.
-                    /// </summary>
-                    abstract outputSchema: obj option with get, set
-                    /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
                     /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
@@ -17979,7 +17904,7 @@ module Tools =
                     /// <summary>
                     /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
                     /// </summary>
-                    abstract args: Record<string, obj> with get, set
+                    abstract args: JS.Record<string, obj> with get, set
                     abstract description: unit option with get, set
                     abstract strict: unit option with get, set
                     abstract inputExamples: unit option with get, set
@@ -18000,11 +17925,18 @@ module Tools =
                     /// </summary>
                     /// <defaultValue>false</defaultValue>
                     abstract supportsDeferredResults: bool option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ``type``: string, id: string, args: Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item8 = jsNative
+                    [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+                    static member Create (inputSchema: obj, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: obj, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item8 = jsNative
+
+                module Item8 =
+                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Item9 =
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item9.Base
+                    inherit Tools.Fetch.CreateFetchTools.Result.Item.Base2
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -18015,7 +17947,7 @@ module Tools =
                     /// to the provider from the AI SDK and enable provider-specific
                     /// functionality that can be fully encapsulated in the provider.
                     /// </summary>
-                    abstract providerOptions: Record<string, obj> option with get, set
+                    abstract providerOptions: JS.Record<string, obj> option with get, set
                     /// <summary>
                     /// Optional metadata about the tool itself (e.g. its source).
                     /// <br /><br />
@@ -18040,26 +17972,6 @@ module Tools =
                     /// The context is passed to execute function as part of the execution options.
                     /// </summary>
                     abstract contextSchema: obj option with get, set
-                    /// <summary>
-                    /// Whether the tool needs approval before it can be executed.
-                    /// </summary>
-                    /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
-                    abstract needsApproval: obj option with get, set
-                    /// <summary>
-                    /// Optional function that is called when the model starts generating the tool input.
-                    /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
-                    /// </summary>
-                    abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when an argument streaming delta is available.
-                    /// Only called when the tool is used in a streaming context.
-                    /// </summary>
-                    abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
-                    /// <summary>
-                    /// Optional function that is called when a tool call can be started,
-                    /// even if the execute function is not provided.
-                    /// </summary>
-                    abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
                     /// <summary>
                     /// Optional conversion function that maps the tool result to an output that can be used by the language model.
                     /// <br /><br />
@@ -18069,14 +17981,6 @@ module Tools =
                     /// </summary>
                     abstract toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
                     /// <summary>
-                    /// An async function that is called with the arguments from the tool call and produces a result.
-                    /// If not provided, the tool will not be executed automatically.
-                    /// </summary>
-                    /// <remarks>@args is the input of the tool call.</remarks>
-                    /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
-                    abstract execute: unit option with get, set
-                    abstract outputSchema: unit option with get, set
-                    /// <summary>
                     /// Optional description of what the tool does.
                     /// <br /><br />
                     /// Included in the tool definition sent to the language model so it can
@@ -18106,9 +18010,59 @@ module Tools =
                     abstract supportsDeferredResults: unit option with get, set
                     abstract ``type``: string option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item9 = jsNative
+                    static member Create (inputSchema: obj, ?title: string, ?providerOptions: JS.Record<string, obj>, ?metadata: obj, ?contextSchema: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (Tools.Fetch.CreateFetchTools.Result.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Runtime.Think.Tools.Fetch.CreateFetchTools.Result.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit, ?``type``: string) : Item9 = jsNative
 
                 module Item =
+                    [<Interface>]
+                    type Base =
+                        /// <summary>
+                        /// The optional schema of the output that the tool produces.
+                        /// <br /><br />
+                        /// If not provided, the output shape will be inferred from the execute function.
+                        /// </summary>
+                        abstract outputSchema: obj option with get, set
+                        /// <summary>
+                        /// An async function that is called with the arguments from the tool call and produces a result.
+                        /// If not provided, the tool will not be executed automatically.
+                        /// </summary>
+                        /// <remarks>@args is the input of the tool call.</remarks>
+                        /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                        abstract execute: obj option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?outputSchema: obj, ?execute: obj) : Base = jsNative
+
+                    [<Interface>]
+                    type Base2 =
+                        /// <summary>
+                        /// An async function that is called with the arguments from the tool call and produces a result.
+                        /// If not provided, the tool will not be executed automatically.
+                        /// </summary>
+                        /// <remarks>@args is the input of the tool call.</remarks>
+                        /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                        abstract execute: obj option with get, set
+                        /// <summary>
+                        /// Whether the tool needs approval before it can be executed.
+                        /// </summary>
+                        /// <remarks>@deprecated Tool approval is handled on a <c>generateText</c> / <c>streamText</c> level now.</remarks>
+                        abstract needsApproval: obj option with get, set
+                        /// <summary>
+                        /// Optional function that is called when the model starts generating the tool input.
+                        /// In non-streaming contexts, it is called immediately before <c>onInputAvailable</c>.
+                        /// </summary>
+                        abstract onInputStart: (obj -> JS.Promise<unit> option) option with get, set
+                        /// <summary>
+                        /// Optional function that is called when an argument streaming delta is available.
+                        /// Only called when the tool is used in a streaming context.
+                        /// </summary>
+                        abstract onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option) option with get, set
+                        /// <summary>
+                        /// Optional function that is called when a tool call can be started,
+                        /// even if the execute function is not provided.
+                        /// </summary>
+                        abstract onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option) option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?execute: obj, ?needsApproval: obj, ?onInputStart: (obj -> JS.Promise<unit> option), ?onInputDelta: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (Tools.Fetch.CreateFetchTools.Result.Item.OnInputAvailable.Options -> JS.Promise<unit> option)) : Base2 = jsNative
+
                     [<Interface>]
                     type InputSchema<'SCHEMA> =
                         /// <summary>
@@ -18123,10 +18077,11 @@ module Tools =
                         /// <summary>
                         /// Validates unknown input values.
                         /// </summary>
-                        abstract validate: Tools.Fetch.CreateFetchTools.Result.Item.InputSchemaStandard.Validate
+                        abstract validate: Tools.Fetch.CreateFetchTools.Result.Item.InputSchemaStandard.Validate<'SCHEMA>
                         /// <summary>
                         /// The version number of the standard.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
                         abstract version: float
                         /// <summary>
                         /// The vendor name of the schema library.
@@ -18137,8 +18092,18 @@ module Tools =
                         /// </summary>
                         abstract types: obj option
                         abstract jsonSchema: obj option
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (validate: Tools.Fetch.CreateFetchTools.Result.Item.InputSchemaStandard.Validate, version: float, vendor: string, ?types: obj, ?jsonSchema: obj) : InputSchemaStandard<'SCHEMA> = jsNative
+                        [<ParamObject; Emit("({ version: 1, ...$0 })")>]
+                        static member Create (validate: Tools.Fetch.CreateFetchTools.Result.Item.InputSchemaStandard.Validate<'SCHEMA>, vendor: string, ?types: obj, ?jsonSchema: obj) : InputSchemaStandard<'SCHEMA> = jsNative
+
+                    module InputSchemaStandard =
+                        /// <summary>
+                        /// The version number of the standard.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>1</c></remarks>
+                        [<Literal>]
+                        let version = 1.0
+
+                        type Validate<'SCHEMA> = delegate of value: obj * options: obj option -> obj
 
                     module Description =
                         [<Interface>]
@@ -18154,9 +18119,6 @@ module Tools =
                             abstract input: obj with get, set
                             [<ParamObject; Emit("$0")>]
                             static member Create (input: obj) : Item = jsNative
-
-                    module InputSchemaStandard =
-                        type Validate = delegate of value: obj * options: obj option -> obj
 
                     module OnInputAvailable =
                         [<Interface>]
@@ -18249,6 +18211,24 @@ module Tools =
                             static member Create (toolCallId: string, input: obj, output: obj) : Options = jsNative
 
                 module Item13 =
+                    [<Interface>]
+                    type Base =
+                        /// <summary>
+                        /// The optional schema of the output that the tool produces.
+                        /// <br /><br />
+                        /// If not provided, the output shape will be inferred from the execute function.
+                        /// </summary>
+                        abstract outputSchema: obj option with get, set
+                        /// <summary>
+                        /// An async function that is called with the arguments from the tool call and produces a result.
+                        /// If not provided, the tool will not be executed automatically.
+                        /// </summary>
+                        /// <remarks>@args is the input of the tool call.</remarks>
+                        /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
+                        abstract execute: obj option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?outputSchema: obj, ?execute: obj) : Base = jsNative
+
                     module InputExamples =
                         [<Interface>]
                         type Item =
@@ -18337,6 +18317,27 @@ module Tools =
                             [<ParamObject; Emit("$0")>]
                             static member Create (toolCallId: string, input: obj, output: obj) : Options = jsNative
 
+                module Item17 =
+                    [<Interface>]
+                    type Base =
+                        /// <summary>
+                        /// The schema of the output that the tool produces.
+                        /// <br /><br />
+                        /// Required when no execute function is provided.
+                        /// </summary>
+                        abstract outputSchema: obj option with get, set
+                        abstract execute: unit option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?outputSchema: obj, ?execute: unit) : Base = jsNative
+
+                module Item9 =
+                    [<Interface>]
+                    type Base =
+                        abstract execute: unit option with get, set
+                        abstract outputSchema: unit option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?execute: unit, ?outputSchema: unit) : Base = jsNative
+
         module FetchWorkspace =
             module Mkdir =
                 [<Interface>]
@@ -18387,7 +18388,7 @@ module Tools =
             /// </code>
             /// </example>
             [<Import("createSandboxTools", "@cloudflare/think/tools/sandbox")>]
-            static member createSandboxTools (?_binding: obj, ?_options: FSharp.CloudEdge.Runtime.Think.Tools.Sandbox.CreateSandboxToolsOptions) : Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
+            static member createSandboxTools (?_binding: obj, ?_options: FSharp.CloudEdge.Runtime.Think.Tools.Sandbox.CreateSandboxToolsOptions) : JS.Record<string, U24<Tools.Fetch.CreateFetchTools.Result.Item, Tools.Fetch.CreateFetchTools.Result.Item2, Tools.Fetch.CreateFetchTools.Result.Item3, Tools.Fetch.CreateFetchTools.Result.Item4, Tools.Fetch.CreateFetchTools.Result.Item5, Tools.Fetch.CreateFetchTools.Result.Item6, Tools.Fetch.CreateFetchTools.Result.Item7, Tools.Fetch.CreateFetchTools.Result.Item8, Tools.Fetch.CreateFetchTools.Result.Item9, Tools.Fetch.CreateFetchTools.Result.Item10, Tools.Fetch.CreateFetchTools.Result.Item11, Tools.Fetch.CreateFetchTools.Result.Item12, Tools.Fetch.CreateFetchTools.Result.Item13, Tools.Fetch.CreateFetchTools.Result.Item14, Tools.Fetch.CreateFetchTools.Result.Item15, Tools.Fetch.CreateFetchTools.Result.Item16, Tools.Fetch.CreateFetchTools.Result.Item17, Tools.Fetch.CreateFetchTools.Result.Item18, Tools.Fetch.CreateFetchTools.Result.Item19, Tools.Fetch.CreateFetchTools.Result.Item20, Tools.Fetch.CreateFetchTools.Result.Item21, Tools.Fetch.CreateFetchTools.Result.Item22, Tools.Fetch.CreateFetchTools.Result.Item23, Tools.Fetch.CreateFetchTools.Result.Item24>> = jsNative
 
     /// <summary>@cloudflare/think/tools/workspace</summary>
     module Workspace =
@@ -18628,16 +18629,22 @@ module TurnConfig =
         abstract firstChunkMs: float option with get, set
         abstract chunkMs: float option with get, set
         abstract toolMs: float option with get, set
-        abstract tools: Record<string, float option> option with get, set
+        abstract tools: JS.Record<string, float option> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?totalMs: float, ?stepMs: float, ?firstChunkMs: float, ?chunkMs: float, ?toolMs: float, ?tools: Record<string, float option>) : Timeout = jsNative
+        static member Create (?totalMs: float, ?stepMs: float, ?firstChunkMs: float, ?chunkMs: float, ?toolMs: float, ?tools: JS.Record<string, float option>) : Timeout = jsNative
 
     [<Interface>]
     type ToolChoice =
+        /// <remarks>TypeScript type: <c>"tool"</c></remarks>
         abstract ``type``: string with get, set
         abstract toolName: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolName: string) : ToolChoice = jsNative
+        [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
+        static member Create (toolName: string) : ToolChoice = jsNative
+
+    module ToolChoice =
+        /// <remarks>TypeScript type: <c>"tool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "tool"
 
 module TurnInput =
     [<Interface>]
@@ -18715,7 +18722,7 @@ module Workflows =
         /// Performs a shallow merge and broadcasts to all connected clients.
         /// </summary>
         /// <param name="partialState">- Partial state to merge</param>
-        abstract mergeAgentState: partialState: Record<string, obj> -> JS.Promise<unit>
+        abstract mergeAgentState: partialState: JS.Record<string, obj> -> JS.Promise<unit>
         /// <summary>
         /// Reset the Agent's state to its initialState (durable).
         /// Broadcasts the reset state to all connected clients.
@@ -18789,7 +18796,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("ThinkPromptError.captureStackTrace", "@cloudflare/think/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ThinkPromptError.prepareStackTrace", "@cloudflare/think/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -18863,7 +18870,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("ThinkPromptAbortedError.captureStackTrace", "@cloudflare/think/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ThinkPromptAbortedError.prepareStackTrace", "@cloudflare/think/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -18937,7 +18944,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("ThinkPromptSkippedError.captureStackTrace", "@cloudflare/think/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ThinkPromptSkippedError.prepareStackTrace", "@cloudflare/think/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -19011,7 +19018,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("ThinkPromptTimeoutError.captureStackTrace", "@cloudflare/think/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ThinkPromptTimeoutError.prepareStackTrace", "@cloudflare/think/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -19085,7 +19092,7 @@ module Workflows =
         /// </code>
         /// </summary>
         [<Import("ThinkPromptValidationError.captureStackTrace", "@cloudflare/think/workflows")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("ThinkPromptValidationError.prepareStackTrace", "@cloudflare/think/workflows")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -19104,7 +19111,7 @@ module Workflows =
             with get (): float = jsNative
             and set (_: float): unit = jsNative
 
-    type ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Think<obj, obj, Record<string, obj>>> =
+    type ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Think<obj, obj, JS.Record<string, obj>>> =
         /// <summary>
         /// Instance-level guard to prevent double initialization.
         /// Used when a subclass calls super.run() after its own run() was wrapped.
@@ -19198,7 +19205,7 @@ module Workflows =
         /// Send a notification to the Agent via RPC.
         /// </summary>
         /// <param name="callback">- Callback payload to send</param>
-        abstract notifyAgent: callback: Think.OnWorkflowCallback.Callback -> JS.Promise<unit>
+        abstract notifyAgent: callback: Think.OnWorkflowCallback.Callback<obj> -> JS.Promise<unit>
         /// <summary>
         /// Report progress to the Agent with typed progress data.
         /// Triggers onWorkflowProgress() on the Agent.
@@ -19260,19 +19267,19 @@ module Workflows =
         [<Import("ThinkPromptValidationError", "@cloudflare/think/workflows"); EmitConstructor>]
         static member ThinkPromptValidationError (submissionId: string, cause: obj) : FSharp.CloudEdge.Runtime.Think.Workflows.ThinkPromptValidationError = jsNative
         [<Import("ThinkWorkflow", "@cloudflare/think/workflows"); EmitConstructor>]
-        static member ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Think<obj, obj, Record<string, obj>>> (ctx: obj, env: 'Env) : FSharp.CloudEdge.Runtime.Think.Workflows.ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
+        static member ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env when 'AgentType :> Think<obj, obj, JS.Record<string, obj>>> (ctx: obj, env: 'Env) : FSharp.CloudEdge.Runtime.Think.Workflows.ThinkWorkflow<'AgentType, 'Params, 'ProgressType, 'Env> = jsNative
 
     module ThinkWorkflow =
         module Run =
             [<Interface>]
             type Event =
                 abstract payload: Workflows.ThinkWorkflow.Run.Event.Payload
-                abstract timestamp: JS.Date
+                abstract timestamp: Fable.Core.TS.Es.Date
                 abstract instanceId: string
                 abstract workflowName: string
                 abstract schedule: obj option
                 [<ParamObject; Emit("$0")>]
-                static member Create (payload: Workflows.ThinkWorkflow.Run.Event.Payload, timestamp: JS.Date, instanceId: string, workflowName: string, ?schedule: obj) : Event = jsNative
+                static member Create (payload: Workflows.ThinkWorkflow.Run.Event.Payload, timestamp: Fable.Core.TS.Es.Date, instanceId: string, workflowName: string, ?schedule: obj) : Event = jsNative
 
             module Event =
                 [<Interface>]
@@ -19290,26 +19297,31 @@ module Workflows =
     module ThinkWorkflowStep =
         type Sleep = delegate of name: string * duration: U2<float, string> -> JS.Promise<unit>
 
-        type SleepUntil = delegate of name: string * timestamp: U2<float, JS.Date> -> JS.Promise<unit>
+        type SleepUntil = delegate of name: string * timestamp: U2<float, Fable.Core.TS.Es.Date> -> JS.Promise<unit>
 
         module Do =
             [<Interface>]
             type Config =
-                abstract timeout: U2<float, string> option with get, set
-                abstract sensitive: string option with get, set
+                inherit Workflows.ThinkWorkflowStep.Do.Config.Base
                 abstract retries: Workflows.ThinkWorkflowStep.Do.Config.Retries with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (retries: Workflows.ThinkWorkflowStep.Do.Config.Retries, ?timeout: U2<float, string>, ?sensitive: string) : Config = jsNative
 
             [<Interface>]
             type Config2 =
-                abstract timeout: U2<float, string> option with get, set
-                abstract sensitive: string option with get, set
+                inherit Workflows.ThinkWorkflowStep.Do.Config.Base
                 abstract retries: Workflows.ThinkWorkflowStep.Do.Config2.Retries option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (?timeout: U2<float, string>, ?sensitive: string, ?retries: Workflows.ThinkWorkflowStep.Do.Config2.Retries) : Config2 = jsNative
 
             module Config =
+                [<Interface>]
+                type Base =
+                    abstract timeout: U2<float, string> option with get, set
+                    abstract sensitive: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?timeout: U2<float, string>, ?sensitive: string) : Base = jsNative
+
                 [<Interface>]
                 type Retries =
                     abstract limit: float with get, set
@@ -19383,7 +19395,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -19449,7 +19461,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -19515,7 +19527,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -19581,7 +19593,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -19647,7 +19659,7 @@ module Workflows =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>

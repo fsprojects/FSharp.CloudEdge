@@ -380,7 +380,7 @@ type SessionTerminatedError =
     /// </code>
     /// </summary>
     [<Import("SessionTerminatedError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("SessionTerminatedError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -473,7 +473,7 @@ type ProcessReadyTimeoutError =
     /// </code>
     /// </summary>
     [<Import("ProcessReadyTimeoutError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("ProcessReadyTimeoutError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -566,7 +566,7 @@ type ProcessExitedBeforeReadyError =
     /// </code>
     /// </summary>
     [<Import("ProcessExitedBeforeReadyError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("ProcessExitedBeforeReadyError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -653,7 +653,7 @@ type BackupNotFoundError =
     /// </code>
     /// </summary>
     [<Import("BackupNotFoundError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BackupNotFoundError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -742,7 +742,7 @@ type BackupExpiredError =
     /// </code>
     /// </summary>
     [<Import("BackupExpiredError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BackupExpiredError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -829,7 +829,7 @@ type InvalidBackupConfigError =
     /// </code>
     /// </summary>
     [<Import("InvalidBackupConfigError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("InvalidBackupConfigError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -920,7 +920,7 @@ type BackupCreateError =
     /// </code>
     /// </summary>
     [<Import("BackupCreateError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BackupCreateError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1011,7 +1011,7 @@ type BackupRestoreError =
     /// </code>
     /// </summary>
     [<Import("BackupRestoreError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BackupRestoreError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1098,7 +1098,7 @@ type ContainerUnavailableError =
     /// </code>
     /// </summary>
     [<Import("ContainerUnavailableError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("ContainerUnavailableError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1189,7 +1189,7 @@ type RPCTransportError =
     /// </code>
     /// </summary>
     [<Import("RPCTransportError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("RPCTransportError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1272,7 +1272,7 @@ type OperationInterruptedError =
     /// </code>
     /// </summary>
     [<Import("OperationInterruptedError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("OperationInterruptedError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1562,7 +1562,7 @@ type BucketMountError =
     /// </code>
     /// </summary>
     [<Import("BucketMountError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BucketMountError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1639,7 +1639,7 @@ type S3FSMountError =
     /// </code>
     /// </summary>
     [<Import("S3FSMountError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("S3FSMountError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1716,7 +1716,7 @@ type BucketUnmountError =
     /// </code>
     /// </summary>
     [<Import("BucketUnmountError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("BucketUnmountError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1793,7 +1793,7 @@ type MissingCredentialsError =
     /// </code>
     /// </summary>
     [<Import("MissingCredentialsError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("MissingCredentialsError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1870,7 +1870,7 @@ type InvalidMountConfigError =
     /// </code>
     /// </summary>
     [<Import("InvalidMountConfigError.captureStackTrace", "@cloudflare/sandbox")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("InvalidMountConfigError.prepareStackTrace", "@cloudflare/sandbox")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -1977,12 +1977,23 @@ type CheckChangesResult2 =
 [<Interface>]
 type CheckChangesResult3 =
     abstract success: bool with get, set
+    /// <remarks>TypeScript type: <c>"resync"</c></remarks>
     abstract status: string with get, set
     abstract reason: CheckChangesResult3.Reason with get, set
     abstract version: string with get, set
     abstract timestamp: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (success: bool, status: string, reason: CheckChangesResult3.Reason, version: string, timestamp: string) : CheckChangesResult3 = jsNative
+    [<ParamObject; Emit("({ status: 'resync', ...$0 })")>]
+    static member Create (success: bool, reason: CheckChangesResult3.Reason, version: string, timestamp: string) : CheckChangesResult3 = jsNative
+
+module CheckChangesResult3 =
+    /// <remarks>TypeScript type: <c>"resync"</c></remarks>
+    [<Literal>]
+    let status = "resync"
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Reason =
+        | [<CompiledName("expired")>] Expired
+        | [<CompiledName("restarted")>] Restarted
 
 type ContainerControlClient =
     abstract connOptions: obj
@@ -2152,23 +2163,35 @@ type DeleteFileResult =
 type EnsureNamedTunnelRunRequest =
     abstract tunnelId: string with get, set
     abstract runId: string with get, set
+    /// <remarks>TypeScript type: <c>"named"</c></remarks>
     abstract mode: string with get, set
     abstract port: float with get, set
     /// <summary>
     /// Opaque Cloudflare tunnel token. Never logged or stored.
     /// </summary>
     abstract token: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (tunnelId: string, runId: string, mode: string, port: float, token: string) : EnsureNamedTunnelRunRequest = jsNative
+    [<ParamObject; Emit("({ mode: 'named', ...$0 })")>]
+    static member Create (tunnelId: string, runId: string, port: float, token: string) : EnsureNamedTunnelRunRequest = jsNative
+
+module EnsureNamedTunnelRunRequest =
+    /// <remarks>TypeScript type: <c>"named"</c></remarks>
+    [<Literal>]
+    let mode = "named"
 
 [<Interface>]
 type EnsureQuickTunnelRunRequest =
     abstract tunnelId: string with get, set
     abstract runId: string with get, set
+    /// <remarks>TypeScript type: <c>"quick"</c></remarks>
     abstract mode: string with get, set
     abstract port: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (tunnelId: string, runId: string, mode: string, port: float) : EnsureQuickTunnelRunRequest = jsNative
+    [<ParamObject; Emit("({ mode: 'quick', ...$0 })")>]
+    static member Create (tunnelId: string, runId: string, port: float) : EnsureQuickTunnelRunRequest = jsNative
+
+module EnsureQuickTunnelRunRequest =
+    /// <remarks>TypeScript type: <c>"quick"</c></remarks>
+    [<Literal>]
+    let mode = "quick"
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("mode", CaseRules.None)>]
 type EnsureTunnelRunRequest =
@@ -2227,7 +2250,7 @@ type ITransport =
     /// Make a streaming request
     /// </summary>
     /// <returns>ReadableStream for consuming SSE/streaming data</returns>
-    abstract fetchStream: path: string * ?body: obj * ?``method``: ITransport.FetchStream.Method * ?headers: Record<string, string> -> JS.Promise<obj>
+    abstract fetchStream: path: string * ?body: obj * ?``method``: ITransport.FetchStream.Method * ?headers: JS.Record<string, string> -> JS.Promise<obj>
     /// <summary>
     /// Get the transport mode
     /// </summary>
@@ -2249,7 +2272,7 @@ type ITransport =
     /// </summary>
     abstract setRetryTimeoutMs: ms: float -> unit
     [<ParamObject; Emit("$0")>]
-    static member Create (fetch: Func<string, TransportRequestInit option, JS.Promise<obj>>, fetchStream: Func<string, obj option, ITransport.FetchStream.Method option, Record<string, string> option, JS.Promise<obj>>, getMode: (unit -> RouteTransportMode), connect: (unit -> JS.Promise<unit>), disconnect: (unit -> unit), isConnected: (unit -> bool), setRetryTimeoutMs: (float -> unit)) : ITransport = jsNative
+    static member Create (fetch: Func<string, TransportRequestInit option, JS.Promise<obj>>, fetchStream: Func<string, obj option, ITransport.FetchStream.Method option, JS.Record<string, string> option, JS.Promise<obj>>, getMode: (unit -> RouteTransportMode), connect: (unit -> JS.Promise<unit>), disconnect: (unit -> unit), isConnected: (unit -> bool), setRetryTimeoutMs: (float -> unit)) : ITransport = jsNative
 
 [<Interface>]
 type ListFilesResult =
@@ -2736,14 +2759,14 @@ type CreateContextOptions =
     /// Environment variables for the context.
     /// Undefined values are skipped (treated as "not configured").
     /// </summary>
-    abstract envVars: Record<string, string option> option with get, set
+    abstract envVars: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Request timeout in milliseconds
     /// </summary>
     /// <defaultValue>30000</defaultValue>
     abstract timeout: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?language: CreateContextOptions.Language, ?cwd: string, ?envVars: Record<string, string option>, ?timeout: float) : CreateContextOptions = jsNative
+    static member Create (?language: CreateContextOptions.Language, ?cwd: string, ?envVars: JS.Record<string, string option>, ?timeout: float) : CreateContextOptions = jsNative
 
 [<Interface>]
 type CodeContext =
@@ -2762,13 +2785,13 @@ type CodeContext =
     /// <summary>
     /// When the context was created
     /// </summary>
-    abstract createdAt: JS.Date
+    abstract createdAt: Fable.Core.TS.Es.Date
     /// <summary>
     /// When the context was last used
     /// </summary>
-    abstract lastUsed: JS.Date
+    abstract lastUsed: Fable.Core.TS.Es.Date
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, language: string, cwd: string, createdAt: JS.Date, lastUsed: JS.Date) : CodeContext = jsNative
+    static member Create (id: string, language: string, cwd: string, createdAt: Fable.Core.TS.Es.Date, lastUsed: Fable.Core.TS.Es.Date) : CodeContext = jsNative
 
 [<Interface>]
 type RunCodeOptions =
@@ -2785,7 +2808,7 @@ type RunCodeOptions =
     /// Environment variables for this execution.
     /// Undefined values are skipped (treated as "not configured").
     /// </summary>
-    abstract envVars: Record<string, string option> option with get, set
+    abstract envVars: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Execution timeout in milliseconds
     /// </summary>
@@ -2812,7 +2835,7 @@ type RunCodeOptions =
     /// </summary>
     abstract onError: (ExecutionError -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?context: CodeContext, ?language: CreateContextOptions.Language, ?envVars: Record<string, string option>, ?timeout: float, ?signal: obj, ?onStdout: (OutputMessage -> JS.Promise<unit> option), ?onStderr: (OutputMessage -> JS.Promise<unit> option), ?onResult: (Result -> JS.Promise<unit> option), ?onError: (ExecutionError -> JS.Promise<unit> option)) : RunCodeOptions = jsNative
+    static member Create (?context: CodeContext, ?language: CreateContextOptions.Language, ?envVars: JS.Record<string, string option>, ?timeout: float, ?signal: obj, ?onStdout: (OutputMessage -> JS.Promise<unit> option), ?onStderr: (OutputMessage -> JS.Promise<unit> option), ?onResult: (Result -> JS.Promise<unit> option), ?onError: (ExecutionError -> JS.Promise<unit> option)) : RunCodeOptions = jsNative
 
 [<Interface>]
 type ExecutionResult =
@@ -2844,7 +2867,7 @@ type BaseExecOptions =
     /// duration of the command but do not persist after it completes.
     /// Undefined values are skipped (treated as "not configured").
     /// </summary>
-    abstract env: Record<string, string option> option with get, set
+    abstract env: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Working directory for command execution
     /// </summary>
@@ -2854,7 +2877,7 @@ type BaseExecOptions =
     /// </summary>
     abstract encoding: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?timeout: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string) : BaseExecOptions = jsNative
+    static member Create (?timeout: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string) : BaseExecOptions = jsNative
 
 [<Interface>]
 type ExecOptions =
@@ -2886,7 +2909,7 @@ type ExecOptions =
     /// </summary>
     abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?stream: bool, ?onOutput: ExecOptions.OnOutput, ?onComplete: (ExecResult -> unit), ?onError: (exn -> unit), ?signal: obj, ?origin: SandboxCommandsAPI.Execute.Options.Origin, ?timeout: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string) : ExecOptions = jsNative
+    static member Create (?stream: bool, ?onOutput: ExecOptions.OnOutput, ?onComplete: (ExecResult -> unit), ?onError: (exn -> unit), ?signal: obj, ?origin: SandboxCommandsAPI.Execute.Options.Origin, ?timeout: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string) : ExecOptions = jsNative
 
 [<Interface>]
 type ExecResult =
@@ -2937,9 +2960,9 @@ type WaitForLogResult =
     /// <summary>
     /// Regex capture groups (if condition was a RegExp)
     /// </summary>
-    abstract ``match``: obj option with get, set
+    abstract ``match``: Fable.Core.TS.Es.RegExpMatchArray option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (line: string, ?``match``: obj) : WaitForLogResult = jsNative
+    static member Create (line: string, ?``match``: Fable.Core.TS.Es.RegExpMatchArray) : WaitForLogResult = jsNative
 
 /// <summary>
 /// Options for waiting for a port to become ready
@@ -3013,7 +3036,7 @@ type ProcessOptions =
     /// </summary>
     abstract onError: (exn -> unit) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?sessionId: string, ?processId: string, ?autoCleanup: bool, ?onExit: (float option -> unit), ?onOutput: ProcessOptions.OnOutput, ?onStart: (Process -> unit), ?onError: (exn -> unit), ?timeout: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string) : ProcessOptions = jsNative
+    static member Create (?sessionId: string, ?processId: string, ?autoCleanup: bool, ?onExit: (float option -> unit), ?onOutput: ProcessOptions.OnOutput, ?onStart: (Process -> unit), ?onError: (exn -> unit), ?timeout: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string) : ProcessOptions = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ProcessStatus =
@@ -3045,11 +3068,11 @@ type Process =
     /// <summary>
     /// When the process was started
     /// </summary>
-    abstract startTime: JS.Date
+    abstract startTime: Fable.Core.TS.Es.Date
     /// <summary>
     /// When the process ended (if completed)
     /// </summary>
-    abstract endTime: JS.Date option
+    abstract endTime: Fable.Core.TS.Es.Date option
     /// <summary>
     /// Process exit code (if completed)
     /// </summary>
@@ -3080,7 +3103,7 @@ type Process =
     /// await proc.waitForLog(/Epoch (\d+) complete/);
     /// </code>
     /// </example>
-    abstract waitForLog: pattern: obj * ?timeout: float -> JS.Promise<WaitForLogResult>
+    abstract waitForLog: pattern: U2<string, Fable.Core.TS.Es.RegExp> * ?timeout: float -> JS.Promise<WaitForLogResult>
     /// <summary>
     /// Wait for a port to become ready
     /// </summary>
@@ -3112,7 +3135,7 @@ type Process =
     /// </summary>
     abstract waitForExit: ?timeout: float -> JS.Promise<WaitForExitResult>
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, command: string, status: ProcessStatus, startTime: JS.Date, kill: (string option -> JS.Promise<unit>), getStatus: (unit -> JS.Promise<ProcessStatus>), getLogs: (unit -> JS.Promise<Process.GetLogs.Result.Item>), waitForLog: Func<obj, float option, JS.Promise<WaitForLogResult>>, waitForPort: Func<float, WaitForPortOptions option, JS.Promise<unit>>, waitForExit: (float option -> JS.Promise<WaitForExitResult>), ?pid: float, ?endTime: JS.Date, ?exitCode: float, ?sessionId: string) : Process = jsNative
+    static member Create (id: string, command: string, status: ProcessStatus, startTime: Fable.Core.TS.Es.Date, kill: (string option -> JS.Promise<unit>), getStatus: (unit -> JS.Promise<ProcessStatus>), getLogs: (unit -> JS.Promise<Process.GetLogs.Result.Item>), waitForLog: Func<U2<string, Fable.Core.TS.Es.RegExp>, float option, JS.Promise<WaitForLogResult>>, waitForPort: Func<float, WaitForPortOptions option, JS.Promise<unit>>, waitForExit: (float option -> JS.Promise<WaitForExitResult>), ?pid: float, ?endTime: Fable.Core.TS.Es.Date, ?exitCode: float, ?sessionId: string) : Process = jsNative
 
 [<Interface>]
 type ExecEvent =
@@ -3157,7 +3180,7 @@ type StreamOptions =
     /// </summary>
     abstract signal: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?sessionId: string, ?bufferSize: float, ?signal: obj, ?timeout: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string) : StreamOptions = jsNative
+    static member Create (?sessionId: string, ?bufferSize: float, ?signal: obj, ?timeout: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string) : StreamOptions = jsNative
 
 [<Interface>]
 type SessionOptions =
@@ -3173,7 +3196,7 @@ type SessionOptions =
     /// Environment variables for this session.
     /// Undefined values are skipped (treated as "not configured").
     /// </summary>
-    abstract env: Record<string, string option> option with get, set
+    abstract env: JS.Record<string, string option> option with get, set
     /// <summary>
     /// Working directory
     /// </summary>
@@ -3187,7 +3210,7 @@ type SessionOptions =
     /// </summary>
     abstract commandTimeoutMs: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?name: string, ?env: Record<string, string option>, ?cwd: string, ?isolation: bool, ?commandTimeoutMs: float) : SessionOptions = jsNative
+    static member Create (?id: string, ?name: string, ?env: JS.Record<string, string option>, ?cwd: string, ?isolation: bool, ?commandTimeoutMs: float) : SessionOptions = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type SandboxTransport =
@@ -3317,9 +3340,9 @@ type SandboxOptions =
     /// })
     /// </code>
     /// </example>
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?sleepAfter: U2<string, float>, ?keepAlive: bool, ?enableDefaultSession: bool, ?normalizeId: bool, ?containerTimeouts: Sandbox.Configure.Configuration.ContainerTimeouts, ?transport: SandboxTransport, ?labels: Record<string, string>) : SandboxOptions = jsNative
+    static member Create (?sleepAfter: U2<string, float>, ?keepAlive: bool, ?enableDefaultSession: bool, ?normalizeId: bool, ?containerTimeouts: Sandbox.Configure.Configuration.ContainerTimeouts, ?transport: SandboxTransport, ?labels: JS.Record<string, string>) : SandboxOptions = jsNative
 
 [<Interface>]
 type ListFilesOptions =
@@ -3354,34 +3377,58 @@ type FileStreamEvent =
 
 [<Interface>]
 type FileStreamEvent2 =
+    /// <remarks>TypeScript type: <c>"metadata"</c></remarks>
     abstract ``type``: string with get, set
     abstract mimeType: string with get, set
     abstract size: float with get, set
     abstract isBinary: bool with get, set
     abstract encoding: FileMetadata.Encoding with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, mimeType: string, size: float, isBinary: bool, encoding: FileMetadata.Encoding) : FileStreamEvent2 = jsNative
+    [<ParamObject; Emit("({ type: 'metadata', ...$0 })")>]
+    static member Create (mimeType: string, size: float, isBinary: bool, encoding: FileMetadata.Encoding) : FileStreamEvent2 = jsNative
+
+module FileStreamEvent2 =
+    /// <remarks>TypeScript type: <c>"metadata"</c></remarks>
+    [<Literal>]
+    let ``type`` = "metadata"
 
 [<Interface>]
 type FileStreamEvent3 =
+    /// <remarks>TypeScript type: <c>"chunk"</c></remarks>
     abstract ``type``: string with get, set
     abstract data: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, data: string) : FileStreamEvent3 = jsNative
+    [<ParamObject; Emit("({ type: 'chunk', ...$0 })")>]
+    static member Create (data: string) : FileStreamEvent3 = jsNative
+
+module FileStreamEvent3 =
+    /// <remarks>TypeScript type: <c>"chunk"</c></remarks>
+    [<Literal>]
+    let ``type`` = "chunk"
 
 [<Interface>]
 type FileStreamEvent4 =
+    /// <remarks>TypeScript type: <c>"complete"</c></remarks>
     abstract ``type``: string with get, set
     abstract bytesRead: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, bytesRead: float) : FileStreamEvent4 = jsNative
+    [<ParamObject; Emit("({ type: 'complete', ...$0 })")>]
+    static member Create (bytesRead: float) : FileStreamEvent4 = jsNative
+
+module FileStreamEvent4 =
+    /// <remarks>TypeScript type: <c>"complete"</c></remarks>
+    [<Literal>]
+    let ``type`` = "complete"
 
 [<Interface>]
 type FileStreamEvent5 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string with get, set
     abstract error: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, error: string) : FileStreamEvent5 = jsNative
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member Create (error: string) : FileStreamEvent5 = jsNative
+
+module FileStreamEvent5 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error"
 
 /// <summary>
 /// File metadata from streaming
@@ -3398,7 +3445,7 @@ type FileMetadata =
 /// <summary>
 /// File stream chunk - either string (text) or Uint8Array (binary, auto-decoded)
 /// </summary>
-type FileChunk = U2<string, JS.Uint8Array>
+type FileChunk = U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 /// <summary>
 /// Options for watching a directory.
@@ -3460,35 +3507,59 @@ type FileWatchSSEEvent =
 
 [<Interface>]
 type FileWatchSSEEvent2 =
+    /// <remarks>TypeScript type: <c>"watching"</c></remarks>
     abstract ``type``: string with get, set
     abstract path: string with get, set
     abstract watchId: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, path: string, watchId: string) : FileWatchSSEEvent2 = jsNative
+    [<ParamObject; Emit("({ type: 'watching', ...$0 })")>]
+    static member Create (path: string, watchId: string) : FileWatchSSEEvent2 = jsNative
+
+module FileWatchSSEEvent2 =
+    /// <remarks>TypeScript type: <c>"watching"</c></remarks>
+    [<Literal>]
+    let ``type`` = "watching"
 
 [<Interface>]
 type FileWatchSSEEvent3 =
+    /// <remarks>TypeScript type: <c>"event"</c></remarks>
     abstract ``type``: string with get, set
     abstract eventType: FileWatchEventType with get, set
     abstract path: string with get, set
     abstract isDirectory: bool with get, set
     abstract timestamp: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, eventType: FileWatchEventType, path: string, isDirectory: bool, timestamp: string) : FileWatchSSEEvent3 = jsNative
+    [<ParamObject; Emit("({ type: 'event', ...$0 })")>]
+    static member Create (eventType: FileWatchEventType, path: string, isDirectory: bool, timestamp: string) : FileWatchSSEEvent3 = jsNative
+
+module FileWatchSSEEvent3 =
+    /// <remarks>TypeScript type: <c>"event"</c></remarks>
+    [<Literal>]
+    let ``type`` = "event"
 
 [<Interface>]
 type FileWatchSSEEvent4 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
     abstract ``type``: string with get, set
     abstract error: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, error: string) : FileWatchSSEEvent4 = jsNative
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member Create (error: string) : FileWatchSSEEvent4 = jsNative
+
+module FileWatchSSEEvent4 =
+    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+    [<Literal>]
+    let ``type`` = "error"
 
 [<Interface>]
 type FileWatchSSEEvent5 =
+    /// <remarks>TypeScript type: <c>"stopped"</c></remarks>
     abstract ``type``: string with get, set
     abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, reason: string) : FileWatchSSEEvent5 = jsNative
+    [<ParamObject; Emit("({ type: 'stopped', ...$0 })")>]
+    static member Create (reason: string) : FileWatchSSEEvent5 = jsNative
+
+module FileWatchSSEEvent5 =
+    /// <remarks>TypeScript type: <c>"stopped"</c></remarks>
+    [<Literal>]
+    let ``type`` = "stopped"
 
 /// <summary>
 /// Result returned by <c>checkChanges()</c>.
@@ -3578,7 +3649,7 @@ type ExecutionSession =
     abstract listFiles: path: string * ?options: ListFilesOptions -> JS.Promise<ListFilesResult>
     abstract exists: path: string -> JS.Promise<FileExistsResult>
     abstract gitCheckout: repoUrl: string * ?options: ExecutionSession.GitCheckout.Options -> JS.Promise<GitCheckoutResult>
-    abstract setEnvVars: envVars: Record<string, string option> -> JS.Promise<unit>
+    abstract setEnvVars: envVars: JS.Record<string, string option> -> JS.Promise<unit>
     abstract createCodeContext: ?options: CreateContextOptions -> JS.Promise<CodeContext>
     abstract runCode: code: string * ?options: RunCodeOptions -> JS.Promise<ExecutionResult>
     abstract runCodeStream: code: string * ?options: RunCodeOptions -> JS.Promise<obj>
@@ -3815,7 +3886,7 @@ type ISandbox =
     abstract listFiles: path: string * ?options: ListFilesOptions -> JS.Promise<ListFilesResult>
     abstract exists: path: string * ?sessionId: string -> JS.Promise<FileExistsResult>
     abstract gitCheckout: repoUrl: string * ?options: ISandbox.GitCheckout.Options -> JS.Promise<GitCheckoutResult>
-    abstract setEnvVars: envVars: Record<string, string option> -> JS.Promise<unit>
+    abstract setEnvVars: envVars: JS.Record<string, string option> -> JS.Promise<unit>
     abstract mountBucket: bucket: string * mountPath: string * options: MountBucketOptions -> JS.Promise<unit>
     abstract unmountBucket: mountPath: string -> JS.Promise<unit>
     abstract createSession: ?options: SessionOptions -> JS.Promise<ExecutionSession>
@@ -3845,11 +3916,11 @@ type ExecuteRequest =
     abstract sessionId: string option with get, set
     abstract background: bool option with get, set
     abstract timeoutMs: float option with get, set
-    abstract env: Record<string, string option> option with get, set
+    abstract env: JS.Record<string, string option> option with get, set
     abstract cwd: string option with get, set
     abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (command: string, ?sessionId: string, ?background: bool, ?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : ExecuteRequest = jsNative
+    static member Create (command: string, ?sessionId: string, ?background: bool, ?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : ExecuteRequest = jsNative
 
 /// <summary>
 /// Request to start a background process
@@ -3861,13 +3932,13 @@ type StartProcessRequest =
     abstract sessionId: string option with get, set
     abstract processId: string option with get, set
     abstract timeoutMs: float option with get, set
-    abstract env: Record<string, string option> option with get, set
+    abstract env: JS.Record<string, string option> option with get, set
     abstract cwd: string option with get, set
     abstract encoding: string option with get, set
     abstract autoCleanup: bool option with get, set
     abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (command: string, ?sessionId: string, ?processId: string, ?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string, ?autoCleanup: bool, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : StartProcessRequest = jsNative
+    static member Create (command: string, ?sessionId: string, ?processId: string, ?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string, ?autoCleanup: bool, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : StartProcessRequest = jsNative
 
 /// <summary>
 /// Public-facing tunnel record. Discriminated on the presence of <c>name</c>:
@@ -3985,9 +4056,9 @@ type SandboxClientOptions =
     /// Used to propagate stable context (e.g. sandboxId) from the Durable Object
     /// to the container so container logs carry the same identifiers as DO logs.
     /// </summary>
-    abstract defaultHeaders: Record<string, string> option with get, set
+    abstract defaultHeaders: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?logger: Logger, ?baseUrl: string, ?port: float, ?stub: ContainerStub, ?onCommandComplete: SandboxClientOptions.OnCommandComplete, ?onError: SandboxClientOptions.OnError, ?transportMode: RouteTransportMode, ?wsUrl: string, ?transport: ITransport, ?retryTimeoutMs: float, ?defaultHeaders: Record<string, string>) : SandboxClientOptions = jsNative
+    static member Create (?logger: Logger, ?baseUrl: string, ?port: float, ?stub: ContainerStub, ?onCommandComplete: SandboxClientOptions.OnCommandComplete, ?onError: SandboxClientOptions.OnError, ?transportMode: RouteTransportMode, ?wsUrl: string, ?transport: ITransport, ?retryTimeoutMs: float, ?defaultHeaders: JS.Record<string, string>) : SandboxClientOptions = jsNative
 
 /// <summary>
 /// Base response interface for all API responses
@@ -4016,7 +4087,7 @@ type ErrorResponse =
 [<Interface>]
 type RequestConfig =
     abstract endpoint: string with get, set
-    abstract data: Record<string, obj> option with get, set
+    abstract data: JS.Record<string, obj> option with get, set
     abstract ``method``: string option with get, set
     abstract headers: obj option with get, set
     abstract body: obj option with get, set
@@ -4028,7 +4099,7 @@ type RequestConfig =
     abstract signal: obj option with get, set
     abstract encodeResponseBody: TransportRequestInit.EncodeResponseBody option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (endpoint: string, ?data: Record<string, obj>, ?``method``: string, ?headers: obj, ?body: obj, ?redirect: string, ?fetcher: TransportRequestInit.Fetcher, ?cf: obj, ?cache: TransportRequestInit.Cache, ?integrity: string, ?signal: obj, ?encodeResponseBody: TransportRequestInit.EncodeResponseBody) : RequestConfig = jsNative
+    static member Create (endpoint: string, ?data: JS.Record<string, obj>, ?``method``: string, ?headers: obj, ?body: obj, ?redirect: string, ?fetcher: TransportRequestInit.Fetcher, ?cf: obj, ?cache: TransportRequestInit.Cache, ?integrity: string, ?signal: obj, ?encodeResponseBody: TransportRequestInit.EncodeResponseBody) : RequestConfig = jsNative
 
 type ResponseHandler<'T> = (obj -> JS.Promise<'T>)
 
@@ -4357,11 +4428,11 @@ type CommandsResponse =
 [<Interface>]
 type CreateSessionRequest =
     abstract id: string with get, set
-    abstract env: Record<string, string option> option with get, set
+    abstract env: JS.Record<string, string option> option with get, set
     abstract cwd: string option with get, set
     abstract commandTimeoutMs: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, ?env: Record<string, string option>, ?cwd: string, ?commandTimeoutMs: float) : CreateSessionRequest = jsNative
+    static member Create (id: string, ?env: JS.Record<string, string option>, ?cwd: string, ?commandTimeoutMs: float) : CreateSessionRequest = jsNative
 
 /// <summary>
 /// Response interface for creating sessions.
@@ -4520,7 +4591,7 @@ type Sandbox<'Env> =
     abstract defaultSession: obj with get, set
     abstract containerGeneration: obj with get, set
     abstract defaultSessionInit: obj with get, set
-    abstract envVars: Record<string, string> with get, set
+    abstract envVars: JS.Record<string, string> with get, set
     abstract logger: obj with get, set
     abstract keepAliveEnabled: obj with get, set
     abstract activeMounts: obj with get, set
@@ -4621,7 +4692,7 @@ type Sandbox<'Env> =
     abstract setKeepAlive: keepAlive: bool -> JS.Promise<unit>
     abstract setContainerTimeouts: timeouts: Sandbox.Configure.Configuration.ContainerTimeouts -> JS.Promise<unit>
     abstract setTransport: transport: SandboxTransport -> JS.Promise<unit>
-    abstract setLabels: labels: Record<string, string> -> JS.Promise<unit>
+    abstract setLabels: labels: JS.Record<string, string> -> JS.Promise<unit>
     abstract validateTimeout: obj with get, set
     abstract getDefaultTimeouts: obj with get, set
     abstract runMountOperation: obj with get, set
@@ -5192,7 +5263,7 @@ type Sandbox<'Env> =
     abstract requiredPorts: float[] option with get, set
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     abstract interceptHttps: bool with get, set
     abstract allowedHosts: string[] option with get, set
     abstract deniedHosts: string[] option with get, set
@@ -5357,7 +5428,7 @@ type Sandbox<'Env> =
     /// <param name="callback">Name of the method to call</param>
     /// <param name="payload">Data to pass to the callback</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U2<float, JS.Date> * callback: string * ?payload: 'T -> JS.Promise<Sandbox.Schedule.Result.Item>
+    abstract schedule<'T>: ``when``: U2<float, Fable.Core.TS.Es.Date> * callback: string * ?payload: 'T -> JS.Promise<Sandbox.Schedule.Result.Item<'T>>
     abstract container: obj with get, set
     abstract onStopCalled: obj with get, set
     abstract state: obj with get, set
@@ -5446,7 +5517,7 @@ type Sandbox<'Env> =
     /// Schedule the next alarm based on upcoming tasks
     /// </summary>
     abstract scheduleNextAlarm: ?ms: float -> JS.Promise<unit>
-    abstract listSchedules: name: string -> JS.Promise<FSharp.CloudEdge.Runtime.Sandbox.Sandbox.Schedule.Result.Item[]>
+    abstract listSchedules<'T>: name: string -> JS.Promise<Sandbox.Schedule.Result.Item<'T>[]>
     abstract toSchedule: obj with get, set
     /// <summary>
     /// Get a scheduled task by ID
@@ -5454,13 +5525,13 @@ type Sandbox<'Env> =
     /// <remarks>@template T Type of the payload data</remarks>
     /// <param name="id">ID of the scheduled task</param>
     /// <returns>The Schedule object or undefined if not found</returns>
-    abstract getSchedule<'T>: id: string -> JS.Promise<U2<Sandbox.GetSchedule.Result.Item<'T>, Sandbox.GetSchedule.Result.Item2<'T>> option>
+    abstract getSchedule<'T>: id: string -> JS.Promise<Sandbox.Schedule.Result.Item<'T> option>
     abstract isActivityExpired: obj with get, set
     abstract __DURABLE_OBJECT_BRAND: unit
     abstract ctx: obj with get, set
     abstract env: 'Env with get, set
     abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
     /// <summary>
@@ -5478,17 +5549,17 @@ type Sandbox<'Env> =
     [<Import("Sandbox.PRESIGNED_URL_EXPIRY_SECONDS", "@cloudflare/sandbox")>]
     static member PRESIGNED_URL_EXPIRY_SECONDS: obj = jsNative
     static member outboundByHost
-        with get (): Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
-        and set (_: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
+        with get (): JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
+        and set (_: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
     static member outboundHandlers
-        with get (): Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
-        and set (_: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
+        with get (): JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
+        and set (_: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
     static member outbound
         with get (): Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option = jsNative
         and set (_: Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option): unit = jsNative
     static member outboundProxies
-        with get (): Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
-        and set (_: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
+        with get (): JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option = jsNative
+        and set (_: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option): unit = jsNative
     static member outboundProxy
         with get (): Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option = jsNative
         and set (_: Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option): unit = jsNative
@@ -5607,7 +5678,7 @@ type Exports =
     /// </code>
     /// </example>
     [<Import("streamFile", "@cloudflare/sandbox")>]
-    static member streamFile (stream: obj) : JS.AsyncGenerator<FileChunk> = jsNative
+    static member streamFile (stream: obj) : Fable.Core.TS.Es.AsyncGenerator<FileChunk, FileMetadata, obj> = jsNative
     /// <summary>
     /// Collect an entire file into memory from a stream
     /// </summary>
@@ -5638,14 +5709,14 @@ type Exports =
     /// <param name="stream">- The ReadableStream from fetch response</param>
     /// <param name="signal">- Optional AbortSignal for cancellation</param>
     [<Import("parseSSEStream", "@cloudflare/sandbox")>]
-    static member parseSSEStream<'T> (stream: obj, ?signal: obj) : JS.AsyncIterable<'T> = jsNative
+    static member parseSSEStream<'T> (stream: obj, ?signal: obj) : Fable.Core.TS.Es.AsyncIterable<'T, obj, obj> = jsNative
     /// <summary>
     /// Helper to convert a Response with SSE stream directly to AsyncIterable
     /// </summary>
     /// <param name="response">- Response object with SSE stream</param>
     /// <param name="signal">- Optional AbortSignal for cancellation</param>
     [<Import("responseToAsyncIterable", "@cloudflare/sandbox")>]
-    static member responseToAsyncIterable<'T> (response: obj, ?signal: obj) : JS.AsyncIterable<'T> = jsNative
+    static member responseToAsyncIterable<'T> (response: obj, ?signal: obj) : Fable.Core.TS.Es.AsyncIterable<'T, obj, obj> = jsNative
     /// <summary>
     /// Create an SSE-formatted ReadableStream from an AsyncIterable
     /// (Useful for Worker endpoints that need to forward AsyncIterable as SSE)
@@ -5653,7 +5724,7 @@ type Exports =
     /// <param name="events">- AsyncIterable of events</param>
     /// <param name="options">- Stream options</param>
     [<Import("asyncIterableToSSEStream", "@cloudflare/sandbox")>]
-    static member asyncIterableToSSEStream<'T> (events: JS.AsyncIterable<'T>, ?options: AsyncIterableToSSEStream.Options<'T>) : obj = jsNative
+    static member asyncIterableToSSEStream<'T> (events: Fable.Core.TS.Es.AsyncIterable<'T, obj, obj>, ?options: AsyncIterableToSSEStream.Options<'T>) : obj = jsNative
     /// <summary>
     /// Base error for bucket mounting operations
     /// </summary>
@@ -5879,41 +5950,35 @@ module CheckChangesResult2 =
         | [<CompiledName("changed")>] Changed
         | [<CompiledName("unchanged")>] Unchanged
 
-module CheckChangesResult3 =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Reason =
-        | [<CompiledName("expired")>] Expired
-        | [<CompiledName("restarted")>] Restarted
-
 module CollectFile =
     module Result =
         [<Interface>]
         type Item =
-            abstract content: U2<string, JS.Uint8Array> with get, set
+            abstract content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
             abstract metadata: FileMetadata with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (content: U2<string, JS.Uint8Array>, metadata: FileMetadata) : Item = jsNative
+            static member Create (content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, metadata: FileMetadata) : Item = jsNative
 
 module CommandClient =
     module Execute =
         [<Interface>]
         type Options =
             abstract timeoutMs: float option with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
+            static member Create (?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
 
     module ExecuteStream =
         [<Interface>]
         type Options =
             abstract timeoutMs: float option with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
+            static member Create (?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
 
 module ContainerUnavailableError =
     module ToJSON =
@@ -6054,9 +6119,15 @@ module ExecutionSession =
     module ReadFile =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
             abstract encoding: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (encoding: string) : Options = jsNative
+            [<Emit("({ encoding: 'none' })")>]
+            static member Create () : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
+            [<Literal>]
+            let encoding = "none"
 
         [<Interface>]
         type Options2 =
@@ -6112,9 +6183,15 @@ module FileClient =
     module ReadFile =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
             abstract encoding: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (encoding: string) : Options = jsNative
+            [<Emit("({ encoding: 'none' })")>]
+            static member Create () : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
+            [<Literal>]
+            let encoding = "none"
 
         [<Interface>]
         type Options2 =
@@ -6217,9 +6294,15 @@ module ISandbox =
     module ReadFile =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
             abstract encoding: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (encoding: string) : Options = jsNative
+            [<Emit("({ encoding: 'none' })")>]
+            static member Create () : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
+            [<Literal>]
+            let encoding = "none"
 
         [<Interface>]
         type Options2 =
@@ -6338,9 +6421,9 @@ module Opencode =
         /// <summary>
         /// Additional environment variables to pass to the OpenCode process
         /// </summary>
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?port: float, ?directory: string, ?config: obj, ?env: Record<string, string>) : OpencodeOptions = jsNative
+        static member Create (?port: float, ?directory: string, ?config: obj, ?env: JS.Record<string, string>) : OpencodeOptions = jsNative
 
     /// <summary>
     /// Server lifecycle management
@@ -6386,14 +6469,15 @@ module Opencode =
     [<Interface>]
     [<Import("OpencodeStartupError", "@cloudflare/sandbox/opencode")>]
     type OpencodeStartupError =
+        /// <remarks>TypeScript type: <c>"OPENCODE_STARTUP_FAILED"</c></remarks>
         abstract code: string
         abstract context: OpencodeStartupContext
         abstract name: string with get, set
         abstract message: string with get, set
         abstract stack: string option with get, set
         abstract cause: obj option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (code: string, context: OpencodeStartupContext, name: string, message: string, ?stack: string, ?cause: obj) : OpencodeStartupError = jsNative
+        [<ParamObject; Emit("({ code: 'OPENCODE_STARTUP_FAILED', ...$0 })")>]
+        static member Create (context: OpencodeStartupContext, name: string, message: string, ?stack: string, ?cause: obj) : OpencodeStartupError = jsNative
         /// <summary>
         /// Indicates whether the argument provided is a built-in Error instance or not.
         /// </summary>
@@ -6443,7 +6527,7 @@ module Opencode =
         /// </code>
         /// </summary>
         [<Import("OpencodeStartupError.captureStackTrace", "@cloudflare/sandbox/opencode")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         [<Import("OpencodeStartupError.prepareStackTrace", "@cloudflare/sandbox/opencode")>]
         static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -6462,6 +6546,11 @@ module Opencode =
             with get (): float = jsNative
             and set (_: float): unit = jsNative
 
+    module OpencodeStartupError =
+        /// <remarks>TypeScript type: <c>"OPENCODE_STARTUP_FAILED"</c></remarks>
+        [<Literal>]
+        let code = "OPENCODE_STARTUP_FAILED"
+
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -6469,7 +6558,7 @@ module Opencode =
         /// Error thrown when OpenCode server fails to start
         /// </summary>
         [<Import("OpencodeStartupError", "@cloudflare/sandbox/opencode"); EmitConstructor>]
-        static member OpencodeStartupError (message: string, context: OpencodeStartupContext, ?options: obj) : FSharp.CloudEdge.Runtime.Sandbox.Opencode.OpencodeStartupError = jsNative
+        static member OpencodeStartupError (message: string, context: OpencodeStartupContext, ?options: Fable.Core.TS.Es.ErrorOptions) : FSharp.CloudEdge.Runtime.Sandbox.Opencode.OpencodeStartupError = jsNative
         /// <summary>
         /// Starts an OpenCode server inside a Sandbox container.
         /// <br /><br />
@@ -6688,7 +6777,7 @@ module Opencode =
         /// a();
         /// </code>
         /// </summary>
-        abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
         /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
         abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
         /// <summary>
@@ -6707,7 +6796,7 @@ module Opencode =
         /// Error thrown when OpenCode server fails to start
         /// </summary>
         [<EmitConstructor>]
-        abstract Create: message: string * context: OpencodeStartupContext * ?options: obj -> FSharp.CloudEdge.Runtime.Sandbox.Opencode.OpencodeStartupError
+        abstract Create: message: string * context: OpencodeStartupContext * ?options: Fable.Core.TS.Es.ErrorOptions -> FSharp.CloudEdge.Runtime.Sandbox.Opencode.OpencodeStartupError
 
 module OperationInterruptedContext =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -6761,13 +6850,13 @@ module ProcessClient =
         type Options =
             abstract processId: string option with get, set
             abstract timeoutMs: float option with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             abstract encoding: string option with get, set
             abstract autoCleanup: bool option with get, set
             abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?processId: string, ?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?encoding: string, ?autoCleanup: bool, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
+            static member Create (?processId: string, ?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?encoding: string, ?autoCleanup: bool, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
 
 module ProcessExitedBeforeReadyError =
     module ToJSON =
@@ -7327,9 +7416,9 @@ module Sandbox =
             abstract keepAlive: bool option with get, set
             abstract containerTimeouts: Sandbox.Configure.Configuration.ContainerTimeouts option with get, set
             abstract transport: SandboxTransport option with get, set
-            abstract labels: Record<string, string> option with get, set
+            abstract labels: JS.Record<string, string> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?sandboxName: Sandbox.Configure.Configuration.SandboxName, ?sleepAfter: U2<string, float>, ?keepAlive: bool, ?containerTimeouts: Sandbox.Configure.Configuration.ContainerTimeouts, ?transport: SandboxTransport, ?labels: Record<string, string>) : Configuration = jsNative
+            static member Create (?sandboxName: Sandbox.Configure.Configuration.SandboxName, ?sleepAfter: U2<string, float>, ?keepAlive: bool, ?containerTimeouts: Sandbox.Configure.Configuration.ContainerTimeouts, ?transport: SandboxTransport, ?labels: JS.Record<string, string>) : Configuration = jsNative
 
         module Configuration =
             [<Interface>]
@@ -7384,9 +7473,15 @@ module Sandbox =
                 type Item =
                     abstract url: string with get, set
                     abstract port: float with get, set
+                    /// <remarks>TypeScript type: <c>"active"</c></remarks>
                     abstract status: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (url: string, port: float, status: string) : Item = jsNative
+                    [<ParamObject; Emit("({ status: 'active', ...$0 })")>]
+                    static member Create (url: string, port: float) : Item = jsNative
+
+                module Item =
+                    /// <remarks>TypeScript type: <c>"active"</c></remarks>
+                    [<Literal>]
+                    let status = "active"
 
     module GetProcessLogs =
         module Result =
@@ -7397,62 +7492,6 @@ module Sandbox =
                 abstract processId: string with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (stdout: string, stderr: string, processId: string) : Item = jsNative
-
-    module GetSchedule =
-        module Result =
-            [<Interface>]
-            type Item<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for one-time execution at a specific time
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item<'T> = jsNative
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for delayed execution
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                /// <summary>
-                /// Number of seconds to delay execution
-                /// </summary>
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item2<'T> = jsNative
 
     module GetState =
         module Result =
@@ -7466,10 +7505,16 @@ module Sandbox =
             [<Interface>]
             type Item2 =
                 abstract lastChange: float with get, set
+                /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
                 abstract status: string with get, set
                 abstract exitCode: float option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (lastChange: float, status: string, ?exitCode: float) : Item2 = jsNative
+                [<ParamObject; Emit("({ status: 'stopped_with_code', ...$0 })")>]
+                static member Create (lastChange: float, ?exitCode: float) : Item2 = jsNative
+
+            module Item2 =
+                /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
+                [<Literal>]
+                let status = "stopped_with_code"
 
             module Item =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -7512,10 +7557,16 @@ module Sandbox =
     module ReadFile =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
             abstract encoding: string with get, set
             abstract sessionId: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (encoding: string, ?sessionId: string) : Options = jsNative
+            [<ParamObject; Emit("({ encoding: 'none', ...$0 })")>]
+            static member Create (?sessionId: string) : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
+            [<Literal>]
+            let encoding = "none"
 
         [<Interface>]
         type Options2 =
@@ -7534,9 +7585,9 @@ module Sandbox =
     module Schedule =
         module Result =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: obj * time: float
-                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: obj * time: float * delayInSeconds: float
+            type Item<'T> =
+                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: 'T * time: float
+                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: 'T * time: float * delayInSeconds: float
 
             [<Interface>]
             type Item2<'T> =
@@ -7555,13 +7606,22 @@ module Sandbox =
                 /// <summary>
                 /// Type of schedule for one-time execution at a specific time
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// Timestamp when the task should execute
                 /// </summary>
                 abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item2<'T> = jsNative
+                [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
+                static member Create (taskId: string, callback: string, payload: 'T, time: float) : Item2<'T> = jsNative
+
+            module Item2 =
+                /// <summary>
+                /// Type of schedule for one-time execution at a specific time
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
+                [<Literal>]
+                let ``type`` = "scheduled"
 
             [<Interface>]
             type Item3<'T> =
@@ -7580,6 +7640,7 @@ module Sandbox =
                 /// <summary>
                 /// Type of schedule for delayed execution
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
                 abstract ``type``: string with get, set
                 /// <summary>
                 /// Timestamp when the task should execute
@@ -7589,8 +7650,16 @@ module Sandbox =
                 /// Number of seconds to delay execution
                 /// </summary>
                 abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item3<'T> = jsNative
+                [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
+                static member Create (taskId: string, callback: string, payload: 'T, time: float, delayInSeconds: float) : Item3<'T> = jsNative
+
+            module Item3 =
+                /// <summary>
+                /// Type of schedule for delayed execution
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
+                [<Literal>]
+                let ``type`` = "delayed"
 
     module SetOutboundByHosts =
         type Handlers<'Params> =
@@ -7662,11 +7731,11 @@ module SandboxCommandsAPI =
         [<Interface>]
         type Options =
             abstract timeoutMs: float option with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
+            static member Create (?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
 
         module Options =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -7690,11 +7759,11 @@ module SandboxCommandsAPI =
         [<Interface>]
         type Options =
             abstract timeoutMs: float option with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             abstract origin: SandboxCommandsAPI.Execute.Options.Origin option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?timeoutMs: float, ?env: Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
+            static member Create (?timeoutMs: float, ?env: JS.Record<string, string option>, ?cwd: string, ?origin: SandboxCommandsAPI.Execute.Options.Origin) : Options = jsNative
 
 module SandboxError =
     module ToJSON =
@@ -7724,9 +7793,15 @@ module SandboxFilesAPI =
     module ReadFile =
         [<Interface>]
         type Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
             abstract encoding: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (encoding: string) : Options = jsNative
+            [<Emit("({ encoding: 'none' })")>]
+            static member Create () : Options = jsNative
+
+        module Options =
+            /// <remarks>TypeScript type: <c>"none"</c></remarks>
+            [<Literal>]
+            let encoding = "none"
 
         [<Interface>]
         type Options2 =
@@ -7806,10 +7881,10 @@ module SandboxUtilsAPI =
         [<Interface>]
         type Options =
             abstract id: string with get, set
-            abstract env: Record<string, string option> option with get, set
+            abstract env: JS.Record<string, string option> option with get, set
             abstract cwd: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (id: string, ?env: Record<string, string option>, ?cwd: string) : Options = jsNative
+            static member Create (id: string, ?env: JS.Record<string, string option>, ?cwd: string) : Options = jsNative
 
         module Result =
             [<Interface>]
@@ -7946,7 +8021,7 @@ type SessionTerminatedErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8021,7 +8096,7 @@ type ProcessReadyTimeoutErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8093,7 +8168,7 @@ type ProcessExitedBeforeReadyErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8165,7 +8240,7 @@ type BackupNotFoundErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8237,7 +8312,7 @@ type BackupExpiredErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8309,7 +8384,7 @@ type InvalidBackupConfigErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8381,7 +8456,7 @@ type BackupCreateErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8453,7 +8528,7 @@ type BackupRestoreErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8530,7 +8605,7 @@ type ContainerUnavailableErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8616,7 +8691,7 @@ type RPCTransportErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8699,7 +8774,7 @@ type OperationInterruptedErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8773,7 +8848,7 @@ type BucketMountErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8845,7 +8920,7 @@ type S3FSMountErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8917,7 +8992,7 @@ type BucketUnmountErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -8989,7 +9064,7 @@ type MissingCredentialsErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -9061,7 +9136,7 @@ type InvalidMountConfigErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>
@@ -9104,10 +9179,10 @@ type SandboxConstructor =
     /// </summary>
     abstract validateBackupDir: obj with get, set
     abstract PRESIGNED_URL_EXPIRY_SECONDS: obj
-    abstract outboundByHost: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
-    abstract outboundHandlers: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
+    abstract outboundByHost: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
+    abstract outboundHandlers: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
     abstract outbound: Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option with get, set
-    abstract outboundProxies: Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
+    abstract outboundProxies: JS.Record<string, Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj>> option with get, set
     abstract outboundProxy: Func<obj, obj, Sandbox.OutboundByHost.Item.Ctx<obj>, obj> option with get, set
     [<EmitConstructor>]
     abstract Create<'Env>: ctx: obj * env: 'Env -> Sandbox<'Env>

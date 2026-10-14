@@ -428,7 +428,7 @@ type FlagshipError =
     /// </code>
     /// </summary>
     [<Import("FlagshipError.captureStackTrace", "@cloudflare/flagship")>]
-    static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     [<Import("FlagshipError.prepareStackTrace", "@cloudflare/flagship")>]
     static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
@@ -452,7 +452,7 @@ type FlagshipError =
 /// </summary>
 type ContextTransformer = obj
 
-type EvaluationContextValue = U6<string, float, bool, obj[], JS.Date, EvaluationContextValue2> option
+type EvaluationContextValue = U6<string, float, bool, obj[], Fable.Core.TS.Es.Date, EvaluationContextValue2> option
 
 type EvaluationContextValue2 =
     [<EmitIndexer>]
@@ -557,12 +557,12 @@ module ContextTransformer =
             /// </summary>
             abstract targetingKey: string option with get, set
             [<EmitIndexer>]
-            abstract Item: string -> U6<string, float, bool, obj[], JS.Date, ContextTransformer.ToQueryParams.Context.Item> option with get, set
+            abstract Item: string -> U6<string, float, bool, obj[], Fable.Core.TS.Es.Date, ContextTransformer.ToQueryParams.Context.Item> option with get, set
 
         module Context =
             type Item =
                 [<EmitIndexer>]
-                abstract Item: string -> U6<string, float, bool, obj[], JS.Date, FSharp.CloudEdge.Runtime.Flagship.ContextTransformer.ToQueryParams.Context.Item> option with get, set
+                abstract Item: string -> U6<string, float, bool, obj[], Fable.Core.TS.Es.Date, FSharp.CloudEdge.Runtime.Flagship.ContextTransformer.ToQueryParams.Context.Item> option with get, set
 
 module FlagshipClient =
     module Evaluate =
@@ -1094,6 +1094,7 @@ module Server =
     [<Interface>]
     type FlagshipServerProvider =
         abstract metadata: obj
+        /// <remarks>TypeScript type: <c>"server"</c></remarks>
         abstract runsOn: string
         abstract events: obj
         /// <summary>
@@ -1130,8 +1131,13 @@ module Server =
         /// expected type. Falls back to <c>get</c> + synthetic details for unknown types.
         /// </summary>
         abstract evaluateBinding: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (metadata: obj, runsOn: string, events: obj, client: obj, binding: obj, logging: obj, cache: obj, resolve: obj, logger: obj, onClose: (unit -> JS.Promise<unit>), resolveBooleanEvaluation: Func<string, bool, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveStringEvaluation: Func<string, string, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveNumberEvaluation: Func<string, float, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveObjectEvaluation: Func<string, 'T, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveCached: obj, resolveViaHttp: obj, handleHttpError: obj, resolveViaBinding: obj, evaluateBinding: obj) : FlagshipServerProvider = jsNative
+        [<ParamObject; Emit("({ runsOn: 'server', ...$0 })")>]
+        static member Create (metadata: obj, events: obj, client: obj, binding: obj, logging: obj, cache: obj, resolve: obj, logger: obj, onClose: (unit -> JS.Promise<unit>), resolveBooleanEvaluation: Func<string, bool, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveStringEvaluation: Func<string, string, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveNumberEvaluation: Func<string, float, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveObjectEvaluation: Func<string, 'T, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveCached: obj, resolveViaHttp: obj, handleHttpError: obj, resolveViaBinding: obj, evaluateBinding: obj) : FlagshipServerProvider = jsNative
+
+    module FlagshipServerProvider =
+        /// <remarks>TypeScript type: <c>"server"</c></remarks>
+        [<Literal>]
+        let runsOn = "server"
 
     /// <summary>
     /// Logging hook for debugging flag evaluations
@@ -1154,12 +1160,12 @@ module Server =
     [<Interface>]
     type LoggingHook =
         abstract logger: obj
-        abstract before: hookContext: obj * ?_hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract ``finally``: _hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: ReadonlyRecord<string, obj> -> unit
+        abstract before: hookContext: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract ``finally``: _hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (logger: obj, before: Action<obj, ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, ReadonlyRecord<string, obj> option>) : LoggingHook = jsNative
+        static member Create (logger: obj, before: Action<obj, JS.ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, JS.ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>) : LoggingHook = jsNative
 
     /// <summary>
     /// Telemetry event data
@@ -1178,15 +1184,15 @@ module Server =
         /// </summary>
         abstract errorCode: ErrorCode option with get, set
         abstract errorMessage: string option with get, set
-        abstract context: Record<string, obj> option with get, set
+        abstract context: JS.Record<string, obj> option with get, set
         /// <summary>
         /// Caller-supplied hints forwarded from <c>EvaluationOptions.hookHints</c>.
         /// Use this to attach trace IDs, request IDs, or any other metadata
         /// that the application author wants to associate with the evaluation.
         /// </summary>
-        abstract hints: ReadonlyRecord<string, obj> option with get, set
+        abstract hints: JS.ReadonlyRecord<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``type``: Server.TelemetryEvent.Type, flagKey: string, timestamp: float, ?duration: float, ?value: obj, ?reason: string, ?variant: string, ?errorCode: ErrorCode, ?errorMessage: string, ?context: Record<string, obj>, ?hints: ReadonlyRecord<string, obj>) : TelemetryEvent = jsNative
+        static member Create (``type``: Server.TelemetryEvent.Type, flagKey: string, timestamp: float, ?duration: float, ?value: obj, ?reason: string, ?variant: string, ?errorCode: ErrorCode, ?errorMessage: string, ?context: JS.Record<string, obj>, ?hints: JS.ReadonlyRecord<string, obj>) : TelemetryEvent = jsNative
 
     /// <summary>
     /// Telemetry hook for tracking flag evaluations
@@ -1213,12 +1219,12 @@ module Server =
         abstract contextKeys: obj with get, set
         abstract hints: obj with get, set
         abstract onEvent: obj
-        abstract before: hookContext: obj * ?hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: ReadonlyRecord<string, obj> -> unit
-        abstract ``finally``: hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: ReadonlyRecord<string, obj> -> unit
+        abstract before: hookContext: obj * ?hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
+        abstract ``finally``: hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         [<ParamObject; Emit("$0")>]
-        static member Create (startTimes: obj, contextKeys: obj, hints: obj, onEvent: obj, before: Action<obj, ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, ReadonlyRecord<string, obj> option>) : TelemetryHook = jsNative
+        static member Create (startTimes: obj, contextKeys: obj, hints: obj, onEvent: obj, before: Action<obj, JS.ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, JS.ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>) : TelemetryHook = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -1399,7 +1405,7 @@ module Server =
                     /// </summary>
                     abstract targetingKey: string option
                     [<EmitIndexer>]
-                    abstract Item: string -> U6<string, float, bool, obj[], JS.Date, ContextTransformer.ToQueryParams.Context.Item> option
+                    abstract Item: string -> U6<string, float, bool, obj[], Fable.Core.TS.Es.Date, ContextTransformer.ToQueryParams.Context.Item> option
 
     module TelemetryEvent =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1468,7 +1474,7 @@ type FlagshipErrorConstructor =
     /// a();
     /// </code>
     /// </summary>
-    abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
     /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
     abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
     /// <summary>

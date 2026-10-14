@@ -16,7 +16,7 @@
   <!-- Worker-side examples compile with Fable. Set ExampleKind to DotNet for control-plane examples. -->
   <ItemGroup Condition="'$(ExampleKind)' != 'DotNet'">
     <PackageReference Include="Fable.Core" Version="5.2.0" />
-    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.83b9196820f7e253f211" Condition="'$(CloudEdgeUseSource)' == 'true'" />
-    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.2cc2de89eabe31fc35f6" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.2.0" Condition="'$(CloudEdgeUseSource)' == 'true'" />
+    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.4.0-beta.1" Condition="'$(CloudEdgeUseSource)' == 'true'" />
   </ItemGroup>
 </Project>

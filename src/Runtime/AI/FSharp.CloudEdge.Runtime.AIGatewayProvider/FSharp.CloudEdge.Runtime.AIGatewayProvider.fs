@@ -55,13 +55,40 @@ type AiGatewayUnauthorizedError =
 [<Interface>]
 type AiGatewayChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
     abstract defaultObjectGenerationMode: string
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
     abstract models: AiGatewayChatLanguageModel.Models.Item[]
     abstract config: AiGatewaySettings
     abstract processModelRequest: options: obj * modelMethod: AiGatewayChatLanguageModel.ProcessModelRequest.ModelMethod -> JS.Promise<obj>
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, defaultObjectGenerationMode: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, models: AiGatewayChatLanguageModel.Models.Item[], config: AiGatewaySettings, modelId: string, provider: string, processModelRequest: Func<obj, AiGatewayChatLanguageModel.ProcessModelRequest.ModelMethod, JS.Promise<obj>>, doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>), doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>)) : AiGatewayChatLanguageModel = jsNative
+    [<ParamObject; Emit("({ specificationVersion: 'v4', defaultObjectGenerationMode: 'json', ...$0 })")>]
+    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, models: AiGatewayChatLanguageModel.Models.Item[], config: AiGatewaySettings, modelId: string, provider: string, processModelRequest: Func<obj, AiGatewayChatLanguageModel.ProcessModelRequest.ModelMethod, JS.Promise<obj>>, doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>), doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>)) : AiGatewayChatLanguageModel = jsNative
+
+module AiGatewayChatLanguageModel =
+    /// <remarks>TypeScript type: <c>"json"</c></remarks>
+    [<Literal>]
+    let defaultObjectGenerationMode = "json"
+
+    module Models =
+        [<Interface>]
+        type Item =
+            inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
+            abstract config: AiGatewayChatLanguageModel.Models.Item.Config option with get, set
+            [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
+            static member Create (provider: string, modelId: string, supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>), ?config: AiGatewayChatLanguageModel.Models.Item.Config) : Item = jsNative
+
+        module Item =
+            [<Interface>]
+            type Config =
+                abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?fetch: Func<obj, obj option, JS.Promise<obj>>) : Config = jsNative
+
+    module ProcessModelRequest =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ModelMethod =
+            | [<CompiledName("doGenerate")>] DoGenerate
+            | [<CompiledName("doStream")>] DoStream
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ResumeExpiredPolicy =
@@ -99,7 +126,7 @@ type AiGatewayOptions =
     abstract cacheKey: string option with get, set
     abstract cacheTtl: float option with get, set
     abstract skipCache: bool option with get, set
-    abstract metadata: Record<string, U4<string, float, bigint, bool> option> option with get, set
+    abstract metadata: JS.Record<string, U4<string, float, bigint, bool> option> option with get, set
     abstract collectLog: bool option with get, set
     abstract eventId: string option with get, set
     abstract requestTimeoutMs: float option with get, set
@@ -116,7 +143,7 @@ type AiGatewayOptions =
     /// </summary>
     abstract zdr: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: AiGatewayRetries, ?byokAlias: string, ?zdr: bool) : AiGatewayOptions = jsNative
+    static member Create (?cacheKey: string, ?cacheTtl: float, ?skipCache: bool, ?metadata: JS.Record<string, U4<string, float, bigint, bool> option>, ?collectLog: bool, ?eventId: string, ?requestTimeoutMs: float, ?retries: AiGatewayRetries, ?byokAlias: string, ?zdr: bool) : AiGatewayOptions = jsNative
 
 [<Interface>]
 type AiGatewayAPISettings =
@@ -167,15 +194,15 @@ type Exports =
     [<Import("AiGatewayInternalFetchError", "ai-gateway-provider"); EmitConstructor>]
     static member AiGatewayInternalFetchError (?message: string) : AiGatewayInternalFetchError = jsNative
     [<Import("AiGatewayInternalFetchError", "ai-gateway-provider"); EmitConstructor>]
-    static member AiGatewayInternalFetchError_Overload2 (?message: string, ?options: obj) : AiGatewayInternalFetchError = jsNative
+    static member AiGatewayInternalFetchError_Overload2 (?message: string, ?options: Fable.Core.TS.Es.ErrorOptions) : AiGatewayInternalFetchError = jsNative
     [<Import("AiGatewayDoesNotExist", "ai-gateway-provider"); EmitConstructor>]
     static member AiGatewayDoesNotExist (?message: string) : AiGatewayDoesNotExist = jsNative
     [<Import("AiGatewayDoesNotExist", "ai-gateway-provider"); EmitConstructor>]
-    static member AiGatewayDoesNotExist_Overload2 (?message: string, ?options: obj) : AiGatewayDoesNotExist = jsNative
+    static member AiGatewayDoesNotExist_Overload2 (?message: string, ?options: Fable.Core.TS.Es.ErrorOptions) : AiGatewayDoesNotExist = jsNative
     [<Import("AiGatewayUnauthorizedError", "ai-gateway-provider"); EmitConstructor>]
     static member AiGatewayUnauthorizedError (?message: string) : AiGatewayUnauthorizedError = jsNative
     [<Import("AiGatewayUnauthorizedError", "ai-gateway-provider"); EmitConstructor>]
-    static member AiGatewayUnauthorizedError_Overload2 (?message: string, ?options: obj) : AiGatewayUnauthorizedError = jsNative
+    static member AiGatewayUnauthorizedError_Overload2 (?message: string, ?options: Fable.Core.TS.Es.ErrorOptions) : AiGatewayUnauthorizedError = jsNative
     [<Import("AiGatewayChatLanguageModel", "ai-gateway-provider"); EmitConstructor>]
     static member AiGatewayChatLanguageModel (models: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4[], config: AiGatewaySettings) : AiGatewayChatLanguageModel = jsNative
     [<Import("createAiGateway", "ai-gateway-provider")>]
@@ -205,28 +232,6 @@ module AiGatewayBindingSettings =
                 abstract signal: obj option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (?signal: obj) : Options = jsNative
-
-module AiGatewayChatLanguageModel =
-    module Models =
-        [<Interface>]
-        type Item =
-            inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
-            abstract config: AiGatewayChatLanguageModel.Models.Item.Config option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (specificationVersion: string, provider: string, modelId: string, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>), ?config: AiGatewayChatLanguageModel.Models.Item.Config) : Item = jsNative
-
-        module Item =
-            [<Interface>]
-            type Config =
-                abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?fetch: Func<obj, obj option, JS.Promise<obj>>) : Config = jsNative
-
-    module ProcessModelRequest =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type ModelMethod =
-            | [<CompiledName("doGenerate")>] DoGenerate
-            | [<CompiledName("doStream")>] DoStream
 
 module AiGatewayRetries =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -402,11 +407,11 @@ module Providers =
                 /// Optional custom headers to include in requests. These will be added to request headers
                 /// after any headers potentially added by use of the <c>apiKey</c> option.
                 /// </summary>
-                abstract headers: Record<string, string> option with get, set
+                abstract headers: JS.Record<string, string> option with get, set
                 /// <summary>
                 /// Optional custom url query parameters to include in request urls.
                 /// </summary>
-                abstract queryParams: Record<string, string> option with get, set
+                abstract queryParams: JS.Record<string, string> option with get, set
                 /// <summary>
                 /// Custom fetch implementation. You can use it as a middleware to intercept requests,
                 /// or to provide a custom fetch implementation for e.g. testing.
@@ -425,7 +430,7 @@ module Providers =
                 /// This is useful for proxy providers that may require a different request format
                 /// than the official OpenAI API.
                 /// </summary>
-                abstract transformRequestBody: (Record<string, obj> -> Record<string, obj>) option with get, set
+                abstract transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>) option with get, set
                 /// <summary>
                 /// Optional metadata extractor to capture provider-specific metadata from API responses.
                 /// This is useful for extracting non-standard fields, experimental features,
@@ -435,14 +440,14 @@ module Providers =
                 /// <summary>
                 /// The supported URLs for chat models.
                 /// </summary>
-                abstract supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>) option with get, set
+                abstract supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>) option with get, set
                 /// <summary>
                 /// Optional usage converter for providers with token accounting semantics that
                 /// differ from the default OpenAI-compatible shape.
                 /// </summary>
                 abstract convertUsage: (FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage) option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?baseURL: string, ?name: string, ?apiKey: string, ?headers: Record<string, string>, ?queryParams: Record<string, string>, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?includeUsage: bool, ?supportsStructuredOutputs: bool, ?transformRequestBody: (Record<string, obj> -> Record<string, obj>), ?metadataExtractor: FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.MetadataExtractor, ?supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>), ?convertUsage: (FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Arg = jsNative
+                static member Create (?baseURL: string, ?name: string, ?apiKey: string, ?headers: JS.Record<string, string>, ?queryParams: JS.Record<string, string>, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?includeUsage: bool, ?supportsStructuredOutputs: bool, ?transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>), ?metadataExtractor: FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.MetadataExtractor, ?supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>), ?convertUsage: (FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Arg = jsNative
 
     /// <summary>ai-gateway-provider/providers/xai</summary>
     module Xai =
@@ -460,7 +465,7 @@ type AiGatewayInternalFetchErrorConstructor =
     [<EmitConstructor>]
     abstract Create: ?message: string -> AiGatewayInternalFetchError
     [<EmitConstructor>]
-    abstract Create: ?message: string * ?options: obj -> AiGatewayInternalFetchError
+    abstract Create: ?message: string * ?options: Fable.Core.TS.Es.ErrorOptions -> AiGatewayInternalFetchError
 
 type AiGatewayDoesNotExistConstructor =
     /// <summary>
@@ -470,7 +475,7 @@ type AiGatewayDoesNotExistConstructor =
     [<EmitConstructor>]
     abstract Create: ?message: string -> AiGatewayDoesNotExist
     [<EmitConstructor>]
-    abstract Create: ?message: string * ?options: obj -> AiGatewayDoesNotExist
+    abstract Create: ?message: string * ?options: Fable.Core.TS.Es.ErrorOptions -> AiGatewayDoesNotExist
 
 type AiGatewayUnauthorizedErrorConstructor =
     /// <summary>
@@ -480,4 +485,4 @@ type AiGatewayUnauthorizedErrorConstructor =
     [<EmitConstructor>]
     abstract Create: ?message: string -> AiGatewayUnauthorizedError
     [<EmitConstructor>]
-    abstract Create: ?message: string * ?options: obj -> AiGatewayUnauthorizedError
+    abstract Create: ?message: string * ?options: Fable.Core.TS.Es.ErrorOptions -> AiGatewayUnauthorizedError

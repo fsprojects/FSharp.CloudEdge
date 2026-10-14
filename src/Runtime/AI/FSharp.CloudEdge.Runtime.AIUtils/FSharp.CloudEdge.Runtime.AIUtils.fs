@@ -13,10 +13,10 @@ open Fable.Core.TS.Dom
 [<Interface>]
 type Config =
     abstract overrides: ConfigRule[] with get, set
-    abstract matchPatterns: obj[] option with get, set
+    abstract matchPatterns: Fable.Core.TS.Es.RegExp[] option with get, set
     abstract options: Config.Options option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (overrides: ConfigRule[], ?matchPatterns: obj[], ?options: Config.Options) : Config = jsNative
+    static member Create (overrides: ConfigRule[], ?matchPatterns: Fable.Core.TS.Es.RegExp[], ?options: Config.Options) : Config = jsNative
 
 [<Interface>]
 type ConfigRule =
@@ -101,17 +101,29 @@ type ToolsSchema<'T> =
 
 [<Interface>]
 type ApiKeySecurityScheme =
+    /// <remarks>TypeScript type: <c>"apiKey"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract name: string with get, set
     abstract ``in``: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, name: string, ``in``: string, ?description: string) : ApiKeySecurityScheme = jsNative
+    [<ParamObject; Emit("({ type: 'apiKey', ...$0 })")>]
+    static member Create (name: string, ``in``: string, ?description: string) : ApiKeySecurityScheme = jsNative
+
+module ApiKeySecurityScheme =
+    /// <remarks>TypeScript type: <c>"apiKey"</c></remarks>
+    [<Literal>]
+    let ``type`` = "apiKey"
 
 type ArraySchemaObject =
     inherit BaseSchemaObject
+    /// <remarks>TypeScript type: <c>"array"</c></remarks>
     abstract ``type``: string with get, set
     abstract items: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject> with get, set
+
+module ArraySchemaObject =
+    /// <remarks>TypeScript type: <c>"array"</c></remarks>
+    [<Literal>]
+    let ``type`` = "array"
 
 type BaseSchemaObject =
     abstract title: string option with get, set
@@ -134,7 +146,7 @@ type BaseSchemaObject =
     abstract minProperties: float option with get, set
     abstract required: string[] option with get, set
     abstract enum: obj[] option with get, set
-    abstract properties: Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>> option with get, set
+    abstract properties: JS.Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>> option with get, set
     abstract allOf: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>[] option with get, set
     abstract oneOf: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>[] option with get, set
     abstract anyOf: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>[] option with get, set
@@ -154,17 +166,17 @@ type CallbackObject =
 
 [<Interface>]
 type ComponentsObject =
-    abstract schemas: Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>> option with get, set
-    abstract responses: Record<string, U2<ReferenceObject, ResponseObject>> option with get, set
-    abstract parameters: Record<string, U2<ParameterObject, ReferenceObject>> option with get, set
-    abstract examples: Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
-    abstract requestBodies: Record<string, U2<ReferenceObject, RequestBodyObject>> option with get, set
-    abstract headers: Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
-    abstract securitySchemes: Record<string, U5<ApiKeySecurityScheme, HttpSecurityScheme, OAuth2SecurityScheme, OpenIdSecurityScheme, ReferenceObject>> option with get, set
-    abstract links: Record<string, U2<LinkObject, ReferenceObject>> option with get, set
-    abstract callbacks: Record<string, U2<CallbackObject, ReferenceObject>> option with get, set
+    abstract schemas: JS.Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>> option with get, set
+    abstract responses: JS.Record<string, U2<ReferenceObject, ResponseObject>> option with get, set
+    abstract parameters: JS.Record<string, U2<ParameterObject, ReferenceObject>> option with get, set
+    abstract examples: JS.Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
+    abstract requestBodies: JS.Record<string, U2<ReferenceObject, RequestBodyObject>> option with get, set
+    abstract headers: JS.Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
+    abstract securitySchemes: JS.Record<string, U5<ApiKeySecurityScheme, HttpSecurityScheme, OAuth2SecurityScheme, OpenIdSecurityScheme, ReferenceObject>> option with get, set
+    abstract links: JS.Record<string, U2<LinkObject, ReferenceObject>> option with get, set
+    abstract callbacks: JS.Record<string, U2<CallbackObject, ReferenceObject>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?schemas: Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>>, ?responses: Record<string, U2<ReferenceObject, ResponseObject>>, ?parameters: Record<string, U2<ParameterObject, ReferenceObject>>, ?examples: Record<string, U2<ExampleObject, ReferenceObject>>, ?requestBodies: Record<string, U2<ReferenceObject, RequestBodyObject>>, ?headers: Record<string, U2<HeaderObject, ReferenceObject>>, ?securitySchemes: Record<string, U5<ApiKeySecurityScheme, HttpSecurityScheme, OAuth2SecurityScheme, OpenIdSecurityScheme, ReferenceObject>>, ?links: Record<string, U2<LinkObject, ReferenceObject>>, ?callbacks: Record<string, U2<CallbackObject, ReferenceObject>>) : ComponentsObject = jsNative
+    static member Create (?schemas: JS.Record<string, U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>>, ?responses: JS.Record<string, U2<ReferenceObject, ResponseObject>>, ?parameters: JS.Record<string, U2<ParameterObject, ReferenceObject>>, ?examples: JS.Record<string, U2<ExampleObject, ReferenceObject>>, ?requestBodies: JS.Record<string, U2<ReferenceObject, RequestBodyObject>>, ?headers: JS.Record<string, U2<HeaderObject, ReferenceObject>>, ?securitySchemes: JS.Record<string, U5<ApiKeySecurityScheme, HttpSecurityScheme, OAuth2SecurityScheme, OpenIdSecurityScheme, ReferenceObject>>, ?links: JS.Record<string, U2<LinkObject, ReferenceObject>>, ?callbacks: JS.Record<string, U2<CallbackObject, ReferenceObject>>) : ComponentsObject = jsNative
 
 [<Interface>]
 type ContactObject =
@@ -177,9 +189,9 @@ type ContactObject =
 [<Interface>]
 type DiscriminatorObject =
     abstract propertyName: string with get, set
-    abstract mapping: Record<string, string> option with get, set
+    abstract mapping: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (propertyName: string, ?mapping: Record<string, string>) : DiscriminatorObject = jsNative
+    static member Create (propertyName: string, ?mapping: JS.Record<string, string>) : DiscriminatorObject = jsNative
 
 [<Interface>]
 type Document<'T> =
@@ -199,12 +211,12 @@ type Document<'T> =
 [<Interface>]
 type EncodingObject =
     abstract contentType: string option with get, set
-    abstract headers: Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
+    abstract headers: JS.Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
     abstract style: string option with get, set
     abstract explode: bool option with get, set
     abstract allowReserved: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?contentType: string, ?headers: Record<string, U2<HeaderObject, ReferenceObject>>, ?style: string, ?explode: bool, ?allowReserved: bool) : EncodingObject = jsNative
+    static member Create (?contentType: string, ?headers: JS.Record<string, U2<HeaderObject, ReferenceObject>>, ?style: string, ?explode: bool, ?allowReserved: bool) : EncodingObject = jsNative
 
 [<Interface>]
 type ExampleObject =
@@ -226,16 +238,22 @@ type ExternalDocumentationObject =
 type HeaderObject =
     inherit ParameterBaseObject
     [<ParamObject; Emit("$0")>]
-    static member Create (?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: Record<string, U2<ExampleObject, ReferenceObject>>, ?content: Record<string, MediaTypeObject>) : HeaderObject = jsNative
+    static member Create (?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: JS.Record<string, U2<ExampleObject, ReferenceObject>>, ?content: JS.Record<string, MediaTypeObject>) : HeaderObject = jsNative
 
 [<Interface>]
 type HttpSecurityScheme =
+    /// <remarks>TypeScript type: <c>"http"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract scheme: string with get, set
     abstract bearerFormat: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, scheme: string, ?description: string, ?bearerFormat: string) : HttpSecurityScheme = jsNative
+    [<ParamObject; Emit("({ type: 'http', ...$0 })")>]
+    static member Create (scheme: string, ?description: string, ?bearerFormat: string) : HttpSecurityScheme = jsNative
+
+module HttpSecurityScheme =
+    /// <remarks>TypeScript type: <c>"http"</c></remarks>
+    [<Literal>]
+    let ``type`` = "http"
 
 [<Interface>]
 type InfoObject =
@@ -259,21 +277,21 @@ type LicenseObject =
 type LinkObject =
     abstract operationRef: string option with get, set
     abstract operationId: string option with get, set
-    abstract parameters: Record<string, obj> option with get, set
+    abstract parameters: JS.Record<string, obj> option with get, set
     abstract requestBody: obj option with get, set
     abstract description: string option with get, set
     abstract server: ServerObject option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?operationRef: string, ?operationId: string, ?parameters: Record<string, obj>, ?requestBody: obj, ?description: string, ?server: ServerObject) : LinkObject = jsNative
+    static member Create (?operationRef: string, ?operationId: string, ?parameters: JS.Record<string, obj>, ?requestBody: obj, ?description: string, ?server: ServerObject) : LinkObject = jsNative
 
 [<Interface>]
 type MediaTypeObject =
     abstract schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject> option with get, set
     abstract example: obj option with get, set
-    abstract examples: Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
-    abstract encoding: Record<string, EncodingObject> option with get, set
+    abstract examples: JS.Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
+    abstract encoding: JS.Record<string, EncodingObject> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: Record<string, U2<ExampleObject, ReferenceObject>>, ?encoding: Record<string, EncodingObject>) : MediaTypeObject = jsNative
+    static member Create (?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: JS.Record<string, U2<ExampleObject, ReferenceObject>>, ?encoding: JS.Record<string, EncodingObject>) : MediaTypeObject = jsNative
 
 type NonArraySchemaObject =
     inherit BaseSchemaObject
@@ -289,19 +307,74 @@ type NonArraySchemaObjectType =
 
 [<Interface>]
 type OAuth2SecurityScheme =
+    /// <remarks>TypeScript type: <c>"oauth2"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract flows: OAuth2SecurityScheme.Flows with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, flows: OAuth2SecurityScheme.Flows, ?description: string) : OAuth2SecurityScheme = jsNative
+    [<ParamObject; Emit("({ type: 'oauth2', ...$0 })")>]
+    static member Create (flows: OAuth2SecurityScheme.Flows, ?description: string) : OAuth2SecurityScheme = jsNative
+
+module OAuth2SecurityScheme =
+    /// <remarks>TypeScript type: <c>"oauth2"</c></remarks>
+    [<Literal>]
+    let ``type`` = "oauth2"
+
+    [<Interface>]
+    type Flows =
+        abstract implicit: OAuth2SecurityScheme.Flows.Implicit option with get, set
+        abstract password: OAuth2SecurityScheme.Flows.Password option with get, set
+        abstract clientCredentials: OAuth2SecurityScheme.Flows.ClientCredentials option with get, set
+        abstract authorizationCode: OAuth2SecurityScheme.Flows.AuthorizationCode option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?implicit: OAuth2SecurityScheme.Flows.Implicit, ?password: OAuth2SecurityScheme.Flows.Password, ?clientCredentials: OAuth2SecurityScheme.Flows.ClientCredentials, ?authorizationCode: OAuth2SecurityScheme.Flows.AuthorizationCode) : Flows = jsNative
+
+    module Flows =
+        [<Interface>]
+        type AuthorizationCode =
+            abstract authorizationUrl: string with get, set
+            abstract tokenUrl: string with get, set
+            abstract refreshUrl: string option with get, set
+            abstract scopes: JS.Record<string, string> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (authorizationUrl: string, tokenUrl: string, scopes: JS.Record<string, string>, ?refreshUrl: string) : AuthorizationCode = jsNative
+
+        [<Interface>]
+        type ClientCredentials =
+            abstract tokenUrl: string with get, set
+            abstract refreshUrl: string option with get, set
+            abstract scopes: JS.Record<string, string> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (tokenUrl: string, scopes: JS.Record<string, string>, ?refreshUrl: string) : ClientCredentials = jsNative
+
+        [<Interface>]
+        type Implicit =
+            abstract authorizationUrl: string with get, set
+            abstract refreshUrl: string option with get, set
+            abstract scopes: JS.Record<string, string> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (authorizationUrl: string, scopes: JS.Record<string, string>, ?refreshUrl: string) : Implicit = jsNative
+
+        [<Interface>]
+        type Password =
+            abstract tokenUrl: string with get, set
+            abstract refreshUrl: string option with get, set
+            abstract scopes: JS.Record<string, string> with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (tokenUrl: string, scopes: JS.Record<string, string>, ?refreshUrl: string) : Password = jsNative
 
 [<Interface>]
 type OpenIdSecurityScheme =
+    /// <remarks>TypeScript type: <c>"openIdConnect"</c></remarks>
     abstract ``type``: string with get, set
     abstract description: string option with get, set
     abstract openIdConnectUrl: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``type``: string, openIdConnectUrl: string, ?description: string) : OpenIdSecurityScheme = jsNative
+    [<ParamObject; Emit("({ type: 'openIdConnect', ...$0 })")>]
+    static member Create (openIdConnectUrl: string, ?description: string) : OpenIdSecurityScheme = jsNative
+
+module OpenIdSecurityScheme =
+    /// <remarks>TypeScript type: <c>"openIdConnect"</c></remarks>
+    [<Literal>]
+    let ``type`` = "openIdConnect"
 
 [<Interface>]
 type ParameterBaseObject =
@@ -314,10 +387,10 @@ type ParameterBaseObject =
     abstract allowReserved: bool option with get, set
     abstract schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject> option with get, set
     abstract example: obj option with get, set
-    abstract examples: Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
-    abstract content: Record<string, MediaTypeObject> option with get, set
+    abstract examples: JS.Record<string, U2<ExampleObject, ReferenceObject>> option with get, set
+    abstract content: JS.Record<string, MediaTypeObject> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: Record<string, U2<ExampleObject, ReferenceObject>>, ?content: Record<string, MediaTypeObject>) : ParameterBaseObject = jsNative
+    static member Create (?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: JS.Record<string, U2<ExampleObject, ReferenceObject>>, ?content: JS.Record<string, MediaTypeObject>) : ParameterBaseObject = jsNative
 
 [<Interface>]
 type ParameterObject =
@@ -325,7 +398,7 @@ type ParameterObject =
     abstract name: string with get, set
     abstract ``in``: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, ``in``: string, ?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: Record<string, U2<ExampleObject, ReferenceObject>>, ?content: Record<string, MediaTypeObject>) : ParameterObject = jsNative
+    static member Create (name: string, ``in``: string, ?description: string, ?required: bool, ?deprecated: bool, ?allowEmptyValue: bool, ?style: string, ?explode: bool, ?allowReserved: bool, ?schema: U3<ArraySchemaObject, NonArraySchemaObject, ReferenceObject>, ?example: obj, ?examples: JS.Record<string, U2<ExampleObject, ReferenceObject>>, ?content: JS.Record<string, MediaTypeObject>) : ParameterObject = jsNative
 
 type PathsObject<'T, 'P> =
     [<EmitIndexer>]
@@ -340,19 +413,19 @@ type ReferenceObject =
 [<Interface>]
 type RequestBodyObject =
     abstract description: string option with get, set
-    abstract content: Record<string, MediaTypeObject> with get, set
+    abstract content: JS.Record<string, MediaTypeObject> with get, set
     abstract required: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (content: Record<string, MediaTypeObject>, ?description: string, ?required: bool) : RequestBodyObject = jsNative
+    static member Create (content: JS.Record<string, MediaTypeObject>, ?description: string, ?required: bool) : RequestBodyObject = jsNative
 
 [<Interface>]
 type ResponseObject =
     abstract description: string with get, set
-    abstract headers: Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
-    abstract content: Record<string, MediaTypeObject> option with get, set
-    abstract links: Record<string, U2<LinkObject, ReferenceObject>> option with get, set
+    abstract headers: JS.Record<string, U2<HeaderObject, ReferenceObject>> option with get, set
+    abstract content: JS.Record<string, MediaTypeObject> option with get, set
+    abstract links: JS.Record<string, U2<LinkObject, ReferenceObject>> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (description: string, ?headers: Record<string, U2<HeaderObject, ReferenceObject>>, ?content: Record<string, MediaTypeObject>, ?links: Record<string, U2<LinkObject, ReferenceObject>>) : ResponseObject = jsNative
+    static member Create (description: string, ?headers: JS.Record<string, U2<HeaderObject, ReferenceObject>>, ?content: JS.Record<string, MediaTypeObject>, ?links: JS.Record<string, U2<LinkObject, ReferenceObject>>) : ResponseObject = jsNative
 
 type SecurityRequirementObject =
     [<EmitIndexer>]
@@ -362,9 +435,9 @@ type SecurityRequirementObject =
 type ServerObject =
     abstract url: string with get, set
     abstract description: string option with get, set
-    abstract variables: Record<string, ServerVariableObject> option with get, set
+    abstract variables: JS.Record<string, ServerVariableObject> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (url: string, ?description: string, ?variables: Record<string, ServerVariableObject>) : ServerObject = jsNative
+    static member Create (url: string, ?description: string, ?variables: JS.Record<string, ServerVariableObject>) : ServerObject = jsNative
 
 [<Interface>]
 type ServerVariableObject =
@@ -404,7 +477,7 @@ type Exports =
     [<Import("fetchSpec", "@cloudflare/ai-utils")>]
     static member fetchSpec (spec: string) : JS.Promise<Document<obj> option> = jsNative
     [<Import("validateArgsWithZod", "@cloudflare/ai-utils")>]
-    static member validateArgsWithZod (args: obj, properties: Record<string, obj>) : bool = jsNative
+    static member validateArgsWithZod (args: obj, properties: JS.Record<string, obj>) : bool = jsNative
     [<Import("autoTrimTools", "@cloudflare/ai-utils")>]
     static member autoTrimTools (tools: AiTextGenerationToolInputWithFunction[], ai: obj, model: obj, messages: obj[]) : JS.Promise<AiTextGenerationToolInputWithFunction[]> = jsNative
 
@@ -412,10 +485,10 @@ module AiTextGenerationToolInputWithFunction =
     [<Interface>]
     type Parameters =
         abstract ``type``: string with get, set
-        abstract properties: Record<string, AiTextGenerationToolInputWithFunction.Parameters.Properties.Item> with get, set
+        abstract properties: JS.Record<string, AiTextGenerationToolInputWithFunction.Parameters.Properties.Item> with get, set
         abstract required: string[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, properties: Record<string, AiTextGenerationToolInputWithFunction.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
+        static member Create (``type``: string, properties: JS.Record<string, AiTextGenerationToolInputWithFunction.Parameters.Properties.Item>, required: string[]) : Parameters = jsNative
 
     module Parameters =
         module Properties =
@@ -455,14 +528,14 @@ module Config =
 module ConfigRule =
     [<Interface>]
     type Values =
-        abstract headers: Record<string, string> option with get, set
-        abstract pathData: Record<string, string> option with get, set
-        abstract query: Record<string, string> option with get, set
+        abstract headers: JS.Record<string, string> option with get, set
+        abstract pathData: JS.Record<string, string> option with get, set
+        abstract query: JS.Record<string, string> option with get, set
         abstract body: obj option with get, set
-        abstract cookies: Record<string, string> option with get, set
-        abstract formData: Record<string, obj> option with get, set
+        abstract cookies: JS.Record<string, string> option with get, set
+        abstract formData: JS.Record<string, obj> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?headers: Record<string, string>, ?pathData: Record<string, string>, ?query: Record<string, string>, ?body: obj, ?cookies: Record<string, string>, ?formData: Record<string, obj>) : Values = jsNative
+        static member Create (?headers: JS.Record<string, string>, ?pathData: JS.Record<string, string>, ?query: JS.Record<string, string>, ?body: obj, ?cookies: JS.Record<string, string>, ?formData: JS.Record<string, obj>) : Values = jsNative
 
     module Matcher =
         [<Interface>]
@@ -477,50 +550,6 @@ module Document =
         type Item = delegate of request: obj * response: obj * next: obj -> JS.Promise<unit>
 
         type Item2 = delegate of request: obj * response: obj * next: obj -> unit
-
-module OAuth2SecurityScheme =
-    [<Interface>]
-    type Flows =
-        abstract implicit: OAuth2SecurityScheme.Flows.Implicit option with get, set
-        abstract password: OAuth2SecurityScheme.Flows.Password option with get, set
-        abstract clientCredentials: OAuth2SecurityScheme.Flows.ClientCredentials option with get, set
-        abstract authorizationCode: OAuth2SecurityScheme.Flows.AuthorizationCode option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?implicit: OAuth2SecurityScheme.Flows.Implicit, ?password: OAuth2SecurityScheme.Flows.Password, ?clientCredentials: OAuth2SecurityScheme.Flows.ClientCredentials, ?authorizationCode: OAuth2SecurityScheme.Flows.AuthorizationCode) : Flows = jsNative
-
-    module Flows =
-        [<Interface>]
-        type AuthorizationCode =
-            abstract authorizationUrl: string with get, set
-            abstract tokenUrl: string with get, set
-            abstract refreshUrl: string option with get, set
-            abstract scopes: Record<string, string> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (authorizationUrl: string, tokenUrl: string, scopes: Record<string, string>, ?refreshUrl: string) : AuthorizationCode = jsNative
-
-        [<Interface>]
-        type ClientCredentials =
-            abstract tokenUrl: string with get, set
-            abstract refreshUrl: string option with get, set
-            abstract scopes: Record<string, string> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (tokenUrl: string, scopes: Record<string, string>, ?refreshUrl: string) : ClientCredentials = jsNative
-
-        [<Interface>]
-        type Implicit =
-            abstract authorizationUrl: string with get, set
-            abstract refreshUrl: string option with get, set
-            abstract scopes: Record<string, string> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (authorizationUrl: string, scopes: Record<string, string>, ?refreshUrl: string) : Implicit = jsNative
-
-        [<Interface>]
-        type Password =
-            abstract tokenUrl: string with get, set
-            abstract refreshUrl: string option with get, set
-            abstract scopes: Record<string, string> with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (tokenUrl: string, scopes: Record<string, string>, ?refreshUrl: string) : Password = jsNative
 
 module RunWithTools =
     [<Interface>]
