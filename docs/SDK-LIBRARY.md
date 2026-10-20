@@ -16,7 +16,7 @@ npm run build -- --plan
 npm run build -- --resume
 ```
 
-`build` generates the selected SDKs with the pinned local Xantham tool, generates management
+`build` generates the selected SDKs with the source adapter built from the pinned Xantham revision ([details](sdk-build.md)), generates management
 from the pinned OpenAPI specification with Hawaii, and compiles the complete hierarchy in
 `FSharp.CloudEdge.slnx`. Hawaii validates its staged Release build and local HTTP consumer
 before installing generated files. `--resume` reuses SDK output only after authenticating
@@ -63,37 +63,33 @@ React, web clients, mobile UI, separate optional integrations and alternate prev
 remain outside this selection. `agents/mcp/client` is retained as the server-side
 `AgentsMcpClient` library.
 
-`supportTargets` defines ordinary generated libraries for dependency types. `catalogImports`
-injects their authenticated declaration catalogs into consumers and orders producer generation
-before consumption. For example:
+`supportTargets` defines ordinary generated libraries for dependency types. `catalogImports` injects their authenticated declaration catalogs into consumers and orders producer generation before consumption. `inferenceProfiles` names one complete set of inference settings (`lib`, `types`, `groups`, `resolveNoInfer`), and a `targetOverrides` entry selects it with `inferenceProfile`. For example:
 
 ```json
 {
   "catalogImports": {
     "containers": ["workers"],
-    "ai-openai-compatible-v4": ["ai-provider-v4"],
-    "aigatewayprovider": ["ai-provider-v4", "ai-openai-compatible-v4"],
-    "workersaiprovider": ["ai-provider-v4"],
-    "aisearchprovider": ["ai-provider-v3"]
+    "aigatewayprovider": ["workers", "zod-v4", "json-schema-v7", "ai-provider-v4", "ai-provider-utils-v4", "ai-openai-compatible-v4"]
+  },
+  "inferenceProfiles": {
+    "workers-node": {
+      "lib": ["esnext"],
+      "types": ["@cloudflare/workers-types", "node"],
+      "groups": { "@cloudflare/workers-types": "ship", "@ai-sdk/provider": "ship", "zod": "ship" }
+    }
+  },
+  "targetOverrides": {
+    "workers": { "profile": "containers", "inferenceProfile": "workers-node" },
+    "containers": { "inferenceProfile": "workers-node" }
   }
 }
 ```
 
-The producer package must be directly pinned in its installation profile. A transitive
-dependency may be promoted at its existing locked version; doing so must retain resolved
-versions and tarball integrities. Generator inference settings, including the complete
-`groups` map, must match the intended catalog context. Catalog source and F# API checks remain
-enforced. The build authenticates owner provenance and derives the corresponding project
-references; sharing a package name alone is insufficient.
+A catalog redirects a declaration only when the consumer generates that declaration itself, so an import requires the consumer to ship the producer's package and to share the producer's inference profile exactly. `scripts/sdk-delivery.mjs` rejects any other import before generation. The producer package must be directly pinned in its installation profile. A transitive dependency may be promoted at its existing locked version; doing so must retain resolved versions and tarball integrities. Catalog source and F# API checks remain enforced. The build authenticates owner provenance and derives the corresponding project references; sharing a package name alone is insufficient.
 
-AI Gateway and Workers AI retain AI SDK v4 model contracts. The pinned AI Search provider
-retains v3 contracts in a separate support library. These interfaces are not interchangeable.
-Workers supplies the native resource owner directly to Containers. Both generation programs
-use the retained Containers profile's exact Workers pin and matching inference settings;
-there is no second generated Workers support assembly in this selection.
-The [composition consumer](../tests/SDKComposition/AI.fs) checks typed model selection and
-generation across these libraries. Exact npm dependencies are pinned in the corresponding
-`profiles/` lockfiles.
+Every delivered library that reaches a shipped dependency package belongs to the single `workers-node` catalog family. The family generates with `lib: ["esnext"]`, `types: ["@cloudflare/workers-types", "node"]`, one `groups` map, and `@types/node` 26.4.1 in every family profile. Declaration identity includes every merged declaration with its package version, and `@types/node` augments the Workers web globals such as `Request`, `Response`, `URL` and `AbortSignal`, so a producer and consumer can share those declarations only with the same Node type pin. The Workers declarations therefore include those augmentations, such as the `URL` and `Console` heritage and the Node timer overloads. The pin is 26.x because `@types/node` 22.x adds script-level `compatibility/indexable.d.ts` declarations that move `Uint8Array` and the other typed arrays out of the compiler lib, which widens them to `obj`. Program contents outside the inference settings also gate reuse: a module augmentation (for example `@asteasolutions/zod-to-openapi` extending Zod in Chanfana's program) or a different package version produces different identities, and those declarations are generated locally in the consumer's group module.
+
+Workers is the single owner of the ambient Workers declarations; there is no second generated Workers support assembly. AI Gateway and Workers AI retain AI SDK v4 model contracts. The pinned AI Search provider retains v3 contracts in a separate support library. These interfaces are not interchangeable. JSON Schema (`@types/json-schema` 7.0.15), Zod 4.5.4 (the `zod`, `zod/v3` and `zod/v4/core` declaration entries that consumers load), AI SDK provider utilities 5.0.36 and AI SDK 7.0.93 have their own generated support owners in the Agents profile; they are public dependencies of the libraries that reach them. Turnstile and Static Forms keep their DOM inference settings and import no catalogs; Voice errors and Cabidela reach no dependency declarations; Agents Pi keeps its own profile (Workers types `5.20261009.1` for wrangler 4.130.0) and its projection validation compiles without producer assemblies. The [composition consumer](../tests/SDKComposition/AI.fs) checks typed model selection and generation across these libraries. Exact npm dependencies are pinned in the corresponding `profiles/` lockfiles.
 
 ## Build output and fidelity
 
@@ -110,15 +106,9 @@ SDK projects retain the existing `FS1104` suppression for generated identifiers 
 `@`. Compiler warning totals reflect that project setting; type-mapping losses remain
 visible in the fidelity findings.
 
-Use the fidelity findings to identify widened declarations and opaque boundaries that
-affect consumers. Consumer helpers belong in separate F# sources; generated files stay
-reproducible generator output. Resolve catalog source/API mismatches before introducing
-an injected type.
+Use the fidelity findings to identify widened declarations and opaque boundaries that affect consumers. Consumer helpers belong in separate F# sources; generated files stay reproducible generator output. Resolve catalog source/API mismatches before introducing an injected type.
 
-The bounded widening policy is to repair a mapping when it prevents a selected consumer
-from passing a resource or model directly between libraries. Unknown values, unsupported
-TypeScript constructs and deliberate recursion cutoffs retain their reported losses.
-Prioritize useful typed composition over reducing an aggregate finding count.
+Generated bindings are constrained, contractual F# APIs that preserve the TypeScript contract across inputs, outputs, callbacks, properties, indexers, generic arguments and input/result relationships. A widened `obj` is a defect to repair in the owning generator pass or in catalog ownership, unless the source declaration itself is `any` or `unknown` and that source evidence is recorded. A renamed `obj`, an opaque wrapper over a lost contract, a dropped API or a lower aggregate finding count does not resolve a loss; the delivered inventory stays fixed while losses are repaired. A source contract that cannot be preserved is reported with its concrete limitation for an explicit decision.
 
 There are two extension mechanisms. Generated support types use the catalog imports above,
 which authenticate both ownership and the exposed F# API. Xantham also supports explicit

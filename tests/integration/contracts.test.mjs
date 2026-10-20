@@ -56,6 +56,12 @@ test("inherited declarations remain owned by their producer instead of inflating
   assert.equal(Object.keys(catalogContract(target, input).declarations).length, 1);
 });
 
+test("schema-2 catalogs carry the same declaration contract and unknown schemas fail", () => {
+  const current = { ...catalog(), schemaVersion: 2, compatibility: { identityVersion: 2, apiVersion: 2 } };
+  assert.deepEqual(catalogContract(target, current), catalogContract(target, catalog()));
+  assert.throws(() => catalogContract(target, { ...catalog(), schemaVersion: 3 }), /invalid declaration catalog/);
+});
+
 test("duplicate declaration identities and missing API evidence fail instead of losing coverage", () => {
   const input = catalog(); input.declarations.push({ ...input.declarations[0] });
   assert.throws(() => catalogContract(target, input), /duplicate identity/);

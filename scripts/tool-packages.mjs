@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -153,3 +153,71 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(JSON.stringify(tool));
   } catch (error) { console.error(error.message); process.exitCode = 1; }
 }
+
+/** Select the single source adapter owner, with legacy per-projection pins accepted when equal. */
+export function sourceToolConfiguration(configuration, target) {
+  const shared = configuration.xantham?.source;
+  const projection = target.projection;
+  const local = projection && (projection.project !== undefined || projection.xanthamRevision !== undefined)
+    ? { project: projection.project, xanthamRevision: projection.xanthamRevision } : undefined;
+  for (const [label, value] of [["xantham.source", shared], ["projection source", local]]) {
+    if (value === undefined) continue;
+    requireThat(value && typeof value === "object" && !Array.isArray(value)
+      && Object.keys(value).every(key => ["project", "xanthamRevision"].includes(key))
+      && typeof value.project === "string" && value.project.length > 0
+      && typeof value.xanthamRevision === "string" && /^[0-9a-f]{40}$/.test(value.xanthamRevision),
+    `${label} must name a project and exact Xantham source revision`);
+  }
+  requireThat(!shared || !local || canonical(shared) === canonical(local), `${target.id}: projection source differs from shared xantham.source`);
+  requireThat(!projection || shared || local, `${target.id}: projection requires a source adapter`);
+  return shared ?? local;
+}
+
+/** Build and authenticate the source adapter and its complete runtime payload. */
+export function resolveSourceTool(root, sourceConfiguration, environment = process.env, build = false) {
+  const project = path.resolve(root, sourceConfiguration.project);
+  requireThat(project.startsWith(path.resolve(root, "generators") + path.sep) && project.endsWith(".fsproj") && existsSync(project), "Projection project must exist under generators/");
+  const xanthamRoot = path.resolve(environment.CLOUDEDGE_XANTHAM_ROOT ?? path.join(root, "../Xantham"));
+  requireThat(typeof sourceConfiguration.xanthamRevision === "string" && /^[0-9a-f]{40}$/.test(sourceConfiguration.xanthamRevision), "Projection must pin an exact Xantham source revision");
+  const git = args => {
+    const result = spawnSync("git", ["-C", xanthamRoot, ...args], { encoding: "utf8" });
+    requireThat(!result.error && result.status === 0, "Projection requires the primary Xantham source checkout");
+    return result.stdout;
+  };
+  const inputs = () => {
+    const revision = git(["rev-parse", "HEAD"]).trim();
+    requireThat(revision === sourceConfiguration.xanthamRevision, `Projection requires Xantham ${sourceConfiguration.xanthamRevision}; current checkout is ${revision}`);
+    const scope = ["src/Xantham.Generator", "src/Xantham.Generator.Myriad", "src/Xantham.TypeScript.Wire", "src/Xantham.Fable.Core", "src/Xantham.Fable.Core.TS", "Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props", "global.json", "NuGet.Config", "nuget.config"];
+    const diff = git(["diff", "--binary", "HEAD", "--", ...scope]);
+    const untracked = git(["ls-files", "--others", "--exclude-standard", "-z", "--", ...scope]).split("\0").filter(Boolean);
+    const dirty = diff.length > 0 || untracked.length > 0;
+    requireThat(!dirty || environment.CLOUDEDGE_ALLOW_DIRTY_XANTHAM === "1", "Projection requires clean pinned Xantham sources; explicit development override CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1 records the source diff");
+    const source = { root: xanthamRoot, revision, dirty, diffSha256: createHash("sha256").update(diff).digest("hex"), untrackedSha256: Object.fromEntries(untracked.map(file => [file, fileHash(path.join(xanthamRoot, file))])) };
+    const buildInputs = [project, path.join(path.dirname(project), "Program.fs")];
+    for (let directory = path.dirname(project); ; directory = path.dirname(directory)) {
+      for (const name of ["Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props", "NuGet.Config", "nuget.config", "global.json"])
+        if (existsSync(path.join(directory, name))) buildInputs.push(path.join(directory, name));
+      if (path.dirname(directory) === directory) break;
+    }
+    return { source, configuration: "Release", framework: "net10.0", buildInputSha256: Object.fromEntries([...new Set(buildInputs)].sort().map(file => [path.relative(root, file), fileHash(file)])) };
+  };
+  const before = inputs();
+  if (build) {
+    const result = spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["build", project, "-c", "Release", `-p:XanthamProjectRoot=${xanthamRoot}`], { cwd: root, env: environment, stdio: "inherit" });
+    requireThat(!result.error && result.status === 0, "Projection adapter build failed");
+    requireThat(canonical(inputs()) === canonical(before), "Projection source/build inputs changed during compilation; output was not accepted");
+  }
+  const directory = path.join(path.dirname(project), "bin/Release/net10.0");
+  const executable = path.join(directory, path.basename(project, ".fsproj") + ".dll");
+  requireThat(existsSync(executable), "Projection adapter is missing; build the configured project");
+  const receiptName = "cloudedge-build.json";
+  const payloadSha256 = Object.fromEntries(files(directory).filter(file => file !== receiptName).map(file => [file, fileHash(path.join(directory, file))]));
+  const association = { schemaVersion: 1, inputs: before, payloadSha256 };
+  const receiptFile = path.join(directory, receiptName);
+  if (build) writeFileSync(receiptFile, JSON.stringify(association, null, 2) + "\n");
+  requireThat(existsSync(receiptFile) && canonical(readJson(receiptFile)) === canonical(association),
+    "Projection adapter has no matching source-to-payload build receipt; rebuild the configured project");
+  return { args: [executable], fingerprint: { kind: "source-adapter", project: sourceConfiguration.project, ...before, payloadSha256, buildReceiptSha256: fileHash(receiptFile) } };
+}
+
+export const resolveProjectionTool = resolveSourceTool;

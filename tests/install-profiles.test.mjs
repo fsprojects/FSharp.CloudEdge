@@ -7,7 +7,7 @@ function fixture() {
     .map(id => ({ id, directory: `profiles/${id}` }));
   const target = (id, profile = id) => ({ id, package: id, version: "1.0.0", profile,
     dependencies: [], outputDirectory: `src/${id}`, files: [`Bindings.${id}.fs`],
-    generator: { module: `Bindings.${id}`, entry: "index.d.ts", lib: ["esnext"], types: [], declarationCatalog: true } });
+    generator: { module: `Bindings.${id}`, entry: "index.d.ts", lib: ["esnext"], types: [], groups: { provider: "ship" }, declarationCatalog: true } });
   const config = { profiles, targets: [target("workers"), target("agents"), target("browser")] };
   const catalog = { surfaces: config.targets.map(item => ({ id: item.id + "--root", package: item.package,
     version: item.version, publicSubpath: ".", entry: "index.d.ts", productionTarget: true,

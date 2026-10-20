@@ -42,7 +42,7 @@ dotnet tool run hawaii-unofficial -- --version
 
 The manifest at `.config/dotnet-tools.json` pins the versions. `config/tool-packages.json` records package and installed payload hashes, which the generation runners check before and after invoking a tool. Source and build receipts remain under `artifacts/tools/bootstrap/`. The pinned TypeScript compiler still comes from the root npm installation; Xantham's tool package does not embed it.
 
-Local package versions include a digest of the source and build recipe. Updating a generator checkout has no effect on routine generation until you explicitly bootstrap that tool again:
+Local package versions include a digest of the source and build recipe. Hawaii generation runs only the bootstrapped package, so updating the Hawaii checkout has no effect until you bootstrap it again. SDK generation instead builds the primary Xantham checkout at `xantham.source.xanthamRevision` through `generators/xantham` ([SDK build](sdk-build.md)); the Xantham bootstrap still supplies the `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` packages that generated projects compile against, packed from the checked-out revision:
 
 ```sh
 npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
@@ -66,7 +66,7 @@ bootstrapped package; the regression is described in [upstream issues](upstream-
 
 ## Routine generation
 
-After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). They resolve installed tools through the local manifest. They do not compile the generator repositories or run a sibling DLL.
+After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). Hawaii commands resolve the installed tool through the local manifest and do not compile the Hawaii repository. SDK generation compiles and runs the source adapter against the pinned primary Xantham checkout; the packaged `xantham` tool does not generate SDK targets.
 
 `npm run tools:restore` restores the versions already in the manifest. It requires access to the local archives until those versions are available from a package feed. A fresh contributor therefore needs either the matching reviewed archives or the source bootstrap step. Locally rebuilding a package can change archive bytes; review the new package lock and rerun validation before treating its output as equivalent.
 

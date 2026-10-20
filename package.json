@@ -25,7 +25,8 @@
     "test:bridge": "dotnet tool restore && dotnet build tests/ByteBridge/ByteBridge.fsproj --nologo && dotnet fable tests/ByteBridge/ByteBridge.fsproj --outDir tests/ByteBridge/fable-out --noCache && node tests/ByteBridge/check.mjs",
     "test": "npm run test:tooling && npm run test:integration-tooling && npm run test:contracts && npm run test:hawaii-tooling && npm run build -- --resume && npm run test:bridge",
     "build:sdk": "node scripts/build-sdk.mjs",
-    "build": "node scripts/build-library.mjs"
+    "build": "node scripts/build-library.mjs",
+    "test:agents-pi": "node tests/AgentsPi/check.mjs"
   },
   "devDependencies": {
     "fflate": "0.8.3",

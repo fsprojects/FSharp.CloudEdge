@@ -1,15 +1,29 @@
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
 import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import { zipSync } from "fflate";
-import { installedTool, packageCache, resolveTool, sameTool } from "../scripts/tool-packages.mjs";
+import { installedTool, packageCache, resolveTool, resolveProjectionTool, sourceToolConfiguration, sameTool } from "../scripts/tool-packages.mjs";
 
 const hash = (bytes) => createHash("sha256").update(bytes).digest("hex");
 const write = (file, bytes) => { mkdirSync(path.dirname(file), { recursive: true }); writeFileSync(file, bytes); };
 const json = (file, value) => write(file, JSON.stringify(value));
+
+test("source adapter configuration has one shared pin and rejects conflicting projection ownership", () => {
+  const source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  const configuration = { xantham: { source } };
+  assert.equal(sourceToolConfiguration(configuration, { id: "ordinary" }), source);
+  assert.equal(sourceToolConfiguration(configuration, { id: "projected", projection: { selections: [{}] } }), source);
+  assert.deepEqual(sourceToolConfiguration({ xantham: {} }, { projection: { ...source, selections: [{}] } }), source);
+  assert.throws(() => sourceToolConfiguration(configuration, { id: "conflict", projection: { ...source, xanthamRevision: "1".repeat(40) } }), /differs from shared/);
+  assert.throws(() => sourceToolConfiguration({ xantham: { source: { ...source, extra: true } } }, {}), /must name a project/);
+  assert.throws(() => sourceToolConfiguration({ xantham: {} }, { projection: { selections: [{}] } }), /requires a source adapter/);
+  assert.throws(() => sourceToolConfiguration({ xantham: { source: { ...source, xanthamRevision: "develop" } } }, {}), /exact Xantham source revision/);
+});
 
 function fixture(t) {
   const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-tool-package-"));
@@ -183,4 +197,36 @@ test("resolver verifies only the payload selected by the active SDK in a multi-f
   }
   write(f.archive, zipSync(all));
   assert.equal(installedTool(f.root, "example", f.env, f.definition).assembly, f.assembly);
+});
+
+test("projection build receipt binds source and ancestor build settings to the emitted payload", t => {
+  const scratch = fileURLToPath(new URL("./.scratch/projection-tooling/", import.meta.url));
+  mkdirSync(scratch, { recursive: true });
+  const root = mkdtempSync(path.join(scratch, "case-"));
+  t.after(() => rmSync(root, { recursive: true, force: true }));
+  // The primary checkout supplies stable Git metadata; the compiler process is a test double.
+  const checkout = fileURLToPath(new URL("../", import.meta.url));
+  const revision = spawnSync("git", ["-C", checkout, "rev-parse", "HEAD"], { encoding: "utf8" }).stdout.trim();
+  const projection = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: revision };
+  const project = path.join(root, projection.project);
+  const source = path.join(path.dirname(project), "Program.fs");
+  write(project, "<Project />"); write(source, "module Original");
+  const payload = path.join(path.dirname(project), "bin/Release/net10.0/Adapter.dll");
+  const compiler = path.join(root, "fake-dotnet.cjs");
+  write(compiler, `#!${process.execPath}\nconst fs = require('node:fs');const path=require('node:path');const out=process.env.FIXTURE_PAYLOAD;fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,'compiled '+fs.readFileSync(process.env.FIXTURE_SOURCE,'utf8'));\n`);
+  chmodSync(compiler, 0o755);
+  const env = { ...process.env, CLOUDEDGE_DOTNET: compiler, CLOUDEDGE_XANTHAM_ROOT: checkout, CLOUDEDGE_ALLOW_DIRTY_XANTHAM: "1", FIXTURE_PAYLOAD: payload, FIXTURE_SOURCE: source };
+  const built = resolveProjectionTool(root, projection, env, true);
+  assert.ok(sameTool(built, resolveProjectionTool(root, projection, env)));
+  const originalPayload = readFileSync(payload);
+  write(source, "module Changed");
+  assert.deepEqual(readFileSync(payload), originalPayload);
+  assert.throws(() => resolveProjectionTool(root, projection, env), /source-to-payload build receipt/);
+  resolveProjectionTool(root, projection, env, true);
+  write(path.join(root, "Directory.Build.props"), "<Project><PropertyGroup><DefineConstants>CHANGED</DefineConstants></PropertyGroup></Project>");
+  assert.throws(() => resolveProjectionTool(root, projection, env), /source-to-payload build receipt/);
+  resolveProjectionTool(root, projection, env, true);
+  write(payload, "stale or changed assembly");
+  assert.throws(() => resolveProjectionTool(root, projection, env), /source-to-payload build receipt/);
+  assert.throws(() => resolveProjectionTool(root, { ...projection, xanthamRevision: "1".repeat(40) }, env), /Projection requires Xantham/);
 });

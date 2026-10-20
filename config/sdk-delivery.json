@@ -388,24 +388,15 @@
       "dependencies": [],
       "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider",
       "files": [
+        "groups/FSharp.CloudEdge.Support.AI.V4.JsonSchema.fs",
         "FSharp.CloudEdge.Support.AI.V4.Provider.fs"
       ],
       "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
         "declarationCatalog": true,
         "module": "FSharp.CloudEdge.Support.AI.V4.Provider",
         "namespace": "FSharp.CloudEdge.Support.AI.V4",
         "entry": "dist/index.d.ts",
-        "runtime": "@ai-sdk/provider",
-        "groups": {
-          "@ai-sdk/provider": "ship",
-          "@ai-sdk/openai-compatible": "ship"
-        }
+        "runtime": "@ai-sdk/provider"
       }
     },
     {
@@ -416,23 +407,15 @@
       "dependencies": [],
       "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider",
       "files": [
+        "groups/FSharp.CloudEdge.Support.AI.V3.JsonSchema.fs",
         "FSharp.CloudEdge.Support.AI.V3.Provider.fs"
       ],
       "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
         "declarationCatalog": true,
         "module": "FSharp.CloudEdge.Support.AI.V3.Provider",
         "namespace": "FSharp.CloudEdge.Support.AI.V3",
         "entry": "dist/index.d.ts",
-        "runtime": "@ai-sdk/provider",
-        "groups": {
-          "@ai-sdk/provider": "ship"
-        }
+        "runtime": "@ai-sdk/provider"
       }
     },
     {
@@ -446,6 +429,105 @@
         "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fs"
       ],
       "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible",
+        "namespace": "FSharp.CloudEdge.Support.AI.V4",
+        "entry": "dist/index.d.ts",
+        "runtime": "@ai-sdk/openai-compatible"
+      }
+    },
+    {
+      "id": "json-schema-v7",
+      "package": "@types/json-schema",
+      "version": "7.0.15",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Support/Schema/FSharp.CloudEdge.Support.JsonSchema",
+      "files": [
+        "FSharp.CloudEdge.Support.JsonSchema.fs"
+      ],
+      "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.JsonSchema",
+        "namespace": "FSharp.CloudEdge.Support",
+        "entry": "index.d.ts"
+      }
+    },
+    {
+      "id": "zod-v4",
+      "package": "zod",
+      "version": "4.5.4",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4",
+      "files": [
+        "FSharp.CloudEdge.Support.Zod.V4.fs"
+      ],
+      "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.Zod.V4",
+        "namespace": "FSharp.CloudEdge.Support.Zod",
+        "runtime": "zod",
+        "publicInputs": {
+          ".": "index.d.cts",
+          "./v3": "v3/index.d.cts",
+          "./v4/core": "v4/core/index.d.cts"
+        }
+      }
+    },
+    {
+      "id": "ai-provider-utils-v4",
+      "package": "@ai-sdk/provider-utils",
+      "version": "5.0.36",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.ProviderUtils",
+      "files": [
+        "FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fs"
+      ],
+      "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V4.ProviderUtils",
+        "namespace": "FSharp.CloudEdge.Support.AI.V4",
+        "entry": "dist/index.d.ts",
+        "runtime": "@ai-sdk/provider-utils"
+      }
+    },
+    {
+      "id": "ai-v7",
+      "package": "ai",
+      "version": "7.0.93",
+      "profile": "agents",
+      "dependencies": [],
+      "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V7",
+      "files": [
+        "FSharp.CloudEdge.Support.AI.V7.fs"
+      ],
+      "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.AI.V7",
+        "namespace": "FSharp.CloudEdge.Support.AI",
+        "entry": "dist/index.d.ts",
+        "runtime": "ai"
+      }
+    },
+    {
+      "id": "agents-pi",
+      "package": "agents",
+      "version": "0.27.0",
+      "profile": "agents-pi",
+      "dependencies": [],
+      "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.fs",
+        "FSharp.CloudEdge.Pi.HarnessSubmit.fs",
+        "FSharp.CloudEdge.Pi.HarnessPrompt.fs",
+        "FSharp.CloudEdge.Pi.SessionSubmit.fs",
+        "FSharp.CloudEdge.Pi.SessionPrompt.fs"
+      ],
+      "generator": {
+        "namespace": "FSharp.CloudEdge.Runtime",
+        "module": "FSharp.CloudEdge.Runtime.AgentsPi",
         "lib": [
           "esnext"
         ],
@@ -453,103 +535,388 @@
           "@cloudflare/workers-types"
         ],
         "declarationCatalog": true,
-        "module": "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible",
-        "namespace": "FSharp.CloudEdge.Support.AI.V4",
-        "entry": "dist/index.d.ts",
-        "runtime": "@ai-sdk/openai-compatible",
         "groups": {
-          "@ai-sdk/provider": "ship",
-          "@ai-sdk/openai-compatible": "ship"
-        }
+          "@earendil-works/pi-ai": "ship",
+          "@earendil-works/pi-durable": "ship",
+          "@earendil-works/chord": "ship"
+        },
+        "publicInputs": {
+          "./harness/pi": "dist/harness/pi/index.d.ts",
+          "./models/pi-ai": "dist/models/pi-ai/index.d.ts"
+        },
+        "recursiveGroups": true
+      },
+      "projection": {
+        "selections": [
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiHarness"
+            ],
+            "methodName": "submit",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarness",
+            "moduleName": "FSharp.CloudEdge.Pi.HarnessSubmit",
+            "typeName": "Input",
+            "functionName": "submit"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiHarness"
+            ],
+            "methodName": "prompt",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarness",
+            "moduleName": "FSharp.CloudEdge.Pi.HarnessPrompt",
+            "typeName": "Input",
+            "functionName": "prompt"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiSession"
+            ],
+            "methodName": "submit",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession",
+            "moduleName": "FSharp.CloudEdge.Pi.SessionSubmit",
+            "typeName": "Input",
+            "functionName": "submit"
+          },
+          {
+            "package": "agents",
+            "receiverPath": [
+              "PiSession"
+            ],
+            "methodName": "prompt",
+            "parameterName": "input",
+            "receiverType": "FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession",
+            "moduleName": "FSharp.CloudEdge.Pi.SessionPrompt",
+            "typeName": "Input",
+            "functionName": "prompt"
+          }
+        ]
       }
     }
   ],
   "catalogImports": {
+    "json-schema-v7": [
+      "workers"
+    ],
+    "zod-v4": [
+      "workers"
+    ],
+    "ai-provider-v4": [
+      "workers",
+      "json-schema-v7"
+    ],
+    "ai-provider-v3": [
+      "workers",
+      "json-schema-v7"
+    ],
+    "ai-provider-utils-v4": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4"
+    ],
     "ai-openai-compatible-v4": [
-      "ai-provider-v4"
-    ],
-    "aigatewayprovider": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
       "ai-provider-v4",
-      "ai-openai-compatible-v4"
+      "ai-provider-utils-v4"
     ],
-    "workersaiprovider": [
-      "ai-provider-v4"
+    "ai-v7": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4"
     ],
-    "aisearchprovider": [
-      "ai-provider-v3"
+    "agents": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7"
+    ],
+    "agents--ai-chat-agent": [
+      "workers",
+      "zod-v4"
+    ],
+    "agents-mcp-client": [
+      "workers",
+      "zod-v4"
+    ],
+    "aichat": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7",
+      "agents"
+    ],
+    "codemode": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7"
+    ],
+    "shell": [
+      "workers"
+    ],
+    "shell--git": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7",
+      "codemode"
+    ],
+    "voice": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7",
+      "agents"
+    ],
+    "computer": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7"
+    ],
+    "computer--artifacts": [
+      "workers"
     ],
     "containers": [
       "workers"
+    ],
+    "sandbox": [
+      "workers",
+      "containers"
+    ],
+    "sandbox--bridge": [
+      "workers",
+      "containers",
+      "zod-v4"
+    ],
+    "actors": [
+      "workers"
+    ],
+    "dynamicworkflows": [
+      "workers"
+    ],
+    "workersoauthprovider": [
+      "workers"
+    ],
+    "kvassethandler": [
+      "workers"
+    ],
+    "chanfana": [
+      "workers"
+    ],
+    "capnweb": [
+      "workers"
+    ],
+    "aigatewayprovider": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-openai-compatible-v4"
+    ],
+    "workersaiprovider": [
+      "workers",
+      "json-schema-v7",
+      "ai-provider-v4"
+    ],
+    "aisearchprovider": [
+      "workers",
+      "json-schema-v7",
+      "ai-provider-v3"
+    ],
+    "aiutils": [
+      "workers",
+      "json-schema-v7"
+    ],
+    "think": [
+      "workers",
+      "zod-v4",
+      "json-schema-v7",
+      "ai-provider-v4",
+      "ai-provider-utils-v4",
+      "ai-v7",
+      "agents",
+      "codemode",
+      "shell"
+    ],
+    "flagship": [
+      "workers"
+    ],
+    "pagesplugincloudflareaccess": [
+      "workers"
     ]
   },
+  "inferenceProfiles": {
+    "workers-node": {
+      "lib": [
+        "esnext"
+      ],
+      "types": [
+        "@cloudflare/workers-types",
+        "node"
+      ],
+      "groups": {
+        "@cloudflare/workers-types": "ship",
+        "@ai-sdk/provider": "ship",
+        "@ai-sdk/openai-compatible": "ship",
+        "@ai-sdk/provider-utils": "ship",
+        "zod": "ship",
+        "ai": "ship",
+        "agents": "ship",
+        "@cloudflare/codemode": "ship",
+        "@cloudflare/shell": "ship",
+        "@cloudflare/containers": "ship",
+        "@types/json-schema": "ship"
+      }
+    }
+  },
   "targetOverrides": {
-    "aigatewayprovider": {
-      "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
-        "groups": {
-          "@ai-sdk/provider": "ship",
-          "@ai-sdk/openai-compatible": "ship"
-        }
-      }
-    },
-    "workersaiprovider": {
-      "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
-        "groups": {
-          "@ai-sdk/provider": "ship",
-          "@ai-sdk/openai-compatible": "ship"
-        }
-      }
-    },
-    "aisearchprovider": {
-      "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
-        "groups": {
-          "@ai-sdk/provider": "ship"
-        }
-      }
-    },
     "workers": {
       "profile": "containers",
-      "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
-        "groups": {
-          "@cloudflare/workers-types": "ship"
-        }
-      }
+      "inferenceProfile": "workers-node"
+    },
+    "agents": {
+      "inferenceProfile": "workers-node"
+    },
+    "agents--ai-chat-agent": {
+      "inferenceProfile": "workers-node"
+    },
+    "agents-mcp-client": {
+      "inferenceProfile": "workers-node"
+    },
+    "aichat": {
+      "inferenceProfile": "workers-node"
+    },
+    "codemode": {
+      "inferenceProfile": "workers-node"
+    },
+    "shell": {
+      "inferenceProfile": "workers-node"
+    },
+    "shell--git": {
+      "inferenceProfile": "workers-node"
+    },
+    "voice": {
+      "inferenceProfile": "workers-node"
+    },
+    "computer": {
+      "inferenceProfile": "workers-node"
+    },
+    "computer--artifacts": {
+      "inferenceProfile": "workers-node"
+    },
+    "sandbox": {
+      "inferenceProfile": "workers-node"
+    },
+    "sandbox--bridge": {
+      "inferenceProfile": "workers-node"
     },
     "containers": {
-      "generator": {
-        "lib": [
-          "esnext"
-        ],
-        "types": [
-          "@cloudflare/workers-types"
-        ],
-        "groups": {
-          "@cloudflare/workers-types": "ship"
-        }
-      }
+      "inferenceProfile": "workers-node"
+    },
+    "actors": {
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.Actors.fs"
+      ]
+    },
+    "dynamicworkflows": {
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.DynamicWorkflows.fs"
+      ]
+    },
+    "workersoauthprovider": {
+      "inferenceProfile": "workers-node"
+    },
+    "kvassethandler": {
+      "inferenceProfile": "workers-node"
+    },
+    "chanfana": {
+      "inferenceProfile": "workers-node"
+    },
+    "capnweb": {
+      "inferenceProfile": "workers-node"
+    },
+    "aigatewayprovider": {
+      "inferenceProfile": "workers-node"
+    },
+    "workersaiprovider": {
+      "inferenceProfile": "workers-node"
+    },
+    "aisearchprovider": {
+      "inferenceProfile": "workers-node"
+    },
+    "aiutils": {
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.AIUtils.fs"
+      ]
+    },
+    "think": {
+      "inferenceProfile": "workers-node"
+    },
+    "flagship": {
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.Flagship.fs"
+      ]
+    },
+    "pagesplugincloudflareaccess": {
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess.fs"
+      ]
+    },
+    "ai-provider-v4": {
+      "inferenceProfile": "workers-node"
+    },
+    "ai-provider-v3": {
+      "inferenceProfile": "workers-node"
+    },
+    "ai-openai-compatible-v4": {
+      "inferenceProfile": "workers-node"
+    },
+    "json-schema-v7": {
+      "inferenceProfile": "workers-node"
+    },
+    "zod-v4": {
+      "inferenceProfile": "workers-node"
+    },
+    "ai-provider-utils-v4": {
+      "inferenceProfile": "workers-node"
+    },
+    "ai-v7": {
+      "inferenceProfile": "workers-node"
     }
   }
 }

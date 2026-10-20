@@ -1,7 +1,7 @@
 # Selected SDK scope
 
 This is the explicit `server-resources` selection from `config/sdk-delivery.json`:
-31 SDK libraries covering 112 public entrypoints, plus three generated AI support libraries.
+31 SDK libraries covering 112 public entrypoints, plus seven generated dependency support libraries and the Agents Pi operations library.
 One handwritten Workers support project provides checked Durable Object fetch adapters.
 Versions retain the installed package pins. The tables describe the selection; successful
 generation and compilation are recorded separately in `artifacts/library-build/latest.json`.
@@ -45,16 +45,19 @@ The management selection contains 3,437 operations across 12 projects, including
 | `PagesPluginTurnstile` | `@cloudflare/pages-plugin-turnstile` | `1.0.2` | 1 |
 | `PagesPluginStaticForms` | `@cloudflare/pages-plugin-static-forms` | `1.0.3` | 1 |
 
-## Shared AI contracts
+## Shared dependency contracts
 
 | Library | npm package | Retained version |
 |---|---|---|
-| `V4.Provider` | `@ai-sdk/provider` | `4.0.10` |
-| `V4.OpenAICompatible` | `@ai-sdk/openai-compatible` | `3.0.44` |
-| `V3.Provider` | `@ai-sdk/provider` | `3.0.15` |
+| `Support.AI.V4.Provider` | `@ai-sdk/provider` | `4.0.10` |
+| `Support.AI.V4.OpenAICompatible` | `@ai-sdk/openai-compatible` | `3.0.44` |
+| `Support.AI.V4.ProviderUtils` | `@ai-sdk/provider-utils` | `5.0.36` |
+| `Support.AI.V7` | `ai` | `7.0.93` |
+| `Support.AI.V3.Provider` | `@ai-sdk/provider` | `3.0.15` |
+| `Support.Zod.V4` | `zod` (`.`, `./v3`, `./v4/core`) | `4.5.4` |
+| `Support.JsonSchema` | `@types/json-schema` | `7.0.15` |
 
-AI Gateway and Workers AI share the v4 contract. The retained AI Search package uses v3,
-which has its own owner. Runtime Workers is the native resource owner used by Containers.
+AI Gateway and Workers AI share the v4 contract. The retained AI Search package uses v3, which has its own owner. Runtime Workers is the single owner of the native Workers declarations for every library in the `workers-node` catalog family described in the [library guide](SDK-LIBRARY.md).
 
 ## Selection boundaries
 

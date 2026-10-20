@@ -162,6 +162,7 @@ export function snapshotContracts({ root = defaultRoot } = {}) {
       publicInputs, ...contract, provenance: { profileLockSha256: provenance.profileLockSha256,
         profileManifestSha256: provenance.profileManifestSha256, overlayFingerprint: provenance.inputOverlays.fingerprint,
         typescript: provenance.typescript, compiler: catalog.compiler, generator: catalog.generator,
+        catalogSchemaVersion: catalog.schemaVersion, compatibility: catalog.compatibility ?? null,
         inferenceProfile: catalog.inferenceProfile, sourceSha256: provenance.sourceSha256,
         declarationCatalogSha256: provenance.declarationCatalogSha256 } }];
   }), "SDK targets");

@@ -19,3 +19,6 @@ site/output/
 .env
 .env.*
 !.env.template
+
+# Local generation and validation receipts.
+/tests/.scratch/

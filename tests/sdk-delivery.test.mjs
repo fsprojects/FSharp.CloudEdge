@@ -35,7 +35,10 @@ test("delivery selects exact server inputs and keeps a reasoned disposition for 
 
 test("catalog injection produces an ordered support dependency with a relocatable catalog path", () => {
   const f = fixture();
+  const groups = { "@ai-sdk/provider": "ship", sdk: "ship" };
+  f.configuration.targets[0].generator.groups = groups;
   f.delivery.supportTargets = [f.target("ai-v4", "@ai-sdk/provider")];
+  f.delivery.supportTargets[0].generator.groups = groups;
   f.delivery.catalogImports = { sdk: ["ai-v4"] };
   const { configuration } = deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo");
   assert.deepEqual(configuration.targets.map(target => target.id), ["ai-v4", "sdk"]);
@@ -69,4 +72,43 @@ test("delivery rejects unknown catalog owners, unexplained omissions and input o
   f.delivery.deferred = [{ partitions: ["mobile"], reason: "Deferred." }];
   f.delivery.targetOverrides = { sdk: { generator: { publicInputs: { "./react": "dist/react.d.ts" } } } };
   assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /not input selection or ownership/);
+});
+
+test("a named inference profile replaces each target's inference settings with one shared definition", () => {
+  const f = fixture();
+  const shared = { lib: ["esnext"], types: ["@cloudflare/workers-types", "node"], groups: { "@ai-sdk/provider": "ship" } };
+  f.configuration.targets[0].generator.resolveNoInfer = true;
+  f.delivery.supportTargets = [f.target("ai-v4", "@ai-sdk/provider")];
+  f.delivery.inferenceProfiles = { shared };
+  f.delivery.targetOverrides = { sdk: { inferenceProfile: "shared", generator: { namespace: "Bindings" } }, "ai-v4": { inferenceProfile: "shared" } };
+  f.delivery.catalogImports = { sdk: ["ai-v4"] };
+  const { configuration } = deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo");
+  const [producer, consumer] = configuration.targets;
+  for (const target of [producer, consumer]) {
+    assert.deepEqual({ lib: target.generator.lib, types: target.generator.types, groups: target.generator.groups }, shared);
+    assert.equal(Object.hasOwn(target.generator, "resolveNoInfer"), false);
+  }
+  assert.equal(consumer.generator.namespace, "Bindings");
+  assert.equal(consumer.generator.module, "Bindings.sdk");
+  f.delivery.targetOverrides.sdk = { inferenceProfile: "missing" };
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /unknown inference profile missing/);
+  f.delivery.targetOverrides.sdk = { inferenceProfile: "shared", generator: { groups: {} } };
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /come from inference profile shared/);
+  f.delivery.targetOverrides.sdk = { inferenceProfile: "shared" };
+  f.delivery.inferenceProfiles.shared = { ...shared, module: "Other" };
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /may contain only/);
+});
+
+test("catalog imports require an identical inference profile and a shipped producer package", () => {
+  const f = fixture();
+  f.delivery.supportTargets = [f.target("ai-v4", "@ai-sdk/provider")];
+  f.delivery.catalogImports = { sdk: ["ai-v4"] };
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /owns @ai-sdk\/provider, which sdk must ship/);
+  f.configuration.targets[0].generator.groups = { "@ai-sdk/provider": "ship" };
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /ai-v4 uses a different inference profile/);
+  f.delivery.supportTargets[0].generator.groups = { "@ai-sdk/provider": "ship" };
+  f.delivery.supportTargets[0].generator.types = ["node"];
+  assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /ai-v4 uses a different inference profile/);
+  f.delivery.supportTargets[0].generator.types = [];
+  assert.deepEqual(deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo").configuration.targets[1].dependencies, ["ai-v4"]);
 });

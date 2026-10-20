@@ -6,6 +6,7 @@
   "devDependencies": {
     "@cloudflare/ai-utils": "1.0.1",
     "@cloudflare/workers-types": "5.20260906.1",
-    "@types/json-schema": "7.0.15"
+    "@types/json-schema": "7.0.15",
+    "@types/node": "26.4.1"
   }
 }
