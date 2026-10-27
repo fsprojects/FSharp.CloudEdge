@@ -10,24 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
-
 [<Interface>]
 type RetryOptions =
     /// <summary>
@@ -52,12 +34,21 @@ type TransportType =
     | [<CompiledName("sse")>] Sse
     | [<CompiledName("streamable-http")>] StreamableHttp
 
-type Agent<'Env, 'State, 'Props> =
+type Agent<'Env, 'TState, 'Props> =
     /// <summary>
     /// Runtime lifecycle and reusable durable capabilities for this Agent.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     abstract lifecycle: Lifecycle<'Env, 'Props>
+    /// <summary>
+    /// Durable state: the <c>cf_agents_state</c> row, lazy load, validated persistence.
+    /// <c>initialState</c> stays on Agent (a subclass field, initialized after this
+    /// one) and is seeded by the <c>state</c> getter. Typed <c>&lt;unknown&gt;</c> rather than
+    /// <c>&lt;TState&gt;</c> because <c>TState</c> appears in both <c>get()</c> and <c>set()</c> positions,
+    /// which would make <c>Agent</c>'s own <c>TState</c> parameter invariant and break
+    /// <c>Subclass -&gt; Agent&lt;Env, unknown&gt;</c> assignability; the typed boundary is
+    /// re-established in <c>state</c> / <c>setState</c>.
+    /// </summary>
+    abstract _state: State<obj>
     /// <summary>
     /// Run user initialization after lifecycle components have started.
     /// </summary>
@@ -65,7 +56,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <summary>
     /// Handle an HTTP request not claimed by a lifecycle component.
     /// </summary>
-    abstract onRequest: _request: obj -> obj
+    abstract onRequest: _request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
     /// <summary>
     /// Handle a newly accepted hibernating WebSocket connection.
     /// </summary>
@@ -84,51 +75,8 @@ type Agent<'Env, 'State, 'Props> =
     abstract getConnectionTags: _connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> * _context: McpAgent.ShouldSendProtocolMessages.Ctx -> U2<string[], JS.Promise<string[]>>
     /// <remarks>@internal Ensure lifecycle startup before a native RPC implementation.</remarks>
     abstract __unsafe_ensureInitialized: ?props: 'Props -> JS.Promise<unit>
-    abstract _state: obj with get, set
-    abstract _disposables: obj with get, set
-    abstract _destroyed: obj with get, set
     /// <summary>
-    /// Stores raw state accessors for wrapped connections.
-    /// Used by internal flag methods (readonly, no-protocol) to read/write
-    /// _cf_-prefixed keys without going through the user-facing state/setState.
-    /// </summary>
-    abstract _rawStateAccessors: obj with get, set
-    /// <summary>
-    /// Cached persistence-hook dispatch mode, computed once in the constructor.
-    /// - "new"  → call onStateChanged
-    /// - "old"  → call onStateUpdate (deprecated)
-    /// - "none" → neither hook is overridden, skip entirely
-    /// </summary>
-    abstract _persistenceHookMode: obj with get, set
-    /// <summary>
-    /// True when this agent runs as a facet (sub-agent) inside a parent.
-    /// </summary>
-    abstract _isFacet: obj with get, set
-    abstract _protocolBroadcastExcludeIds: obj with get, set
-    abstract _cf_subAgentBridgeContext: obj with get, set
-    abstract _cf_virtualSubAgentConnections: obj with get, set
-    abstract _cf_subAgentConnectionOperationTails: obj with get, set
-    abstract _cf_subAgentBroadcastOperationTail: obj option with get, set
-    /// <summary>
-    /// User-facing facet name. For legacy facets this is the same as
-    /// <c>ctx.id.name</c>; path-scoped facets use an internal routing id and
-    /// keep the logical name here instead.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _facetName: obj option with get, set
-    /// <summary>
-    /// Ancestor chain, root-first. Empty for top-level DOs; populated at
-    /// facet init time from the parent's own <c>selfPath</c>. Exposed publicly
-    /// via the <c>parentPath</c> getter.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _parentPath: obj with get, set
-    /// <summary>
-    /// Warn-once guard: <c>chatRecovery</c> reassigned during onStart() (too late for wake recovery).
-    /// </summary>
-    abstract _warnedChatRecoveryInOnStart: obj with get, set
-    /// <summary>
-    /// Number of active keepAlive() callers. When &gt; 0, <c>_rearmAlarm()</c>
+    /// Number of active keepAlive() callers. When &gt; 0, <c>_syncHostJobs()</c>
     /// caps the next alarm at <c>keepAliveIntervalMs</c> so the DO stays alive.
     /// Purely in-memory — lost on eviction, which is correct because the
     /// in-memory work keepAlive was protecting is also lost.
@@ -136,53 +84,58 @@ type Agent<'Env, 'State, 'Props> =
     /// <remarks>@internal</remarks>
     abstract _keepAliveRefs: float with get, set
     /// <summary>
-    /// In-memory tokens for keepAlive leases acquired by facets and held
-    /// on the root alarm owner. Lost on eviction, like <c>_keepAliveRefs</c>,
-    /// because the in-memory work those leases were protecting is also gone.
+    /// The dynamic-agents capability: facet-backed child agents that run
+    /// in their own isolate with their own SQLite database, colocated
+    /// with — and supervised by — this agent.
+    /// <br /><br />
+    /// Use dynamic agents for code whose class or lifecycle this agent
+    /// owns: dynamically-loaded or AI-generated code, per-run tool
+    /// agents, sandboxed components. For independent peers (for example
+    /// one Durable Object per chat), use <c>getAgentByName</c> instead.
+    /// <code lang="ts">
+    /// const child = await this.dynamicAgents.get(Researcher, id);
+    /// await child.doWork();
+    /// this.dynamicAgents.abort(Researcher, id, reason);
+    /// await this.dynamicAgents.delete(Researcher, id);
+    /// </code>
     /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _facetKeepAliveTokens: obj with get, set
-    /// <remarks>@internal In-memory set of fiber IDs running in this process.</remarks>
-    abstract _runFiberActiveFibers: obj with get, set
-    /// <remarks>@internal In-memory abort controllers for managed running fibers.</remarks>
-    abstract _managedFiberAbortControllers: obj with get, set
-    /// <remarks>@internal In-memory executions for callers that want to await accepted work.</remarks>
-    abstract _managedFiberExecutions: obj with get, set
-    /// <remarks>@internal In-memory waiters for managed fibers reaching terminal ledger state.</remarks>
-    abstract _managedFiberTerminalWaiters: obj with get, set
-    /// <remarks>@internal Prevents re-entrant recovery from overlapping alarm ticks.</remarks>
-    abstract _runFiberRecoveryInProgress: obj with get, set
-    /// <remarks>
-    /// @internal
-    /// Consecutive runFiber-recovery scans that made NO forward progress
-    /// while work was still pending. Drives the exponential backoff of the
-    /// recovery follow-up alarm so a repeatedly-throwing recovery hook does not
-    /// busy-loop the DO. Reset to 0 whenever a scan recovers anything.
-    /// </remarks>
-    abstract _recoveryNoProgressScans: obj with get, set
-    /// <remarks>@internal Single-flight background recovery for parent agent-tool rows.</remarks>
-    abstract _agentToolRunRecoveryPromise: obj with get, set
-    /// <remarks>@internal Serializes detached-backbone arming against concurrent dispatch.</remarks>
-    abstract _detachedBackboneArming: obj with get, set
-    /// <remarks>@internal Edge-trigger latch for the live-detached-count warning.</remarks>
-    abstract _detachedLiveCountWarned: obj with get, set
-    abstract _ParentClass: obj with get, set
+    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
+    abstract dynamicAgents: DynamicAgents
     /// <summary>
     /// Durable scheduling capability installed into this Agent's Lifecycle.
+    /// Agent's schedule()/scheduleEvery()/getScheduleById()/listSchedules()/
+    /// cancelSchedule() methods delegate to it.
     /// </summary>
-    /// <remarks>
-    /// @experimental
-    /// The API surface may change before stabilizing. Agent's
-    /// schedule()/scheduleEvery()/getScheduleById()/listSchedules()/
-    /// cancelSchedule() methods are the stable surface.
-    /// </remarks>
-    abstract scheduler: Scheduler<JS.Record<string, McpAgent.Scheduler.Item.Item>>
+    abstract scheduler: Scheduler<JS.Record<string, Agent.Scheduler.Item.Item>>
+    /// <summary>
+    /// Durable replayable execution capability installed into this Agent's
+    /// Lifecycle. Declare definitions on the overridable
+    /// taskDefinitions property and start runs with
+    /// <c>this.tasks.run(name, input, options)</c>.
+    /// </summary>
+    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
+    abstract tasks: Tasks<JS.Record<string, Tasks.Register.Definition>>
+    /// <summary>
+    /// Named Task definitions for this Agent, resolved lazily on every
+    /// dispatch. Declare as a field so the map is rebuilt on every Durable
+    /// Object wake — that is what lets in-flight runs resolve their persisted
+    /// definition names after a restart:
+    /// <code lang="ts">
+    /// readonly taskDefinitions = {
+    ///   "build-report@v1": async (input: ReportInput, step: TaskStep) =&gt; {
+    ///     // ...
+    ///   }
+    /// } satisfies TaskHandlers;
+    /// </code>
+    /// </summary>
+    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
+    abstract taskDefinitions: JS.Record<string, Agent.TaskDefinitions.Item> option
     abstract mcp: Mcp.Client.MCPClientManager
     /// <summary>
     /// Initial state for the Agent
     /// Override to provide default state values
     /// </summary>
-    abstract initialState: 'State with get, set
+    abstract initialState: 'TState with get, set
     /// <summary>
     /// Stable key for Workers AI session affinity (prefix-cache optimization).
     /// <br /><br />
@@ -205,16 +158,12 @@ type Agent<'Env, 'State, 'Props> =
     /// </example>
     abstract sessionAffinity: string
     /// <summary>
-    /// Current state of the Agent
+    /// Current state of the Agent.
+    /// <br /><br />
+    /// Delegates to the State capability, which owns lazy load and the
+    /// in-memory cache; Agent seeds <c>initialState</c> on first access.
     /// </summary>
-    abstract state: 'State
-    /// <summary>
-    /// Resolved options (merges defaults with subclass overrides).
-    /// Cached after first access — static options never change during the
-    /// lifetime of a Durable Object instance.
-    /// </summary>
-    abstract _cachedOptions: obj option with get, set
-    abstract _resolvedOptions: obj
+    abstract state: 'TState
     /// <summary>
     /// The observability implementation to use for the Agent
     /// </summary>
@@ -223,11 +172,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Emit an observability event with auto-generated timestamp.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _emit: ``type``: McpAgent.Emit.Type * ?payload: JS.Record<string, obj> -> unit
-    /// <summary>
-    /// Run SDK work under a stable parent for platform child spans.
-    /// </summary>
-    abstract _withAgentSpan: obj with get, set
+    abstract _emit: ``type``: Agent.Emit.Type * ?payload: JS.Record<string, obj> -> unit
     /// <summary>
     /// Execute SQL queries against the Agent's database
     /// </summary>
@@ -236,7 +181,6 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="values">Values to be inserted into the query</param>
     /// <returns>Array of query results</returns>
     abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
-    abstract _schemaInitialization: obj with get, set
     /// <summary>
     /// Create all internal tables and run migrations if needed.
     /// Called by the constructor on every wake. Idempotent — skips DDL when
@@ -247,39 +191,12 @@ type Agent<'Env, 'State, 'Props> =
     /// local dev and the constructor only runs once per DO instance).
     /// </summary>
     abstract _ensureSchema: unit -> unit
-    abstract _restoreAgentFacetContext: obj with get, set
-    /// <summary>
-    /// Check for workflows referencing unknown bindings and warn with migration suggestion.
-    /// </summary>
-    abstract _checkOrphanedWorkflows: obj with get, set
-    /// <summary>
-    /// Broadcast a protocol message only to connections that have protocol
-    /// messages enabled. Connections where shouldSendProtocolMessages returned
-    /// false are excluded automatically.
-    /// </summary>
-    /// <param name="msg">The JSON-encoded protocol message</param>
-    /// <param name="excludeIds">Additional connection IDs to exclude (e.g. the source)</param>
-    abstract _broadcastProtocol: obj with get, set
-    abstract _setStateInternal: obj with get, set
     /// <summary>
     /// Update the Agent's state
     /// </summary>
     /// <param name="state">New state to set</param>
     /// <remarks>@throws Error if called from a readonly connection context</remarks>
-    abstract setState: state: 'State -> unit
-    /// <summary>
-    /// Wraps connection.state and connection.setState so that internal
-    /// _cf_-prefixed flags (readonly, no-protocol) are hidden from user code
-    /// and cannot be accidentally overwritten.
-    /// <br /><br />
-    /// Idempotent — safe to call multiple times on the same connection.
-    /// After hibernation, the _rawStateAccessors WeakMap is empty but the
-    /// connection's state getter still reads from the persisted WebSocket
-    /// attachment. Calling this method re-captures the raw getter so that
-    /// predicate methods (isConnectionReadonly, isConnectionProtocolEnabled)
-    /// work correctly post-hibernation.
-    /// </summary>
-    abstract _ensureConnectionWrapped: obj with get, set
+    abstract setState: state: 'TState -> unit
     /// <summary>
     /// Mark a connection as readonly or readwrite
     /// </summary>
@@ -312,8 +229,8 @@ type Agent<'Env, 'State, 'Props> =
     /// <br /><br />
     /// Write an internal <c>_cf_</c>-prefixed flag to the raw connection state,
     /// bypassing the user-facing state wrapper. The key must be registered
-    /// in <c>CF_INTERNAL_KEYS</c> so it is preserved across user <c>setState</c> calls
-    /// and hidden from <c>connection.state</c>.
+    /// with <c>registerInternalConnectionKeys</c> so it is preserved across user
+    /// <c>setState</c> calls and hidden from <c>connection.state</c>.
     /// </summary>
     /// <remarks>@internal</remarks>
     abstract _unsafe_setConnectionFlag: connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> * key: string * value: obj -> unit
@@ -352,17 +269,12 @@ type Agent<'Env, 'State, 'Props> =
     /// <returns>True if the connection receives protocol messages</returns>
     abstract isConnectionProtocolEnabled: connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> -> bool
     /// <summary>
-    /// Mark a connection as having protocol messages disabled.
-    /// Called internally when shouldSendProtocolMessages returns false.
-    /// </summary>
-    abstract _setConnectionNoProtocol: obj with get, set
-    /// <summary>
     /// Called before the Agent's state is persisted and broadcast.
     /// Override to validate or reject an update by throwing an error.
     /// <br /><br />
     /// IMPORTANT: This hook must be synchronous.
     /// </summary>
-    abstract validateStateChange: _nextState: 'State * _source: U2<string, McpAgent.ShouldSendProtocolMessages.Connection<obj>> -> unit
+    abstract validateStateChange: _nextState: 'TState * _source: StateChangeSource -> unit
     /// <summary>
     /// Called after the Agent's state has been persisted and broadcast to all clients.
     /// This is a notification hook — errors here are routed to onError and do not
@@ -370,7 +282,7 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     /// <param name="state">Updated state</param>
     /// <param name="source">Source of the state update ("server" or a client connection)</param>
-    abstract onStateChanged: _state: 'State option * _source: U2<string, McpAgent.ShouldSendProtocolMessages.Connection<obj>> -> unit
+    abstract onStateChanged: _state: 'TState option * _source: StateChangeSource -> unit
     /// <remarks>
     /// @deprecated
     /// Renamed to <c>onStateChanged</c> — the behavior is identical.
@@ -382,18 +294,13 @@ type Agent<'Env, 'State, 'Props> =
     /// </remarks>
     /// <param name="state">Updated state</param>
     /// <param name="source">Source of the state update ("server" or a client connection)</param>
-    abstract onStateUpdate: _state: 'State option * _source: U2<string, McpAgent.ShouldSendProtocolMessages.Connection<obj>> -> unit
-    /// <summary>
-    /// Dispatch to the appropriate persistence hook based on the mode
-    /// cached in the constructor. No prototype walks at call time.
-    /// </summary>
-    abstract _callStatePersistenceHook: obj with get, set
+    abstract onStateUpdate: _state: 'TState option * _source: StateChangeSource -> unit
     /// <summary>
     /// Called when the Agent receives an email via routeAgentEmail()
     /// Override this method to handle incoming emails
     /// </summary>
     /// <param name="payload">Internal wire format — plain data + RpcTarget bridge</param>
-    abstract _onEmail: payload: McpAgent.OnEmail.Payload -> JS.Promise<unit>
+    abstract _onEmail: payload: Agent.OnEmail.Payload -> JS.Promise<unit>
     /// <summary>
     /// Reply to an email
     /// </summary>
@@ -405,7 +312,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Pass explicit <c>null</c> to opt-out of signing (not recommended for secure routing).
     /// </param>
     /// <returns>void</returns>
-    abstract replyToEmail: email: McpAgent.ReplyToEmail.Email * options: McpAgent.ReplyToEmail.Options -> JS.Promise<unit>
+    abstract replyToEmail: email: Agent.ReplyToEmail.Email * options: Agent.ReplyToEmail.Options -> JS.Promise<unit>
     /// <summary>
     /// Send an outbound email via an Email Service binding.
     /// <br /><br />
@@ -426,13 +333,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options.headers">Additional custom headers</param>
     /// <param name="options.secret">Secret for signing agent routing headers</param>
     /// <returns>The messageId from Email Service</returns>
-    abstract sendEmail: options: McpAgent.SendEmail.Options -> JS.Promise<obj>
-    abstract _tryCatch: obj with get, set
-    /// <summary>
-    /// Wrap public subclass methods that may be entered outside Lifecycle, such as
-    /// native Durable Object RPC. Lifecycle hooks already have Agent context.
-    /// </summary>
-    abstract _autoWrapCustomMethods: obj with get, set
+    abstract sendEmail: options: Agent.SendEmail.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>
     abstract onError: connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> * error: obj -> JS.Promise<unit> option
     abstract onError: error: obj -> JS.Promise<unit> option
     /// <summary>
@@ -451,56 +352,52 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options.shouldRetry">Predicate called with the error and next attempt number. Return false to stop retrying immediately. Default: retry all errors.</param>
     /// <returns>The result of fn on success.</returns>
     /// <remarks>@throws The last error if all attempts fail or shouldRetry returns false.</remarks>
-    abstract retry<'T>: fn: (float -> JS.Promise<'T>) * ?options: McpAgent.Retry.Options -> JS.Promise<'T>
+    abstract retry<'T>: fn: (float -> JS.Promise<'T>) * ?options: Agent.Retry.Options -> JS.Promise<'T>
     /// <summary>
-    /// Queue a task to be executed in the future
+    /// Queue a task to run in the background.
+    /// <br /><br />
+    /// The item is durable: it runs from the Lifecycle alarm event loop after
+    /// this call returns, in push order, one at a time, with retries per
+    /// <c>options.retry</c>, and survives the Durable Object leaving memory.
     /// </summary>
     /// <param name="callback">Name of the method to call</param>
     /// <param name="payload">Payload to pass to the callback</param>
     /// <param name="options">Options for the queued task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
+    /// <param name="options.id">Stable id; a push with an existing id replaces that item</param>
     /// <returns>The ID of the queued task</returns>
-    abstract queue<'T>: callback: McpAgent.GetQueue.Result.Callback * payload: 'T * ?options: McpAgent.Queue.Options -> JS.Promise<string>
-    abstract _flushingQueue: obj with get, set
-    abstract _flushQueue: obj with get, set
+    abstract queue<'T>: callback: Agent.Queue.Callback * payload: 'T * ?options: Agent.Queue.Options -> JS.Promise<string>
     /// <summary>
     /// Dequeue a task by ID
     /// </summary>
     /// <param name="id">ID of the task to dequeue</param>
-    abstract dequeue: id: string -> unit
+    abstract dequeue: id: string -> JS.Promise<bool>
     /// <summary>
     /// Dequeue all tasks
     /// </summary>
-    abstract dequeueAll: unit -> unit
+    abstract dequeueAll: unit -> JS.Promise<float>
     /// <summary>
     /// Dequeue all tasks by callback
     /// </summary>
     /// <param name="callback">Name of the callback to dequeue</param>
-    abstract dequeueAllByCallback: callback: string -> unit
+    abstract dequeueAllByCallback: callback: string -> JS.Promise<float>
     /// <summary>
     /// Get a queued task by ID
     /// </summary>
     /// <param name="id">ID of the task to get</param>
     /// <returns>The task or undefined if not found</returns>
-    abstract getQueue: id: string -> McpAgent.GetQueue.Result option
+    abstract getQueue<'T>: id: string -> JS.Promise<Agent.GetQueue.Result.Item<'T> option>
     /// <summary>
-    /// Get all queues by key and value
+    /// Get all queued tasks whose payload has <c>key</c> equal to <c>value</c>
     /// </summary>
     /// <param name="key">Key to filter by</param>
     /// <param name="value">Value to filter by</param>
     /// <returns>Array of matching QueueItem objects</returns>
-    abstract getQueues: key: string * value: string -> McpAgent.GetQueue.Result[]
-    abstract _facetRunRowsForPrefix: obj with get, set
-    abstract _deleteFacetRunRowsForPrefix: obj with get, set
-    abstract _lifecycleRouteAddress: obj with get, set
-    abstract _routeLifecycleToRoot: obj with get, set
-    abstract _routeLifecycleToTarget: obj with get, set
+    abstract getQueues<'T>: key: string * value: string -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.GetQueue.Result.Item<'T>[]>
     /// <summary>
     /// Single native-RPC aperture for routed Lifecycle capabilities.
     /// </summary>
     abstract _cf_routeLifecycle: target: DurableObjectCapability.OnRoute.Context.Source option * envelope: Lifecycle.Route.Envelope -> JS.Promise<obj>
-    abstract _rootAlarmOwner: obj with get, set
-    abstract _cf_rootResolvesToSelf: obj with get, set
     /// <summary>
     /// Clean root-owned bookkeeping for a sub-tree of facets. This
     /// bulk-cancels schedules whose <c>owner_path</c> starts with the given
@@ -514,8 +411,8 @@ type Agent<'Env, 'State, 'Props> =
     abstract _cf_cleanupFacetPrefix: ownerPath: AgentPathStep[] -> JS.Promise<unit>
     /// <summary>
     /// Acquire a root-owned keepAlive ref on behalf of a descendant facet.
-    /// Facets share the root isolate but cannot set their own physical
-    /// alarm, so this lets facet work use the root alarm heartbeat.
+    /// Facets run in separate colocated isolates but cannot set their own
+    /// physical alarm, so this lets facet work use the root alarm heartbeat.
     /// </summary>
     /// <remarks>@internal</remarks>
     abstract _cf_acquireFacetKeepAlive: ownerPath: AgentPathStep[] -> JS.Promise<string>
@@ -558,7 +455,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: McpAgent.Schedule.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
+    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: Agent.Queue.Callback * ?payload: 'T * ?options: Scheduler.Set.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
     /// <summary>
     /// Schedule a task to run repeatedly at a fixed interval.
     /// <br /><br />
@@ -583,7 +480,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="options">Options for the scheduled task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract scheduleEvery<'T>: intervalSeconds: float * callback: McpAgent.GetQueue.Result.Callback * ?payload: 'T * ?options: McpAgent.ScheduleEvery.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
+    abstract scheduleEvery<'T>: intervalSeconds: float * callback: Agent.Queue.Callback * ?payload: 'T * ?options: Agent.ScheduleEvery.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
     /// <summary>
     /// Get a scheduled task by ID
     /// </summary>
@@ -687,36 +584,13 @@ type Agent<'Env, 'State, 'Props> =
     /// </code>
     /// </example>
     abstract keepAliveWhile<'T>: fn: (unit -> JS.Promise<'T>) -> JS.Promise<'T>
-    abstract _isTerminalFiberStatus: obj with get, set
-    abstract _notifyManagedFiberTerminal: obj with get, set
-    abstract _waitForManagedFiberTerminal: obj with get, set
-    abstract _normalizeFiberStatusFilter: obj with get, set
-    abstract _parseFiberJsonObject: obj with get, set
-    abstract _parseFiberSnapshot: obj with get, set
-    abstract _fiberErrorMessage: obj with get, set
-    abstract _stringifyFiberSnapshot: obj with get, set
-    abstract _fiberRecoveryErrorMessage: obj with get, set
-    abstract _applyManagedFiberRecoveryResult: obj with get, set
-    abstract _settleManagedFiberExecution: obj with get, set
-    abstract _parseFiberRecoverySnapshot: obj with get, set
-    abstract _fiberRecoveryPayload: obj with get, set
-    abstract _withFiberRecoveryTimeout: obj with get, set
-    abstract _recordFiberRecoveryFailure: obj with get, set
-    abstract _runFiberRecoveryHook: obj with get, set
-    abstract _fiberInspectionFromRow: obj with get, set
-    abstract _waitForManagedFiber: obj with get, set
-    abstract _readFiber: obj with get, set
-    abstract _readFiberByKey: obj with get, set
-    abstract _listFiberRows: obj with get, set
-    abstract _listFiberRowsByStatus: obj with get, set
-    abstract inspectFiber: fiberId: string -> JS.Promise<McpAgent.InspectFiber.Result.Item option>
-    abstract inspectFiberByKey: idempotencyKey: string -> JS.Promise<McpAgent.InspectFiber.Result.Item option>
-    abstract listFibers: ?options: McpAgent.ListFibers.Options -> JS.Promise<McpAgent.InspectFiber.Result.Item[]>
+    abstract inspectFiber: fiberId: string -> JS.Promise<Agent.InspectFiber.Result.Item option>
+    abstract inspectFiberByKey: idempotencyKey: string -> JS.Promise<Agent.InspectFiber.Result.Item option>
+    abstract listFibers: ?options: Agent.ListFibers.Options -> JS.Promise<Agent.InspectFiber.Result.Item[]>
     abstract cancelFiber: fiberId: string * ?reason: string -> JS.Promise<bool>
     abstract cancelFiberByKey: idempotencyKey: string * ?reason: string -> JS.Promise<bool>
     abstract resolveFiber: fiberId: string * result: FiberRecoveryResult -> JS.Promise<bool>
-    abstract deleteFibers: ?options: McpAgent.DeleteFibers.Options -> JS.Promise<float>
-    abstract _listTerminalFiberRowsForDelete: obj with get, set
+    abstract deleteFibers: ?options: Agent.DeleteFibers.Options -> JS.Promise<float>
     /// <summary>
     /// Run a function as a durable fiber. The fiber is registered in SQLite
     /// before execution, checkpointable during execution via <c>ctx.stash()</c>,
@@ -729,7 +603,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="name">Informational name for debugging and recovery filtering</param>
     /// <param name="fn">Async function to execute. Receives a FiberContext with stash/snapshot.</param>
     /// <returns>The return value of fn</returns>
-    abstract runFiber<'T>: name: string * fn: (McpAgent.RunFiber.Fn.Ctx -> JS.Promise<'T>) -> JS.Promise<'T>
+    abstract runFiber<'T>: name: string * fn: (Agent.RunFiber.Fn.Ctx -> JS.Promise<'T>) -> JS.Promise<'T>
     /// <summary>
     /// Internal framework entry point for fibers that need to compose their own
     /// recovery metadata with user checkpoint data while preserving the public
@@ -739,10 +613,8 @@ type Agent<'Env, 'State, 'Props> =
     /// <c>runFiber()</c> option until the durable execution API needs this generality.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _runFiberWithStashWrapper<'T>: name: string * fn: (McpAgent.RunFiber.Fn.Ctx -> JS.Promise<'T>) * options: McpAgent.RunFiberWithStashWrapper.Options -> JS.Promise<'T>
-    abstract startFiber: name: string * fn: (McpAgent.RunFiber.Fn.Ctx -> JS.Promise<unit>) * ?options: McpAgent.StartFiber.Options -> JS.Promise<McpAgent.StartFiber.Result.Item>
-    abstract _executeManagedFiber: obj with get, set
-    abstract _runFiberInternal: obj with get, set
+    abstract _runFiberWithStashWrapper<'T>: name: string * fn: (Agent.RunFiber.Fn.Ctx -> JS.Promise<'T>) * options: Agent.RunFiberWithStashWrapper.Options -> JS.Promise<'T>
+    abstract startFiber: name: string * fn: (Agent.RunFiber.Fn.Ctx -> JS.Promise<unit>) * ?options: Agent.StartFiber.Options -> JS.Promise<Agent.StartFiber.Result.Item>
     /// <summary>
     /// Checkpoint data for the currently executing fiber.
     /// Uses AsyncLocalStorage to identify the correct fiber,
@@ -752,6 +624,13 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     abstract stash: data: obj -> unit
     /// <summary>
+    /// Run <c>fn</c> inside the fiber stash context so <c>this.stash()</c> keeps working
+    /// for turns executing on the <c>tasks</c> capability exactly as it does inside
+    /// legacy <c>runFiber()</c> closures.
+    /// </summary>
+    /// <remarks>@internal</remarks>
+    abstract _withFiberStash<'T>: context: Agent.WithFiberStash.Context * fn: (unit -> JS.Promise<'T>) -> JS.Promise<'T>
+    /// <summary>
     /// Called when an interrupted fiber is detected after restart.
     /// Override to implement recovery (re-invoke work, notify clients, etc.).
     /// <br /><br />
@@ -760,25 +639,15 @@ type Agent<'Env, 'State, 'Props> =
     /// <br /><br />
     /// Default: logs a warning.
     /// </summary>
-    abstract onFiberRecovered: _ctx: McpAgent.OnFiberRecovered.Ctx -> JS.Promise<FiberRecoveryResult option>
+    abstract onFiberRecovered: _ctx: Agent.OnFiberRecovered.Ctx -> JS.Promise<FiberRecoveryResult option>
     /// <summary>
     /// Override point for subclasses to handle internal (framework) fibers
     /// before the user's recovery hook fires. Return <c>true</c> if handled.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _handleInternalFiberRecovery: _ctx: McpAgent.OnFiberRecovered.Ctx -> JS.Promise<bool>
-    /// <remarks>@internal Detect fibers left by a dead process (runFiber system).</remarks>
-    abstract _checkRunFibers: obj with get, set
+    abstract _handleInternalFiberRecovery: _ctx: Agent.OnFiberRecovered.Ctx -> JS.Promise<bool>
     /// <remarks>@internal</remarks>
     abstract _onAlarmHousekeeping: unit -> JS.Promise<unit>
-    abstract _isSameAgentPathPrefix: obj with get, set
-    /// <summary>
-    /// Root-side scan for durable fibers owned by descendant facets.
-    /// <c>cf_agents_facet_runs</c> is only an index; actual snapshots and
-    /// recovery hooks live in each facet's own <c>cf_agents_runs</c> table.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _checkFacetRunFibers: obj with get, set
     /// <summary>
     /// Dispatch a runFiber recovery check into the facet identified by
     /// <c>ownerPath</c>. Returns the number of remaining local <c>cf_agents_runs</c>
@@ -808,87 +677,50 @@ type Agent<'Env, 'State, 'Props> =
     /// <remarks>@internal</remarks>
     abstract _cf_destroyDescendantFacet: targetPath: AgentPathStep[] -> JS.Promise<unit>
     /// <summary>
-    /// Whether any runFiber recovery work is still outstanding: orphaned
-    /// <c>cf_agents_runs</c> rows left by a dead process (excluding fibers currently
-    /// executing in memory, which already hold a keepAlive ref) or managed
-    /// ledger fibers stuck in a non-terminal state with no live run row.
-    /// <br /><br />
-    /// Used by <c>_rearmAlarm</c> to arm a follow-up alarm so multi-pass
-    /// recovery (e.g. after a scan-deadline yield, or while retrying a throwing
-    /// recovery hook) resumes instead of starving.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _hasPendingFiberRecovery: obj with get, set
-    abstract _rearmAlarm: obj with get, set
-    /// <summary>
-    /// Contribute Agent-owned alarm work that has not yet been extracted into its
-    /// own capability. Scheduler contributes independently.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract getNextAlarm: unit -> JS.Promise<AlarmContribution>
-    /// <remarks>@internal Transitional alarm contribution for Agent subclasses.</remarks>
-    abstract _getExtensionAlarm: unit -> U2<float, JS.Promise<float option>> option
-    /// <summary>
     /// Lifecycle alarm callback; Agent housekeeping runs after user alarm work.
     /// </summary>
     abstract onAlarm: unit -> unit
     /// <summary>
-    /// Run Lifecycle's alarm phase inside Agent's memory-limit circuit breaker.
+    /// Drive one Agent-owned host job from the Lifecycle queue.
+    /// </summary>
+    /// <remarks>
+    /// @internal
+    /// Dispatched by Lifecycle's alarm event loop; extensions add
+    /// job fns through {@link _onHostJob}.
+    /// </remarks>
+    abstract onJob: context: DurableObjectCapability.OnJob.Context -> U3<string, JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>, DurableObjectCapability.OnJob.Result.Item> option
+    /// <remarks>
+    /// @internal
+    /// Dispatch one host job fn. Agent extensions (Think) override
+    /// this to add fns and delegate unknown ones to <c>super</c>.
+    /// </remarks>
+    abstract _onHostJob: fn: string * _context: DurableObjectCapability.OnJob.Context -> U3<string, JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>, DurableObjectCapability.OnJob.Result.Item> option
+    /// <summary>
+    /// Apply host policy after the alarm memory-limit breaker records a strike.
+    /// <br /><br />
+    /// New chat hosts override this hook directly. The sealed-only fallback keeps
+    /// <c>agents</c> 0.23 compatible with already-published chat packages whose peer
+    /// ranges accept it but which implement only the former
+    /// <c>_cf_sealMemoryLimitedRecovery</c> template method. Queue membership remains
+    /// job-row policy; this invokes terminalization only and can be removed once
+    /// old chat releases no longer accept the current <c>agents</c> range.
+    /// </summary>
+    /// <remarks>@internal</remarks>
+    abstract onAlarmMemoryLimit: context: DurableObjectCapability.OnMemoryLimit.Context -> JS.Promise<unit>
+    /// <summary>
+    /// Run Lifecycle's alarm event loop after the pending-destroy preamble.
+    /// <br /><br />
+    /// The alarm memory-limit circuit breaker (#1825) lives inside
+    /// <c>Lifecycle.alarm()</c>; capabilities and hosts opt into extra domain
+    /// policy via their <c>onMemoryLimit</c> / <c>onAlarmMemoryLimit</c> hooks and the
+    /// <c>recoveryLoop</c> schedule option.
     /// </summary>
     /// <remarks>
     /// @remarks
     /// Use <c>this.schedule()</c> for named Agent callbacks. Reusable durable
-    /// work belongs in a capability with <c>getNextAlarm()</c> and <c>onAlarm()</c>.
+    /// work belongs in a capability that pushes jobs and implements <c>onJob()</c>.
     /// </remarks>
     abstract alarm: unit -> JS.Promise<unit>
-    /// <summary>
-    /// Run the Lifecycle alarm phase inside Agent's OOM circuit breaker.
-    /// </summary>
-    abstract _cf_runAlarmBody: obj with get, set
-    /// <summary>
-    /// The schedule-callback names whose alarm rows drive a recovery loop that can
-    /// deterministically OOM. The base agent has none; chat hosts (<c>Think</c>,
-    /// <c>AIChatAgent</c>) override this to return their recovery continuation callbacks
-    /// so the circuit breaker can surgically back them off / purge them WITHOUT
-    /// disturbing unrelated scheduled tasks. See _cf_handleAlarmMemoryLimitReset.
-    /// </summary>
-    abstract _cf_recoveryAlarmCallbacks: unit -> string[]
-    /// <summary>
-    /// Hook for a host to terminalize ("seal") any in-flight recovery work as an
-    /// out-of-memory exhaustion when the alarm circuit breaker trips at its strike
-    /// budget (#1825). Runs at the outermost alarm frame (post-unwind, so writes
-    /// can land). Default: no-op. Chat hosts override to fire <c>onExhausted</c> + the
-    /// terminal banner and persist the sealed incident.
-    /// </summary>
-    abstract _cf_sealMemoryLimitedRecovery: unit -> JS.Promise<unit>
-    /// <summary>
-    /// Clear the durable memory-limit strike counter after a clean alarm so the
-    /// circuit breaker counts CONSECUTIVE resets rather than lifetime ones
-    /// (#1825). Reads first (cheap, usually cached) and only writes when a strike
-    /// is actually recorded, so the common no-strike path costs no write.
-    /// Best-effort: a stale strike only costs one extra tolerated spike later.
-    /// </summary>
-    abstract _cf_clearAlarmMemoryLimitStrikes: obj with get, set
-    /// <summary>
-    /// Alarm-boundary circuit breaker for Durable Object memory-limit resets
-    /// (#1825). The in-DO recovery budgets (<c>chatRecovery.maxOomRetries</c> /
-    /// <c>maxRecoveryWork</c>) only engage if their code runs AND its writes land; a
-    /// severe OOM can defeat both — thrown before the budget runs (boot hydration),
-    /// or its own small writes also OOM under memory pressure. In that case the
-    /// error reaches alarm and, unhandled, the platform auto-retries the
-    /// alarm indefinitely (re-running the doomed, billable turn each cycle).
-    /// <br /><br />
-    /// This runs at the OUTERMOST frame: the heavy turn has unwound and GC has
-    /// reclaimed its footprint, so the small writes here can land where mid-turn
-    /// ones (e.g. give-up's incident read) OOMed. A durable strike counter tolerates
-    /// a few resets (a transient spike may clear), backing off the recovery rows so
-    /// the retry is not a hot loop. At the <c>maxAlarmMemoryLimitStrikes</c> budget it
-    /// seals the recovery work and purges the looping rows so the loop — and the
-    /// bill — stops. Each step is best-effort: even these tiny writes can OOM, but
-    /// swallowing (not re-throwing) still halts the platform's auto-retry, and a
-    /// later wake re-arms legitimate schedules.
-    /// </summary>
-    abstract _cf_handleAlarmMemoryLimitReset: obj with get, set
     /// <summary>
     /// Intercept incoming HTTP/WS requests whose URL contains a
     /// <c>/sub/{child-class}/{child-name}</c> marker and forward them to
@@ -897,44 +729,21 @@ type Agent<'Env, 'State, 'Props> =
     /// Response, the framework resolves the facet and hands the
     /// request off.
     /// <br /><br />
-    /// After a WebSocket upgrade completes, subsequent frames route
-    /// directly to the child — the parent is only on the path for the
-    /// initial request.
+    /// The parent owns an upgraded WebSocket for its lifetime. Subsequent
+    /// frames wake the root parent, which forwards them to the child over
+    /// RPC and routes replies back to the native socket.
     /// </summary>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
-    abstract fetch: request: obj -> JS.Promise<obj>
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
     abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
-    abstract getConnection<'TState>: id: string -> McpAgent.ShouldSendProtocolMessages.Connection<'TState> option
-    abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<McpAgent.ShouldSendProtocolMessages.Connection<'TState>, obj, obj>
-    abstract _cf_activeSubAgentBridge: obj with get, set
-    /// <summary>
-    /// Route a virtual sub-agent connection operation through its live frame
-    /// bridge, or through the durable root Agent after that frame completes.
-    /// All operations share one per-connection queue. Facet broadcasts wait for
-    /// older queued operations; failures do not block later work.
-    /// </summary>
-    abstract _cf_routeSubAgentConnectionOperation: obj with get, set
-    /// <summary>
-    /// Route a facet broadcast after every older connection operation.
-    /// <br /><br />
-    /// This barrier is intentionally one-way: facet startup can broadcast before
-    /// a child connection has finished initializing its tags and protocol flags.
-    /// Making those later connection operations wait would let the next frame
-    /// observe stale root-owned metadata.
-    /// </summary>
-    abstract _cf_routeSubAgentBroadcast: obj with get, set
-    abstract _cf_reportSubAgentConnectionOperationFailure: obj with get, set
-    abstract _cf_broadcastToParentSubAgent: obj with get, set
+    abstract getConnection<'TState2>: id: string -> McpAgent.ShouldSendProtocolMessages.Connection<'TState2> option
+    abstract getConnections<'TState2>: ?tag: string -> Fable.Core.TS.Es.Iterable<McpAgent.ShouldSendProtocolMessages.Connection<'TState2>, obj, obj>
     abstract _cf_broadcastToSubAgent: ownerPath: AgentPathStep[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit>
-    abstract _cf_subAgentConnectionMetas: ownerPath: AgentPathStep[] -> JS.Promise<McpAgent.CfSubAgentConnectionMetas.Result.Item.Item[]>
+    abstract _cf_subAgentConnectionMetas: ownerPath: AgentPathStep[] -> JS.Promise<Agent.CfSubAgentConnectionMetas.Result.Item.Item[]>
     abstract _cf_sendToSubAgentConnection: connectionId: string * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract _cf_closeSubAgentConnection: connectionId: string * ?code: float * ?reason: string -> JS.Promise<unit>
+    abstract _cf_closeSubAgentConnectionsForPrefix: prefix: AgentPathStep[] * code: float * reason: string -> JS.Promise<unit>
     abstract _cf_setSubAgentConnectionState: connectionId: string * state: obj -> JS.Promise<obj>
-    abstract _cf_subAgentConnectionMetaForPath: obj with get, set
-    abstract _cf_subAgentTargetPath: obj with get, set
-    abstract _cf_subAgentPathFromOuterUri: obj with get, set
-    abstract _isSameAgentPath: obj with get, set
-    abstract _cf_connectionHasSubAgentTarget: obj with get, set
     abstract _cf_connectionTargetsSubAgent: connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> -> bool
     /// <summary>
     /// Returns true when the current request is addressed to a child facet of
@@ -944,21 +753,11 @@ type Agent<'Env, 'State, 'Props> =
     /// wrapper runs, so they need a request-level check to avoid sending their
     /// own protocol frames on sockets that are about to be forwarded to a child.
     /// </summary>
-    abstract _cf_requestTargetsSubAgent: request: obj -> bool
-    abstract _cf_forwardSubAgentWebSocketConnect: obj with get, set
-    abstract _cf_createSubAgentConnectionBridge: obj with get, set
-    abstract _cf_forwardSubAgentWebSocketMessage: obj with get, set
-    abstract _cf_forwardSubAgentWebSocketClose: obj with get, set
-    abstract _cf_resolveSubAgentConnection: obj with get, set
-    abstract _cf_handleSubAgentWebSocketConnect: bridge: SubAgentConnectionBridge * meta: McpAgent.CfSubAgentConnectionMetas.Result.Item.Item -> JS.Promise<unit>
-    abstract _cf_handleSubAgentWebSocketMessage: message: WSMessage * bridge: SubAgentConnectionBridge * meta: McpAgent.CfSubAgentConnectionMetas.Result.Item.Item * ?replyBridge: SubAgentConnectionBridge -> JS.Promise<unit>
-    abstract _cf_handleSubAgentWebSocketClose: code: float * reason: string * wasClean: bool * bridge: SubAgentConnectionBridge * meta: McpAgent.CfSubAgentConnectionMetas.Result.Item.Item -> JS.Promise<unit>
-    abstract _cf_runWithSubAgentBridge: obj with get, set
-    abstract _cf_createSubAgentBridgeConnection: obj with get, set
-    abstract _cf_storeVirtualSubAgentConnection: obj with get, set
+    abstract _cf_requestTargetsSubAgent: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> bool
+    abstract _cf_handleSubAgentWebSocketConnect: bridge: DynamicAgentConnectionBridge * meta: Agent.CfSubAgentConnectionMetas.Result.Item.Item -> JS.Promise<unit>
+    abstract _cf_handleSubAgentWebSocketMessage: message: WSMessage * bridge: DynamicAgentConnectionBridge * meta: Agent.CfSubAgentConnectionMetas.Result.Item.Item * ?replyBridge: DynamicAgentConnectionBridge -> JS.Promise<unit>
+    abstract _cf_handleSubAgentWebSocketClose: code: float * reason: string * wasClean: bool * bridge: DynamicAgentConnectionBridge * meta: Agent.CfSubAgentConnectionMetas.Result.Item.Item -> JS.Promise<unit>
     abstract _cf_hydrateSubAgentConnectionsFromRoot: unit -> JS.Promise<unit>
-    abstract _cf_getRawConnectionState: obj with get, set
-    abstract _cf_getForwardedSubAgentState: obj with get, set
     /// <summary>
     /// Parent-side middleware hook. Fires before a request is
     /// forwarded into a facet sub-agent. Mirrors <c>onBeforeConnect</c> /
@@ -994,7 +793,7 @@ type Agent<'Env, 'State, 'Props> =
     /// class Inbox extends Agent {
     ///   override async onBeforeSubAgent(req, { className, name }) {
     ///     // Strict registry gate
-    ///     if (!this.hasSubAgent(className, name)) {
+    ///     if (!this.dynamicAgents.has(className, name)) {
     ///       return new Response("Not found", { status: 404 });
     ///     }
     ///   }
@@ -1003,13 +802,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract onBeforeSubAgent: _request: obj * _child: McpAgent.OnBeforeSubAgent.Child -> JS.Promise<obj option>
-    /// <summary>
-    /// Resolve the facet Fetcher for the match and forward the
-    /// request to it with <c>/sub/{class}/{name}</c> stripped.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _cf_forwardToFacet: obj with get, set
+    abstract onBeforeSubAgent: _request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * _child: Agent.OnBeforeSubAgent.Child -> JS.Promise<U2<FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, FSharp.CloudEdge.Runtime.Workers.Response> option>
     /// <summary>
     /// Bridge method used by <c>getSubAgentByName</c>. Resolves the facet
     /// on each call (idempotent via <c>subAgent</c>) and dispatches one
@@ -1024,8 +817,7 @@ type Agent<'Env, 'State, 'Props> =
     /// delegates to the next facet using that facet's own <c>ctx.facets</c>.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract _cf_invokeSubAgentPath: path: McpAgent.CfInvokeSubAgentPath.Path.Item[] * ``method``: string * args: obj[] -> JS.Promise<obj>
-    abstract _cf_invokeStubMethod: obj with get, set
+    abstract _cf_invokeSubAgentPath: path: Agent.CfInvokeSubAgentPath.Path.Item[] * ``method``: string * args: obj[] -> JS.Promise<obj>
     /// <summary>
     /// Initialize this agent as a facet in a single RPC.
     /// <br /><br />
@@ -1049,7 +841,7 @@ type Agent<'Env, 'State, 'Props> =
     /// facets can use path-scoped routing ids while preserving <c>this.name</c>.
     /// </summary>
     /// <remarks>@internal Called by {@link subAgent}.</remarks>
-    abstract _cf_initAsFacet: name: string * ?parentPath: McpAgent.CfInitAsFacet.ParentPath.Item[] * ?identityName: string -> JS.Promise<unit>
+    abstract _cf_initAsFacet: name: string * ?parentPath: Agent.CfInitAsFacet.ParentPath.Item[] * ?identityName: string -> JS.Promise<unit>
     abstract name: string
     /// <summary>
     /// Ancestor chain for this agent, root-first. Empty for top-level
@@ -1131,11 +923,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract parentAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.HasAgentToolRun.ClsConstructor<'T> -> JS.Promise<obj>
-    abstract _cf_getTopLevelNamespaceByClassName: obj with get, set
-    abstract _cf_asDurableObjectNamespace: obj with get, set
-    abstract _cf_parentAgentFacetProxy: obj with get, set
-    abstract _cf_isWebSocketUpgradeRequest: obj with get, set
+    abstract parentAgent<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> -> JS.Promise<obj>
     /// <summary>
     /// Get or create a named sub-agent — a child Durable Object (facet)
     /// with its own isolated SQLite storage running on the same machine.
@@ -1157,13 +945,14 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract subAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.HasAgentToolRun.ClsConstructor<'T> * name: string -> JS.Promise<obj>
+    /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.get()} instead.</remarks>
+    abstract subAgent<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> * name: string -> JS.Promise<obj>
     /// <summary>
     /// Maximum number of non-terminal agent-tool runs this parent may own at once.
     /// </summary>
     abstract maxConcurrentAgentTools: float with get, set
-    abstract onAgentToolStart: _run: McpAgent.OnAgentToolStart.Run -> JS.Promise<unit>
-    abstract onAgentToolFinish: _run: McpAgent.OnAgentToolStart.Run * _result: McpAgent.OnAgentToolFinish.Result -> JS.Promise<unit>
+    abstract onAgentToolStart: _run: Agent.OnAgentToolStart.Run -> JS.Promise<unit>
+    abstract onAgentToolFinish: _run: Agent.OnAgentToolStart.Run * _result: Agent.OnAgentToolFinish.Result -> JS.Promise<unit>
     /// <summary>
     /// Parent hook fired (best-effort) whenever a child agent-tool run emits a
     /// <c>reportProgress</c> signal that is forwarded through this parent's tail. Use it
@@ -1171,7 +960,7 @@ type Agent<'Env, 'State, 'Props> =
     /// detached runs; it is NOT durable — after eviction a detached run's latest
     /// snapshot is read from <c>inspectAgentToolRun().progress</c> on reconcile instead.
     /// </summary>
-    abstract onProgress: _run: McpAgent.OnAgentToolStart.Run * _progress: McpAgent.OnProgress.Progress -> JS.Promise<unit>
+    abstract onProgress: _run: Agent.OnAgentToolStart.Run * _progress: Agent.OnProgress.Progress -> JS.Promise<unit>
     /// <summary>
     /// Emit an ephemeral progress signal from a sub-agent that is currently running
     /// as an agent tool. Rides the child's active turn stream as a transient
@@ -1181,9 +970,9 @@ type Agent<'Env, 'State, 'Props> =
     /// streaming turn — overridden by chat hosts (<c>@cloudflare/think</c>,
     /// <c>AIChatAgent</c>). See <c>design/rfc-detached-agent-tools.md</c>.
     /// </summary>
-    abstract reportProgress<'T>: _progress: McpAgent.ReportProgress.Progress<'T> * ?_options: McpAgent.ReportProgress.Options -> JS.Promise<unit>
-    abstract runAgentTool<'Input>: cls: AgentConstructor * options: McpAgent.RunAgentTool.Options<'Input> -> JS.Promise<McpAgent.RunAgentTool.Result.Item>
-    abstract runAgentTool<'Input, 'Output>: cls: AgentConstructor * options: McpAgent.RunAgentTool.Options2<'Input> -> JS.Promise<McpAgent.RunAgentTool.Result.Item2<'Output>>
+    abstract reportProgress<'T>: _progress: Agent.ReportProgress.Progress<'T> * ?_options: Agent.ReportProgress.Options -> JS.Promise<unit>
+    abstract runAgentTool<'Input>: cls: AgentConstructor * options: Agent.RunAgentTool.Options<'Input> -> JS.Promise<Agent.RunAgentTool.Result.Item>
+    abstract runAgentTool<'Input, 'Output>: cls: AgentConstructor * options: Agent.RunAgentTool.Options2<'Input> -> JS.Promise<Agent.RunAgentTool.Result.Item2<'Output>>
     /// <summary>
     /// Cancel an agent-tool run by id. Idempotent: cancelling an already-terminal
     /// run is a no-op. Detached runs deliver through the guarded ledger so a wired
@@ -1191,52 +980,6 @@ type Agent<'Env, 'State, 'Props> =
     /// observation to the awaiting/recovery path, avoiding duplicate finish hooks.
     /// </summary>
     abstract cancelAgentTool: runId: string * ?reason: obj -> JS.Promise<unit>
-    /// <summary>
-    /// Parse + validate the <c>detached</c> option. Returns <c>null</c> for a non-detached
-    /// run, or the normalized config (with the validated <c>onFinish</c> method name)
-    /// for a detached one. Throws if <c>onFinish</c> does not name a method on this
-    /// agent — closures cannot survive Durable Object eviction, so the durable
-    /// hook is referenced by method name (the same contract as <c>schedule</c>).
-    /// </summary>
-    abstract _parseDetachedOption: obj with get, set
-    abstract _isAgentToolRowHardTerminal: obj with get, set
-    abstract _hasOutstandingDetachedRuns: obj with get, set
-    /// <summary>
-    /// Detached runs still holding a concurrency slot (non-terminal).
-    /// </summary>
-    abstract _liveDetachedRunCount: obj with get, set
-    /// <summary>
-    /// Edge-triggered warning when live detached runs cross
-    /// <c>DETACHED_LIVE_COUNT_WARN_THRESHOLD</c>. Fires once on the up-crossing and
-    /// re-arms only after the count falls back below the threshold, so a parent
-    /// accumulating long-lived background runs surfaces a signal without spamming.
-    /// </summary>
-    abstract _maybeWarnDetachedLiveCount: obj with get, set
-    /// <summary>
-    /// Warm fast path for a detached run: tail the child to terminal (so the
-    /// parent re-broadcasts its live stream to clients) and deliver the completion
-    /// with low latency while the isolate stays alive. Best-effort — the durable
-    /// <c>_cfDetachedReconcileTick</c> backbone is the guarantee; anything this misses
-    /// (eviction, a child that has not yet reached terminal) the backbone collects.
-    /// </summary>
-    abstract _detachedFastPath: obj with get, set
-    /// <summary>
-    /// Single delivery funnel for a detached terminal. Both the warm fast path and
-    /// the durable backbone route through here, with INDEPENDENT ledger slots for
-    /// <c>finish</c> (the real terminal) vs <c>give_up</c> (budget exhausted). Each slot is
-    /// delivered at-least-once via a claim + lease:
-    /// <br /><br />
-    /// - Concurrent double-fire is prevented by the guarded CAS claim (RETURNING
-    ///   yields the row only to the winner).
-    /// - A crash after the side effect but before <c>*_delivered_at</c> is written lets
-    ///   the lease expire so a later reconcile re-delivers — hence handlers must be
-    ///   idempotent.
-    /// - Two slots, not one, because <c>interrupted</c> is SOFT: a give-up followed by a
-    ///   real completion is legitimate, and a single shared "delivered" bit would
-    ///   dedupe the child's real late result away (the #1752 production incident).
-    /// </summary>
-    abstract _deliverDetachedTerminal: obj with get, set
-    abstract _safeRunOnError: obj with get, set
     /// <summary>
     /// Run a detached terminal delivery (the <c>onAgentToolFinish</c> + per-run
     /// <c>onFinish</c> callbacks) in an appropriate execution context. The base <c>Agent</c>
@@ -1256,13 +999,6 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     abstract _runDetachedDelivery: invoke: (unit -> JS.Promise<unit>) * ?_options: Agent.RunDetachedDelivery.Options -> JS.Promise<unit>
     /// <summary>
-    /// Arm the self-scheduling detached reconcile backbone. Existing schedules are
-    /// reused for recovery/startup calls, but a fresh detached dispatch resets the
-    /// pending cadence to the fast end so new work is noticed promptly.
-    /// </summary>
-    abstract _armDetachedBackbone: obj with get, set
-    abstract _armDetachedBackboneInner: obj with get, set
-    /// <summary>
     /// Durable backbone for detached runs. Runs on a self-rescheduling alarm:
     /// collects any detached run that has reached terminal but was not yet
     /// delivered (e.g. the parent was evicted before the fast path landed), gives
@@ -1271,35 +1007,9 @@ type Agent<'Env, 'State, 'Props> =
     /// itself once everything has settled (zero steady-state cost).
     /// </summary>
     abstract _cfDetachedReconcileTick: ?payload: Agent.CfDetachedReconcileTick.Payload -> JS.Promise<unit>
-    abstract hasAgentToolRun<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: McpAgent.HasAgentToolRun.ClsConstructor<'T> * runId: string -> bool
+    abstract hasAgentToolRun<'T when 'T :> Agent<obj, obj, obj>> : cls: Agent.HasAgentToolRun.ClsConstructor<'T> * runId: string -> bool
     abstract hasAgentToolRun: agentType: string * runId: string -> bool
     abstract clearAgentToolRuns: ?options: Agent.ClearAgentToolRuns.Options -> JS.Promise<unit>
-    abstract _isAgentToolTerminal: obj with get, set
-    abstract _activeAgentToolRunCount: obj with get, set
-    abstract _defaultAgentToolPreview: obj with get, set
-    abstract _readAgentToolRun: obj with get, set
-    /// <summary>
-    /// Reconstruct the typed interrupted cause (<c>reason</c> / <c>childStillRunning</c>,
-    /// #1630 follow-up) from a stored row so a row→result/event rebuild — e.g. a
-    /// reconnect replay — carries the same fields a live client saw. Only
-    /// <c>interrupted</c> rows store a cause; everything else yields <c>{}</c> (the columns
-    /// are cleared whenever a row settles to a hard terminal).
-    /// </summary>
-    abstract _agentToolInterruptedExtrasFromRow: obj with get, set
-    abstract _resultFromAgentToolRow: obj with get, set
-    abstract _agentToolRunInfoFromRow: obj with get, set
-    abstract _terminalResultFromInspection: obj with get, set
-    abstract _finishAgentToolRun: obj with get, set
-    abstract _runDeferredAgentToolFinishHooks: obj with get, set
-    abstract _updateAgentToolTerminal: obj with get, set
-    abstract _markAgentToolRunning: obj with get, set
-    abstract _parseAgentToolJson: obj with get, set
-    abstract _stringifyAgentToolOutput: obj with get, set
-    abstract _broadcastAgentToolEvent: obj with get, set
-    abstract _broadcastAgentToolChunks: obj with get, set
-    abstract _broadcastAgentToolStoredChunks: obj with get, set
-    abstract _broadcastAgentToolStoredChunksFromAdapter: obj with get, set
-    abstract _forwardAgentToolStream: obj with get, set
     /// <summary>
     /// Hook invoked by <c>_forwardAgentToolStream</c> after a child produces output that
     /// was forwarded to the parent's connections. Forwarding a sub-agent's stream
@@ -1322,99 +1032,13 @@ type Agent<'Env, 'State, 'Props> =
     /// </summary>
     abstract _onAgentToolStreamProgress: unit -> JS.Promise<unit>
     /// <summary>
-    /// Best-effort observation of a forwarded child chunk: if it is a reserved
-    /// <c>data-agent-progress</c> frame, refresh the cached liveness timestamp on the
-    /// run row (a hint for a still-warm parent) and fire the public <c>onProgress</c>
-    /// hook. Never throws into the forward loop — the child's own persisted
-    /// snapshot (read via <c>inspectAgentToolRun</c>) remains authoritative for the
-    /// resetting no-progress budget after eviction.
-    /// </summary>
-    abstract _observeForwardedProgress: obj with get, set
-    /// <summary>
-    /// Deliver a milestone notification IF this run opted into it via
-    /// <c>detached: { onMilestones }</c> and the milestone name is in that set. Routes
-    /// to the overridable <c>_deliverDetachedMilestone</c> seam (a no-op on the base
-    /// <c>Agent</c>; chat hosts inject an idempotent synthetic chat message).
-    /// </summary>
-    abstract _maybeDeliverDetachedMilestone: obj with get, set
-    /// <summary>
     /// Overridable seam for the <c>detached: { onMilestones }</c> convenience. The base
     /// <c>Agent</c> has no chat surface, so this is a no-op; chat hosts
     /// (<c>@cloudflare/think</c>, <c>AIChatAgent</c>) override it to submit an idempotent
     /// synthetic message keyed on <c>(runId, milestone.name)</c>. Called from both the
     /// warm tail and the backbone reconcile, so it MUST be idempotent.
     /// </summary>
-    abstract _deliverDetachedMilestone: _run: McpAgent.OnAgentToolStart.Run * _milestone: Agent.DeliverDetachedMilestone.Milestone * _mode: Agent.DeliverDetachedMilestone.Mode -> JS.Promise<unit>
-    abstract _broadcastAgentToolTerminal: obj with get, set
-    abstract _asAgentToolChildAdapter: obj with get, set
-    abstract _agentToolClassByName: obj with get, set
-    abstract _replayAndInterruptAgentToolRun: obj with get, set
-    /// <summary>
-    /// Human-readable prose for an <c>interrupted</c> seal. Kept in sync with
-    /// AgentToolInterruptedReason; callers branch on the typed <c>reason</c>
-    /// field, not this string.
-    /// </summary>
-    abstract _interruptedMessageForReason: obj with get, set
-    /// <summary>
-    /// Tear down a child agent-tool run the parent has genuinely given up on
-    /// (#1630 follow-up). Teardown is scoped to <c>window-exceeded</c> ONLY — the hard
-    /// ceiling, where the child has had its full recovery window and is therefore
-    /// truly exhausted, so cancelling it reclaims its fiber / keep-alive. Every
-    /// other give-up is deliberately left repairable: <c>no-progress</c> seals stay
-    /// SOFT (<c>interrupted</c>, <c>childStillRunning: true</c>) so a re-issue can still
-    /// re-attach and collect the child if it self-heals — tearing those down would
-    /// defeat the repair-on-re-issue path and convert a retryable interrupt into a
-    /// non-retryable <c>aborted</c>. Reasons where the child's state is unknown
-    /// (<c>inspect-*</c>, <c>recovery-deadline</c>, <c>not-tailable</c>) are also left alone.
-    /// Returns whether the child was torn down (so the caller reports
-    /// <c>childStillRunning: false</c>).
-    /// </summary>
-    abstract _teardownGivenUpAgentToolChild: obj with get, set
-    /// <summary>
-    /// Re-attach to a still-running child agent-tool run and tail it to its real
-    /// terminal result, instead of abandoning it as <c>interrupted</c> (#1630). The
-    /// child is a separate facet with its own <c>chatRecovery</c>, so resolving it via
-    /// the adapter wakes it and lets it self-complete the interrupted turn; we tail
-    /// its live stream (forwarding chunks to the parent's connections) until it
-    /// reaches terminal, then inspect for the collected result.
-    /// <br /><br />
-    /// The wait is PROGRESS-KEYED, not a flat wall clock (which previously abandoned
-    /// healthy, still-advancing children whose recovery simply outran a fixed
-    /// budget). <c>noProgressTimeoutMs</c> bounds how long the parent waits with NO
-    /// forward progress; it is reset on every forwarded chunk. As long as the child
-    /// keeps streaming it is followed through to terminal. The loop also RE-ARMS
-    /// across stream-closes (a child re-evicted mid-recovery, or a tail that ends
-    /// before terminal) as long as the prior attempt made progress, so a child that
-    /// dies and recovers again during deploy churn is still collected. A genuinely
-    /// silent/hung child can never block recovery forever: it seals <c>interrupted</c>
-    /// after one <c>noProgressTimeoutMs</c> window. <c>maxWindowMs</c> is an OPTIONAL hard
-    /// wall-clock ceiling (default <c>Infinity</c> — uncapped, mirroring #1672's
-    /// <c>maxRecoveryWork</c>); set it finite to also bound a child that keeps
-    /// progressing, which seals <c>window-exceeded</c> and tears the child down.
-    /// <br /><br />
-    /// Returns the terminal <c>result</c> (and <c>completedAt</c>) when the child reaches a
-    /// terminal status, plus the advanced broadcast <c>sequence</c>. Returns
-    /// <c>{ result: undefined }</c> when there is no <c>tailAgentToolRun</c> adapter, the
-    /// child makes no progress within a full no-progress window, or the ceiling is
-    /// reached while the child is still non-terminal — the caller then seals
-    /// <c>interrupted</c>.
-    /// </summary>
-    abstract _reattachAgentToolRunToTerminal: obj with get, set
-    abstract _replayAgentToolRuns: obj with get, set
-    abstract _reconcileAgentToolRuns: obj with get, set
-    abstract _inspectAgentToolRunForRecovery: obj with get, set
-    abstract _scheduleAgentToolRunRecovery: obj with get, set
-    abstract _agentToolRunRecoveryRunIds: obj with get, set
-    abstract _getAgentToolChunksForRecovery: obj with get, set
-    /// <summary>
-    /// Shared facet resolution — takes a CamelCase class name string
-    /// (matching <c>ctx.exports</c>) rather than a class reference. Both
-    /// <c>subAgent(cls, name)</c> and <c>_cf_invokeSubAgent(className, ...)</c>
-    /// funnel through here so registry bookkeeping and the
-    /// <c>_cf_initAsFacet</c> handshake are consistent.
-    /// </summary>
-    /// <remarks>@internal</remarks>
-    abstract _cf_resolveSubAgent: obj with get, set
+    abstract _deliverDetachedMilestone: _run: Agent.OnAgentToolStart.Run * _milestone: Agent.DeliverDetachedMilestone.Milestone * _mode: Agent.RunAgentTool.Options.Detached.OnMilestones.Mode -> JS.Promise<unit>
     /// <summary>
     /// Forcefully abort a running sub-agent. The child stops executing
     /// immediately and will be restarted on next subAgent call.
@@ -1425,6 +1049,7 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="cls">The Agent subclass used when creating the child</param>
     /// <param name="name">Name of the child to abort</param>
     /// <param name="reason">Error thrown to pending/future RPC callers</param>
+    /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.abort()} instead.</remarks>
     abstract abortSubAgent: cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.AgentConstructor * name: string * ?reason: obj -> unit
     /// <summary>
     /// Delete a sub-agent: abort it if running, then permanently wipe its
@@ -1433,19 +1058,8 @@ type Agent<'Env, 'State, 'Props> =
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     /// <param name="cls">The Agent subclass used when creating the child</param>
     /// <param name="name">Name of the child to delete</param>
+    /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.delete()} instead.</remarks>
     abstract deleteSubAgent: cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.AgentConstructor * name: string -> JS.Promise<unit>
-    /// <remarks>@internal</remarks>
-    abstract _subAgentRegistryReady: obj with get, set
-    abstract _addColumnIfNotExists: obj with get, set
-    /// <remarks>@internal</remarks>
-    abstract _ensureSubAgentRegistry: obj with get, set
-    /// <remarks>@internal</remarks>
-    abstract _recordSubAgent: obj with get, set
-    /// <remarks>@internal</remarks>
-    abstract _subAgentRegistryRow: obj with get, set
-    abstract _cf_subAgentIdentity: obj with get, set
-    /// <remarks>@internal</remarks>
-    abstract _forgetSubAgent: obj with get, set
     /// <summary>
     /// Whether this agent has previously spawned (and not deleted) a
     /// sub-agent of the given class and name. Backed by an
@@ -1467,7 +1081,8 @@ type Agent<'Env, 'State, 'Props> =
     /// <code>
     /// </code>
     /// </example>
-    abstract hasSubAgent<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.HasAgentToolRun.ClsConstructor<'T> * name: string -> bool
+    /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.has()} instead.</remarks>
+    abstract hasSubAgent<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> * name: string -> bool
     /// <summary>
     /// Whether this agent has previously spawned (and not deleted) a
     /// sub-agent of the given class and name. Backed by an
@@ -1496,7 +1111,8 @@ type Agent<'Env, 'State, 'Props> =
     /// deleteSubAgent.
     /// </summary>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
-    abstract listSubAgents<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.HasAgentToolRun.ClsConstructor<'T> -> Agent.ListSubAgents.Result.Item[]
+    /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.list()} instead.</remarks>
+    abstract listSubAgents<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> -> Agent.ListSubAgents.Result.Item[]
     /// <summary>
     /// List known sub-agents, optionally filtered by class. Reflects
     /// the registry rows written by subAgent and removed by
@@ -1541,19 +1157,6 @@ type Agent<'Env, 'State, 'Props> =
     /// callers don't need to swallow an abort error.
     /// </remarks>
     abstract _cf_scheduleDestroy: unit -> JS.Promise<unit>
-    /// <summary>
-    /// Whether a (deferred or interrupted) destroy is pending. Reads the
-    /// durable marker directly — the in-memory <c>_isFacet</c> flag may not be
-    /// hydrated yet at the call sites, but facets never write the marker.
-    /// </summary>
-    abstract _pendingDestroyAlarm: obj with get, set
-    abstract _hasPendingDestroy: obj with get, set
-    /// <summary>
-    /// Check if a method is callable
-    /// </summary>
-    /// <param name="method">The method name to check</param>
-    /// <returns>True if the method is marked as callable</returns>
-    abstract _isCallable: obj with get, set
     /// <summary>
     /// Get all methods marked as callable on this Agent
     /// </summary>
@@ -1732,20 +1335,12 @@ type Agent<'Env, 'State, 'Props> =
     /// </example>
     abstract restartWorkflow: workflowId: string * ?options: Agent.RestartWorkflow.Options -> JS.Promise<unit>
     /// <summary>
-    /// Find a workflow binding by its name.
-    /// </summary>
-    abstract _findWorkflowBindingByName: obj with get, set
-    /// <summary>
-    /// Get all workflow binding names from the environment.
-    /// </summary>
-    abstract _getWorkflowBindingNames: obj with get, set
-    /// <summary>
     /// Get the status of a workflow and update the tracking record.
     /// </summary>
     /// <param name="workflowName">- Name of the workflow binding in env (e.g., 'MY_WORKFLOW')</param>
     /// <param name="workflowId">- ID of the workflow instance</param>
     /// <returns>The workflow status</returns>
-    abstract getWorkflowStatus: workflowName: obj * workflowId: string -> JS.Promise<obj>
+    abstract getWorkflowStatus: workflowName: obj * workflowId: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.InstanceStatus>
     /// <summary>
     /// Get a tracked workflow by ID.
     /// </summary>
@@ -1776,20 +1371,6 @@ type Agent<'Env, 'State, 'Props> =
     /// </code>
     /// </example>
     abstract getWorkflows: ?criteria: Agent.GetWorkflows.Criteria -> Agent.GetWorkflows.Result
-    /// <summary>
-    /// Count workflows matching criteria (for pagination total).
-    /// </summary>
-    abstract _countWorkflows: obj with get, set
-    /// <summary>
-    /// Encode a cursor from workflow info for pagination.
-    /// Stores createdAt as Unix timestamp in seconds (matching DB storage).
-    /// </summary>
-    abstract _encodeCursor: obj with get, set
-    /// <summary>
-    /// Decode a pagination cursor.
-    /// Returns createdAt as Unix timestamp in seconds (matching DB storage).
-    /// </summary>
-    abstract _decodeCursor: obj with get, set
     /// <summary>
     /// Delete a workflow tracking record.
     /// </summary>
@@ -1840,17 +1421,6 @@ type Agent<'Env, 'State, 'Props> =
     /// </example>
     abstract migrateWorkflowBinding: oldName: string * newName: string -> float
     /// <summary>
-    /// Update workflow tracking record from InstanceStatus
-    /// </summary>
-    abstract _updateWorkflowTracking: obj with get, set
-    /// <summary>
-    /// Convert a database row to WorkflowInfo
-    /// </summary>
-    abstract _rowToWorkflowInfo: obj with get, set
-    abstract _workflowOrigin: obj with get, set
-    abstract _findAgentBindingNameForClass: obj with get, set
-    abstract _findBindingNameForNamespace: obj with get, set
-    /// <summary>
     /// Handle a callback from a workflow.
     /// Invoked via the internal <c>_workflow_handleCallback</c> RPC whenever an
     /// AgentWorkflow reports progress, completion, an error, or a custom
@@ -1858,7 +1428,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Override this to handle all callback types in one place.
     /// </summary>
     /// <param name="callback">- The callback payload</param>
-    abstract onWorkflowCallback: callback: Agent.OnWorkflowCallback.Callback<Agent.OnWorkflowCallback.Callback.Item> -> JS.Promise<unit>
+    abstract onWorkflowCallback: callback: Agent.OnWorkflowCallback.Callback<DefaultProgress> -> JS.Promise<unit>
     /// <summary>
     /// Called when a workflow reports progress.
     /// Override to handle progress updates.
@@ -1895,7 +1465,7 @@ type Agent<'Env, 'State, 'Props> =
     /// Handle a workflow callback via RPC.
     /// </summary>
     /// <remarks>@internal - Called by AgentWorkflow, do not call directly</remarks>
-    abstract _workflow_handleCallback: callback: Agent.OnWorkflowCallback.Callback<Agent.OnWorkflowCallback.Callback.Item> -> JS.Promise<unit>
+    abstract _workflow_handleCallback: callback: Agent.OnWorkflowCallback.Callback<DefaultProgress> -> JS.Promise<unit>
     /// <summary>
     /// Broadcast a message to all connected clients via RPC.
     /// </summary>
@@ -1926,7 +1496,7 @@ type Agent<'Env, 'State, 'Props> =
     /// await this.addMcpServer("github", url, callbackHost, agentsPrefix, options); // legacy
     /// </code>
     /// </example>
-    abstract addMcpServer: serverName: string * binding: obj * ?options: Agent.AddMcpServer.Options -> JS.Promise<Agent.AddMcpServer.Result.Item>
+    abstract addMcpServer<'T when 'T :> McpAgent<obj, obj, JS.Record<string, obj>>> : serverName: string * binding: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<'T> * ?options: Agent.AddMcpServer.Options -> JS.Promise<Agent.AddMcpServer.Result.Item>
     /// <summary>
     /// Connect to a new MCP Server via RPC (Durable Object binding)
     /// <br /><br />
@@ -1948,8 +1518,6 @@ type Agent<'Env, 'State, 'Props> =
     /// </code>
     /// </example>
     abstract addMcpServer: serverName: string * url: string * ?callbackHostOrOptions: U2<string, Agent.AddMcpServer.CallbackHostOrOptions> * ?agentsPrefix: string * ?options: Agent.AddMcpServer.Options2 -> JS.Promise<Agent.AddMcpServer.Result.Item2>
-    abstract _redeemableAuthUrl: obj with get, set
-    abstract _isAbsoluteHttpUrl: obj with get, set
     abstract removeMcpServer: id: string -> JS.Promise<unit>
     abstract getMcpServers: unit -> Agent.GetMcpServers.Result
     /// <summary>
@@ -1976,18 +1544,17 @@ type Agent<'Env, 'State, 'Props> =
     /// <param name="callbackUrl">The OAuth callback URL for the authorization flow</param>
     /// <returns>An {@link AgentMcpOAuthProvider} instance used by {@link addMcpServer}</returns>
     abstract createMcpOAuthProvider: callbackUrl: string -> AgentMcpOAuthProvider
-    abstract broadcastMcpServers: obj with get, set
     abstract __DURABLE_OBJECT_BRAND: unit
-    abstract ctx: obj with get, set
+    abstract ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> with get, set
     abstract env: 'Env with get, set
-    abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<obj, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
-    abstract webSocketClose: Func<obj, float, string, bool, JS.Promise<unit> option> option with get, set
-    abstract webSocketError: Func<obj, obj, JS.Promise<unit> option> option with get, set
+    abstract connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option) option with get, set
+    abstract webSocketMessage: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketClose: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
+    abstract webSocketError: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, obj, JS.Promise<unit> option> option with get, set
 
 type AgentConstructor =
     [<EmitConstructor>]
-    abstract Create: ctx: obj * env: unit -> Agent<obj, obj, JS.Record<string, obj>>
+    abstract Create: ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> * env: unit -> Agent<obj, obj, obj>
 
 type AgentMcpOAuthProvider =
     abstract authUrl: string option with get, set
@@ -1995,14 +1562,14 @@ type AgentMcpOAuthProvider =
     abstract serverId: string option with get, set
     abstract checkState: state: string -> JS.Promise<AgentMcpOAuthProvider.CheckState.Result.Item>
     abstract consumeState: state: string -> JS.Promise<unit>
-    abstract runWithCodeVerifierState: Func<string, (unit -> JS.Promise<obj>), JS.Promise<obj>> option with get, set
+    abstract runWithCodeVerifierState: RunWithCodeVerifierState option with get, set
     abstract deleteCodeVerifier: unit -> JS.Promise<unit>
     /// <summary>
     /// The URL to redirect the user agent to after authorization.
     /// Return <c>undefined</c> for non-interactive flows that don't require user interaction
     /// (e.g., <c>client_credentials</c>, <c>jwt-bearer</c>).
     /// </summary>
-    abstract redirectUrl: obj option
+    abstract redirectUrl: U2<string, FSharp.CloudEdge.Runtime.Workers.URL> option
     /// <summary>
     /// External URL the server should use to fetch client metadata document
     /// </summary>
@@ -2066,7 +1633,7 @@ type AgentMcpOAuthProvider =
     /// <summary>
     /// Invoked to redirect the user agent to the given URL to begin the authorization flow.
     /// </summary>
-    abstract redirectToAuthorization: authorizationUrl: obj -> JS.Promise<unit> option
+    abstract redirectToAuthorization: authorizationUrl: FSharp.CloudEdge.Runtime.Workers.URL -> JS.Promise<unit> option
     /// <summary>
     /// Saves a PKCE code verifier for the current session, before redirecting to
     /// the authorization flow.
@@ -2096,13 +1663,34 @@ type AgentMcpOAuthProvider =
     /// <param name="metadata">- Optional OAuth metadata for the server, which may include supported authentication methods</param>
     abstract addClientAuthentication: obj option with get, set
     /// <summary>
+    /// Enables DPoP (RFC 9449 / SEP-1932) sender-constrained tokens when implemented. When this
+    /// resolves to a DpopSession, auth signs a DPoP proof into the token
+    /// request, and the transports (and withOAuth) present a resulting <c>token_type: DPoP</c>
+    /// access token with the <c>DPoP</c> Authorization scheme plus a fresh per-request proof instead of
+    /// <c>Bearer</c>, by wrapping their resource-server <c>fetch</c> with withDpopFromProvider.
+    /// <br /><br />
+    /// Return the <i>same</i> session across calls — the AS/RS nonce state and signing key it holds are
+    /// meant to persist for the life of this client registration. A minimal implementation:
+    /// <code lang="typescript">
+    /// class MyProvider implements OAuthClientProvider {
+    ///     private _dpop = DpopSession.create();
+    ///     dpop() { return this._dpop; }
+    ///     // ...
+    /// }
+    /// </code>
+    /// <br /><br />
+    /// Left undefined (the default), the provider behaves exactly as before this option existed:
+    /// plain Bearer tokens throughout.
+    /// </summary>
+    abstract dpop: (unit -> obj option) option with get, set
+    /// <summary>
     /// If defined, overrides the selection and validation of the
     /// RFC 8707 Resource Indicator. If left undefined, default
     /// validation behavior will be used.
     /// <br /><br />
     /// Implementations must verify the returned resource matches the MCP server.
     /// </summary>
-    abstract validateResourceURL: Func<obj, string option, JS.Promise<obj option>> option with get, set
+    abstract validateResourceURL: Func<U2<string, FSharp.CloudEdge.Runtime.Workers.URL>, string option, JS.Promise<FSharp.CloudEdge.Runtime.Workers.URL option>> option with get, set
     /// <summary>
     /// If implemented, provides a way for the client to invalidate (e.g. delete) the specified
     /// credentials, in the case where the server has indicated that they are no longer valid.
@@ -2148,7 +1736,7 @@ type AgentMcpOAuthProvider =
     /// }
     /// </code>
     /// </example>
-    abstract prepareTokenRequest: (string option -> obj option) option with get, set
+    abstract prepareTokenRequest: (string option -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.URLSearchParams option>, FSharp.CloudEdge.Runtime.Workers.URLSearchParams> option) option with get, set
     /// <summary>
     /// Saves the resolved authorization-server <b>issuer</b>. Called after a successful
     /// token exchange (timing changed in v2: was post-discovery, now post-<c>saveTokens</c>).
@@ -2234,6 +1822,11 @@ type AgentPathStep =
     static member Create (className: string, name: string) : AgentPathStep = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AgentToolEventDelivery =
+    | [<CompiledName("full")>] Full
+    | [<CompiledName("terminal")>] Terminal
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentToolInterruptedReason =
     | [<CompiledName("budget-exceeded")>] BudgetExceeded
     | [<CompiledName("inspect-failed")>] InspectFailed
@@ -2244,32 +1837,11 @@ type AgentToolInterruptedReason =
     | [<CompiledName("window-exceeded")>] WindowExceeded
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type AgentToolRunStatus =
-    | [<CompiledName("aborted")>] Aborted
-    | [<CompiledName("completed")>] Completed
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("interrupted")>] Interrupted
-    | [<CompiledName("running")>] Running
-    | [<CompiledName("starting")>] Starting
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentToolTerminalStatus =
     | [<CompiledName("aborted")>] Aborted
     | [<CompiledName("completed")>] Completed
     | [<CompiledName("error")>] Error
     | [<CompiledName("interrupted")>] Interrupted
-
-type AlarmContribution = U2<float, AlarmContribution2> option
-
-[<Interface>]
-type AlarmContribution2 =
-    /// <summary>
-    /// Epoch time in milliseconds.
-    /// </summary>
-    abstract time: float
-    abstract exclusive: bool
-    [<ParamObject; Emit("$0")>]
-    static member Create (time: float, exclusive: bool) : AlarmContribution2 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type BaseTransportType =
@@ -2278,15 +1850,21 @@ type BaseTransportType =
     | [<CompiledName("streamable-http")>] StreamableHttp
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type BinaryType =
-    | [<CompiledName("arraybuffer")>] Arraybuffer
-    | [<CompiledName("blob")>] Blob
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type CacheMode =
     | [<CompiledName("bypass")>] Bypass
     | [<CompiledName("refresh")>] Refresh
     | [<CompiledName("use")>] Use
+
+type DefaultProgress =
+    /// <summary>
+    /// Current step name
+    /// </summary>
+    abstract step: string option with get, set
+    abstract status: DefaultProgress.Status option with get, set
+    abstract message: string option with get, set
+    abstract percent: float option with get, set
+    [<EmitIndexer>]
+    abstract Item: string -> obj with get, set
 
 [<Interface>]
 type Disposable =
@@ -2297,52 +1875,161 @@ type Disposable =
 [<Interface>]
 type DurableObjectCapability<'Props> =
     /// <summary>
+    /// How this capability claims traffic. Default: <c>"selective"</c>.
+    /// <br /><br />
+    /// A <c>"selective"</c> capability answers only requests and upgrades it
+    /// recognizes and declines the rest. A <c>"catch-all"</c> claims everything
+    /// offered to the hooks it implements, so Lifecycle always places it
+    /// last, whenever it was installed, and refuses a second catch-all for
+    /// the same hook. Catch-alls for disjoint hooks coexist: <c>WebSockets</c>
+    /// claims every upgrade and implements no <c>onRequest</c>, so an HTTP
+    /// catch-all installs beside it. Selective HTTP capabilities target
+    /// their own routes and run before either.
+    /// </summary>
+    abstract claims: DurableObjectCapability.Claims option
+    /// <summary>
     /// Initialize or recover the capability before the host handles work.
     /// </summary>
     abstract onStart: (DurableObjectCapability.OnStart.Context<'Props> -> JS.Promise<unit> option) option with get, set
     /// <summary>
-    /// Inspect an HTTP request before the host's request handler.
+    /// Act as middleware over HTTP requests, ahead of the host's request handler.
     /// <br /><br />
-    /// Return a response to handle the request, or <c>undefined</c> to continue.
+    /// Return a response to handle the request, or <c>undefined</c> to pass it to the
+    /// next capability and finally the host.
     /// </summary>
-    abstract onRequest: (DurableObjectCapability.OnRequest.Context -> obj option) option with get, set
+    abstract onRequest: (DurableObjectCapability.OnRequest.Context -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response option>, FSharp.CloudEdge.Runtime.Workers.Response> option) option with get, set
     /// <summary>
-    /// Run work assigned to the capability when the host's alarm fires.
+    /// Claim a WebSocket upgrade before the host's legacy connection path.
+    /// <br /><br />
+    /// A capability that returns a response owns that socket and its lifetime,
+    /// including any hibernation attachment it needs to recognize the socket
+    /// later. Return <c>undefined</c> to decline.
     /// </summary>
-    abstract onAlarm: (unit -> JS.Promise<unit> option) option with get, set
+    abstract onWebSocketUpgrade: (DurableObjectCapability.OnWebSocketUpgrade.Context -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response option>, FSharp.CloudEdge.Runtime.Workers.Response> option) option with get, set
+    /// <summary>
+    /// Handle a platform <c>webSocketMessage</c> wake for a socket this capability
+    /// owns. Return <c>true</c> to consume the event; anything else offers it to
+    /// the next capability and finally the host's legacy path. Ownership is
+    /// the capability's to determine — typically via its own hibernation
+    /// attachment namespace.
+    /// </summary>
+    abstract onWebSocketMessage: OnWebSocketMessage option with get, set
+    /// <summary>
+    /// Handle a platform <c>webSocketClose</c> wake for an owned socket.
+    /// </summary>
+    abstract onWebSocketClose: OnWebSocketClose option with get, set
+    /// <summary>
+    /// Handle a platform <c>webSocketError</c> wake for an owned socket.
+    /// </summary>
+    abstract onWebSocketError: OnWebSocketError option with get, set
+    /// <summary>
+    /// Drive one due job this capability pushed into the Lifecycle queue.
+    /// Return an outcome to reschedule or retain the job; returning nothing
+    /// completes it.
+    /// <br /><br />
+    /// Dispatch must be bounded: the event loop awaits each job inline, so a
+    /// long-running <c>onJob</c> delays every other job on this object. Detach
+    /// unbounded work (start it, keep durable evidence, return) instead of
+    /// awaiting it here; a dispatch that outlives the job's hung timeout
+    /// logs a warning and emits <c>job:slow_dispatch</c>.
+    /// </summary>
+    abstract onJob: (DurableObjectCapability.OnJob.Context -> U3<string, JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>, DurableObjectCapability.OnJob.Result.Item> option) option with get, set
+    /// <summary>
+    /// Observe one job's terminal application failure after retry exhaustion.
+    /// The returned outcome decides advancement; returning nothing completes
+    /// the job.
+    /// </summary>
+    abstract onJobError: OnJobError option with get, set
+    /// <summary>
+    /// Apply domain policy after the alarm memory-limit circuit breaker
+    /// records a strike (#1825). Lifecycle has already handled the queue: the
+    /// executing job and every <c>recoveryLoop</c>-flagged job are backed off (or
+    /// purged when <c>sealed</c>). Runs at the outermost alarm frame, post-unwind,
+    /// best-effort — the isolate resets right after, so keep writes small.
+    /// </summary>
+    abstract onMemoryLimit: (DurableObjectCapability.OnMemoryLimit.Context -> JS.Promise<unit> option) option with get, set
     /// <summary>
     /// Handle one message routed to this capability identity.
     /// </summary>
     abstract onRoute: (DurableObjectCapability.OnRoute.Context -> obj) option with get, set
     /// <summary>
-    /// Return this capability's next requested physical alarm.
-    /// </summary>
-    abstract getNextAlarm: (unit -> U3<float, JS.Promise<AlarmContribution>, AlarmContribution2> option) option with get, set
-    /// <summary>
     /// Release live or in-memory resources during explicit host destruction.
     /// </summary>
     abstract dispose: (unit -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?onStart: (DurableObjectCapability.OnStart.Context<'Props> -> JS.Promise<unit> option), ?onRequest: (DurableObjectCapability.OnRequest.Context -> obj option), ?onAlarm: (unit -> JS.Promise<unit> option), ?onRoute: (DurableObjectCapability.OnRoute.Context -> obj), ?getNextAlarm: (unit -> U3<float, JS.Promise<AlarmContribution>, AlarmContribution2> option), ?dispose: (unit -> JS.Promise<unit> option)) : DurableObjectCapability<'Props> = jsNative
+    static member Create (?claims: DurableObjectCapability.Claims, ?onStart: (DurableObjectCapability.OnStart.Context<'Props> -> JS.Promise<unit> option), ?onRequest: (DurableObjectCapability.OnRequest.Context -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response option>, FSharp.CloudEdge.Runtime.Workers.Response> option), ?onWebSocketUpgrade: (DurableObjectCapability.OnWebSocketUpgrade.Context -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response option>, FSharp.CloudEdge.Runtime.Workers.Response> option), ?onWebSocketMessage: OnWebSocketMessage, ?onWebSocketClose: OnWebSocketClose, ?onWebSocketError: OnWebSocketError, ?onJob: (DurableObjectCapability.OnJob.Context -> U3<string, JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>, DurableObjectCapability.OnJob.Result.Item> option), ?onJobError: OnJobError, ?onMemoryLimit: (DurableObjectCapability.OnMemoryLimit.Context -> JS.Promise<unit> option), ?onRoute: (DurableObjectCapability.OnRoute.Context -> obj), ?dispose: (unit -> JS.Promise<unit> option)) : DurableObjectCapability<'Props> = jsNative
+
+type DynamicAgentConnectionBridge =
+    inherit DynamicAgentConnectionBridge.Implements
+    abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
+    abstract close: ?code: float * ?reason: string -> unit
+    abstract broadcast: ownerPath: DynamicAgentConnectionBridge.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
+    abstract __RPC_TARGET_BRAND: unit
+
+type DynamicAgents =
+    /// <summary>
+    /// Get (creating or waking if needed) the dynamic agent of the given
+    /// class and name, as a typed RPC stub. Idempotent — repeated calls
+    /// with the same class and name return the same child.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract get<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> * name: string -> JS.Promise<obj>
+    /// <summary>
+    /// Forcefully abort a running dynamic agent. The child stops
+    /// executing immediately and restarts on the next get call;
+    /// its storage is preserved. Transitively aborts the child's own
+    /// children. Pending RPC calls receive the reason as an error.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract abort: cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.AgentConstructor * name: string * ?reason: obj -> unit
+    /// <summary>
+    /// Delete a dynamic agent: abort it if running, then permanently wipe
+    /// its storage. Transitively deletes the child's own children.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract delete: cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.AgentConstructor * name: string -> JS.Promise<unit>
+    /// <summary>
+    /// Whether this agent has previously spawned (and not deleted) a
+    /// dynamic agent of the given class and name. Backed by an
+    /// auto-maintained SQLite registry in the parent's storage.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract has<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> * name: string -> bool
+    /// <summary>
+    /// Whether this agent has previously spawned (and not deleted) a
+    /// dynamic agent of the given class and name. Backed by an
+    /// auto-maintained SQLite registry in the parent's storage.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract has: className: string * name: string -> bool
+    /// <summary>
+    /// List known dynamic agents, optionally filtered by class. Reflects
+    /// the registry rows written by get and removed by
+    /// delete.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract list<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.HasAgentToolRun.ClsConstructor<'T> -> DynamicAgents.List.Result.Item[]
+    /// <summary>
+    /// List known dynamic agents, optionally filtered by class. Reflects
+    /// the registry rows written by get and removed by
+    /// delete.
+    /// </summary>
+    /// <remarks>@experimental</remarks>
+    abstract list: ?className: string -> DynamicAgents.List.Result.Item2[]
 
 type EmailBridge =
-    abstract ``__#2@#private``: obj with get, set
-    abstract getRaw: unit -> JS.Promise<obj>
+    abstract getRaw: unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     abstract setReject: reason: string -> unit
-    abstract forward: rcptTo: string * ?headers: obj -> JS.Promise<obj>
-    abstract reply: options: EmailBridge.Reply.Options -> JS.Promise<obj>
+    abstract forward: rcptTo: string * ?headers: FSharp.CloudEdge.Runtime.Workers.Headers -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>
+    abstract reply: options: EmailBridge.Reply.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>
     abstract __RPC_TARGET_BRAND: unit
     [<Emit("$0[Symbol.dispose]()")>]
     abstract SymbolDispose: unit -> unit
 
-[<Interface>]
 type Emitter<'T> =
     inherit Disposable
-    abstract _listeners: obj with get, set
     abstract ``event``: (('T -> unit) -> Disposable)
     abstract fire: data: 'T -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (_listeners: obj, ``event``: (('T -> unit) -> Disposable), fire: ('T -> unit), dispose: (unit -> unit)) : Emitter<'T> = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type FiberRecoveryResult =
@@ -2350,77 +2037,18 @@ type FiberRecoveryResult =
     | [<CompiledName("error")>] Error of error: obj option * snapshot: obj option
     | [<CompiledName("aborted")>] Aborted of reason: string option * snapshot: obj option
     | [<CompiledName("interrupted")>] Interrupted of reason: string option * snapshot: obj option
-
-[<Interface>]
-type FiberRecoveryResult2 =
-    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
-    abstract status: string with get, set
-    abstract snapshot: obj option with get, set
-    abstract metadata: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
-    static member Create (?snapshot: obj, ?metadata: JS.Record<string, obj>) : FiberRecoveryResult2 = jsNative
-
-module FiberRecoveryResult2 =
-    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
-    [<Literal>]
-    let status = "completed"
-
-[<Interface>]
-type FiberRecoveryResult3 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract status: string with get, set
-    abstract error: obj option with get, set
-    abstract snapshot: obj option with get, set
+    static member CreateCompleted (?snapshot: obj, ?metadata: JS.Record<string, obj>) : FiberRecoveryResult = jsNative
     [<ParamObject; Emit("({ status: 'error', ...$0 })")>]
-    static member Create (?error: obj, ?snapshot: obj) : FiberRecoveryResult3 = jsNative
-
-module FiberRecoveryResult3 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let status = "error"
-
-[<Interface>]
-type FiberRecoveryResult4 =
-    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
-    abstract status: string with get, set
-    abstract reason: string option with get, set
-    abstract snapshot: obj option with get, set
+    static member CreateError (?error: obj, ?snapshot: obj) : FiberRecoveryResult = jsNative
     [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
-    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult4 = jsNative
-
-module FiberRecoveryResult4 =
-    /// <remarks>TypeScript type: <c>"aborted"</c></remarks>
-    [<Literal>]
-    let status = "aborted"
-
-[<Interface>]
-type FiberRecoveryResult5 =
-    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
-    abstract status: string with get, set
-    abstract reason: string option with get, set
-    abstract snapshot: obj option with get, set
+    static member CreateAborted (?reason: string, ?snapshot: obj) : FiberRecoveryResult = jsNative
     [<ParamObject; Emit("({ status: 'interrupted', ...$0 })")>]
-    static member Create (?reason: string, ?snapshot: obj) : FiberRecoveryResult5 = jsNative
+    static member CreateInterrupted (?reason: string, ?snapshot: obj) : FiberRecoveryResult = jsNative
 
-module FiberRecoveryResult5 =
-    /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
-    [<Literal>]
-    let status = "interrupted"
+type LegacyCallToolResultSchema = U2<FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>, FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>)>>
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type FiberStatus =
-    | [<CompiledName("aborted")>] Aborted
-    | [<CompiledName("completed")>] Completed
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("interrupted")>] Interrupted
-    | [<CompiledName("pending")>] Pending
-    | [<CompiledName("running")>] Running
-
-type LegacyCallToolResultSchema = obj
-
-[<Interface>]
 type Lifecycle<'Env, 'Props> =
-    abstract ``__#3@#private``: obj with get, set
     /// <summary>
     /// Install platform fetch, alarm, and hibernating WebSocket handlers.
     /// <br /><br />
@@ -2431,8 +2059,15 @@ type Lifecycle<'Env, 'Props> =
     abstract installHandlers: unit -> unit
     /// <summary>
     /// Add a reusable capability before this lifecycle starts.
+    /// <br /><br />
+    /// Capabilities dispatch in registration order, except that a capability
+    /// declaring <c>claims: "catch-all"</c> always comes last, whenever it was
+    /// installed. Catch-alls are unique per dispatch hook: two may coexist
+    /// when they claim disjoint traffic (one <c>onRequest</c>, one
+    /// <c>onWebSocketUpgrade</c>), but a second catch-all for the same hook could
+    /// never be reached and is refused.
     /// </summary>
-    /// <param name="capability">- The capability to add in dispatch order.</param>
+    /// <param name="capability">- The capability to add.</param>
     /// <returns>This lifecycle.</returns>
     abstract ``use``: capability: DurableObjectCapability<'Props> -> Lifecycle<'Env, 'Props>
     /// <remarks>@internal Deliver a generic capability envelope to this Lifecycle.</remarks>
@@ -2447,22 +2082,37 @@ type Lifecycle<'Env, 'Props> =
     abstract sql<'T>: strings: Fable.Core.TS.Es.TemplateStringsArray * [<ParamArray>] values: U3<string, float, bool> option[] -> 'T[]
     /// <summary>
     /// Handle an incoming request for the owning Durable Object.
+    /// <br /><br />
+    /// Non-upgrade requests run through the capability middleware chain first,
+    /// then fall through to the host's <c>onRequest</c>.
     /// </summary>
-    abstract fetch: request: obj -> JS.Promise<obj>
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
     /// <remarks>@internal Dispatch a hibernating WebSocket message.</remarks>
-    abstract webSocketMessage: ws: obj * message: WSMessage -> JS.Promise<unit>
-    /// <remarks>@internal Dispatch and reciprocate a hibernating WebSocket close.</remarks>
-    abstract webSocketClose: ws: obj * code: float * reason: string * wasClean: bool -> JS.Promise<unit>
+    abstract webSocketMessage: ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * message: WSMessage -> JS.Promise<unit>
+    /// <remarks>@internal Dispatch a hibernating WebSocket close.</remarks>
+    abstract webSocketClose: ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * code: float * reason: string * wasClean: bool -> JS.Promise<unit>
     /// <remarks>@internal Dispatch a hibernating WebSocket error.</remarks>
-    abstract webSocketError: ws: obj * error: obj -> JS.Promise<unit>
+    abstract webSocketError: ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * error: obj -> JS.Promise<unit>
     /// <summary>
     /// Start lifecycle capabilities and the owning Durable Object.
     /// <br /><br />
     /// Runtime fetch, alarm, and WebSocket entry points call this automatically.
     /// RPC methods may call it explicitly because native RPC bypasses fetch.
+    /// <br /><br />
+    /// Concurrent callers share one startup and all observe its outcome. A call
+    /// made from inside that startup, such as a capability or <c>onStart</c> calling
+    /// back into the host, returns immediately instead of waiting on itself.
     /// </summary>
-    /// <param name="props">- Optional properties supplied to capability and host startup.</param>
+    /// <param name="props">
+    /// - Optional properties supplied to capability and host startup.
+    /// Ignored while a startup is already in flight.
+    /// </param>
     abstract start: ?props: 'Props -> JS.Promise<unit>
+    /// <summary>
+    /// Whether lifecycle startup has completed for this instance.
+    /// </summary>
+    /// <returns><c>true</c> after capabilities and the host <c>onStart</c> have finished.</returns>
+    abstract isStarted: unit -> bool
     /// <summary>
     /// The name used to address this Durable Object.
     /// <br /><br />
@@ -2472,24 +2122,26 @@ type Lifecycle<'Env, 'Props> =
     /// </summary>
     abstract name: string
     /// <summary>
-    /// Send a message to all connected clients, except connection ids listed in <c>without</c>
+    /// The host's scoped access to the Lifecycle work queue. Items pushed here
+    /// are dispatched to the host's <c>onJob</c> inside the host invocation
+    /// boundary.
     /// </summary>
-    abstract broadcast: msg: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> unit
+    abstract jobs: Lifecycle.Jobs
     /// <summary>
-    /// Get a connection by connection id
-    /// </summary>
-    abstract getConnection<'TState>: id: string -> McpAgent.ShouldSendProtocolMessages.Connection<'TState> option
-    /// <summary>
-    /// Get all managed connections, optionally filtered by tag.
-    /// </summary>
-    abstract getConnections<'TState>: ?tag: string -> Fable.Core.TS.Es.Iterable<McpAgent.ShouldSendProtocolMessages.Connection<'TState>, obj, obj>
-    /// <summary>
-    /// Recompute the physical Durable Object alarm from every capability.
+    /// Recompute the physical Durable Object alarm from job-queue state.
     /// <br /><br />
     /// Concurrent requests are serialized so a later durable-state change cannot
-    /// be overwritten by an earlier alarm calculation.
+    /// be overwritten by an earlier alarm calculation. Queue mutations call this
+    /// automatically; it stays public for composition roots and tests.
     /// </summary>
     abstract rearmAlarm: unit -> JS.Promise<unit>
+    /// <summary>
+    /// Keep work a job handed off at a bounded return inside the current
+    /// alarm's memory-limit breaker domain (#1825). Hosts call this where a
+    /// queue-driven callback detaches long work and returns.
+    /// </summary>
+    /// <returns>True when called during an alarm invocation; false otherwise.</returns>
+    abstract trackAlarmWork: work: JS.Promise<obj> -> bool
     /// <summary>
     /// Dispose installed capabilities in reverse registration order.
     /// </summary>
@@ -2499,15 +2151,21 @@ type Lifecycle<'Env, 'Props> =
     /// </summary>
     abstract disableAlarms: unit -> JS.Promise<unit>
     /// <summary>
-    /// Dispatch lifecycle and host alarm callbacks after startup.
+    /// Run one alarm invocation. The job driver owns the event loop — deadman
+    /// pre-arm, due-job dispatch with retry and deferral policy, the alarm
+    /// memory-limit circuit breaker (#1825) — and re-arms the physical alarm
+    /// from queue state. The host's <c>onAlarm()</c> runs after due jobs, inside
+    /// the host invocation boundary.
     /// </summary>
     abstract alarm: unit -> JS.Promise<unit>
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#3@#private``: obj, installHandlers: (unit -> unit), ``use``: (DurableObjectCapability<'Props> -> Lifecycle<'Env, 'Props>), route: (Lifecycle.Route.Envelope -> JS.Promise<obj>), sql: Func<Fable.Core.TS.Es.TemplateStringsArray, U3<string, float, bool> option[], 'T[]>, fetch: (obj -> JS.Promise<obj>), webSocketMessage: Func<obj, WSMessage, JS.Promise<unit>>, webSocketClose: Func<obj, float, string, bool, JS.Promise<unit>>, webSocketError: Func<obj, obj, JS.Promise<unit>>, start: ('Props option -> JS.Promise<unit>), name: string, broadcast: Action<U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option>, getConnection: (string -> McpAgent.ShouldSendProtocolMessages.Connection<'TState> option), getConnections: (string option -> Fable.Core.TS.Es.Iterable<McpAgent.ShouldSendProtocolMessages.Connection<'TState>, obj, obj>), rearmAlarm: (unit -> JS.Promise<unit>), dispose: (unit -> JS.Promise<unit>), disableAlarms: (unit -> JS.Promise<unit>), alarm: (unit -> JS.Promise<unit>)) : Lifecycle<'Env, 'Props> = jsNative
 
 [<Interface>]
 type LifecycleCapability<'Props> =
     abstract capabilityId: string
+    /// <summary>
+    /// How this capability claims traffic; see DurableObjectCapability.claims.
+    /// </summary>
+    abstract claims: DurableObjectCapability.Claims
     /// <summary>
     /// Default startup hook; capabilities override when they own startup work.
     /// </summary>
@@ -2515,17 +2173,22 @@ type LifecycleCapability<'Props> =
     /// <summary>
     /// Standard services when installed, or undefined in isolated unit tests.
     /// </summary>
-    abstract lifecycleServices: Scheduler.LifecycleServices option
+    abstract lifecycleServices: State.LifecycleServices option
     /// <summary>
     /// Standard services supplied when Lifecycle installs this capability.
     /// </summary>
-    abstract lifecycle: Scheduler.LifecycleServices
+    abstract lifecycle: State.LifecycleServices
     [<ParamObject; Emit("$0")>]
-    static member Create (capabilityId: string, onStart: (FSharp.CloudEdge.Runtime.AgentsMcpClient.DurableObjectCapability.OnStart.Context<'Props> -> unit), lifecycle: Scheduler.LifecycleServices, ?lifecycleServices: Scheduler.LifecycleServices) : LifecycleCapability<'Props> = jsNative
+    static member Create (capabilityId: string, claims: DurableObjectCapability.Claims, onStart: (FSharp.CloudEdge.Runtime.AgentsMcpClient.DurableObjectCapability.OnStart.Context<'Props> -> unit), lifecycle: State.LifecycleServices, ?lifecycleServices: State.LifecycleServices) : LifecycleCapability<'Props> = jsNative
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type LifecycleStatus =
+    | [<CompiledName("started")>] Started
+    | [<CompiledName("starting")>] Starting
+    | [<CompiledName("zero")>] Zero
 
 type MCPClientConnection =
-    abstract url: obj with get, set
-    abstract _info: obj
+    abstract url: FSharp.CloudEdge.Runtime.Workers.URL with get, set
     abstract options: MCPClientConnection.Options with get, set
     abstract client: obj with get, set
     abstract connectionState: MCPConnectionState with get, set
@@ -2533,40 +2196,12 @@ type MCPClientConnection =
     abstract lastConnectedTransport: BaseTransportType option with get, set
     abstract instructions: string option with get, set
     abstract tools: MCPClientConnection.Tools.Item[] with get, set
-    abstract _transport: obj option with get, set
-    /// <summary>
-    /// Transport that received the 401 during the initial connect attempt.
-    /// Kept so finishAuth() runs on the transport that captured the resource
-    /// metadata URL from the WWW-Authenticate header — a fresh transport would
-    /// rediscover from defaults and exchange the code at the wrong token
-    /// endpoint when the authorization server is not at the default location.
-    /// </summary>
-    abstract _pendingAuthTransport: obj option with get, set
-    abstract _restoredListSubscription: obj option with get, set
     abstract prompts: MCPClientConnection.Prompts.Item[] with get, set
     abstract resources: MCPClientConnection.Resources.Item[] with get, set
     abstract resourceTemplates: MCPClientConnection.ResourceTemplates.Item[] with get, set
     abstract serverCapabilities: MCPClientConnection.ServerCapabilities option with get, set
-    /// <summary>
-    /// True when resuming a streamable-http session without cached capabilities
-    /// </summary>
-    abstract _probingCapabilities: obj with get, set
-    /// <summary>
-    /// Tracks in-flight discovery to allow cancellation
-    /// </summary>
-    abstract _discoveryAbortController: obj with get, set
-    abstract _onObservabilityEvent: obj
     abstract onObservabilityEvent: ((MCPObservabilityEvent -> unit) -> Disposable)
-    abstract _onListChanged: obj
     abstract onListChanged: ((unit -> unit) -> Disposable)
-    /// <summary>
-    /// Whether the connection advertised the elicitation capability. The SDK
-    /// client refuses to register an <c>elicitation/create</c> request handler when
-    /// the capability was not declared, so handler registration is gated on
-    /// this.
-    /// </summary>
-    abstract _elicitationEnabled: obj with get, set
-    abstract createClient: obj with get, set
     /// <summary>
     /// Configure the handler used for server-initiated elicitation requests.
     /// <br /><br />
@@ -2585,15 +2220,9 @@ type MCPClientConnection =
     /// <returns>Error message if connection failed, undefined otherwise</returns>
     abstract init: unit -> JS.Promise<string option>
     /// <summary>
-    /// Finish OAuth by probing transports based on configured type.
-    /// - Explicit: finish on that transport
-    /// - Auto: try streamable-http, then sse on 404/405/Not Implemented
-    /// </summary>
-    abstract finishAuthProbe: obj with get, set
-    /// <summary>
     /// Complete OAuth authorization
     /// </summary>
-    abstract completeAuthorization: callback: obj * ?options: MCPClientConnection.CompleteAuthorization.Options -> JS.Promise<unit>
+    abstract completeAuthorization: callback: U2<string, FSharp.CloudEdge.Runtime.Workers.URLSearchParams> * ?options: MCPClientConnection.CompleteAuthorization.Options -> JS.Promise<unit>
     /// <summary>
     /// Discover server capabilities and register tools, resources, prompts, and templates.
     /// This method does the work but does not manage connection state - that's handled by discover().
@@ -2628,7 +2257,6 @@ type MCPClientConnection =
     /// </summary>
     abstract registerPrompts: unit -> JS.Promise<MCPClientConnection.Prompts.Item[]>
     abstract registerResourceTemplates: unit -> JS.Promise<MCPClientConnection.ResourceTemplates.Item[]>
-    abstract catalogFetchOptions: obj with get, set
     abstract fetchTools: unit -> JS.Promise<MCPClientConnection.FetchTools.Result.Item.Item[]>
     abstract fetchResources: unit -> JS.Promise<MCPClientConnection.FetchResources.Result.Item.Item[]>
     abstract fetchPrompts: unit -> JS.Promise<MCPClientConnection.FetchPrompts.Result.Item.Item[]>
@@ -2643,15 +2271,12 @@ type MCPClientConnection =
     /// Overriding or instance-patching this method directly is
     /// deprecated — pass the <c>elicitationHandlers</c> connection option instead.
     /// </remarks>
-    abstract handleElicitationRequest: request: Mcp.Client.ElicitRequest * ?signal: obj -> JS.Promise<Mcp.Client.ElicitResult>
-    abstract isResumedStreamableHttpSession: obj with get, set
+    abstract handleElicitationRequest: request: Mcp.Client.ElicitRequest * ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal -> JS.Promise<Mcp.Client.ElicitResult>
     abstract sessionId: string option
     /// <remarks>@internal Clear a restored session before reconnecting.</remarks>
     abstract clearResumedSession: unit -> unit
     abstract protocolVersion: string option
     abstract discoverResult: Mcp.Client.MCPServerOptions.DiscoverResult option
-    abstract openRestoredListSubscription: obj with get, set
-    abstract getTransportName: obj with get, set
     abstract close: unit -> JS.Promise<unit>
     /// <summary>
     /// Get the transport for the client
@@ -2659,8 +2284,6 @@ type MCPClientConnection =
     /// <param name="transportType">- The transport type to get</param>
     /// <returns>The transport for the client</returns>
     abstract getTransport: transportType: BaseTransportType -> obj
-    abstract tryConnect: obj with get, set
-    abstract _capabilityErrorHandler: obj with get, set
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type MCPConnectionState =
@@ -2689,11 +2312,11 @@ type MCPDiscoveryResult3 =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type MCPObservabilityEvent =
-    | [<CompiledName("mcp:client:authorize")>] McpClientAuthorize of agent: string option * name: string option * payload: MCPObservabilityEvent2.Payload * timestamp: float
-    | [<CompiledName("mcp:client:close")>] McpClientClose of agent: string option * name: string option * payload: MCPObservabilityEvent3.Payload * timestamp: float
-    | [<CompiledName("mcp:client:connect")>] McpClientConnect of agent: string option * name: string option * payload: MCPObservabilityEvent4.Payload * timestamp: float
-    | [<CompiledName("mcp:client:discover")>] McpClientDiscover of agent: string option * name: string option * payload: MCPObservabilityEvent5.Payload * timestamp: float
-    | [<CompiledName("mcp:client:preconnect")>] McpClientPreconnect of agent: string option * name: string option * payload: MCPObservabilityEvent6.Payload * timestamp: float
+    | [<CompiledName("mcp:client:authorize"); Fickl.Core.InlineInterface>] McpClientAuthorize of MCPObservabilityEvent2
+    | [<CompiledName("mcp:client:close"); Fickl.Core.InlineInterface>] McpClientClose of MCPObservabilityEvent3
+    | [<CompiledName("mcp:client:connect"); Fickl.Core.InlineInterface>] McpClientConnect of MCPObservabilityEvent4
+    | [<CompiledName("mcp:client:discover"); Fickl.Core.InlineInterface>] McpClientDiscover of MCPObservabilityEvent5
+    | [<CompiledName("mcp:client:preconnect"); Fickl.Core.InlineInterface>] McpClientPreconnect of MCPObservabilityEvent6
 
 [<Interface>]
 type MCPObservabilityEvent2 =
@@ -2906,7 +2529,7 @@ type MCPTransportOptions2 =
     abstract authProvider: AgentMcpOAuthProvider option with get, set
     abstract ``type``: TransportType option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``namespace``: obj, name: string, ?props: JS.Record<string, obj>, ?authProvider: AgentMcpOAuthProvider, ?``type``: TransportType) : MCPTransportOptions2 = jsNative
+    static member Create (``namespace``: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<McpAgent<obj, obj, JS.Record<string, obj>>>, name: string, ?props: JS.Record<string, obj>, ?authProvider: AgentMcpOAuthProvider, ?``type``: TransportType) : MCPTransportOptions2 = jsNative
 
 [<Interface>]
 type MCPTransportOptions3 =
@@ -2916,8 +2539,8 @@ type MCPTransportOptions3 =
     /// token() is called before every request to obtain the
     /// bearer token. When the server responds with 401, onUnauthorized()
     /// is called (if provided) to refresh credentials, then the request is retried once. If
-    /// the retry also gets 401, or <c>onUnauthorized</c> is not provided, UnauthorizedError
-    /// is thrown.
+    /// the retry also gets 401, <c>SdkHttpError</c> (<c>SdkErrorCode.ClientHttpAuthentication</c>) is thrown.
+    /// If <c>onUnauthorized</c> is not provided, UnauthorizedError is thrown.
     /// <br /><br />
     /// For simple bearer tokens: <c>{ token: async () =&gt; myApiKey }</c>.
     /// <br /><br />
@@ -2937,23 +2560,51 @@ type MCPTransportOptions3 =
     /// <summary>
     /// Customizes the initial SSE request to the server (the request that begins the stream).
     /// <br /><br />
-    /// NOTE: Setting this property will prevent an <c>Authorization</c> header from
-    /// being automatically attached to the SSE request, if an authProvider is
-    /// also given. This can be worked around by setting the <c>Authorization</c> header
-    /// manually.
+    /// A custom <c>fetch</c> supplied here is still wrapped by the transport: the
+    /// transport-managed headers, including the <c>Authorization</c> header derived from
+    /// authProvider, are attached to the
+    /// SSE request and take precedence over a same-named entry in <c>requestInit.headers</c>
+    /// (see requestInit).
     /// </summary>
     abstract eventSourceInit: obj option with get, set
     /// <summary>
     /// Customizes recurring <c>POST</c> requests to the server.
+    /// <br /><br />
+    /// The transport-managed headers take precedence over a same-named entry in
+    /// <c>headers</c>: <c>Authorization</c> when
+    /// authProvider yields a token, and
+    /// <c>mcp-protocol-version</c>. A caller-supplied <c>Authorization</c> value is therefore only sent
+    /// while the provider has no token, which lets a static API key fall back to OAuth once
+    /// the provider obtains one.
+    /// <br /><br />
+    /// A <c>redirect</c> of <c>'error'</c> or <c>'manual'</c> is passed to fetch as it is for the <c>POST</c>
+    /// requests that carry messages. For the OAuth requests, and for any other value,
+    /// <c>redirect</c> is consulted only when
+    /// redirectPolicy is <c>'follow'</c>. The
+    /// request that begins the stream does not read it.
     /// </summary>
-    abstract requestInit: obj option with get, set
+    abstract requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option with get, set
     /// <summary>
     /// Custom fetch implementation used for all network requests.
     /// </summary>
     abstract fetch: obj option with get, set
+    /// <summary>
+    /// How a redirect of one of the transport's requests is handled, including the OAuth
+    /// requests it makes for authProvider.
+    /// The option does not reach requests that a provider makes with a fetch of its own, such as
+    /// those of the <c>assertion</c> callback of a <c>CrossAppAccessProvider</c>.
+    /// <br /><br />
+    /// - <c>'same-origin'</c> (default): a redirect is followed only when it stays within the origin
+    ///   of the request and keeps the method, and any other redirect fails the request.
+    /// - <c>'follow'</c>: redirects are left to the fetch implementation, as in earlier versions. It
+    ///   follows them to any origin unless <c>requestInit.redirect</c> says otherwise, which the
+    ///   request that begins the stream does not read.
+    /// </summary>
+    /// <defaultValue>'same-origin'</defaultValue>
+    abstract redirectPolicy: MCPTransportOptions3.RedirectPolicy option with get, set
     abstract ``type``: TransportType option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?authProvider: U2<MCPTransportOptions3.AuthProvider, MCPTransportOptions3.AuthProvider2>, ?skipIssuerMetadataValidation: bool, ?eventSourceInit: obj, ?requestInit: obj, ?fetch: obj, ?``type``: TransportType) : MCPTransportOptions3 = jsNative
+    static member Create (?authProvider: U2<MCPTransportOptions3.AuthProvider, MCPTransportOptions3.AuthProvider2>, ?skipIssuerMetadataValidation: bool, ?eventSourceInit: obj, ?requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?fetch: obj, ?redirectPolicy: MCPTransportOptions3.RedirectPolicy, ?``type``: TransportType) : MCPTransportOptions3 = jsNative
 
 [<Interface>]
 type MCPTransportOptions4 =
@@ -2963,8 +2614,8 @@ type MCPTransportOptions4 =
     /// token() is called before every request to obtain the
     /// bearer token. When the server responds with 401, onUnauthorized()
     /// is called (if provided) to refresh credentials, then the request is retried once. If
-    /// the retry also gets 401, or <c>onUnauthorized</c> is not provided, UnauthorizedError
-    /// is thrown.
+    /// the retry also gets 401, <c>SdkHttpError</c> (<c>SdkErrorCode.ClientHttpAuthentication</c>) is thrown.
+    /// If <c>onUnauthorized</c> is not provided, UnauthorizedError is thrown.
     /// <br /><br />
     /// For simple bearer tokens: <c>{ token: async () =&gt; myApiKey }</c>.
     /// <br /><br />
@@ -2985,12 +2636,37 @@ type MCPTransportOptions4 =
     abstract skipIssuerMetadataValidation: bool option with get, set
     /// <summary>
     /// Customizes HTTP requests to the server.
+    /// <br /><br />
+    /// <c>headers</c> are sent on every request, but the transport-managed headers take
+    /// precedence over a same-named entry here: <c>Authorization</c> when
+    /// authProvider yields a
+    /// token, <c>mcp-session-id</c>, and <c>mcp-protocol-version</c>. A caller-supplied <c>Authorization</c>
+    /// value is therefore only sent while the provider has no token, which lets a static API
+    /// key fall back to OAuth once the provider obtains one.
+    /// <br /><br />
+    /// A <c>redirect</c> of <c>'error'</c> or <c>'manual'</c> is passed to fetch as it is for the POST, GET and
+    /// DELETE requests to the server URL. For the OAuth requests, and for any other value,
+    /// <c>redirect</c> is consulted only when
+    /// redirectPolicy is <c>'follow'</c>.
     /// </summary>
-    abstract requestInit: obj option with get, set
+    abstract requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option with get, set
     /// <summary>
     /// Custom fetch implementation used for all network requests.
     /// </summary>
     abstract fetch: obj option with get, set
+    /// <summary>
+    /// How a redirect of one of the transport's requests is handled, including the OAuth
+    /// requests it makes for authProvider.
+    /// The option does not reach requests that a provider makes with a fetch of its own, such as
+    /// those of the <c>assertion</c> callback of a <c>CrossAppAccessProvider</c>.
+    /// <br /><br />
+    /// - <c>'same-origin'</c> (default): a redirect is followed only when it stays within the origin
+    ///   of the request and keeps the method, and any other redirect fails the request.
+    /// - <c>'follow'</c>: redirects are left to the fetch implementation, as in earlier versions. It
+    ///   follows them to any origin unless <c>requestInit.redirect</c> says otherwise.
+    /// </summary>
+    /// <defaultValue>'same-origin'</defaultValue>
+    abstract redirectPolicy: MCPTransportOptions3.RedirectPolicy option with get, set
     /// <summary>
     /// Options to configure the reconnection behavior.
     /// </summary>
@@ -3044,12 +2720,10 @@ type MCPTransportOptions4 =
     abstract maxStepUpRetries: float option with get, set
     abstract ``type``: TransportType option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?authProvider: U2<MCPTransportOptions3.AuthProvider, MCPTransportOptions3.AuthProvider2>, ?skipIssuerMetadataValidation: bool, ?requestInit: obj, ?fetch: obj, ?reconnectionOptions: obj, ?reconnectionScheduler: obj, ?sessionId: string, ?protocolVersion: string, ?onInsufficientScope: Mcp.Client.MCPServerOptions.Transport.OnInsufficientScope, ?maxStepUpRetries: float, ?``type``: TransportType) : MCPTransportOptions4 = jsNative
+    static member Create (?authProvider: U2<MCPTransportOptions3.AuthProvider, MCPTransportOptions3.AuthProvider2>, ?skipIssuerMetadataValidation: bool, ?requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?fetch: obj, ?redirectPolicy: MCPTransportOptions3.RedirectPolicy, ?reconnectionOptions: obj, ?reconnectionScheduler: obj, ?sessionId: string, ?protocolVersion: string, ?onInsufficientScope: Mcp.Client.MCPServerOptions.Transport.OnInsufficientScope, ?maxStepUpRetries: float, ?``type``: TransportType) : MCPTransportOptions4 = jsNative
 
 type McpAgent<'Env, 'State, 'Props> =
     inherit Agent<'Env, 'State, 'Props>
-    abstract _transport: obj option with get, set
-    abstract _pendingElicitations: obj with get, set
     abstract props: 'Props option with get, set
     /// <summary>
     /// Override this method to control whether protocol messages are sent to a
@@ -3070,15 +2744,25 @@ type McpAgent<'Env, 'State, 'Props> =
     abstract setInitializeRequest: initializeRequest: U4<McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4> -> JS.Promise<unit>
     abstract getInitializeRequest: unit -> JS.Promise<U4<McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4> option>
     /// <summary>
+    /// End a streamable HTTP session (<c>DELETE</c>). Teardown is deferred to the
+    /// agent's alarm (#1625), so the stored initialize request is cleared too:
+    /// every route treats a session without one as unknown, which makes requests
+    /// carrying the terminated session ID get 404 as the spec requires. Teardown
+    /// is scheduled first, so a failure part-way leaves a session the client can
+    /// <c>DELETE</c> again rather than one that is never cleaned up.
+    /// </summary>
+    /// <remarks>@internal</remarks>
+    abstract _cf_terminateSession: unit -> JS.Promise<unit>
+    /// <summary>
     /// Persist the <c>requestIds</c> for a POST stream.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract setStreamRequestIds: streamId: string * requestIds: U2<string, float>[] -> JS.Promise<unit>
+    abstract setStreamRequestIds: streamId: string * requestIds: FSharp.CloudEdge.Support.Zod.V4.EnumValue[] -> JS.Promise<unit>
     /// <summary>
     /// Read the persisted <c>requestIds</c> for a POST stream.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract getStreamRequestIds: streamId: string -> JS.Promise<U2<string, float>[] option>
+    abstract getStreamRequestIds: streamId: string -> JS.Promise<FSharp.CloudEdge.Support.Zod.V4.EnumValue[] option>
     /// <summary>
     /// Drop the persisted <c>requestIds</c> for a POST stream.
     /// </summary>
@@ -3102,7 +2786,7 @@ type McpAgent<'Env, 'State, 'Props> =
     /// wrong and <c>send()</c> will throw <c>No active stream found</c>.
     /// </summary>
     /// <remarks>@internal</remarks>
-    abstract getStreamForRequestId: requestId: U2<string, float> -> JS.Promise<McpAgent.GetStreamForRequestId.Result.Item option>
+    abstract getStreamForRequestId: requestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue -> JS.Promise<McpAgent.GetStreamForRequestId.Result.Item option>
     /// <summary>
     /// Read the transport type for this agent.
     /// This relies on the naming scheme being <c>sse:${sessionId}</c>,
@@ -3152,10 +2836,6 @@ type McpAgent<'Env, 'State, 'Props> =
     /// </summary>
     abstract getEventStore: unit -> obj option
     /// <summary>
-    /// Returns a new transport matching the type of the Agent.
-    /// </summary>
-    abstract initTransport: obj with get, set
-    /// <summary>
     /// Update and store the props
     /// </summary>
     abstract updateProps: ?props: 'Props -> JS.Promise<unit>
@@ -3177,10 +2857,6 @@ type McpAgent<'Env, 'State, 'Props> =
     /// </summary>
     abstract elicitInput: ``params``: McpAgent.ElicitInput.Params * ?options: McpAgent.ElicitInput.Options -> JS.Promise<McpAgent.ElicitInput.Result.Item>
     /// <summary>
-    /// Handle elicitation responses via in-memory resolver
-    /// </summary>
-    abstract _handleElicitationResponse: obj with get, set
-    /// <summary>
     /// Handle an RPC message for MCP
     /// This method is called by the RPC stub to process MCP messages
     /// </summary>
@@ -3188,14 +2864,19 @@ type McpAgent<'Env, 'State, 'Props> =
     /// <returns>The response message(s) or undefined</returns>
     abstract handleMcpMessage: message: U5<U4<McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4>[], McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4> -> JS.Promise<U5<U4<McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4>[], McpAgent.SetInitializeRequest.InitializeRequest, McpAgent.SetInitializeRequest.InitializeRequest2, McpAgent.SetInitializeRequest.InitializeRequest3, McpAgent.SetInitializeRequest.InitializeRequest4> option>
     /// <summary>
-    /// Queue a task to be executed in the future
+    /// Queue a task to run in the background.
+    /// <br /><br />
+    /// The item is durable: it runs from the Lifecycle alarm event loop after
+    /// this call returns, in push order, one at a time, with retries per
+    /// <c>options.retry</c>, and survives the Durable Object leaving memory.
     /// </summary>
     /// <param name="callback">Name of the method to call</param>
     /// <param name="payload">Payload to pass to the callback</param>
     /// <param name="options">Options for the queued task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
+    /// <param name="options.id">Stable id; a push with an existing id replaces that item</param>
     /// <returns>The ID of the queued task</returns>
-    abstract queue<'T>: callback: McpAgent.Queue.Callback * payload: 'T * ?options: McpAgent.Queue.Options -> JS.Promise<string>
+    abstract queue<'T>: callback: McpAgent.Queue.Callback * payload: 'T * ?options: Agent.Queue.Options -> JS.Promise<string>
     /// <summary>
     /// Schedule a task to be executed in the future
     /// <br /><br />
@@ -3217,7 +2898,7 @@ type McpAgent<'Env, 'State, 'Props> =
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <param name="options.idempotent">Dedup by callback+payload. Defaults to <c>true</c> for cron, <c>false</c> otherwise.</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: McpAgent.Queue.Callback * ?payload: 'T * ?options: McpAgent.Schedule.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
+    abstract schedule<'T>: ``when``: U3<string, float, Fable.Core.TS.Es.Date> * callback: McpAgent.Queue.Callback * ?payload: 'T * ?options: Scheduler.Set.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
     /// <summary>
     /// Schedule a task to run repeatedly at a fixed interval.
     /// <br /><br />
@@ -3242,7 +2923,7 @@ type McpAgent<'Env, 'State, 'Props> =
     /// <param name="options">Options for the scheduled task</param>
     /// <param name="options.retry">Retry options for the callback execution</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract scheduleEvery<'T>: intervalSeconds: float * callback: McpAgent.Queue.Callback * ?payload: 'T * ?options: McpAgent.ScheduleEvery.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
+    abstract scheduleEvery<'T>: intervalSeconds: float * callback: McpAgent.Queue.Callback * ?payload: 'T * ?options: Agent.ScheduleEvery.Options -> JS.Promise<Scheduler.Set.Result.Item<'T>>
 
 [<Interface>]
 type McpClientOptions =
@@ -3273,97 +2954,97 @@ type Observability =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ObservabilityEvent =
-    | [<CompiledName("action:ledger:conflict")>] ActionLedgerConflict of agent: string option * name: string option * payload: ObservabilityEvent2.Payload * timestamp: float
-    | [<CompiledName("action:ledger:pending")>] ActionLedgerPending of agent: string option * name: string option * payload: ObservabilityEvent3.Payload * timestamp: float
-    | [<CompiledName("action:ledger:reclaimed")>] ActionLedgerReclaimed of agent: string option * name: string option * payload: ObservabilityEvent4.Payload * timestamp: float
-    | [<CompiledName("action:ledger:replayed")>] ActionLedgerReplayed of agent: string option * name: string option * payload: ObservabilityEvent5.Payload * timestamp: float
-    | [<CompiledName("action:ledger:serialize_failed")>] ActionLedgerSerializeFailed of agent: string option * name: string option * payload: ObservabilityEvent6.Payload * timestamp: float
-    | [<CompiledName("action:ledger:settled")>] ActionLedgerSettled of agent: string option * name: string option * payload: ObservabilityEvent7.Payload * timestamp: float
-    | [<CompiledName("action:ledger:swept")>] ActionLedgerSwept of agent: string option * name: string option * payload: ObservabilityEvent8.Payload * timestamp: float
-    | [<CompiledName("action:pause:approved")>] ActionPauseApproved of agent: string option * name: string option * payload: ObservabilityEvent9.Payload * timestamp: float
-    | [<CompiledName("action:pause:created")>] ActionPauseCreated of agent: string option * name: string option * payload: ObservabilityEvent10.Payload * timestamp: float
-    | [<CompiledName("action:pause:rejected")>] ActionPauseRejected of agent: string option * name: string option * payload: ObservabilityEvent11.Payload * timestamp: float
-    | [<CompiledName("action:pause:swept")>] ActionPauseSwept of agent: string option * name: string option * payload: ObservabilityEvent12.Payload * timestamp: float
-    | [<CompiledName("action:reply-attached")>] ActionReplyAttached of agent: string option * name: string option * payload: ObservabilityEvent13.Payload * timestamp: float
-    | [<CompiledName("agent_tool:detached:delivery_failed")>] AgentToolDetachedDeliveryFailed of agent: string option * name: string option * payload: ObservabilityEvent14.Payload * timestamp: float
-    | [<CompiledName("agent_tool:detached:live_count_warning")>] AgentToolDetachedLiveCountWarning of agent: string option * name: string option * payload: ObservabilityEvent15.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:begin")>] AgentToolRecoveryBegin of agent: string option * name: string option * payload: ObservabilityEvent16.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:complete")>] AgentToolRecoveryComplete of agent: string option * name: string option * payload: ObservabilityEvent17.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:deadline")>] AgentToolRecoveryDeadline of agent: string option * name: string option * payload: ObservabilityEvent18.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:failed")>] AgentToolRecoveryFailed of agent: string option * name: string option * payload: ObservabilityEvent19.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:reattach")>] AgentToolRecoveryReattach of agent: string option * name: string option * payload: ObservabilityEvent20.Payload * timestamp: float
-    | [<CompiledName("agent_tool:recovery:row")>] AgentToolRecoveryRow of agent: string option * name: string option * payload: ObservabilityEvent21.Payload * timestamp: float
-    | [<CompiledName("alarm:memory_limit_reset")>] AlarmMemoryLimitReset of agent: string option * name: string option * payload: ObservabilityEvent22.Payload * timestamp: float
-    | [<CompiledName("channel:delivered")>] ChannelDelivered of agent: string option * name: string option * payload: ObservabilityEvent23.Payload * timestamp: float
-    | [<CompiledName("channel:resolved")>] ChannelResolved of agent: string option * name: string option * payload: ObservabilityEvent24.Payload * timestamp: float
-    | [<CompiledName("chat:context:compacted")>] ChatContextCompacted of agent: string option * name: string option * payload: ObservabilityEvent25.Payload * timestamp: float
-    | [<CompiledName("chat:hydration:windowed")>] ChatHydrationWindowed of agent: string option * name: string option * payload: ObservabilityEvent26.Payload * timestamp: float
-    | [<CompiledName("chat:media:evicted")>] ChatMediaEvicted of agent: string option * name: string option * payload: ObservabilityEvent27.Payload * timestamp: float
-    | [<CompiledName("chat:onstart:degraded")>] ChatOnstartDegraded of agent: string option * name: string option * payload: ObservabilityEvent28.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:attempt")>] ChatRecoveryAttempt of agent: string option * name: string option * payload: ObservabilityEvent29.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:completed")>] ChatRecoveryCompleted of agent: string option * name: string option * payload: ObservabilityEvent30.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:detected")>] ChatRecoveryDetected of agent: string option * name: string option * payload: ObservabilityEvent31.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:exhausted")>] ChatRecoveryExhausted of agent: string option * name: string option * payload: ObservabilityEvent32.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:failed")>] ChatRecoveryFailed of agent: string option * name: string option * payload: ObservabilityEvent33.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:scheduled")>] ChatRecoveryScheduled of agent: string option * name: string option * payload: ObservabilityEvent34.Payload * timestamp: float
-    | [<CompiledName("chat:recovery:skipped")>] ChatRecoverySkipped of agent: string option * name: string option * payload: ObservabilityEvent35.Payload * timestamp: float
-    | [<CompiledName("chat:request:failed")>] ChatRequestFailed of agent: string option * name: string option * payload: ObservabilityEvent36.Payload * timestamp: float
-    | [<CompiledName("chat:stream:stalled")>] ChatStreamStalled of agent: string option * name: string option * payload: ObservabilityEvent37.Payload * timestamp: float
-    | [<CompiledName("chat:transcript:repaired")>] ChatTranscriptRepaired of agent: string option * name: string option * payload: ObservabilityEvent38.Payload * timestamp: float
-    | [<CompiledName("chat:turn:finish")>] ChatTurnFinish of agent: string option * name: string option * payload: ObservabilityEvent39.Payload * timestamp: float
-    | [<CompiledName("chat:turn:start")>] ChatTurnStart of agent: string option * name: string option * payload: ObservabilityEvent40.Payload * timestamp: float
-    | [<CompiledName("connect")>] Connect of agent: string option * name: string option * payload: ObservabilityEvent41.Payload * timestamp: float
-    | [<CompiledName("destroy")>] Destroy of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
-    | [<CompiledName("disconnect")>] Disconnect of agent: string option * name: string option * payload: ObservabilityEvent43.Payload * timestamp: float
-    | [<CompiledName("email:receive")>] EmailReceive of agent: string option * name: string option * payload: ObservabilityEvent44.Payload * timestamp: float
-    | [<CompiledName("email:reply")>] EmailReply of agent: string option * name: string option * payload: ObservabilityEvent45.Payload * timestamp: float
-    | [<CompiledName("email:send")>] EmailSend of agent: string option * name: string option * payload: ObservabilityEvent46.Payload * timestamp: float
-    | [<CompiledName("fiber:recovery:attempt")>] FiberRecoveryAttempt of agent: string option * name: string option * payload: ObservabilityEvent47.Payload * timestamp: float
-    | [<CompiledName("fiber:recovery:detected")>] FiberRecoveryDetected of agent: string option * name: string option * payload: ObservabilityEvent48.Payload * timestamp: float
-    | [<CompiledName("fiber:recovery:failed")>] FiberRecoveryFailed of agent: string option * name: string option * payload: ObservabilityEvent49.Payload * timestamp: float
-    | [<CompiledName("fiber:recovery:handled")>] FiberRecoveryHandled of agent: string option * name: string option * payload: ObservabilityEvent50.Payload * timestamp: float
-    | [<CompiledName("fiber:recovery:skipped")>] FiberRecoverySkipped of agent: string option * name: string option * payload: ObservabilityEvent51.Payload * timestamp: float
-    | [<CompiledName("fiber:run:completed")>] FiberRunCompleted of agent: string option * name: string option * payload: ObservabilityEvent52.Payload * timestamp: float
-    | [<CompiledName("fiber:run:failed")>] FiberRunFailed of agent: string option * name: string option * payload: ObservabilityEvent53.Payload * timestamp: float
-    | [<CompiledName("fiber:run:interrupted")>] FiberRunInterrupted of agent: string option * name: string option * payload: ObservabilityEvent54.Payload * timestamp: float
-    | [<CompiledName("fiber:run:started")>] FiberRunStarted of agent: string option * name: string option * payload: ObservabilityEvent55.Payload * timestamp: float
-    | [<CompiledName("mcp:client:authorize")>] McpClientAuthorize of agent: string option * name: string option * payload: MCPObservabilityEvent2.Payload * timestamp: float
-    | [<CompiledName("mcp:client:close")>] McpClientClose of agent: string option * name: string option * payload: MCPObservabilityEvent3.Payload * timestamp: float
-    | [<CompiledName("mcp:client:connect")>] McpClientConnect of agent: string option * name: string option * payload: MCPObservabilityEvent4.Payload * timestamp: float
-    | [<CompiledName("mcp:client:discover")>] McpClientDiscover of agent: string option * name: string option * payload: MCPObservabilityEvent5.Payload * timestamp: float
-    | [<CompiledName("mcp:client:preconnect")>] McpClientPreconnect of agent: string option * name: string option * payload: MCPObservabilityEvent6.Payload * timestamp: float
-    | [<CompiledName("message:cancel")>] MessageCancel of agent: string option * name: string option * payload: ObservabilityEvent56.Payload * timestamp: float
-    | [<CompiledName("message:clear")>] MessageClear of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
-    | [<CompiledName("message:error")>] MessageError of agent: string option * name: string option * payload: ObservabilityEvent58.Payload * timestamp: float
-    | [<CompiledName("message:request")>] MessageRequest of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
-    | [<CompiledName("message:response")>] MessageResponse of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
-    | [<CompiledName("notice:delivered")>] NoticeDelivered of agent: string option * name: string option * payload: ObservabilityEvent61.Payload * timestamp: float
-    | [<CompiledName("notice:failed")>] NoticeFailed of agent: string option * name: string option * payload: ObservabilityEvent62.Payload * timestamp: float
-    | [<CompiledName("queue:create")>] QueueCreate of agent: string option * name: string option * payload: ObservabilityEvent63.Payload * timestamp: float
-    | [<CompiledName("queue:error")>] QueueError of agent: string option * name: string option * payload: ObservabilityEvent64.Payload * timestamp: float
-    | [<CompiledName("queue:retry")>] QueueRetry of agent: string option * name: string option * payload: ObservabilityEvent65.Payload * timestamp: float
-    | [<CompiledName("rpc")>] Rpc of agent: string option * name: string option * payload: ObservabilityEvent66.Payload * timestamp: float
-    | [<CompiledName("rpc:error")>] RpcError of agent: string option * name: string option * payload: ObservabilityEvent67.Payload * timestamp: float
-    | [<CompiledName("schedule:cancel")>] ScheduleCancel of agent: string option * name: string option * payload: ObservabilityEvent68.Payload * timestamp: float
-    | [<CompiledName("schedule:create")>] ScheduleCreate of agent: string option * name: string option * payload: ObservabilityEvent69.Payload * timestamp: float
-    | [<CompiledName("schedule:duplicate_warning")>] ScheduleDuplicateWarning of agent: string option * name: string option * payload: ObservabilityEvent70.Payload * timestamp: float
-    | [<CompiledName("schedule:error")>] ScheduleError of agent: string option * name: string option * payload: ObservabilityEvent71.Payload * timestamp: float
-    | [<CompiledName("schedule:execute")>] ScheduleExecute of agent: string option * name: string option * payload: ObservabilityEvent72.Payload * timestamp: float
-    | [<CompiledName("schedule:retry")>] ScheduleRetry of agent: string option * name: string option * payload: ObservabilityEvent73.Payload * timestamp: float
-    | [<CompiledName("state:update")>] StateUpdate of agent: string option * name: string option * payload: JS.Record<string, unit> * timestamp: float
-    | [<CompiledName("submission:create")>] SubmissionCreate of agent: string option * name: string option * payload: ObservabilityEvent75.Payload * timestamp: float
-    | [<CompiledName("submission:error")>] SubmissionError of agent: string option * name: string option * payload: ObservabilityEvent76.Payload * timestamp: float
-    | [<CompiledName("submission:status")>] SubmissionStatus of agent: string option * name: string option * payload: ObservabilityEvent77.Payload * timestamp: float
-    | [<CompiledName("tool:approval")>] ToolApproval of agent: string option * name: string option * payload: ObservabilityEvent78.Payload * timestamp: float
-    | [<CompiledName("tool:result")>] ToolResult of agent: string option * name: string option * payload: ObservabilityEvent79.Payload * timestamp: float
-    | [<CompiledName("workflow:approved")>] WorkflowApproved of agent: string option * name: string option * payload: ObservabilityEvent80.Payload * timestamp: float
-    | [<CompiledName("workflow:event")>] WorkflowEvent of agent: string option * name: string option * payload: ObservabilityEvent81.Payload * timestamp: float
-    | [<CompiledName("workflow:paused")>] WorkflowPaused of agent: string option * name: string option * payload: ObservabilityEvent82.Payload * timestamp: float
-    | [<CompiledName("workflow:rejected")>] WorkflowRejected of agent: string option * name: string option * payload: ObservabilityEvent83.Payload * timestamp: float
-    | [<CompiledName("workflow:restarted")>] WorkflowRestarted of agent: string option * name: string option * payload: ObservabilityEvent84.Payload * timestamp: float
-    | [<CompiledName("workflow:resumed")>] WorkflowResumed of agent: string option * name: string option * payload: ObservabilityEvent85.Payload * timestamp: float
-    | [<CompiledName("workflow:start")>] WorkflowStart of agent: string option * name: string option * payload: ObservabilityEvent86.Payload * timestamp: float
-    | [<CompiledName("workflow:terminated")>] WorkflowTerminated of agent: string option * name: string option * payload: ObservabilityEvent87.Payload * timestamp: float
+    | [<CompiledName("action:ledger:conflict"); Fickl.Core.InlineInterface>] ActionLedgerConflict of ObservabilityEvent2
+    | [<CompiledName("action:ledger:pending"); Fickl.Core.InlineInterface>] ActionLedgerPending of ObservabilityEvent3
+    | [<CompiledName("action:ledger:reclaimed"); Fickl.Core.InlineInterface>] ActionLedgerReclaimed of ObservabilityEvent4
+    | [<CompiledName("action:ledger:replayed"); Fickl.Core.InlineInterface>] ActionLedgerReplayed of ObservabilityEvent5
+    | [<CompiledName("action:ledger:serialize_failed"); Fickl.Core.InlineInterface>] ActionLedgerSerializeFailed of ObservabilityEvent6
+    | [<CompiledName("action:ledger:settled"); Fickl.Core.InlineInterface>] ActionLedgerSettled of ObservabilityEvent7
+    | [<CompiledName("action:ledger:swept"); Fickl.Core.InlineInterface>] ActionLedgerSwept of ObservabilityEvent8
+    | [<CompiledName("action:pause:approved"); Fickl.Core.InlineInterface>] ActionPauseApproved of ObservabilityEvent9
+    | [<CompiledName("action:pause:created"); Fickl.Core.InlineInterface>] ActionPauseCreated of ObservabilityEvent10
+    | [<CompiledName("action:pause:rejected"); Fickl.Core.InlineInterface>] ActionPauseRejected of ObservabilityEvent11
+    | [<CompiledName("action:pause:swept"); Fickl.Core.InlineInterface>] ActionPauseSwept of ObservabilityEvent12
+    | [<CompiledName("action:reply-attached"); Fickl.Core.InlineInterface>] ActionReplyAttached of ObservabilityEvent13
+    | [<CompiledName("agent_tool:detached:delivery_failed"); Fickl.Core.InlineInterface>] AgentToolDetachedDeliveryFailed of ObservabilityEvent14
+    | [<CompiledName("agent_tool:detached:live_count_warning"); Fickl.Core.InlineInterface>] AgentToolDetachedLiveCountWarning of ObservabilityEvent15
+    | [<CompiledName("agent_tool:recovery:begin"); Fickl.Core.InlineInterface>] AgentToolRecoveryBegin of ObservabilityEvent16
+    | [<CompiledName("agent_tool:recovery:complete"); Fickl.Core.InlineInterface>] AgentToolRecoveryComplete of ObservabilityEvent17
+    | [<CompiledName("agent_tool:recovery:deadline"); Fickl.Core.InlineInterface>] AgentToolRecoveryDeadline of ObservabilityEvent18
+    | [<CompiledName("agent_tool:recovery:failed"); Fickl.Core.InlineInterface>] AgentToolRecoveryFailed of ObservabilityEvent19
+    | [<CompiledName("agent_tool:recovery:reattach"); Fickl.Core.InlineInterface>] AgentToolRecoveryReattach of ObservabilityEvent20
+    | [<CompiledName("agent_tool:recovery:row"); Fickl.Core.InlineInterface>] AgentToolRecoveryRow of ObservabilityEvent21
+    | [<CompiledName("alarm:memory_limit_reset"); Fickl.Core.InlineInterface>] AlarmMemoryLimitReset of ObservabilityEvent22
+    | [<CompiledName("channel:delivered"); Fickl.Core.InlineInterface>] ChannelDelivered of ObservabilityEvent23
+    | [<CompiledName("channel:resolved"); Fickl.Core.InlineInterface>] ChannelResolved of ObservabilityEvent24
+    | [<CompiledName("chat:context:compacted"); Fickl.Core.InlineInterface>] ChatContextCompacted of ObservabilityEvent25
+    | [<CompiledName("chat:hydration:windowed"); Fickl.Core.InlineInterface>] ChatHydrationWindowed of ObservabilityEvent26
+    | [<CompiledName("chat:media:evicted"); Fickl.Core.InlineInterface>] ChatMediaEvicted of ObservabilityEvent27
+    | [<CompiledName("chat:onstart:degraded"); Fickl.Core.InlineInterface>] ChatOnstartDegraded of ObservabilityEvent28
+    | [<CompiledName("chat:recovery:attempt"); Fickl.Core.InlineInterface>] ChatRecoveryAttempt of ObservabilityEvent29
+    | [<CompiledName("chat:recovery:completed"); Fickl.Core.InlineInterface>] ChatRecoveryCompleted of ObservabilityEvent30
+    | [<CompiledName("chat:recovery:detected"); Fickl.Core.InlineInterface>] ChatRecoveryDetected of ObservabilityEvent31
+    | [<CompiledName("chat:recovery:exhausted"); Fickl.Core.InlineInterface>] ChatRecoveryExhausted of ObservabilityEvent32
+    | [<CompiledName("chat:recovery:failed"); Fickl.Core.InlineInterface>] ChatRecoveryFailed of ObservabilityEvent33
+    | [<CompiledName("chat:recovery:scheduled"); Fickl.Core.InlineInterface>] ChatRecoveryScheduled of ObservabilityEvent34
+    | [<CompiledName("chat:recovery:skipped"); Fickl.Core.InlineInterface>] ChatRecoverySkipped of ObservabilityEvent35
+    | [<CompiledName("chat:request:failed"); Fickl.Core.InlineInterface>] ChatRequestFailed of ObservabilityEvent36
+    | [<CompiledName("chat:stream:stalled"); Fickl.Core.InlineInterface>] ChatStreamStalled of ObservabilityEvent37
+    | [<CompiledName("chat:transcript:repaired"); Fickl.Core.InlineInterface>] ChatTranscriptRepaired of ObservabilityEvent38
+    | [<CompiledName("chat:turn:finish"); Fickl.Core.InlineInterface>] ChatTurnFinish of ObservabilityEvent39
+    | [<CompiledName("chat:turn:start"); Fickl.Core.InlineInterface>] ChatTurnStart of ObservabilityEvent40
+    | [<CompiledName("connect"); Fickl.Core.InlineInterface>] Connect of ObservabilityEvent41
+    | [<CompiledName("destroy"); Fickl.Core.InlineInterface>] Destroy of ObservabilityEvent42
+    | [<CompiledName("disconnect"); Fickl.Core.InlineInterface>] Disconnect of ObservabilityEvent43
+    | [<CompiledName("email:receive"); Fickl.Core.InlineInterface>] EmailReceive of ObservabilityEvent44
+    | [<CompiledName("email:reply"); Fickl.Core.InlineInterface>] EmailReply of ObservabilityEvent45
+    | [<CompiledName("email:send"); Fickl.Core.InlineInterface>] EmailSend of ObservabilityEvent46
+    | [<CompiledName("fiber:recovery:attempt"); Fickl.Core.InlineInterface>] FiberRecoveryAttempt of ObservabilityEvent47
+    | [<CompiledName("fiber:recovery:detected"); Fickl.Core.InlineInterface>] FiberRecoveryDetected of ObservabilityEvent48
+    | [<CompiledName("fiber:recovery:failed"); Fickl.Core.InlineInterface>] FiberRecoveryFailed of ObservabilityEvent49
+    | [<CompiledName("fiber:recovery:handled"); Fickl.Core.InlineInterface>] FiberRecoveryHandled of ObservabilityEvent50
+    | [<CompiledName("fiber:recovery:skipped"); Fickl.Core.InlineInterface>] FiberRecoverySkipped of ObservabilityEvent51
+    | [<CompiledName("fiber:run:completed"); Fickl.Core.InlineInterface>] FiberRunCompleted of ObservabilityEvent52
+    | [<CompiledName("fiber:run:failed"); Fickl.Core.InlineInterface>] FiberRunFailed of ObservabilityEvent53
+    | [<CompiledName("fiber:run:interrupted"); Fickl.Core.InlineInterface>] FiberRunInterrupted of ObservabilityEvent54
+    | [<CompiledName("fiber:run:started"); Fickl.Core.InlineInterface>] FiberRunStarted of ObservabilityEvent55
+    | [<CompiledName("mcp:client:authorize"); Fickl.Core.InlineInterface>] McpClientAuthorize of MCPObservabilityEvent2
+    | [<CompiledName("mcp:client:close"); Fickl.Core.InlineInterface>] McpClientClose of MCPObservabilityEvent3
+    | [<CompiledName("mcp:client:connect"); Fickl.Core.InlineInterface>] McpClientConnect of MCPObservabilityEvent4
+    | [<CompiledName("mcp:client:discover"); Fickl.Core.InlineInterface>] McpClientDiscover of MCPObservabilityEvent5
+    | [<CompiledName("mcp:client:preconnect"); Fickl.Core.InlineInterface>] McpClientPreconnect of MCPObservabilityEvent6
+    | [<CompiledName("message:cancel"); Fickl.Core.InlineInterface>] MessageCancel of ObservabilityEvent56
+    | [<CompiledName("message:clear"); Fickl.Core.InlineInterface>] MessageClear of ObservabilityEvent57
+    | [<CompiledName("message:error"); Fickl.Core.InlineInterface>] MessageError of ObservabilityEvent58
+    | [<CompiledName("message:request"); Fickl.Core.InlineInterface>] MessageRequest of ObservabilityEvent59
+    | [<CompiledName("message:response"); Fickl.Core.InlineInterface>] MessageResponse of ObservabilityEvent60
+    | [<CompiledName("notice:delivered"); Fickl.Core.InlineInterface>] NoticeDelivered of ObservabilityEvent61
+    | [<CompiledName("notice:failed"); Fickl.Core.InlineInterface>] NoticeFailed of ObservabilityEvent62
+    | [<CompiledName("queue:create"); Fickl.Core.InlineInterface>] QueueCreate of ObservabilityEvent63
+    | [<CompiledName("queue:error"); Fickl.Core.InlineInterface>] QueueError of ObservabilityEvent64
+    | [<CompiledName("queue:retry"); Fickl.Core.InlineInterface>] QueueRetry of ObservabilityEvent65
+    | [<CompiledName("rpc"); Fickl.Core.InlineInterface>] Rpc of ObservabilityEvent66
+    | [<CompiledName("rpc:error"); Fickl.Core.InlineInterface>] RpcError of ObservabilityEvent67
+    | [<CompiledName("schedule:cancel"); Fickl.Core.InlineInterface>] ScheduleCancel of ObservabilityEvent68
+    | [<CompiledName("schedule:create"); Fickl.Core.InlineInterface>] ScheduleCreate of ObservabilityEvent69
+    | [<CompiledName("schedule:duplicate_warning"); Fickl.Core.InlineInterface>] ScheduleDuplicateWarning of ObservabilityEvent70
+    | [<CompiledName("schedule:error"); Fickl.Core.InlineInterface>] ScheduleError of ObservabilityEvent71
+    | [<CompiledName("schedule:execute"); Fickl.Core.InlineInterface>] ScheduleExecute of ObservabilityEvent72
+    | [<CompiledName("schedule:retry"); Fickl.Core.InlineInterface>] ScheduleRetry of ObservabilityEvent73
+    | [<CompiledName("state:update"); Fickl.Core.InlineInterface>] StateUpdate of ObservabilityEvent74
+    | [<CompiledName("submission:create"); Fickl.Core.InlineInterface>] SubmissionCreate of ObservabilityEvent75
+    | [<CompiledName("submission:error"); Fickl.Core.InlineInterface>] SubmissionError of ObservabilityEvent76
+    | [<CompiledName("submission:status"); Fickl.Core.InlineInterface>] SubmissionStatus of ObservabilityEvent77
+    | [<CompiledName("tool:approval"); Fickl.Core.InlineInterface>] ToolApproval of ObservabilityEvent78
+    | [<CompiledName("tool:result"); Fickl.Core.InlineInterface>] ToolResult of ObservabilityEvent79
+    | [<CompiledName("workflow:approved"); Fickl.Core.InlineInterface>] WorkflowApproved of ObservabilityEvent80
+    | [<CompiledName("workflow:event"); Fickl.Core.InlineInterface>] WorkflowEvent of ObservabilityEvent81
+    | [<CompiledName("workflow:paused"); Fickl.Core.InlineInterface>] WorkflowPaused of ObservabilityEvent82
+    | [<CompiledName("workflow:rejected"); Fickl.Core.InlineInterface>] WorkflowRejected of ObservabilityEvent83
+    | [<CompiledName("workflow:restarted"); Fickl.Core.InlineInterface>] WorkflowRestarted of ObservabilityEvent84
+    | [<CompiledName("workflow:resumed"); Fickl.Core.InlineInterface>] WorkflowResumed of ObservabilityEvent85
+    | [<CompiledName("workflow:start"); Fickl.Core.InlineInterface>] WorkflowStart of ObservabilityEvent86
+    | [<CompiledName("workflow:terminated"); Fickl.Core.InlineInterface>] WorkflowTerminated of ObservabilityEvent87
 
 [<Interface>]
 type ObservabilityEvent10 =
@@ -6765,14 +6446,15 @@ module ObservabilityEvent9 =
         [<ParamObject; Emit("$0")>]
         static member Create (action: string, executionId: string) : Payload = jsNative
 
-[<Interface>]
+type OnJobError = delegate of context: DurableObjectCapability.OnJob.Context * error: obj -> U3<string, JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>, DurableObjectCapability.OnJob.Result.Item> option
+
+type OnWebSocketClose = delegate of ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * code: float * reason: string * wasClean: bool -> U2<bool, JS.Promise<bool option>> option
+
+type OnWebSocketError = delegate of ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * error: obj -> U2<bool, JS.Promise<bool option>> option
+
+type OnWebSocketMessage = delegate of ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * message: WSMessage -> U2<bool, JS.Promise<bool option>> option
+
 type RPCClientTransport =
-    abstract _namespace: obj with get, set
-    abstract _name: obj with get, set
-    abstract _props: obj option with get, set
-    abstract _stub: obj option with get, set
-    abstract _started: obj with get, set
-    abstract _protocolVersion: obj option with get, set
     abstract sessionId: string option with get, set
     abstract onclose: (unit -> unit) option with get, set
     abstract onerror: (exn -> unit) option with get, set
@@ -6782,16 +6464,14 @@ type RPCClientTransport =
     abstract start: unit -> JS.Promise<unit>
     abstract close: unit -> JS.Promise<unit>
     abstract send: message: U5<U4<RPCClientTransport.Onmessage.Message, RPCClientTransport.Onmessage.Message2, RPCClientTransport.Onmessage.Message3, RPCClientTransport.Onmessage.Message4>[], RPCClientTransport.Onmessage.Message, RPCClientTransport.Onmessage.Message2, RPCClientTransport.Onmessage.Message3, RPCClientTransport.Onmessage.Message4> * ?options: obj -> JS.Promise<unit>
-    [<ParamObject; Emit("$0")>]
-    static member Create (_namespace: obj, _name: obj, _started: obj, setProtocolVersion: (string -> unit), getProtocolVersion: (unit -> string option), start: (unit -> JS.Promise<unit>), close: (unit -> JS.Promise<unit>), send: Func<U5<U4<RPCClientTransport.Onmessage.Message, RPCClientTransport.Onmessage.Message2, RPCClientTransport.Onmessage.Message3, RPCClientTransport.Onmessage.Message4>[], RPCClientTransport.Onmessage.Message, RPCClientTransport.Onmessage.Message2, RPCClientTransport.Onmessage.Message3, RPCClientTransport.Onmessage.Message4>, obj option, JS.Promise<unit>>, ?_props: obj, ?_stub: obj, ?_protocolVersion: obj, ?sessionId: string, ?onclose: (unit -> unit), ?onerror: (exn -> unit), ?onmessage: RPCClientTransport.Onmessage) : RPCClientTransport = jsNative
 
 [<Interface>]
 type RPCClientTransportOptions<'T when 'T :> McpAgent<obj, obj, JS.Record<string, obj>>> =
-    abstract ``namespace``: obj with get, set
+    abstract ``namespace``: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<'T> with get, set
     abstract name: string with get, set
     abstract props: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (``namespace``: obj, name: string, ?props: JS.Record<string, obj>) : RPCClientTransportOptions<'T> = jsNative
+    static member Create (``namespace``: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<'T>, name: string, ?props: JS.Record<string, obj>) : RPCClientTransportOptions<'T> = jsNative
 
 [<Interface>]
 type RPCServerTransportOptions =
@@ -6799,26 +6479,29 @@ type RPCServerTransportOptions =
     [<ParamObject; Emit("$0")>]
     static member Create (?timeout: float) : RPCServerTransportOptions = jsNative
 
-[<Interface>]
+[<Fickl.Core.CallableInterface>]
+type RunWithCodeVerifierState =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'T>: state: string * callback: (unit -> JS.Promise<'T>) -> JS.Promise<'T>
+
 type Scheduler<'Handlers> =
     inherit LifecycleCapability<obj>
-    abstract ``__#4@#private``: obj with get, set
     /// <summary>
-    /// Initialize and migrate schedule storage during Lifecycle startup.
+    /// Migrate legacy schedule storage into the Lifecycle job queue.
     /// </summary>
     abstract onStart: unit -> JS.Promise<unit>
     /// <summary>
-    /// Execute due schedule rows during the Lifecycle alarm phase.
+    /// Drive one due schedule job dispatched by the Lifecycle event loop.
     /// </summary>
-    abstract onAlarm: unit -> JS.Promise<unit>
+    abstract onJob: context: DurableObjectCapability.OnJob.Context -> JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>
+    /// <summary>
+    /// Observe one schedule's terminal application failure.
+    /// </summary>
+    abstract onJobError: context: DurableObjectCapability.OnJob.Context * error: obj -> JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>
     /// <summary>
     /// Handle Scheduler protocol messages routed by another Lifecycle.
     /// </summary>
     abstract onRoute: context: DurableObjectCapability.OnRoute.Context -> JS.Promise<obj>
-    /// <summary>
-    /// Contribute the earliest pending schedule to Lifecycle alarm selection.
-    /// </summary>
-    abstract getNextAlarm: unit -> float option
     /// <summary>
     /// Set a delayed, dated, or cron schedule for a registered callback.
     /// </summary>
@@ -6855,23 +6538,283 @@ type Scheduler<'Handlers> =
     /// Durable Object boundaries and throws inside routed sub-agents.
     /// </remarks>
     abstract __DO_NOT_USE_WILL_REMOVE__getSchedules<'T>: ?criteria: Scheduler.List.Criteria -> Scheduler.Set.Result.Item<'T>[]
-    /// <remarks>@internal Remove rows owned by one routed Lifecycle subtree.</remarks>
-    abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> unit
-    /// <remarks>@internal Apply Agent's outer alarm memory-limit policy to Scheduler rows.</remarks>
-    abstract __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: options: Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#4@#private``: obj, onStart: (unit -> JS.Promise<unit>), onAlarm: (unit -> JS.Promise<unit>), onRoute: (DurableObjectCapability.OnRoute.Context -> JS.Promise<obj>), getNextAlarm: (unit -> float option), set: Func<U3<string, float, Fable.Core.TS.Es.Date>, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Scheduler.Set.Result.Item<obj>>>, every: Func<float, 'Name, obj option, Scheduler.Set.Options option, JS.Promise<Scheduler.Set.Result.Item<obj>>>, get: (string -> JS.Promise<Scheduler.Set.Result.Item<obj> option>), list: (Scheduler.List.Criteria option -> JS.Promise<Scheduler.Set.Result.Item<obj>[]>), cancel: (string -> JS.Promise<bool>), __DO_NOT_USE_WILL_REMOVE__getSchedule: (string -> Scheduler.Set.Result.Item<'T> option), __DO_NOT_USE_WILL_REMOVE__getSchedules: (Scheduler.List.Criteria option -> Scheduler.Set.Result.Item<'T>[]), __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: (string -> unit), __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: (Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit), capabilityId: string, lifecycle: Scheduler.LifecycleServices, ?lifecycleServices: Scheduler.LifecycleServices) : Scheduler<'Handlers> = jsNative
+    /// <remarks>@internal Remove schedules owned by one routed Lifecycle subtree.</remarks>
+    abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> JS.Promise<unit>
+
+type State<'T> =
+    inherit LifecycleCapability<obj>
+    /// <summary>
+    /// Initialize state storage during Lifecycle startup.
+    /// </summary>
+    abstract onStart: unit -> JS.Promise<unit>
+    /// <summary>
+    /// Current state.
+    /// <br /><br />
+    /// Loads lazily from storage on first access and caches in memory. Row
+    /// existence in <c>cf_agents_state</c> is the signal that state was previously
+    /// set, so falsy values persist correctly. On a corrupt row, falls back to
+    /// the initial state (re-persisting it) or clears the row.
+    /// </summary>
+    abstract get: unit -> 'T option
+    /// <summary>
+    /// Validate and persist a state change, then call the change hook.
+    /// </summary>
+    /// <param name="nextState">- The new state to persist.</param>
+    /// <param name="source">
+    /// - <c>"server"</c> for host-originated changes, or the originating
+    /// connection for client-originated changes.
+    /// </param>
+    /// <remarks>@throws Whatever the injected <c>validateStateChange</c> throws.</remarks>
+    abstract set: nextState: 'T * ?source: StateChangeSource -> unit
+
+type StateChangeSource = U2<string, McpAgent.ShouldSendProtocolMessages.Connection<obj>>
 
 [<Interface>]
-type SubAgentConnectionBridge =
-    inherit SubAgentConnectionBridge.Implements
-    abstract ``__#1@#private``: obj with get, set
-    abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
-    abstract close: ?code: float * ?reason: string -> unit
-    abstract broadcast: ownerPath: SubAgentConnectionBridge.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
-    abstract __RPC_TARGET_BRAND: unit
+type Task<'Input, 'Output> =
+    abstract name: string
+    /// <summary>
+    /// Durably accept a run and return without waiting for terminal state.
+    /// </summary>
+    abstract run: input: 'Input * ?options: TaskRunOptions -> JS.Promise<TaskReceipt>
+    /// <summary>
+    /// Read one run of this definition.
+    /// </summary>
+    abstract get: runId: string -> JS.Promise<Task.Get.Result.Item<'Output> option>
+    /// <summary>
+    /// Read one run of this definition by its idempotency key.
+    /// </summary>
+    abstract getByIdempotencyKey: idempotencyKey: string -> JS.Promise<Task.Get.Result.Item<'Output> option>
+    /// <summary>
+    /// Request cooperative cancellation. True when a live run was cancelled.
+    /// </summary>
+    abstract cancel: runId: string * ?reason: string -> JS.Promise<bool>
     [<ParamObject; Emit("$0")>]
-    static member Create (``__#1@#private``: obj, send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Broadcast.OwnerPath.Item[], U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option, JS.Promise<unit> option>) : SubAgentConnectionBridge = jsNative
+    static member Create (name: string, run: Func<'Input, TaskRunOptions option, JS.Promise<TaskReceipt>>, get: (string -> JS.Promise<Task.Get.Result.Item<'Output> option>), getByIdempotencyKey: (string -> JS.Promise<Task.Get.Result.Item<'Output> option>), cancel: Func<string, string option, JS.Promise<bool>>) : Task<'Input, 'Output> = jsNative
+
+[<Interface>]
+type TaskError =
+    abstract name: string with get, set
+    abstract message: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (name: string, message: string) : TaskError = jsNative
+
+type TaskJson = U5<string, float, bool, obj[], TaskJson2> option
+
+type TaskJson2 =
+    [<EmitIndexer>]
+    abstract Item: string -> TaskJson with get, set
+
+[<Interface>]
+type TaskReceipt =
+    abstract runId: string with get, set
+    abstract definition: string with get, set
+    abstract accepted: bool with get, set
+    abstract state: TaskRunState with get, set
+    abstract createdAt: float with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (runId: string, definition: string, accepted: bool, state: TaskRunState, createdAt: float) : TaskReceipt = jsNative
+
+[<Interface>]
+type TaskRunOptions =
+    /// <summary>
+    /// Stable key deduplicating repeated acceptance attempts onto one run.
+    /// </summary>
+    abstract idempotencyKey: string option with get, set
+    /// <summary>
+    /// Caller-selected run ID. Generated when omitted.
+    /// </summary>
+    abstract runId: string option with get, set
+    /// <summary>
+    /// JSON metadata retained with the run.
+    /// </summary>
+    abstract metadata: JS.Record<string, TaskJson> option with get, set
+    /// <summary>
+    /// Keep terminal state for inspection. Defaults to <c>true</c>.
+    /// </summary>
+    abstract retain: bool option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?idempotencyKey: string, ?runId: string, ?metadata: JS.Record<string, TaskJson>, ?retain: bool) : TaskRunOptions = jsNative
+
+type TaskStep =
+    /// <summary>
+    /// The step an unclean interruption left mid-execution, or <c>null</c> on a
+    /// clean attempt — the durable evidence a replayed handler branches on
+    /// before re-entering irreversible work. Populated when a lost attempt's
+    /// claim is taken over; a retry park or first attempt sees <c>null</c>.
+    /// </summary>
+    abstract interrupted: TaskStep.Interrupted option
+    /// <summary>
+    /// Run a named step once, replaying its journaled result thereafter.
+    /// </summary>
+    abstract ``do``<'T>: name: string * callback: (TaskStepAttempt -> U2<'T, JS.Promise<'T>>) -> JS.Promise<'T>
+    /// <summary>
+    /// Run a named step once, replaying its journaled result thereafter.
+    /// </summary>
+    abstract ``do``<'T>: name: string * config: TaskStepConfig * callback: (TaskStepAttempt -> U2<'T, JS.Promise<'T>>) -> JS.Promise<'T>
+    /// <summary>
+    /// Sleep durably. The first recorded deadline is authoritative; replays
+    /// before it suspend again, replays after it continue.
+    /// </summary>
+    abstract sleep: name: string * duration: U2<float, string> -> JS.Promise<unit>
+    /// <summary>
+    /// Sleep durably until a wall-clock time.
+    /// </summary>
+    abstract sleepUntil: name: string * ``when``: U2<float, Fable.Core.TS.Es.Date> -> JS.Promise<unit>
+    /// <summary>
+    /// Update observable progress. Replays stay silent until execution reaches
+    /// new ground, so old progress is not re-published as new.
+    /// </summary>
+    abstract status: message: string -> JS.Promise<unit>
+    /// <summary>
+    /// The stable external deduplication key <c>step.do(name, ...)</c> would get.
+    /// </summary>
+    abstract idempotencyKey: name: string -> string
+
+[<Interface>]
+type TaskStepAttempt =
+    /// <summary>
+    /// One-based attempt number for this named step.
+    /// </summary>
+    abstract attempt: float
+    /// <summary>
+    /// Stable external deduplication key for this step: identical across
+    /// attempts and replays of the same run.
+    /// </summary>
+    abstract idempotencyKey: string
+    /// <summary>
+    /// Aborted on cancellation or when this attempt's timeout elapses.
+    /// </summary>
+    abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal
+    [<ParamObject; Emit("$0")>]
+    static member Create (attempt: float, idempotencyKey: string, signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal) : TaskStepAttempt = jsNative
+
+[<Interface>]
+type TaskStepConfig =
+    abstract retries: TaskStepConfig.Retries option with get, set
+    /// <summary>
+    /// Timeout of one callback attempt.
+    /// </summary>
+    abstract timeout: U2<float, string> option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?retries: TaskStepConfig.Retries, ?timeout: U2<float, string>) : TaskStepConfig = jsNative
+
+type TaskValue = U5<string, float, bool, TaskJson[], TaskJson2> option
+
+type Tasks<'Handlers> =
+    inherit LifecycleCapability<obj>
+    /// <remarks>
+    /// @internal
+    /// Framework aperture: register one reserved (<c>__cf</c>-prefixed)
+    /// Task definition directly on this instance, bypassing the constructor's
+    /// <c>definitions</c> map so a host's own subclass layers can each declare their
+    /// own <c>definitions</c> / <c>taskDefinitions</c> field without colliding with — or
+    /// being silently clobbered by — a framework's internal names. Call once per
+    /// name from the owning host's own constructor, unconditionally, so the
+    /// definition is rebuilt identically on every Durable Object wake: an
+    /// in-flight run resolves the same handler for its persisted definition name
+    /// every time, or it cannot resume.
+    /// <br /><br />
+    /// Throws if <c>name</c> does not carry the reserved <c>__cf</c> prefix — this is not
+    /// a general-purpose registration path; declare ordinary definitions in the
+    /// constructor's <c>definitions</c> map instead — or if <c>name</c> is already
+    /// registered, which is always a real conflict: this method runs exactly
+    /// once per name per Tasks construction.
+    /// </remarks>
+    abstract register: name: string * definition: Tasks.Register.Definition -> unit
+    /// <summary>
+    /// Durably accept one run of a declared definition and return a receipt
+    /// without waiting for terminal state. The same <c>idempotencyKey</c> or <c>runId</c>
+    /// joins the existing run (<c>accepted: false</c>) instead of creating a second.
+    /// </summary>
+    abstract run<'Name>: definition: 'Name * ?input: obj * ?options: TaskRunOptions -> JS.Promise<TaskReceipt>
+    /// <summary>
+    /// A typed handle scoped to one declared definition: its <c>run</c>, <c>get</c>,
+    /// <c>getByIdempotencyKey</c>, and <c>cancel</c> see only that definition's runs. The
+    /// handle is a pure lens over this capability — it holds no state and may
+    /// be created at any time.
+    /// </summary>
+    abstract handle<'Name>: definition: 'Name -> Task<obj, obj>
+    /// <summary>
+    /// Migrate storage and reconcile run deadlines during Lifecycle startup.
+    /// </summary>
+    abstract onStart: unit -> JS.Promise<unit>
+    /// <summary>
+    /// Drive one due run's wake dispatched by the Lifecycle event loop.
+    /// </summary>
+    abstract onJob: context: DurableObjectCapability.OnJob.Context -> JS.Promise<U2<string, DurableObjectCapability.OnJob.Result.Item> option>
+    /// <summary>
+    /// Alarm memory-limit breaker policy (#1825) for the run whose wake struck.
+    /// <br /><br />
+    /// The run row is the durable source of truth: startup reconciliation
+    /// re-derives due-now wakes from it, so the breaker's queue-row backoff
+    /// and purge alone cannot contain a run whose attempt deterministically
+    /// exhausts memory — a fresh isolate would resurrect it immediately. On a
+    /// strike the run's claim is stripped and its deadline pushed to the
+    /// backoff wake: the row keeps its state, so a struck <c>running</c> row still
+    /// reads as an interrupted attempt (<c>step.interrupted</c>) when it is
+    /// reclaimed, while reconciliation leaves the claimless row alone instead
+    /// of flooring its deadline to now. When the breaker seals, the run
+    /// terminally fails with an observable <c>task:failed</c> outcome.
+    /// </summary>
+    abstract onMemoryLimit: context: DurableObjectCapability.OnMemoryLimit.Context -> JS.Promise<unit>
+    /// <remarks>
+    /// @internal
+    /// Framework aperture: durably accept one run — reserved
+    /// (<c>__cf</c>-prefixed) definition names included, which the public <c>run()</c>
+    /// refuses so users cannot start framework runs — and drive its first
+    /// attempt in the caller's invocation, resolving when that attempt reaches
+    /// its next durable boundary. The receipt's run may already be terminal
+    /// when this resolves; callers that need the outcome read it from their own
+    /// channel (the run handler settles it) or from the snapshot.
+    /// </remarks>
+    abstract __DO_NOT_USE_WILL_BREAK__runAttached: definition: string * input: obj * ?options: TaskRunOptions -> JS.Promise<TaskReceipt>
+    /// <remarks>
+    /// @internal
+    /// Framework aperture: durably accept one run — reserved names
+    /// included — and leave its first attempt to the durable queue wake instead
+    /// of warm-starting it in the caller's invocation. Chat recovery uses this
+    /// so a continuation always runs under an alarm, where <c>trackAlarmWork</c>
+    /// keeps its model turn inside the memory-limit breaker domain.
+    /// </remarks>
+    abstract __DO_NOT_USE_WILL_BREAK__enqueue: definition: string * input: obj * ?options: TaskRunOptions -> JS.Promise<TaskReceipt>
+    /// <summary>
+    /// Handle Tasks protocol messages routed by another Lifecycle.
+    /// </summary>
+    abstract onRoute: context: DurableObjectCapability.OnRoute.Context -> JS.Promise<obj>
+    /// <remarks>
+    /// @internal
+    /// Framework aperture: bulk-cancel this root's routed wake
+    /// mirrors for every run owned by a deleted facet subtree. The runs and
+    /// their step journals live on the deleted facets' own storage and are
+    /// wiped with them; only this root's mirror job needs an explicit cancel,
+    /// or it stays due forever, retrying a dispatch to a facet that is gone.
+    /// </remarks>
+    abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> JS.Promise<unit>
+    /// <summary>
+    /// Read one run by ID across all definitions.
+    /// </summary>
+    abstract get: runId: string -> JS.Promise<Task.Get.Result.Item<TaskValue> option>
+    /// <summary>
+    /// Read one run by idempotency key across all definitions.
+    /// </summary>
+    abstract getByIdempotencyKey: idempotencyKey: string -> JS.Promise<Task.Get.Result.Item<TaskValue> option>
+    /// <summary>
+    /// List runs, newest first.
+    /// </summary>
+    abstract list: ?options: Tasks.List.Options -> JS.Promise<Task.Get.Result.Item<TaskValue>[]>
+    /// <summary>
+    /// Request cooperative cancellation of one run.
+    /// <br /><br />
+    /// A live attempt is aborted and settles as cancelled at its next step
+    /// boundary; a parked run settles immediately.
+    /// </summary>
+    /// <returns>True when a non-terminal run accepted the request.</returns>
+    abstract cancel: runId: string * ?reason: string -> JS.Promise<bool>
+    /// <summary>
+    /// Delete retained terminal runs and their step journals.
+    /// </summary>
+    /// <returns>The number of runs deleted.</returns>
+    abstract delete: ?options: Tasks.Delete.Options -> JS.Promise<float>
 
 type WSMessage = U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
@@ -6881,6 +6824,38 @@ type WorkflowCallbackType =
     | [<CompiledName("error")>] Error
     | [<CompiledName("event")>] Event
     | [<CompiledName("progress")>] Progress
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type AgentToolRunStatus =
+    | [<CompiledName("aborted")>] Aborted
+    | [<CompiledName("completed")>] Completed
+    | [<CompiledName("error")>] Error
+    | [<CompiledName("interrupted")>] Interrupted
+    | [<CompiledName("running")>] Running
+    | [<CompiledName("starting")>] Starting
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type FiberStatus =
+    | [<CompiledName("aborted")>] Aborted
+    | [<CompiledName("completed")>] Completed
+    | [<CompiledName("error")>] Error
+    | [<CompiledName("interrupted")>] Interrupted
+    | [<CompiledName("pending")>] Pending
+    | [<CompiledName("running")>] Running
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type TaskRunState =
+    | [<CompiledName("cancelled")>] Cancelled
+    | [<CompiledName("completed")>] Completed
+    | [<CompiledName("failed")>] Failed
+    | [<CompiledName("pending")>] Pending
+    | [<CompiledName("running")>] Running
+    | [<CompiledName("waiting")>] Waiting
+
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type TaskWaitReason =
+    | [<CompiledName("retry")>] Retry
+    | [<CompiledName("sleep")>] Sleep
 
 module Agent =
     module AddMcpServer =
@@ -6941,7 +6916,7 @@ module Agent =
                 /// <summary>
                 /// Custom headers for authentication (e.g., bearer tokens, CF Access)
                 /// </summary>
-                abstract headers: obj option with get, set
+                abstract headers: FSharp.CloudEdge.Runtime.Workers.HeadersInit option with get, set
                 abstract ``type``: TransportType option with get, set
                 /// <summary>
                 /// Compatibility escape hatch for a trusted legacy authorization server
@@ -6950,7 +6925,7 @@ module Agent =
                 /// </summary>
                 abstract skipIssuerMetadataValidation: bool option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?headers: obj, ?``type``: TransportType, ?skipIssuerMetadataValidation: bool) : Transport = jsNative
+                static member Create (?headers: FSharp.CloudEdge.Runtime.Workers.HeadersInit, ?``type``: TransportType, ?skipIssuerMetadataValidation: bool) : Transport = jsNative
 
         module Result =
             [<Interface>]
@@ -6971,33 +6946,6 @@ module Agent =
                 | [<CompiledName("authenticating")>] Authenticating of id: string * authUrl: string
                 | [<CompiledName("ready")>] Ready of id: string
 
-            [<Interface>]
-            type Item22 =
-                abstract id: string with get, set
-                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
-                abstract state: string with get, set
-                abstract authUrl: string with get, set
-                [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
-                static member Create (id: string, authUrl: string) : Item22 = jsNative
-
-            module Item22 =
-                /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
-                [<Literal>]
-                let state = "authenticating"
-
-            [<Interface>]
-            type Item23 =
-                abstract id: string with get, set
-                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-                abstract state: string with get, set
-                [<ParamObject; Emit("({ state: 'ready', ...$0 })")>]
-                static member Create (id: string) : Item23 = jsNative
-
-            module Item23 =
-                /// <remarks>TypeScript type: <c>"ready"</c></remarks>
-                [<Literal>]
-                let state = "ready"
-
     module ApproveWorkflow =
         [<Interface>]
         type Data =
@@ -7013,6 +6961,37 @@ module Agent =
             [<ParamObject; Emit("$0")>]
             static member Create (?cadenceIndex: float) : Payload = jsNative
 
+    module CfInitAsFacet =
+        module ParentPath =
+            [<Interface>]
+            type Item =
+                abstract className: string with get, set
+                abstract name: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (className: string, name: string) : Item = jsNative
+
+    module CfInvokeSubAgentPath =
+        module Path =
+            [<Interface>]
+            type Item =
+                abstract className: string with get, set
+                abstract name: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (className: string, name: string) : Item = jsNative
+
+    module CfSubAgentConnectionMetas =
+        module Result =
+            module Item =
+                [<Interface>]
+                type Item =
+                    abstract id: string with get, set
+                    abstract uri: string option with get, set
+                    abstract tags: string[] with get, set
+                    abstract state: obj with get, set
+                    abstract requestHeaders: (string * string)[] option with get, set
+                    [<ParamObject; Emit("(o => ({...o, \"uri\": o[\"uri\"] ?? null}))($0)")>]
+                    static member Create (id: string, tags: string[], state: obj, ?uri: string, ?requestHeaders: (string * string)[]) : Item = jsNative
+
     module ClearAgentToolRuns =
         [<Interface>]
         type Options =
@@ -7021,13 +7000,22 @@ module Agent =
             [<ParamObject; Emit("$0")>]
             static member Create (?olderThan: float, ?status: AgentToolRunStatus[]) : Options = jsNative
 
+    module DeleteFibers =
+        [<Interface>]
+        type Options =
+            abstract status: U2<string, FiberStatus[]> option with get, set
+            abstract settledBefore: Fable.Core.TS.Es.Date option with get, set
+            abstract limit: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?status: U2<string, FiberStatus[]>, ?settledBefore: Fable.Core.TS.Es.Date, ?limit: float) : Options = jsNative
+
     module DeleteWorkflows =
         [<Interface>]
         type Criteria =
             inherit Agent.DeleteWorkflows.Criteria.Base
             abstract createdBefore: Fable.Core.TS.Es.Date option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, Agent.GetWorkflow.Result.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: Fable.Core.TS.Es.Date) : Criteria = jsNative
+            static member Create (?status: U2<string, FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string, ?createdBefore: Fable.Core.TS.Es.Date) : Criteria = jsNative
 
         module Criteria =
             [<Interface>]
@@ -7035,12 +7023,12 @@ module Agent =
                 /// <summary>
                 /// Filter by status
                 /// </summary>
-                abstract status: U2<string, Agent.GetWorkflow.Result.Status[]> option with get, set
+                abstract status: U2<string, FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status[]> option with get, set
                 abstract workflowName: string option with get, set
                 abstract metadata: JS.Record<string, U3<string, float, bool>> option with get, set
                 abstract cursor: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?status: U2<string, Agent.GetWorkflow.Result.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string) : Base = jsNative
+                static member Create (?status: U2<string, FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?cursor: string) : Base = jsNative
 
     module DeliverDetachedMilestone =
         [<Interface>]
@@ -7052,10 +7040,100 @@ module Agent =
             [<ParamObject; Emit("$0")>]
             static member Create (name: string, sequence: float, at: float, ?data: obj) : Milestone = jsNative
 
+    module Emit =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Mode =
-            | [<CompiledName("narrate")>] Narrate
-            | [<CompiledName("react")>] React
+        type Type =
+            | [<CompiledName("action:ledger:conflict")>] ActionLedgerConflict
+            | [<CompiledName("action:ledger:pending")>] ActionLedgerPending
+            | [<CompiledName("action:ledger:reclaimed")>] ActionLedgerReclaimed
+            | [<CompiledName("action:ledger:replayed")>] ActionLedgerReplayed
+            | [<CompiledName("action:ledger:serialize_failed")>] ActionLedgerSerializeFailed
+            | [<CompiledName("action:ledger:settled")>] ActionLedgerSettled
+            | [<CompiledName("action:ledger:swept")>] ActionLedgerSwept
+            | [<CompiledName("action:pause:approved")>] ActionPauseApproved
+            | [<CompiledName("action:pause:created")>] ActionPauseCreated
+            | [<CompiledName("action:pause:rejected")>] ActionPauseRejected
+            | [<CompiledName("action:pause:swept")>] ActionPauseSwept
+            | [<CompiledName("action:reply-attached")>] ActionReplyAttached
+            | [<CompiledName("agent_tool:detached:delivery_failed")>] AgentToolDetachedDeliveryFailed
+            | [<CompiledName("agent_tool:detached:live_count_warning")>] AgentToolDetachedLiveCountWarning
+            | [<CompiledName("agent_tool:recovery:begin")>] AgentToolRecoveryBegin
+            | [<CompiledName("agent_tool:recovery:complete")>] AgentToolRecoveryComplete
+            | [<CompiledName("agent_tool:recovery:deadline")>] AgentToolRecoveryDeadline
+            | [<CompiledName("agent_tool:recovery:failed")>] AgentToolRecoveryFailed
+            | [<CompiledName("agent_tool:recovery:reattach")>] AgentToolRecoveryReattach
+            | [<CompiledName("agent_tool:recovery:row")>] AgentToolRecoveryRow
+            | [<CompiledName("alarm:memory_limit_reset")>] AlarmMemoryLimitReset
+            | [<CompiledName("channel:delivered")>] ChannelDelivered
+            | [<CompiledName("channel:resolved")>] ChannelResolved
+            | [<CompiledName("chat:context:compacted")>] ChatContextCompacted
+            | [<CompiledName("chat:hydration:windowed")>] ChatHydrationWindowed
+            | [<CompiledName("chat:media:evicted")>] ChatMediaEvicted
+            | [<CompiledName("chat:onstart:degraded")>] ChatOnstartDegraded
+            | [<CompiledName("chat:recovery:attempt")>] ChatRecoveryAttempt
+            | [<CompiledName("chat:recovery:completed")>] ChatRecoveryCompleted
+            | [<CompiledName("chat:recovery:detected")>] ChatRecoveryDetected
+            | [<CompiledName("chat:recovery:exhausted")>] ChatRecoveryExhausted
+            | [<CompiledName("chat:recovery:failed")>] ChatRecoveryFailed
+            | [<CompiledName("chat:recovery:scheduled")>] ChatRecoveryScheduled
+            | [<CompiledName("chat:recovery:skipped")>] ChatRecoverySkipped
+            | [<CompiledName("chat:request:failed")>] ChatRequestFailed
+            | [<CompiledName("chat:stream:stalled")>] ChatStreamStalled
+            | [<CompiledName("chat:transcript:repaired")>] ChatTranscriptRepaired
+            | [<CompiledName("chat:turn:finish")>] ChatTurnFinish
+            | [<CompiledName("chat:turn:start")>] ChatTurnStart
+            | [<CompiledName("connect")>] Connect
+            | [<CompiledName("destroy")>] Destroy
+            | [<CompiledName("disconnect")>] Disconnect
+            | [<CompiledName("email:receive")>] EmailReceive
+            | [<CompiledName("email:reply")>] EmailReply
+            | [<CompiledName("email:send")>] EmailSend
+            | [<CompiledName("fiber:recovery:attempt")>] FiberRecoveryAttempt
+            | [<CompiledName("fiber:recovery:detected")>] FiberRecoveryDetected
+            | [<CompiledName("fiber:recovery:failed")>] FiberRecoveryFailed
+            | [<CompiledName("fiber:recovery:handled")>] FiberRecoveryHandled
+            | [<CompiledName("fiber:recovery:skipped")>] FiberRecoverySkipped
+            | [<CompiledName("fiber:run:completed")>] FiberRunCompleted
+            | [<CompiledName("fiber:run:failed")>] FiberRunFailed
+            | [<CompiledName("fiber:run:interrupted")>] FiberRunInterrupted
+            | [<CompiledName("fiber:run:started")>] FiberRunStarted
+            | [<CompiledName("mcp:client:authorize")>] McpClientAuthorize
+            | [<CompiledName("mcp:client:close")>] McpClientClose
+            | [<CompiledName("mcp:client:connect")>] McpClientConnect
+            | [<CompiledName("mcp:client:discover")>] McpClientDiscover
+            | [<CompiledName("mcp:client:preconnect")>] McpClientPreconnect
+            | [<CompiledName("message:cancel")>] MessageCancel
+            | [<CompiledName("message:clear")>] MessageClear
+            | [<CompiledName("message:error")>] MessageError
+            | [<CompiledName("message:request")>] MessageRequest
+            | [<CompiledName("message:response")>] MessageResponse
+            | [<CompiledName("notice:delivered")>] NoticeDelivered
+            | [<CompiledName("notice:failed")>] NoticeFailed
+            | [<CompiledName("queue:create")>] QueueCreate
+            | [<CompiledName("queue:error")>] QueueError
+            | [<CompiledName("queue:retry")>] QueueRetry
+            | [<CompiledName("rpc")>] Rpc
+            | [<CompiledName("rpc:error")>] RpcError
+            | [<CompiledName("schedule:cancel")>] ScheduleCancel
+            | [<CompiledName("schedule:create")>] ScheduleCreate
+            | [<CompiledName("schedule:duplicate_warning")>] ScheduleDuplicateWarning
+            | [<CompiledName("schedule:error")>] ScheduleError
+            | [<CompiledName("schedule:execute")>] ScheduleExecute
+            | [<CompiledName("schedule:retry")>] ScheduleRetry
+            | [<CompiledName("state:update")>] StateUpdate
+            | [<CompiledName("submission:create")>] SubmissionCreate
+            | [<CompiledName("submission:error")>] SubmissionError
+            | [<CompiledName("submission:status")>] SubmissionStatus
+            | [<CompiledName("tool:approval")>] ToolApproval
+            | [<CompiledName("tool:result")>] ToolResult
+            | [<CompiledName("workflow:approved")>] WorkflowApproved
+            | [<CompiledName("workflow:event")>] WorkflowEvent
+            | [<CompiledName("workflow:paused")>] WorkflowPaused
+            | [<CompiledName("workflow:rejected")>] WorkflowRejected
+            | [<CompiledName("workflow:restarted")>] WorkflowRestarted
+            | [<CompiledName("workflow:resumed")>] WorkflowResumed
+            | [<CompiledName("workflow:start")>] WorkflowStart
+            | [<CompiledName("workflow:terminated")>] WorkflowTerminated
 
     module GetCallableMethods =
         module Result =
@@ -7106,7 +7184,7 @@ module Agent =
                     abstract error: string option with get, set
                     abstract instructions: string option with get, set
                     abstract capabilities: MCPClientConnection.ServerCapabilities option with get, set
-                    [<ParamObject; Emit("$0")>]
+                    [<ParamObject; Emit("(o => ({...o, \"auth_url\": o[\"auth_url\"] ?? null, \"error\": o[\"error\"] ?? null, \"instructions\": o[\"instructions\"] ?? null, \"capabilities\": o[\"capabilities\"] ?? null}))($0)")>]
                     static member Create (name: string, server_url: string, state: MCPConnectionState, ?auth_url: string, ?error: string, ?instructions: string, ?capabilities: MCPClientConnection.ServerCapabilities) : Item = jsNative
 
             module Tools =
@@ -7117,6 +7195,21 @@ module Agent =
                     [<ParamObject; Emit("$0")>]
                     static member Create (inputSchema: MCPClientConnection.Tools.Item.InputSchema, name: string, serverId: string, ?description: string, ?outputSchema: MCPClientConnection.Tools.Item.OutputSchema, ?annotations: MCPClientConnection.Tools.Item.Annotations, ?execution: MCPClientConnection.Tools.Item.Execution, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
 
+    module GetQueue =
+        module Result =
+            [<Interface>]
+            type Item<'T> =
+                /// <summary>
+                /// Unique item identifier.
+                /// </summary>
+                abstract id: string with get, set
+                abstract callback: string with get, set
+                abstract payload: 'T with get, set
+                abstract createdAt: float with get, set
+                abstract retry: RetryOptions option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, callback: string, payload: 'T, createdAt: float, ?retry: RetryOptions) : Item<'T> = jsNative
+
     module GetWorkflow =
         [<Interface>]
         type Result =
@@ -7126,14 +7219,14 @@ module Agent =
             abstract id: string with get, set
             abstract workflowId: string with get, set
             abstract workflowName: string with get, set
-            abstract status: Agent.GetWorkflow.Result.Status with get, set
+            abstract status: FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status with get, set
             abstract metadata: JS.Record<string, obj> option with get, set
             abstract error: Agent.GetWorkflow.Result.Error option with get, set
             abstract createdAt: Fable.Core.TS.Es.Date with get, set
             abstract updatedAt: Fable.Core.TS.Es.Date with get, set
             abstract completedAt: Fable.Core.TS.Es.Date option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, workflowId: string, workflowName: string, status: Agent.GetWorkflow.Result.Status, createdAt: Fable.Core.TS.Es.Date, updatedAt: Fable.Core.TS.Es.Date, ?metadata: JS.Record<string, obj>, ?error: Agent.GetWorkflow.Result.Error, ?completedAt: Fable.Core.TS.Es.Date) : Result = jsNative
+            [<ParamObject; Emit("(o => ({...o, \"metadata\": o[\"metadata\"] ?? null, \"error\": o[\"error\"] ?? null, \"completedAt\": o[\"completedAt\"] ?? null}))($0)")>]
+            static member Create (id: string, workflowId: string, workflowName: string, status: FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status, createdAt: Fable.Core.TS.Es.Date, updatedAt: Fable.Core.TS.Es.Date, ?metadata: JS.Record<string, obj>, ?error: Agent.GetWorkflow.Result.Error, ?completedAt: Fable.Core.TS.Es.Date) : Result = jsNative
 
         module Result =
             [<Interface>]
@@ -7143,32 +7236,20 @@ module Agent =
                 [<ParamObject; Emit("$0")>]
                 static member Create (name: string, message: string) : Error = jsNative
 
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Status =
-                | [<CompiledName("complete")>] Complete
-                | [<CompiledName("errored")>] Errored
-                | [<CompiledName("paused")>] Paused
-                | [<CompiledName("queued")>] Queued
-                | [<CompiledName("running")>] Running
-                | [<CompiledName("terminated")>] Terminated
-                | [<CompiledName("unknown")>] Unknown
-                | [<CompiledName("waiting")>] Waiting
-                | [<CompiledName("waitingForPause")>] WaitingForPause
-
     module GetWorkflows =
         [<Interface>]
         type Criteria =
             /// <summary>
             /// Filter by status
             /// </summary>
-            abstract status: U2<string, Agent.GetWorkflow.Result.Status[]> option with get, set
+            abstract status: U2<string, FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status[]> option with get, set
             abstract workflowName: string option with get, set
             abstract metadata: JS.Record<string, U3<string, float, bool>> option with get, set
             abstract limit: float option with get, set
-            abstract orderBy: Agent.GetWorkflows.Criteria.OrderBy option with get, set
+            abstract orderBy: FSharp.CloudEdge.Runtime.Workers.AiSearchListInstancesParams.OrderByDirection option with get, set
             abstract cursor: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, Agent.GetWorkflow.Result.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?limit: float, ?orderBy: Agent.GetWorkflows.Criteria.OrderBy, ?cursor: string) : Criteria = jsNative
+            static member Create (?status: U2<string, FSharp.CloudEdge.Runtime.Workers.InstanceStatus.Status[]>, ?workflowName: string, ?metadata: JS.Record<string, U3<string, float, bool>>, ?limit: float, ?orderBy: FSharp.CloudEdge.Runtime.Workers.AiSearchListInstancesParams.OrderByDirection, ?cursor: string) : Criteria = jsNative
 
         [<Interface>]
         type Result =
@@ -7178,14 +7259,39 @@ module Agent =
             abstract workflows: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.GetWorkflow.Result[] with get, set
             abstract total: float with get, set
             abstract nextCursor: string option with get, set
-            [<ParamObject; Emit("$0")>]
+            [<ParamObject; Emit("(o => ({...o, \"nextCursor\": o[\"nextCursor\"] ?? null}))($0)")>]
             static member Create (workflows: FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.GetWorkflow.Result[], total: float, ?nextCursor: string) : Result = jsNative
 
-        module Criteria =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type OrderBy =
-                | [<CompiledName("asc")>] Asc
-                | [<CompiledName("desc")>] Desc
+    module HasAgentToolRun =
+        type ClsConstructor<'T when 'T :> Agent<obj, obj, obj>> =
+            [<EmitConstructor>]
+            abstract Create: ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> * env: unit -> 'T
+
+    module InspectFiber =
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract fiberId: string with get, set
+                abstract name: string with get, set
+                abstract idempotencyKey: string option with get, set
+                abstract status: FiberStatus with get, set
+                abstract snapshot: obj option with get, set
+                abstract error: string option with get, set
+                abstract metadata: JS.Record<string, obj> option with get, set
+                abstract createdAt: float with get, set
+                abstract startedAt: float option with get, set
+                abstract settledAt: float option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
+
+    module ListFibers =
+        [<Interface>]
+        type Options =
+            abstract status: U2<string, FiberStatus[]> option with get, set
+            abstract name: string option with get, set
+            abstract limit: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?status: U2<string, FiberStatus[]>, ?name: string, ?limit: float) : Options = jsNative
 
     module ListSubAgents =
         module Result =
@@ -7205,13 +7311,117 @@ module Agent =
                 [<ParamObject; Emit("$0")>]
                 static member Create (className: string, name: string, createdAt: float) : Item2 = jsNative
 
+    module OnAgentToolFinish =
+        [<Interface>]
+        type Result =
+            abstract status: AgentToolTerminalStatus with get, set
+            abstract summary: string option with get, set
+            abstract error: string option with get, set
+            abstract reason: AgentToolInterruptedReason option with get, set
+            /// <summary>
+            /// Present only when <c>status</c> is <c>interrupted</c>. Whether the child facet was
+            /// still non-terminal when the parent stopped waiting (before any teardown).
+            /// </summary>
+            abstract childStillRunning: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (status: AgentToolTerminalStatus, ?summary: string, ?error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : Result = jsNative
+
+    module OnAgentToolStart =
+        [<Interface>]
+        type Run =
+            abstract runId: string with get, set
+            abstract parentToolCallId: string option with get, set
+            abstract agentType: string with get, set
+            abstract inputPreview: obj option with get, set
+            abstract status: AgentToolRunStatus with get, set
+            abstract display: Agent.OnAgentToolStart.Run.Display option with get, set
+            /// <summary>
+            /// Caller-controlled <c>metadata.source</c> for chat-agent <c>detached.notify</c>
+            /// completions. Present only for detached notify runs that supplied one.
+            /// </summary>
+            abstract notifySource: string option with get, set
+            abstract displayOrder: float with get, set
+            abstract startedAt: float with get, set
+            abstract completedAt: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (runId: string, agentType: string, status: AgentToolRunStatus, displayOrder: float, startedAt: float, ?parentToolCallId: string, ?inputPreview: obj, ?display: Agent.OnAgentToolStart.Run.Display, ?notifySource: string, ?completedAt: float) : Run = jsNative
+
+        module Run =
+            type Display =
+                abstract name: string option with get, set
+                abstract icon: string option with get, set
+                [<EmitIndexer>]
+                abstract Item: string -> obj with get, set
+
+    module OnBeforeSubAgent =
+        [<Interface>]
+        type Child =
+            abstract className: string with get, set
+            abstract name: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (className: string, name: string) : Child = jsNative
+
+    module OnEmail =
+        [<Interface>]
+        type Payload =
+            abstract from: string with get, set
+            abstract ``to``: string with get, set
+            abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+            abstract rawSize: float with get, set
+            abstract _secureRouted: bool option with get, set
+            abstract _bridge: EmailBridge with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (from: string, ``to``: string, headers: FSharp.CloudEdge.Runtime.Workers.Headers, rawSize: float, _bridge: EmailBridge, ?_secureRouted: bool) : Payload = jsNative
+
+    module OnFiberRecovered =
+        type Ctx =
+            /// <summary>
+            /// Fiber ID.
+            /// </summary>
+            abstract id: string with get, set
+            abstract name: string with get, set
+            abstract status: FiberStatus option with get, set
+            abstract idempotencyKey: string option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
+            abstract snapshot: obj with get, set
+            /// <summary>
+            /// Epoch milliseconds when the fiber row was inserted (when <c>runFiber</c>
+            /// started). Use <c>Date.now() - createdAt</c> to gate stale recoveries.
+            /// </summary>
+            abstract createdAt: float with get, set
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            abstract recoveryReason: string with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+
+        module Ctx =
+            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
+            [<Literal>]
+            let recoveryReason = "interrupted"
+
+    module OnProgress =
+        [<Interface>]
+        type Progress =
+            abstract fraction: float option with get, set
+            abstract message: string option with get, set
+            abstract phase: string option with get, set
+            /// <summary>
+            /// Set when this signal was a durable milestone (<c>reportProgress({ milestone })</c>).
+            /// Lets an <c>onProgress</c> consumer branch on milestone vs. ephemeral progress.
+            /// </summary>
+            abstract milestone: string option with get, set
+            abstract at: float with get, set
+            abstract data: obj option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (at: float, ?fraction: float, ?message: string, ?phase: string, ?milestone: string, ?data: obj) : Progress = jsNative
+
     module OnWorkflowCallback =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Callback<'P> =
-            | [<CompiledName("complete")>] Complete of workflowName: string * workflowId: string * timestamp: float * result: obj option
-            | [<CompiledName("error")>] Error of workflowName: string * workflowId: string * timestamp: float * error: string
-            | [<CompiledName("event")>] Event of workflowName: string * workflowId: string * timestamp: float * ``event``: obj
-            | [<CompiledName("progress")>] Progress of workflowName: string * workflowId: string * timestamp: float * progress: 'P
+            | [<CompiledName("complete"); Fickl.Core.InlineInterface>] Complete of FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.OnWorkflowCallback.Callback2
+            | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.OnWorkflowCallback.Callback3
+            | [<CompiledName("event"); Fickl.Core.InlineInterface>] Event of FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.OnWorkflowCallback.Callback4
+            | [<CompiledName("progress"); Fickl.Core.InlineInterface>] Progress of FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.OnWorkflowCallback.Callback5<'P>
 
         [<Interface>]
         type Callback2 =
@@ -7281,25 +7491,162 @@ module Agent =
             [<Literal>]
             let ``type`` = "progress"
 
-        module Callback =
-            type Item =
-                /// <summary>
-                /// Current step name
-                /// </summary>
-                abstract step: string option with get, set
-                abstract status: Agent.OnWorkflowCallback.Callback.Item.Status option with get, set
-                abstract message: string option with get, set
-                abstract percent: float option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
+    module Queue =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Callback =
+            | [<CompiledName("__DURABLE_OBJECT_BRAND")>] DURABLEOBJECTBRAND
+            | [<CompiledName("__unsafe_ensureInitialized")>] UnsafeEnsureInitialized
+            | [<CompiledName("_cfDetachedReconcileTick")>] CfDetachedReconcileTick
+            | [<CompiledName("_cf_acquireFacetKeepAlive")>] CfAcquireFacetKeepAlive
+            | [<CompiledName("_cf_broadcastToSubAgent")>] CfBroadcastToSubAgent
+            | [<CompiledName("_cf_checkRunFibersForFacet")>] CfCheckRunFibersForFacet
+            | [<CompiledName("_cf_cleanupFacetPrefix")>] CfCleanupFacetPrefix
+            | [<CompiledName("_cf_closeSubAgentConnection")>] CfCloseSubAgentConnection
+            | [<CompiledName("_cf_closeSubAgentConnectionsForPrefix")>] CfCloseSubAgentConnectionsForPrefix
+            | [<CompiledName("_cf_destroyDescendantFacet")>] CfDestroyDescendantFacet
+            | [<CompiledName("_cf_handleSubAgentWebSocketClose")>] CfHandleSubAgentWebSocketClose
+            | [<CompiledName("_cf_handleSubAgentWebSocketConnect")>] CfHandleSubAgentWebSocketConnect
+            | [<CompiledName("_cf_handleSubAgentWebSocketMessage")>] CfHandleSubAgentWebSocketMessage
+            | [<CompiledName("_cf_initAsFacet")>] CfInitAsFacet
+            | [<CompiledName("_cf_invokeAgentPath")>] CfInvokeAgentPath
+            | [<CompiledName("_cf_invokeSubAgent")>] CfInvokeSubAgent
+            | [<CompiledName("_cf_invokeSubAgentPath")>] CfInvokeSubAgentPath
+            | [<CompiledName("_cf_registerFacetRun")>] CfRegisterFacetRun
+            | [<CompiledName("_cf_releaseFacetKeepAlive")>] CfReleaseFacetKeepAlive
+            | [<CompiledName("_cf_routeLifecycle")>] CfRouteLifecycle
+            | [<CompiledName("_cf_scheduleDestroy")>] CfScheduleDestroy
+            | [<CompiledName("_cf_sendToSubAgentConnection")>] CfSendToSubAgentConnection
+            | [<CompiledName("_cf_setSubAgentConnectionState")>] CfSetSubAgentConnectionState
+            | [<CompiledName("_cf_subAgentConnectionMetas")>] CfSubAgentConnectionMetas
+            | [<CompiledName("_cf_unregisterFacetRun")>] CfUnregisterFacetRun
+            | [<CompiledName("_keepAliveRefs")>] KeepAliveRefs
+            | [<CompiledName("_onAlarmHousekeeping")>] OnAlarmHousekeeping
+            | [<CompiledName("_onEmail")>] OnEmail
+            | [<CompiledName("_state")>] State
+            | [<CompiledName("_unsafe_getConnectionFlag")>] UnsafeGetConnectionFlag
+            | [<CompiledName("_unsafe_setConnectionFlag")>] UnsafeSetConnectionFlag
+            | [<CompiledName("_workflow_broadcast")>] WorkflowBroadcast
+            | [<CompiledName("_workflow_handleCallback")>] WorkflowHandleCallback
+            | [<CompiledName("_workflow_updateState")>] WorkflowUpdateState
+            | [<CompiledName("abortSubAgent")>] AbortSubAgent
+            | [<CompiledName("addMcpServer")>] AddMcpServer
+            | [<CompiledName("alarm")>] Alarm
+            | [<CompiledName("approveWorkflow")>] ApproveWorkflow
+            | [<CompiledName("broadcast")>] Broadcast
+            | [<CompiledName("cancelAgentTool")>] CancelAgentTool
+            | [<CompiledName("cancelFiber")>] CancelFiber
+            | [<CompiledName("cancelFiberByKey")>] CancelFiberByKey
+            | [<CompiledName("cancelSchedule")>] CancelSchedule
+            | [<CompiledName("clearAgentToolRuns")>] ClearAgentToolRuns
+            | [<CompiledName("connect")>] Connect
+            | [<CompiledName("createMcpOAuthProvider")>] CreateMcpOAuthProvider
+            | [<CompiledName("deleteFibers")>] DeleteFibers
+            | [<CompiledName("deleteSubAgent")>] DeleteSubAgent
+            | [<CompiledName("deleteWorkflow")>] DeleteWorkflow
+            | [<CompiledName("deleteWorkflows")>] DeleteWorkflows
+            | [<CompiledName("dequeue")>] Dequeue
+            | [<CompiledName("dequeueAll")>] DequeueAll
+            | [<CompiledName("dequeueAllByCallback")>] DequeueAllByCallback
+            | [<CompiledName("destroy")>] Destroy
+            | [<CompiledName("dynamicAgents")>] DynamicAgents
+            | [<CompiledName("fetch")>] Fetch
+            | [<CompiledName("getCallableMethods")>] GetCallableMethods
+            | [<CompiledName("getConnection")>] GetConnection
+            | [<CompiledName("getConnectionTags")>] GetConnectionTags
+            | [<CompiledName("getConnections")>] GetConnections
+            | [<CompiledName("getMcpServers")>] GetMcpServers
+            | [<CompiledName("getQueue")>] GetQueue
+            | [<CompiledName("getQueues")>] GetQueues
+            | [<CompiledName("getSchedule")>] GetSchedule
+            | [<CompiledName("getScheduleById")>] GetScheduleById
+            | [<CompiledName("getSchedules")>] GetSchedules
+            | [<CompiledName("getWorkflow")>] GetWorkflow
+            | [<CompiledName("getWorkflowStatus")>] GetWorkflowStatus
+            | [<CompiledName("getWorkflows")>] GetWorkflows
+            | [<CompiledName("hasAgentToolRun")>] HasAgentToolRun
+            | [<CompiledName("hasSubAgent")>] HasSubAgent
+            | [<CompiledName("initialState")>] InitialState
+            | [<CompiledName("inspectFiber")>] InspectFiber
+            | [<CompiledName("inspectFiberByKey")>] InspectFiberByKey
+            | [<CompiledName("isConnectionProtocolEnabled")>] IsConnectionProtocolEnabled
+            | [<CompiledName("isConnectionReadonly")>] IsConnectionReadonly
+            | [<CompiledName("keepAlive")>] KeepAlive
+            | [<CompiledName("keepAliveWhile")>] KeepAliveWhile
+            | [<CompiledName("lifecycle")>] Lifecycle
+            | [<CompiledName("listFibers")>] ListFibers
+            | [<CompiledName("listSchedules")>] ListSchedules
+            | [<CompiledName("listSubAgents")>] ListSubAgents
+            | [<CompiledName("maxConcurrentAgentTools")>] MaxConcurrentAgentTools
+            | [<CompiledName("mcp")>] Mcp
+            | [<CompiledName("migrateWorkflowBinding")>] MigrateWorkflowBinding
+            | [<CompiledName("name")>] Name
+            | [<CompiledName("observability")>] Observability
+            | [<CompiledName("onAgentToolFinish")>] OnAgentToolFinish
+            | [<CompiledName("onAgentToolStart")>] OnAgentToolStart
+            | [<CompiledName("onAlarm")>] OnAlarm
+            | [<CompiledName("onBeforeSubAgent")>] OnBeforeSubAgent
+            | [<CompiledName("onClose")>] OnClose
+            | [<CompiledName("onConnect")>] OnConnect
+            | [<CompiledName("onError")>] OnError
+            | [<CompiledName("onFiberRecovered")>] OnFiberRecovered
+            | [<CompiledName("onJob")>] OnJob
+            | [<CompiledName("onMessage")>] OnMessage
+            | [<CompiledName("onProgress")>] OnProgress
+            | [<CompiledName("onRequest")>] OnRequest
+            | [<CompiledName("onStart")>] OnStart
+            | [<CompiledName("onStateChanged")>] OnStateChanged
+            | [<CompiledName("onStateUpdate")>] OnStateUpdate
+            | [<CompiledName("onWorkflowCallback")>] OnWorkflowCallback
+            | [<CompiledName("onWorkflowComplete")>] OnWorkflowComplete
+            | [<CompiledName("onWorkflowError")>] OnWorkflowError
+            | [<CompiledName("onWorkflowEvent")>] OnWorkflowEvent
+            | [<CompiledName("onWorkflowProgress")>] OnWorkflowProgress
+            | [<CompiledName("parentAgent")>] ParentAgent
+            | [<CompiledName("parentPath")>] ParentPath
+            | [<CompiledName("pauseWorkflow")>] PauseWorkflow
+            | [<CompiledName("queue")>] Queue
+            | [<CompiledName("rejectWorkflow")>] RejectWorkflow
+            | [<CompiledName("removeMcpServer")>] RemoveMcpServer
+            | [<CompiledName("render")>] Render
+            | [<CompiledName("replyToEmail")>] ReplyToEmail
+            | [<CompiledName("reportProgress")>] ReportProgress
+            | [<CompiledName("resolveFiber")>] ResolveFiber
+            | [<CompiledName("restartWorkflow")>] RestartWorkflow
+            | [<CompiledName("resumeWorkflow")>] ResumeWorkflow
+            | [<CompiledName("retry")>] Retry
+            | [<CompiledName("runAgentTool")>] RunAgentTool
+            | [<CompiledName("runFiber")>] RunFiber
+            | [<CompiledName("runWorkflow")>] RunWorkflow
+            | [<CompiledName("schedule")>] Schedule
+            | [<CompiledName("scheduleEvery")>] ScheduleEvery
+            | [<CompiledName("scheduler")>] Scheduler
+            | [<CompiledName("selfPath")>] SelfPath
+            | [<CompiledName("sendEmail")>] SendEmail
+            | [<CompiledName("sendWorkflowEvent")>] SendWorkflowEvent
+            | [<CompiledName("sessionAffinity")>] SessionAffinity
+            | [<CompiledName("setConnectionReadonly")>] SetConnectionReadonly
+            | [<CompiledName("setState")>] SetState
+            | [<CompiledName("shouldConnectionBeReadonly")>] ShouldConnectionBeReadonly
+            | [<CompiledName("shouldSendProtocolMessages")>] ShouldSendProtocolMessages
+            | [<CompiledName("sql")>] Sql
+            | [<CompiledName("startFiber")>] StartFiber
+            | [<CompiledName("stash")>] Stash
+            | [<CompiledName("state")>] State2
+            | [<CompiledName("subAgent")>] SubAgent
+            | [<CompiledName("taskDefinitions")>] TaskDefinitions
+            | [<CompiledName("tasks")>] Tasks
+            | [<CompiledName("terminateWorkflow")>] TerminateWorkflow
+            | [<CompiledName("validateStateChange")>] ValidateStateChange
+            | [<CompiledName("webSocketClose")>] WebSocketClose
+            | [<CompiledName("webSocketError")>] WebSocketError
+            | [<CompiledName("webSocketMessage")>] WebSocketMessage
 
-            module Item =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Status =
-                    | [<CompiledName("complete")>] Complete
-                    | [<CompiledName("error")>] Error
-                    | [<CompiledName("pending")>] Pending
-                    | [<CompiledName("running")>] Running
+        [<Interface>]
+        type Options =
+            abstract retry: RetryOptions option with get, set
+            abstract id: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?retry: RetryOptions, ?id: string) : Options = jsNative
 
     module RejectWorkflow =
         [<Interface>]
@@ -7308,6 +7655,69 @@ module Agent =
             [<ParamObject; Emit("$0")>]
             static member Create (?reason: string) : Data = jsNative
 
+    module ReplyToEmail =
+        [<Interface>]
+        type Email =
+            abstract from: string with get, set
+            abstract ``to``: string with get, set
+            abstract getRaw: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) with get, set
+            abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+            abstract rawSize: float with get, set
+            abstract setReject: (string -> unit) with get, set
+            abstract forward: Agent.ReplyToEmail.Email.Forward with get, set
+            abstract reply: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.ReplyToEmail.Email.Reply.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>) with get, set
+            abstract _secureRouted: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (from: string, ``to``: string, getRaw: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), headers: FSharp.CloudEdge.Runtime.Workers.Headers, rawSize: float, setReject: (string -> unit), forward: Agent.ReplyToEmail.Email.Forward, reply: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.ReplyToEmail.Email.Reply.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>), ?_secureRouted: bool) : Email = jsNative
+
+        [<Interface>]
+        type Options =
+            abstract fromName: string with get, set
+            abstract subject: string option with get, set
+            abstract body: string with get, set
+            abstract contentType: string option with get, set
+            abstract headers: JS.Record<string, string> option with get, set
+            abstract secret: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
+
+        module Email =
+            type Forward = delegate of rcptTo: string * headers: FSharp.CloudEdge.Runtime.Workers.Headers option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>
+
+            module Reply =
+                [<Interface>]
+                type Options =
+                    abstract from: string with get, set
+                    abstract ``to``: string with get, set
+                    abstract raw: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (from: string, ``to``: string, raw: string) : Options = jsNative
+
+    module ReportProgress =
+        [<Interface>]
+        type Options =
+            abstract persist: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?persist: bool) : Options = jsNative
+
+        [<Interface>]
+        type Progress<'T> =
+            /// <summary>
+            /// 0..1 — drives a progress bar.
+            /// </summary>
+            abstract fraction: float option with get, set
+            abstract message: string option with get, set
+            abstract phase: string option with get, set
+            /// <summary>
+            /// Present ⇒ a <b>durable</b> milestone: persisted, replayable, and surfaced as a
+            /// distinct row in <c>AgentToolRunState.milestones</c> / <c>inspectAgentToolRun</c>. Use
+            /// for named phase boundaries ("schema-ready", "preview-ready", "deployed").
+            /// </summary>
+            abstract milestone: string option with get, set
+            abstract data: 'T option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?fraction: float, ?message: string, ?phase: string, ?milestone: string, ?data: 'T) : Progress<'T> = jsNative
+
     module RestartWorkflow =
         [<Interface>]
         type Options =
@@ -7315,12 +7725,215 @@ module Agent =
             [<ParamObject; Emit("$0")>]
             static member Create (?resetTracking: bool) : Options = jsNative
 
+    module Retry =
+        [<Interface>]
+        type Options =
+            inherit RetryOptions
+            /// <summary>
+            /// Return false to stop retrying a specific error. Receives the error and the next attempt number. Default: retry all errors.
+            /// </summary>
+            abstract shouldRetry: Agent.Retry.Options.ShouldRetry option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?maxAttempts: float, ?baseDelayMs: float, ?maxDelayMs: float, ?shouldRetry: Agent.Retry.Options.ShouldRetry) : Options = jsNative
+
+        module Options =
+            type ShouldRetry = delegate of err: obj * nextAttempt: float -> bool
+
+    module RunAgentTool =
+        [<Interface>]
+        type Options<'Input> =
+            inherit FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.RunAgentTool.Options2<'Input>
+            /// <summary>
+            /// Run the sub-agent <b>detached</b>: dispatch it, let the current turn continue,
+            /// and (optionally) get a durable callback when it finishes. <c>true</c> is
+            /// fire-and-forget (observe via <c>agent-tool-event</c> frames + the global
+            /// <c>onAgentToolFinish</c> hook); an object adds the targeted, eviction-surviving
+            /// <c>onFinish</c> callback. A detached run does NOT inherit <c>options.signal</c> — it
+            /// must outlive the spawning turn; cancel it explicitly via <c>cancelAgentTool</c>.
+            /// </summary>
+            abstract detached: obj with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (input: 'Input, detached: obj, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?inputPreview: obj, ?display: Agent.OnAgentToolStart.Run.Display, ?eventDelivery: AgentToolEventDelivery) : Options<'Input> = jsNative
+
+        [<Interface>]
+        type Options2<'Input> =
+            abstract input: 'Input with get, set
+            abstract runId: string option with get, set
+            abstract parentToolCallId: string option with get, set
+            abstract displayOrder: float option with get, set
+            abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
+            abstract inputPreview: obj option with get, set
+            abstract display: Agent.OnAgentToolStart.Run.Display option with get, set
+            /// <summary>
+            /// Run the sub-agent <b>detached</b>: dispatch it, let the current turn continue,
+            /// and (optionally) get a durable callback when it finishes. <c>true</c> is
+            /// fire-and-forget (observe via <c>agent-tool-event</c> frames + the global
+            /// <c>onAgentToolFinish</c> hook); an object adds the targeted, eviction-surviving
+            /// <c>onFinish</c> callback. A detached run does NOT inherit <c>options.signal</c> — it
+            /// must outlive the spawning turn; cancel it explicitly via <c>cancelAgentTool</c>.
+            /// </summary>
+            abstract detached: U2<bool, Agent.RunAgentTool.Options.Detached> option with get, set
+            /// <summary>
+            /// Which child events reach the parent's clients. <c>"full"</c> (default) forwards
+            /// every streamed chunk. <c>"terminal"</c> forwards only lifecycle events: started,
+            /// progress and milestone frames, and the terminal event. The child still
+            /// persists its whole stream, and the parent still tails it for completion,
+            /// cancellation, progress and recovery. Use it for a headless parent with no
+            /// client watching the child. Not supported with <c>detached</c>.
+            /// </summary>
+            abstract eventDelivery: AgentToolEventDelivery option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (input: 'Input, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?inputPreview: obj, ?display: Agent.OnAgentToolStart.Run.Display, ?detached: U2<bool, Agent.RunAgentTool.Options.Detached>, ?eventDelivery: AgentToolEventDelivery) : Options2<'Input> = jsNative
+
+        module Options =
+            [<Interface>]
+            type Detached =
+                /// <summary>
+                /// Method invoked once per terminal delivery. Branch on <c>result.status</c>:
+                /// <c>"completed" | "error" | "aborted" | "interrupted"</c>. A budget give-up
+                /// arrives as <c>status: "interrupted"</c> with <c>reason: "budget-exceeded"</c>; because
+                /// <c>interrupted</c> is soft, a child that later completes can fire the hook again
+                /// with <c>"completed"</c>, so a give-up never hides a late real result. Make the
+                /// handler idempotent.
+                /// </summary>
+                abstract onFinish: string option with get, set
+                /// <summary>
+                /// Absolute safety ceiling — a backstop against a child that runs forever. On
+                /// expiry the parent gives up watching (delivers <c>onFinish</c> with
+                /// <c>interrupted</c> / <c>budget-exceeded</c>) and tears the child down. Defaults to the
+                /// parent-level <c>detachedMaxBudgetMs</c>.
+                /// </summary>
+                abstract maxBudgetMs: float option with get, set
+                /// <summary>
+                /// Per-run override of the resetting no-progress window (ms). Once the child
+                /// emits its first <c>reportProgress</c>, the parent gives up if it then goes silent
+                /// for this long (resets on each signal). Defaults to the parent-level
+                /// <c>detachedNoProgressBudgetMs</c> (1h). <c>0</c>/<c>Infinity</c> disables it.
+                /// </summary>
+                abstract noProgressBudgetMs: float option with get, set
+                /// <summary>
+                /// Chat-agent convenience (<c>@cloudflare/think</c> / <c>AIChatAgent</c>): when the run
+                /// finishes, inject a message into the chat so the model can react to the
+                /// result, instead of you wiring <c>onFinish</c> by hand. Sugar that auto-targets
+                /// the agent's <c>_cfDetachedNotifyFinish</c> hook; ignored on a base <c>Agent</c> that
+                /// does not implement it, and ignored when <c>onFinish</c> is also set (an explicit
+                /// <c>onFinish</c> wins). Pass <c>{ source }</c> to fit the injected message into your
+                /// app's existing metadata taxonomy. Override <c>formatDetachedCompletion()</c> to
+                /// customize the injected text.
+                /// </summary>
+                abstract notify: U2<bool, Agent.RunAgentTool.Options.Detached.Notify> option with get, set
+                /// <summary>
+                /// Chat-agent convenience: milestone names that, when the detached run reaches
+                /// them, surface an idempotent synthetic message in the chat BEFORE the run
+                /// finishes. Each <c>(runId, name)</c> fires at most once (idempotency-keyed),
+                /// whether observed live or reconciled after eviction. Override the wording via
+                /// <c>formatDetachedMilestone()</c>. Requires a chat host (<c>@cloudflare/think</c>); a
+                /// no-op on a base <c>Agent</c>.
+                /// <br /><br />
+                /// Two delivery modes (the string-array shorthand defaults to <c>"narrate"</c>):
+                /// - <c>"narrate"</c> (default) — inject a synthetic <b>assistant</b> message directly
+                ///   (no inference): a cheap, honest status line ("Found 2 sources…") that does
+                ///   not trigger a model turn. Best for pure progress narration.
+                /// - <c>"react"</c> — inject a <b>user-role</b> turn so the model responds to the
+                ///   milestone (steer, start dependent work, narrate with context). Costs a
+                ///   model turn. Opt in for milestones the agent should <i>act on</i>.
+                /// </summary>
+                abstract onMilestones: U2<string[], Agent.RunAgentTool.Options.Detached.OnMilestones> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?onFinish: string, ?maxBudgetMs: float, ?noProgressBudgetMs: float, ?notify: U2<bool, Agent.RunAgentTool.Options.Detached.Notify>, ?onMilestones: U2<string[], Agent.RunAgentTool.Options.Detached.OnMilestones>) : Detached = jsNative
+
+            module Detached =
+                [<Interface>]
+                type Notify =
+                    abstract source: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?source: string) : Notify = jsNative
+
+                [<Interface>]
+                type OnMilestones =
+                    abstract names: string[] with get, set
+                    abstract mode: Agent.RunAgentTool.Options.Detached.OnMilestones.Mode option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (names: string[], ?mode: Agent.RunAgentTool.Options.Detached.OnMilestones.Mode) : OnMilestones = jsNative
+
+                module OnMilestones =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Mode =
+                        | [<CompiledName("narrate")>] Narrate
+                        | [<CompiledName("react")>] React
+
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract runId: string with get, set
+                abstract agentType: string with get, set
+                /// <summary>
+                /// <c>"running"</c> on a successful dispatch; <c>"error"</c> if dispatch itself failed
+                /// (e.g. the <c>maxConcurrentAgentTools</c> cap was exceeded — rejected
+                /// synchronously, no child started, no callback wired).
+                /// </summary>
+                abstract status: Agent.RunAgentTool.Result.Item.Status with get, set
+                abstract error: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (runId: string, agentType: string, status: Agent.RunAgentTool.Result.Item.Status, ?error: string) : Item = jsNative
+
+            [<Interface>]
+            type Item2<'Output> =
+                abstract runId: string with get, set
+                abstract agentType: string with get, set
+                abstract status: AgentToolTerminalStatus with get, set
+                abstract output: 'Output option with get, set
+                abstract summary: string option with get, set
+                abstract error: string option with get, set
+                /// <summary>
+                /// Present only when <c>status</c> is <c>interrupted</c> — a machine-readable cause so
+                /// callers don't pattern-match the <c>error</c> prose (#1630 follow-up).
+                /// </summary>
+                abstract reason: AgentToolInterruptedReason option with get, set
+                /// <summary>
+                /// Present only when <c>status</c> is <c>interrupted</c>. <c>true</c> when the child facet was
+                /// still non-terminal (running / advancing) at the moment the parent stopped
+                /// waiting and before any teardown; <c>false</c> once the parent has torn the child
+                /// down so it is no longer doing work.
+                /// </summary>
+                abstract childStillRunning: bool option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (runId: string, agentType: string, status: AgentToolTerminalStatus, ?output: 'Output, ?summary: string, ?error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : Item2<'Output> = jsNative
+
+            module Item =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Status =
+                    | [<CompiledName("error")>] Error
+                    | [<CompiledName("running")>] Running
+
     module RunDetachedDelivery =
         [<Interface>]
         type Options =
             abstract serialize: bool option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (?serialize: bool) : Options = jsNative
+
+    module RunFiber =
+        module Fn =
+            [<Interface>]
+            type Ctx =
+                /// <summary>
+                /// Unique identifier for this fiber execution.
+                /// </summary>
+                abstract id: string with get, set
+                abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal with get, set
+                abstract stash: data: obj -> unit
+                abstract snapshot: obj with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, stash: (obj -> unit), snapshot: obj) : Ctx = jsNative
+
+    module RunFiberWithStashWrapper =
+        [<Interface>]
+        type Options =
+            abstract initialSnapshot: obj option with get, set
+            abstract wrapStash: (obj -> obj) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?initialSnapshot: obj, ?wrapStash: (obj -> obj)) : Options = jsNative
 
     module RunWorkflow =
         [<Interface>]
@@ -7331,17 +7944,54 @@ module Agent =
             abstract id: string option with get, set
             abstract metadata: JS.Record<string, obj> option with get, set
             abstract agentBinding: string option with get, set
-            abstract retention: Agent.RunWorkflow.Options.Retention option with get, set
+            abstract retention: FSharp.CloudEdge.Runtime.Workers.WorkflowInstanceCreateOptions.Retention option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?id: string, ?metadata: JS.Record<string, obj>, ?agentBinding: string, ?retention: Agent.RunWorkflow.Options.Retention) : Options = jsNative
+            static member Create (?id: string, ?metadata: JS.Record<string, obj>, ?agentBinding: string, ?retention: FSharp.CloudEdge.Runtime.Workers.WorkflowInstanceCreateOptions.Retention) : Options = jsNative
+
+    module ScheduleEvery =
+        [<Interface>]
+        type Options =
+            abstract retry: RetryOptions option with get, set
+            abstract _idempotent: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?retry: RetryOptions, ?_idempotent: bool) : Options = jsNative
+
+    module Scheduler =
+        module Item =
+            type Item = delegate of payload: obj * schedule: FSharp.CloudEdge.Runtime.AgentsMcpClient.Scheduler.Set.Result.Item<obj> -> obj
+
+    module SendEmail =
+        [<Interface>]
+        type Options =
+            abstract binding: FSharp.CloudEdge.Runtime.Workers.SendEmail with get, set
+            abstract ``to``: U2<string, string[]> with get, set
+            abstract from: U2<string, Agent.SendEmail.Options.From> with get, set
+            abstract subject: string with get, set
+            abstract text: string option with get, set
+            abstract html: string option with get, set
+            abstract replyTo: U2<string, Agent.SendEmail.Options.ReplyTo> option with get, set
+            abstract cc: U2<string, string[]> option with get, set
+            abstract bcc: U2<string, string[]> option with get, set
+            abstract inReplyTo: string option with get, set
+            abstract headers: JS.Record<string, string> option with get, set
+            abstract secret: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (binding: FSharp.CloudEdge.Runtime.Workers.SendEmail, ``to``: U2<string, string[]>, from: U2<string, Agent.SendEmail.Options.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, Agent.SendEmail.Options.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
 
         module Options =
             [<Interface>]
-            type Retention =
-                abstract successRetention: U2<float, string> option with get, set
-                abstract errorRetention: U2<float, string> option with get, set
+            type From =
+                abstract email: string with get, set
+                abstract name: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?successRetention: U2<float, string>, ?errorRetention: U2<float, string>) : Retention = jsNative
+                static member Create (email: string, ?name: string) : From = jsNative
+
+            [<Interface>]
+            type ReplyTo =
+                abstract email: string with get, set
+                abstract name: string option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (email: string, ?name: string) : ReplyTo = jsNative
 
     module SendWorkflowEvent =
         [<Interface>]
@@ -7353,6 +8003,36 @@ module Agent =
             abstract payload: obj with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (``type``: string, payload: obj) : Event = jsNative
+
+    module StartFiber =
+        [<Interface>]
+        type Options =
+            abstract fiberId: string option with get, set
+            abstract idempotencyKey: string option with get, set
+            abstract metadata: JS.Record<string, obj> option with get, set
+            abstract waitForCompletion: bool option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?fiberId: string, ?idempotencyKey: string, ?metadata: JS.Record<string, obj>, ?waitForCompletion: bool) : Options = jsNative
+
+        module Result =
+            [<Interface>]
+            type Item =
+                inherit FSharp.CloudEdge.Runtime.AgentsMcpClient.Agent.InspectFiber.Result.Item
+                abstract accepted: bool with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
+
+    module TaskDefinitions =
+        type Item = delegate of input: unit * step: TaskStep -> U6<string, float, bool, TaskJson[], JS.Promise<TaskValue>, TaskJson2> option
+
+    module WithFiberStash =
+        [<Interface>]
+        type Context =
+            abstract id: string with get, set
+            abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal with get, set
+            abstract stash: (obj -> unit) with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (id: string, signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, stash: (obj -> unit)) : Context = jsNative
 
     module WorkflowUpdateState =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -7456,16 +8136,97 @@ module AgentMcpOAuthProvider =
                 [<ParamObject; Emit("$0")>]
                 static member Create (access_token: string, token_type: string, ?id_token: string, ?expires_in: float, ?scope: string, ?refresh_token: string, ?issuer: string) : Item = jsNative
 
+module DefaultProgress =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Status =
+        | [<CompiledName("complete")>] Complete
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("pending")>] Pending
+        | [<CompiledName("running")>] Running
+
 module DurableObjectCapability =
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type Claims =
+        | [<CompiledName("catch-all")>] CatchAll
+        | [<CompiledName("selective")>] Selective
+
+    module OnJob =
+        [<Interface>]
+        type Context =
+            /// <summary>
+            /// The due job being executed.
+            /// </summary>
+            abstract job: DurableObjectCapability.OnJob.Context.Job
+            abstract attempt: float
+            [<ParamObject; Emit("$0")>]
+            static member Create (job: DurableObjectCapability.OnJob.Context.Job, attempt: float) : Context = jsNative
+
+        module Context =
+            [<Interface>]
+            type Job =
+                /// <summary>
+                /// Unique job id. Stable across reschedules.
+                /// </summary>
+                abstract id: string
+                abstract capability: string
+                abstract fn: string
+                abstract time: float
+                abstract payload: obj
+                abstract retry: RetryOptions option
+                abstract singleflight: bool
+                abstract exclusive: bool
+                abstract recoveryLoop: bool
+                abstract createdAt: float
+                [<ParamObject; Emit("$0")>]
+                static member Create (id: string, capability: string, fn: string, time: float, payload: obj, singleflight: bool, exclusive: bool, recoveryLoop: bool, createdAt: float, ?retry: RetryOptions) : Job = jsNative
+
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract rescheduleAt: float
+                [<ParamObject; Emit("$0")>]
+                static member Create (rescheduleAt: float) : Item = jsNative
+
+    module OnMemoryLimit =
+        [<Interface>]
+        type Context =
+            /// <summary>
+            /// Whether the breaker hit its strike budget and sealed recovery work.
+            /// </summary>
+            abstract ``sealed``: bool
+            abstract nextTime: float option
+            /// <summary>
+            /// The queue job that was executing when the strike landed. Absent when the
+            /// reset happened during startup or host alarm work. Lifecycle has already
+            /// backed off or purged its row before invoking memory-limit policy.
+            /// <br /><br />
+            /// Capabilities whose durable state outlives their queue row use this to
+            /// apply the same policy to the underlying work — Tasks routes a struck
+            /// routed job's owner this way (see <c>setTaskRoutedMemoryLimitHandler</c>).
+            /// </summary>
+            abstract executing: DurableObjectCapability.OnJob.Context.Job option
+            /// <summary>
+            /// Recovery-loop jobs removed when this strike sealed the breaker. This is
+            /// a pre-purge snapshot because the durable rows no longer exist when
+            /// policy hooks run. No current capability reads this — Scheduler's own
+            /// former use of it (routing a sealed strike to every purged row's owning
+            /// dynamic agent) was retired once Tasks took over routed chat-recovery
+            /// wakes — but it stays available for a capability whose routed rows can
+            /// be purged as a pack, unlike Tasks' one-run-at-a-time model.
+            /// </summary>
+            abstract purgedRecoveryLoopJobs: DurableObjectCapability.OnJob.Context.Job[] option
+            [<ParamObject; Emit("$0")>]
+            static member Create (``sealed``: bool, ?nextTime: float, ?executing: DurableObjectCapability.OnJob.Context.Job, ?purgedRecoveryLoopJobs: DurableObjectCapability.OnJob.Context.Job[]) : Context = jsNative
+
     module OnRequest =
         [<Interface>]
         type Context =
             /// <summary>
             /// The request entering the Durable Object.
             /// </summary>
-            abstract request: obj
+            abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>
             [<ParamObject; Emit("$0")>]
-            static member Create (request: obj) : Context = jsNative
+            static member Create (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Context = jsNative
 
     module OnRoute =
         [<Interface>]
@@ -7499,6 +8260,64 @@ module DurableObjectCapability =
             [<ParamObject; Emit("$0")>]
             static member Create (?props: 'Props) : Context<'Props> = jsNative
 
+    module OnWebSocketUpgrade =
+        [<Interface>]
+        type Context =
+            /// <summary>
+            /// The WebSocket upgrade request entering the Durable Object.
+            /// </summary>
+            abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>
+            [<ParamObject; Emit("$0")>]
+            static member Create (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Context = jsNative
+
+module DynamicAgentConnectionBridge =
+    [<Interface>]
+    type Implements =
+        abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option
+        abstract close: ?code: float * ?reason: string -> JS.Promise<unit> option
+        abstract setState: state: obj -> obj
+        abstract broadcast: ownerPath: DynamicAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
+        [<ParamObject; Emit("$0")>]
+        static member Create (send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option), close: Func<float option, string option, JS.Promise<unit> option>, setState: (obj -> obj), broadcast: Func<DynamicAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[], U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option, JS.Promise<unit> option>) : Implements = jsNative
+
+    module Broadcast =
+        module OwnerPath =
+            [<Interface>]
+            type Item =
+                abstract className: string with get, set
+                abstract name: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (className: string, name: string) : Item = jsNative
+
+    module Implements =
+        module Broadcast =
+            module OwnerPath =
+                [<Interface>]
+                type Item =
+                    abstract className: string with get, set
+                    abstract name: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (className: string, name: string) : Item = jsNative
+
+module DynamicAgents =
+    module List =
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract className: string with get, set
+                abstract name: string with get, set
+                abstract createdAt: float with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (className: string, name: string, createdAt: float) : Item = jsNative
+
+            [<Interface>]
+            type Item2 =
+                abstract className: string with get, set
+                abstract name: string with get, set
+                abstract createdAt: float with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (className: string, name: string, createdAt: float) : Item2 = jsNative
+
 module EmailBridge =
     module Reply =
         [<Interface>]
@@ -7512,12 +8331,12 @@ module EmailBridge =
 module LegacyCallToolResultSchema =
     [<Interface>]
     type Item =
-        abstract _meta: obj with get, set
-        abstract content: obj with get, set
-        abstract structuredContent: obj with get, set
-        abstract isError: obj with get, set
+        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+        abstract content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>> with get, set
+        abstract structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+        abstract isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (_meta: obj, content: obj, structuredContent: obj, isError: obj) : Item = jsNative
+        static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>>, structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean>) : Item = jsNative
 
     module Item =
         module Content =
@@ -7527,67 +8346,67 @@ module LegacyCallToolResultSchema =
                         module Item =
                             [<Interface>]
                             type Item =
-                                abstract ``type``: obj with get, set
-                                abstract text: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, text: obj, annotations: obj, _meta: obj) : Item = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item = jsNative
 
                             [<Interface>]
                             type Item2 =
-                                abstract ``type``: obj with get, set
-                                abstract data: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item2 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item2 = jsNative
 
                             [<Interface>]
                             type Item3 =
-                                abstract ``type``: obj with get, set
-                                abstract data: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item3 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item3 = jsNative
 
                             [<Interface>]
                             type Item4 =
-                                abstract uri: obj with get, set
-                                abstract description: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract size: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
-                                abstract icons: obj with get, set
-                                abstract name: obj with get, set
-                                abstract title: obj with get, set
-                                abstract ``type``: obj with get, set
+                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                                abstract icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>> with get, set
+                                abstract name: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (uri: obj, description: obj, mimeType: obj, size: obj, annotations: obj, _meta: obj, icons: obj, name: obj, title: obj, ``type``: obj) : Item4 = jsNative
+                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>>, name: FSharp.CloudEdge.Support.Zod.V4.ZodString, title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
                             [<Interface>]
                             type Item5 =
-                                abstract ``type``: obj with get, set
-                                abstract resource: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)> with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, resource: obj, annotations: obj, _meta: obj) : Item5 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item5 = jsNative
 
                             module Item =
                                 module Annotations =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -7615,11 +8434,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -7647,11 +8466,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -7679,11 +8498,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -7711,12 +8530,12 @@ module LegacyCallToolResultSchema =
                                         module Item =
                                             [<Interface>]
                                             type Item =
-                                                abstract src: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract sizes: obj with get, set
-                                                abstract theme: obj with get, set
+                                                abstract src: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>> with get, set
+                                                abstract theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>> with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (src: obj, mimeType: obj, sizes: obj, theme: obj) : Item = jsNative
+                                                static member Create (src: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>>, theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>>) : Item = jsNative
 
                                             module Item =
                                                 module Theme =
@@ -7743,11 +8562,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -7775,38 +8594,38 @@ module LegacyCallToolResultSchema =
                                         module Item =
                                             [<Interface>]
                                             type Item =
-                                                abstract uri: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract _meta: obj with get, set
-                                                abstract text: obj with get, set
+                                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (uri: obj, mimeType: obj, _meta: obj, text: obj) : Item = jsNative
+                                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                                             [<Interface>]
                                             type Item2 =
-                                                abstract uri: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract _meta: obj with get, set
-                                                abstract blob: obj with get, set
+                                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                abstract blob: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (uri: obj, mimeType: obj, _meta: obj, blob: obj) : Item2 = jsNative
+                                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, blob: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item2 = jsNative
 
         module Item =
             [<Interface>]
             type Item =
-                abstract _meta: obj with get, set
-                abstract content: obj with get, set
-                abstract structuredContent: obj with get, set
-                abstract isError: obj with get, set
+                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                abstract content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>> with get, set
+                abstract structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                abstract isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (_meta: obj, content: obj, structuredContent: obj, isError: obj) : Item = jsNative
+                static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>>, structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean>) : Item = jsNative
 
             [<Interface>]
             type Item2 =
-                abstract _meta: obj with get, set
-                abstract toolResult: obj with get, set
+                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                abstract toolResult: FSharp.CloudEdge.Support.Zod.V4.ZodUnknown with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (_meta: obj, toolResult: obj) : Item2 = jsNative
+                static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, toolResult: FSharp.CloudEdge.Support.Zod.V4.ZodUnknown) : Item2 = jsNative
 
             module Item =
                 module Content =
@@ -7816,67 +8635,67 @@ module LegacyCallToolResultSchema =
                                 module Item =
                                     [<Interface>]
                                     type Item =
-                                        abstract ``type``: obj with get, set
-                                        abstract text: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, text: obj, annotations: obj, _meta: obj) : Item = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item = jsNative
 
                                     [<Interface>]
                                     type Item2 =
-                                        abstract ``type``: obj with get, set
-                                        abstract data: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item2 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item2 = jsNative
 
                                     [<Interface>]
                                     type Item3 =
-                                        abstract ``type``: obj with get, set
-                                        abstract data: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item3 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item3 = jsNative
 
                                     [<Interface>]
                                     type Item4 =
-                                        abstract uri: obj with get, set
-                                        abstract description: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract size: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
-                                        abstract icons: obj with get, set
-                                        abstract name: obj with get, set
-                                        abstract title: obj with get, set
-                                        abstract ``type``: obj with get, set
+                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                                        abstract icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>> with get, set
+                                        abstract name: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (uri: obj, description: obj, mimeType: obj, size: obj, annotations: obj, _meta: obj, icons: obj, name: obj, title: obj, ``type``: obj) : Item4 = jsNative
+                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>>, name: FSharp.CloudEdge.Support.Zod.V4.ZodString, title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
                                     [<Interface>]
                                     type Item5 =
-                                        abstract ``type``: obj with get, set
-                                        abstract resource: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)> with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, resource: obj, annotations: obj, _meta: obj) : Item5 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item5 = jsNative
 
                                     module Item =
                                         module Annotations =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -7904,11 +8723,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -7936,11 +8755,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -7968,11 +8787,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -8000,12 +8819,12 @@ module LegacyCallToolResultSchema =
                                                 module Item =
                                                     [<Interface>]
                                                     type Item =
-                                                        abstract src: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract sizes: obj with get, set
-                                                        abstract theme: obj with get, set
+                                                        abstract src: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>> with get, set
+                                                        abstract theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>> with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (src: obj, mimeType: obj, sizes: obj, theme: obj) : Item = jsNative
+                                                        static member Create (src: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>>, theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>>) : Item = jsNative
 
                                                     module Item =
                                                         module Theme =
@@ -8032,11 +8851,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -8064,21 +8883,21 @@ module LegacyCallToolResultSchema =
                                                 module Item =
                                                     [<Interface>]
                                                     type Item =
-                                                        abstract uri: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract _meta: obj with get, set
-                                                        abstract text: obj with get, set
+                                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                        abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (uri: obj, mimeType: obj, _meta: obj, text: obj) : Item = jsNative
+                                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                                                     [<Interface>]
                                                     type Item2 =
-                                                        abstract uri: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract _meta: obj with get, set
-                                                        abstract blob: obj with get, set
+                                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                        abstract blob: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (uri: obj, mimeType: obj, _meta: obj, blob: obj) : Item2 = jsNative
+                                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, blob: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item2 = jsNative
 
                 module Meta =
                     module Item =
@@ -8087,19 +8906,19 @@ module LegacyCallToolResultSchema =
                             /// <summary>
                             /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                             /// </summary>
-                            abstract progressToken: obj with get, set
+                            abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                             /// <summary>
                             /// If specified, this request is related to the provided task.
                             /// </summary>
-                            abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                            abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                            static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                         [<Interface>]
                         type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                            abstract taskId: obj with get, set
+                            abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                            static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
             module Item2 =
                 module Meta =
@@ -8109,19 +8928,19 @@ module LegacyCallToolResultSchema =
                             /// <summary>
                             /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                             /// </summary>
-                            abstract progressToken: obj with get, set
+                            abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                             /// <summary>
                             /// If specified, this request is related to the provided task.
                             /// </summary>
-                            abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                            abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                            static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                         [<Interface>]
                         type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                            abstract taskId: obj with get, set
+                            abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                            static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
         module Meta =
             module Item =
@@ -8130,21 +8949,79 @@ module LegacyCallToolResultSchema =
                     /// <summary>
                     /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                     /// </summary>
-                    abstract progressToken: obj with get, set
+                    abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                     /// <summary>
                     /// If specified, this request is related to the provided task.
                     /// </summary>
-                    abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                    abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                    static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsMcpClient.LegacyCallToolResultSchema.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                 [<Interface>]
                 type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                    abstract taskId: obj with get, set
+                    abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                    static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
 module Lifecycle =
+    [<Interface>]
+    type Jobs =
+        /// <summary>
+        /// Push one job. A push with an existing id replaces that job — ids are
+        /// scoped to their owner, so replacing (or colliding with) another
+        /// owner's job is impossible; a cross-owner id collision throws instead.
+        /// </summary>
+        abstract push: (Lifecycle.Jobs.Push.Options -> JS.Promise<DurableObjectCapability.OnJob.Context.Job>)
+        abstract cancel: (string -> JS.Promise<bool>)
+        abstract reschedule: Lifecycle.Jobs.Reschedule
+        abstract get: (string -> DurableObjectCapability.OnJob.Context.Job option)
+        abstract list: (unit -> DurableObjectCapability.OnJob.Context.Job[])
+        /// <summary>
+        /// Recompute the physical alarm from queue state without mutating it.
+        /// Mutations re-arm automatically; use this only to recover a lost alarm
+        /// for existing jobs (e.g. an idempotent push that deduplicated).
+        /// </summary>
+        abstract rearm: (unit -> JS.Promise<unit>)
+        [<ParamObject; Emit("$0")>]
+        static member Create (push: (Lifecycle.Jobs.Push.Options -> JS.Promise<DurableObjectCapability.OnJob.Context.Job>), cancel: (string -> JS.Promise<bool>), reschedule: Lifecycle.Jobs.Reschedule, get: (string -> DurableObjectCapability.OnJob.Context.Job option), list: (unit -> DurableObjectCapability.OnJob.Context.Job[]), rearm: (unit -> JS.Promise<unit>)) : Jobs = jsNative
+
+    module Jobs =
+        type Reschedule = delegate of id: string * time: float -> JS.Promise<bool>
+
+        module Push =
+            [<Interface>]
+            type Options =
+                /// <summary>
+                /// Serialisable function name the owner dispatches on.
+                /// </summary>
+                abstract fn: string
+                abstract time: float
+                abstract payload: obj option
+                /// <summary>
+                /// Stable job id. A push with an existing id replaces that job.
+                /// Omitted ids are generated.
+                /// </summary>
+                abstract id: string option
+                abstract retry: RetryOptions option
+                abstract singleflight: bool option
+                /// <summary>
+                /// Seconds before an in-flight single-flight run is treated as hung, and
+                /// before any long dispatch triggers the slow-dispatch warning. Default: 30.
+                /// </summary>
+                abstract hungTimeoutSeconds: float option
+                abstract exclusive: bool option
+                /// <summary>
+                /// Mark this job as part of a recovery loop that can deterministically
+                /// exhaust memory. On an alarm memory-limit strike the circuit breaker
+                /// (#1825) backs off every pending flagged job to the strike's backoff
+                /// time, and purges them all when it seals at the strike budget — so a
+                /// doomed loop cannot re-trigger through a sibling row while unrelated
+                /// jobs stay untouched.
+                /// </summary>
+                abstract recoveryLoop: bool option
+                [<ParamObject; Emit("$0")>]
+                static member Create (fn: string, time: float, ?payload: obj, ?id: string, ?retry: RetryOptions, ?singleflight: bool, ?hungTimeoutSeconds: float, ?exclusive: bool, ?recoveryLoop: bool) : Options = jsNative
+
     module Route =
         [<Interface>]
         type Envelope =
@@ -8251,11 +9128,11 @@ module MCPClientConnection =
                 module Item =
                     [<Interface>]
                     type Annotations =
-                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                        abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
                         abstract priority: float option with get, set
                         abstract lastModified: string option with get, set
                         [<ParamObject; Emit("$0")>]
-                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+                        static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                     module Icons =
                         [<Interface>]
@@ -8287,11 +9164,11 @@ module MCPClientConnection =
                 module Item =
                     [<Interface>]
                     type Annotations =
-                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                        abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
                         abstract priority: float option with get, set
                         abstract lastModified: string option with get, set
                         [<ParamObject; Emit("$0")>]
-                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+                        static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                     module Icons =
                         [<Interface>]
@@ -8374,7 +9251,7 @@ module MCPClientConnection =
             static member Create (?form: MCPClientConnection.Options.ElicitationHandlers.Form, ?url: MCPClientConnection.Options.ElicitationHandlers.Form) : ElicitationHandlers = jsNative
 
         module ElicitationHandlers =
-            type Form = delegate of request: Mcp.Client.ElicitRequest * signal: obj option -> JS.Promise<Mcp.Client.ElicitResult>
+            type Form = delegate of request: Mcp.Client.ElicitRequest * signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option -> JS.Promise<Mcp.Client.ElicitResult>
 
     module Prompts =
         [<Interface>]
@@ -8425,11 +9302,11 @@ module MCPClientConnection =
         module Item =
             [<Interface>]
             type Annotations =
-                abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
+                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
                 abstract priority: float option with get, set
                 abstract lastModified: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
     module Resources =
         [<Interface>]
@@ -8445,14 +9322,6 @@ module MCPClientConnection =
             abstract title: string option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
-
-        module Item =
-            module Annotations =
-                module Audience =
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("assistant")>] Assistant
-                        | [<CompiledName("user")>] User
 
     module ServerCapabilities =
         [<Interface>]
@@ -8572,7 +9441,8 @@ module MCPTransportOptions3 =
         abstract token: unit -> JS.Promise<string option>
         /// <summary>
         /// Called when the server responds with 401. If provided, the transport will
-        /// await this, then retry the request once. If the retry also gets 401, or if
+        /// await this, then retry the request once. If the retry also gets 401, the
+        /// transport throws <c>SdkHttpError</c> (<c>SdkErrorCode.ClientHttpAuthentication</c>). If
         /// this method is not provided, the transport throws UnauthorizedError.
         /// <br /><br />
         /// Implementations should refresh tokens, re-authenticate, etc. — whatever is
@@ -8583,6 +9453,11 @@ module MCPTransportOptions3 =
     type AuthProvider2 =
         inherit AgentMcpOAuthProvider
 
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type RedirectPolicy =
+        | [<CompiledName("follow")>] Follow
+        | [<CompiledName("same-origin")>] SameOrigin
+
 module Mcp =
     /// <summary>agents/mcp/client</summary>
     module Client =
@@ -8591,10 +9466,10 @@ module Mcp =
             abstract description: string option with get, set
             abstract title: string option with get, set
             abstract execute: Mcp.Client.MCPAITool.Execute with get, set
-            abstract inputSchema: obj with get, set
-            abstract outputSchema: obj option with get, set
+            abstract inputSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>> with get, set
+            abstract outputSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (execute: Mcp.Client.MCPAITool.Execute, inputSchema: obj, ?description: string, ?title: string, ?outputSchema: obj) : MCPAITool = jsNative
+            static member Create (execute: Mcp.Client.MCPAITool.Execute, inputSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, ?description: string, ?title: string, ?outputSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>) : MCPAITool = jsNative
 
         /// <summary>
         /// Structural tool set returned by MCPClientManager.getAITools.
@@ -8652,45 +9527,6 @@ module Mcp =
             [<ParamObject; Emit("$0")>]
             static member Create (authSuccess: bool, authError: string, ?serverId: string) : MCPClientOAuthResult3 = jsNative
 
-        [<Interface>]
-        type MCPConnectionResult2 =
-            /// <remarks>TypeScript type: <c>"failed"</c></remarks>
-            abstract state: string with get, set
-            abstract error: string with get, set
-            [<ParamObject; Emit("({ state: 'failed', ...$0 })")>]
-            static member Create (error: string) : MCPConnectionResult2 = jsNative
-
-        module MCPConnectionResult2 =
-            /// <remarks>TypeScript type: <c>"failed"</c></remarks>
-            [<Literal>]
-            let state = "failed"
-
-        [<Interface>]
-        type MCPConnectionResult3 =
-            /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
-            abstract state: string with get, set
-            abstract authUrl: string with get, set
-            abstract clientId: string option with get, set
-            [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
-            static member Create (authUrl: string, ?clientId: string) : MCPConnectionResult3 = jsNative
-
-        module MCPConnectionResult3 =
-            /// <remarks>TypeScript type: <c>"authenticating"</c></remarks>
-            [<Literal>]
-            let state = "authenticating"
-
-        [<Interface>]
-        type MCPConnectionResult4 =
-            /// <remarks>TypeScript type: <c>"connected"</c></remarks>
-            abstract state: string with get, set
-            [<Emit("({ state: 'connected' })")>]
-            static member Create () : MCPConnectionResult4 = jsNative
-
-        module MCPConnectionResult4 =
-            /// <remarks>TypeScript type: <c>"connected"</c></remarks>
-            [<Literal>]
-            let state = "connected"
-
         /// <summary>
         /// Options for registering an MCP server
         /// </summary>
@@ -8707,11 +9543,17 @@ module Mcp =
             [<ParamObject; Emit("$0")>]
             static member Create (url: string, name: string, ?callbackUrl: string, ?client: McpClientOptions, ?transport: MCPTransportOptions, ?authUrl: string, ?clientId: string, ?retry: RetryOptions) : RegisterServerOptions = jsNative
 
+        /// <summary>
+        /// Result of attempting to connect to an MCP server.
+        /// Discriminated union ensures error is present only on failure.
+        /// </summary>
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
         type MCPConnectionResult =
             | [<CompiledName("failed")>] Failed of error: string
             | [<CompiledName("authenticating")>] Authenticating of authUrl: string * clientId: string option
             | [<CompiledName("connected")>] Connected
+            [<ParamObject; Emit("({ state: 'authenticating', ...$0 })")>]
+            static member CreateAuthenticating (authUrl: string, ?clientId: string) : MCPConnectionResult = jsNative
 
         /// <summary>
         /// Result of discovering server capabilities.
@@ -8731,13 +9573,13 @@ module Mcp =
         type MCPClientOAuthCallbackConfig =
             abstract successRedirect: string option with get, set
             abstract errorRedirect: string option with get, set
-            abstract customHandler: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult -> obj) option with get, set
+            abstract customHandler: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult -> FSharp.CloudEdge.Runtime.Workers.Response) option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?successRedirect: string, ?errorRedirect: string, ?customHandler: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult -> obj)) : MCPClientOAuthCallbackConfig = jsNative
+            static member Create (?successRedirect: string, ?errorRedirect: string, ?customHandler: (FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult -> FSharp.CloudEdge.Runtime.Workers.Response)) : MCPClientOAuthCallbackConfig = jsNative
 
         type MCPClientOAuthResult = U2<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult2, FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientOAuthResult3>
 
-        type MCPClientElicitationHandler = delegate of request: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest * serverId: string * signal: obj option -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitResult>
+        type MCPClientElicitationHandler = delegate of request: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest * serverId: string * signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitResult>
 
         [<Interface>]
         type MCPClientElicitationHandlers =
@@ -8777,30 +9619,14 @@ module Mcp =
 
         /// <summary>
         /// A Durable Object capability that persists and aggregates MCP client
-        /// connections. Installing it directly on a Lifecycle (outside <c>agent.mcp</c>)
-        /// is experimental: that capability surface may change before stabilizing.
+        /// connections. Install it on any Lifecycle, or use <c>agent.mcp</c> on an Agent.
         /// </summary>
         type MCPClientManager =
             inherit LifecycleCapability<obj>
-            abstract _name: obj
-            abstract _version: obj
             abstract mcpConnections: JS.Record<string, MCPClientConnection> with get, set
-            /// <summary>
-            /// Cache only the current catalog so old schema graphs are not retained.
-            /// </summary>
-            abstract _aiToolSchemas: obj
-            abstract _didWarnAboutUnstableGetAITools: obj with get, set
-            abstract _oauthCallbackConfig: obj option with get, set
-            abstract _connectionDisposables: obj with get, set
-            abstract _env: obj
-            abstract _createAuthProviderFn: obj
-            abstract _isRestored: obj with get, set
-            abstract _pendingConnections: obj with get, set
-            abstract _elicitationHandlers: obj option with get, set
             /// <remarks>@internal Protected for testing purposes.</remarks>
             abstract _onObservabilityEvent: Emitter<MCPObservabilityEvent>
             abstract onObservabilityEvent: ((MCPObservabilityEvent -> unit) -> Disposable)
-            abstract _onServerStateChanged: obj
             /// <summary>
             /// Event that fires whenever any MCP server state changes (registered, connected, removed, etc.)
             /// This is useful for broadcasting server state to clients.
@@ -8813,17 +9639,7 @@ module Mcp =
             /// <summary>
             /// Intercept a registered MCP OAuth callback request.
             /// </summary>
-            abstract onRequest: context: DurableObjectCapability.OnRequest.Context -> JS.Promise<obj option>
-            abstract oauthCallbackResponse: obj with get, set
-            /// <summary>
-            /// Scope the manager-level elicitation handler to a single connection.
-            /// Returns undefined when no handler is configured so the connection keeps
-            /// its default throwing behavior.
-            /// </summary>
-            abstract scopedElicitationHandlers: obj with get, set
-            abstract sql: obj with get, set
-            abstract saveServerToStorage: obj with get, set
-            abstract removeServerFromStorage: obj with get, set
+            abstract onRequest: context: DurableObjectCapability.OnRequest.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response option>
             /// <summary>
             /// Rename a server's id, in-place, across every place the id is used as a
             /// key. Used to JIT-migrate servers that were originally registered under an
@@ -8843,41 +9659,6 @@ module Mcp =
             /// </summary>
             /// <remarks>@internal Exposed for <c>Agent.addMcpServer</c> JIT-migration.</remarks>
             abstract migrateServerId: oldId: string * newId: string * clientName: string -> JS.Promise<unit>
-            abstract _renameInMemoryConnection: obj with get, set
-            abstract getServersFromStorage: obj with get, set
-            abstract filterConnections: obj with get, set
-            /// <summary>
-            /// Get the parsed server_options for a stored server, if any.
-            /// </summary>
-            abstract getStoredServerOptions: obj with get, set
-            /// <summary>
-            /// Clear the capabilities persisted on a stored server row. Called once a
-            /// seeded connection's handshake completes (see <c>createConnection</c>): the
-            /// stamp is valid for one successful restore — sessions that configure
-            /// handlers re-stamp every row, so a deploy that stops configuring them
-            /// stops advertising stale modes after its first connected wake instead of
-            /// forever, while wakes that never handshake don't burn the stamp.
-            /// </summary>
-            abstract clearStoredCapabilities: obj with get, set
-            /// <summary>
-            /// Get the retry options for a server from stored server_options
-            /// </summary>
-            abstract getServerRetryOptions: obj with get, set
-            abstract clearServerAuthUrl: obj with get, set
-            abstract updateStoredSession: obj with get, set
-            abstract failConnection: obj with get, set
-            abstract isAuthAcceptedConnection: obj with get, set
-            abstract oauthCallbackSuccess: obj with get, set
-            abstract runWithCodeVerifierState: obj with get, set
-            abstract hasRedeemableOAuthState: obj with get, set
-            abstract ignoreUnverifiedCallback: obj with get, set
-            abstract consumeStaleOAuthState: obj with get, set
-            abstract completeAuthorizationAndCleanupVerifier: obj with get, set
-            /// <summary>
-            /// Create an auth provider for a server
-            /// </summary>
-            /// <remarks>@internal</remarks>
-            abstract createAuthProvider: obj with get, set
             /// <summary>
             /// Get saved RPC servers from storage (servers with <c>rpc://</c> URLs).
             /// </summary>
@@ -8894,11 +9675,6 @@ module Mcp =
             /// <param name="clientName">- Durable Object identity used to scope OAuth state.</param>
             abstract restoreConnectionsFromStorage: clientName: string -> JS.Promise<unit>
             /// <summary>
-            /// Track a pending connection promise for a server.
-            /// The promise is removed from the map when it settles.
-            /// </summary>
-            abstract _trackConnection: obj with get, set
-            /// <summary>
             /// Wait for all in-flight connection and discovery operations to settle.
             /// This is useful when you need MCP tools to be available before proceeding,
             /// e.g. before calling getAITools() after the agent wakes from hibernation.
@@ -8912,11 +9688,6 @@ module Mcp =
             /// <c>undefined</c> (default) waits indefinitely.
             /// </param>
             abstract waitForConnections: ?options: Mcp.Client.MCPClientManager.WaitForConnections.Options -> JS.Promise<unit>
-            abstract _connectWithRetry: obj with get, set
-            /// <summary>
-            /// Internal method to restore a single server connection and discovery
-            /// </summary>
-            abstract _restoreServer: obj with get, set
             /// <summary>
             /// Connect to and register an MCP server
             /// </summary>
@@ -8930,12 +9701,6 @@ module Mcp =
             /// <returns>Object with server ID, auth URL (if OAuth), and client ID (if OAuth)</returns>
             abstract connect: url: string * ?options: Mcp.Client.MCPClientManager.Connect.Options -> JS.Promise<Mcp.Client.MCPClientManager.Connect.Result.Item>
             /// <summary>
-            /// Create an in-memory connection object and set up observability
-            /// Does NOT save to storage - use registerServer() for that
-            /// </summary>
-            /// <returns>The connection object (existing or newly created)</returns>
-            abstract createConnection: obj with get, set
-            /// <summary>
             /// Register an MCP server connection without connecting
             /// Creates the connection object, sets up observability, and saves to storage
             /// </summary>
@@ -8943,10 +9708,6 @@ module Mcp =
             /// <param name="options">Registration options including URL, name, callback URL, and connection config</param>
             /// <returns>Server ID</returns>
             abstract registerServer: id: string * options: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.RegisterServerOptions -> JS.Promise<string>
-            /// <summary>
-            /// Persist and emit an OAuth continuation produced by connect or discovery.
-            /// </summary>
-            abstract persistAuthContinuation: obj with get, set
             /// <summary>
             /// Connect to an already registered MCP server and initialize the connection.
             /// <br /><br />
@@ -8961,10 +9722,8 @@ module Mcp =
             /// <param name="id">Server ID (must be registered first via registerServer())</param>
             /// <returns>Connection result with current state and OAuth info (if applicable)</returns>
             abstract connectToServer: id: string -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPConnectionResult>
-            abstract extractServerIdFromState: obj with get, set
-            abstract isCallbackRequest: req: obj -> bool
-            abstract validateCallbackRequest: obj with get, set
-            abstract handleCallbackRequest: req: obj -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPOAuthCallbackResult>
+            abstract isCallbackRequest: req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> bool
+            abstract handleCallbackRequest: req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPOAuthCallbackResult>
             /// <summary>
             /// Discover server capabilities if connection is in CONNECTED or READY state.
             /// Transitions to DISCOVERING then READY (or CONNECTED on error).
@@ -8978,8 +9737,6 @@ module Mcp =
             /// <param name="options.timeoutMs">Timeout in milliseconds (default: 30000)</param>
             /// <returns>Result with current state and optional error, or undefined if connection not found</returns>
             abstract discoverIfConnected: serverId: string * ?options: Mcp.Client.MCPClientManager.DiscoverIfConnected.Options -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPDiscoverResult option>
-            abstract _toDiscoverResult: obj with get, set
-            abstract _recoverStaleSession: obj with get, set
             /// <summary>
             /// Establish connection in the background after OAuth completion.
             /// This method connects to the server and discovers its capabilities.
@@ -8988,7 +9745,6 @@ module Mcp =
             /// </summary>
             /// <param name="serverId">The server ID to establish connection for</param>
             abstract establishConnection: serverId: string -> JS.Promise<unit>
-            abstract _doEstablishConnection: obj with get, set
             /// <summary>
             /// Configure OAuth callback handling
             /// </summary>
@@ -9013,16 +9769,6 @@ module Mcp =
             /// <param name="handlers">Elicitation handlers keyed by mode, each scoped with the server id that sent the request</param>
             abstract configureElicitationHandlers: ?handlers: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientElicitationHandlers -> unit
             /// <summary>
-            /// Client capabilities advertised from the currently configured handlers.
-            /// </summary>
-            abstract advertisedHandlerCapabilities: obj with get, set
-            /// <summary>
-            /// Record the handler-derived capabilities on every stored server row so a
-            /// restore after hibernation re-advertises them before the handlers
-            /// themselves are reconfigured.
-            /// </summary>
-            abstract persistAdvertisedCapabilities: obj with get, set
-            /// <summary>
             /// Get the current OAuth callback configuration
             /// </summary>
             /// <returns>The current OAuth callback configuration</returns>
@@ -9042,17 +9788,6 @@ module Mcp =
             /// <param name="filter">- Optional filter to scope results to specific servers</param>
             /// <returns>a set of tools that you can use with the AI SDK</returns>
             abstract unstable_getAITools: ?filter: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPServerFilter -> FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPAIToolSet
-            /// <summary>
-            /// Closes all active in-memory connections to MCP servers.
-            /// <br /><br />
-            /// Note: This only closes the transport connections - it does NOT remove
-            /// servers from storage. Servers will still be listed and their callback
-            /// URLs will still match incoming OAuth requests.
-            /// <br /><br />
-            /// Use removeServer() instead if you want to fully clean up a server
-            /// (closes connection AND removes from storage).
-            /// </summary>
-            abstract cleanupClosedConnection: obj with get, set
             abstract closeAllConnections: unit -> JS.Promise<unit>
             /// <summary>
             /// Closes a connection to an MCP server
@@ -9147,7 +9882,7 @@ module Mcp =
                     /// <summary>
                     /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                     /// </summary>
-                    abstract progressToken: U2<string, float> option with get, set
+                    abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// If specified, this request is related to the provided task.
                     /// </summary>
@@ -9177,57 +9912,6 @@ module Mcp =
                     module Properties =
                         [<Interface>]
                         type Item =
-                            /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract title: string option with get, set
-                            abstract description: string option with get, set
-                            abstract ``default``: bool option with get, set
-                            [<ParamObject; Emit("({ type: 'boolean', ...$0 })")>]
-                            static member Create (?title: string, ?description: string, ?``default``: bool) : Item = jsNative
-
-                        module Item =
-                            /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "boolean"
-
-                        [<Interface>]
-                        type Item2 =
-                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract title: string option with get, set
-                            abstract description: string option with get, set
-                            abstract minLength: float option with get, set
-                            abstract maxLength: float option with get, set
-                            abstract format: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format option with get, set
-                            abstract ``default``: string option with get, set
-                            [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
-                            static member Create (?title: string, ?description: string, ?minLength: float, ?maxLength: float, ?format: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item2.Format, ?``default``: string) : Item2 = jsNative
-
-                        module Item2 =
-                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "string"
-
-                            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                            type Format =
-                                | [<CompiledName("date")>] Date
-                                | [<CompiledName("date-time")>] DateTime
-                                | [<CompiledName("email")>] Email
-                                | [<CompiledName("uri")>] Uri
-
-                        [<Interface>]
-                        type Item3 =
-                            abstract ``type``: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type with get, set
-                            abstract title: string option with get, set
-                            abstract description: string option with get, set
-                            abstract minimum: float option with get, set
-                            abstract maximum: float option with get, set
-                            abstract ``default``: float option with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.Type, ?title: string, ?description: string, ?minimum: float, ?maximum: float, ?``default``: float) : Item3 = jsNative
-
-                        [<Interface>]
-                        type Item4 =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract title: string option with get, set
@@ -9236,15 +9920,15 @@ module Mcp =
                             abstract enumNames: string[] option with get, set
                             abstract ``default``: string option with get, set
                             [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
-                            static member Create (enum: string[], ?title: string, ?description: string, ?enumNames: string[], ?``default``: string) : Item4 = jsNative
+                            static member Create (enum: string[], ?title: string, ?description: string, ?enumNames: string[], ?``default``: string) : Item = jsNative
 
-                        module Item4 =
+                        module Item =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             [<Literal>]
                             let ``type`` = "string"
 
                         [<Interface>]
-                        type Item5 =
+                        type Item2 =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract title: string option with get, set
@@ -9252,25 +9936,25 @@ module Mcp =
                             abstract enum: string[] with get, set
                             abstract ``default``: string option with get, set
                             [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
-                            static member Create (enum: string[], ?title: string, ?description: string, ?``default``: string) : Item5 = jsNative
+                            static member Create (enum: string[], ?title: string, ?description: string, ?``default``: string) : Item2 = jsNative
 
-                        module Item5 =
+                        module Item2 =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             [<Literal>]
                             let ``type`` = "string"
 
                         [<Interface>]
-                        type Item6 =
+                        type Item3 =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract title: string option with get, set
                             abstract description: string option with get, set
-                            abstract oneOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
+                            abstract oneOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.OneOf.Item[] with get, set
                             abstract ``default``: string option with get, set
                             [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
-                            static member Create (oneOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[], ?title: string, ?description: string, ?``default``: string) : Item6 = jsNative
+                            static member Create (oneOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.OneOf.Item[], ?title: string, ?description: string, ?``default``: string) : Item3 = jsNative
 
-                        module Item6 =
+                        module Item3 =
                             /// <remarks>TypeScript type: <c>"string"</c></remarks>
                             [<Literal>]
                             let ``type`` = "string"
@@ -9284,19 +9968,19 @@ module Mcp =
                                     static member Create (``const``: string, title: string) : Item = jsNative
 
                         [<Interface>]
-                        type Item7 =
+                        type Item4 =
                             /// <remarks>TypeScript type: <c>"array"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract title: string option with get, set
                             abstract description: string option with get, set
                             abstract minItems: float option with get, set
                             abstract maxItems: float option with get, set
-                            abstract items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items with get, set
+                            abstract items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item4.Items with get, set
                             abstract ``default``: string[] option with get, set
                             [<ParamObject; Emit("({ type: 'array', ...$0 })")>]
-                            static member Create (items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item7.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item7 = jsNative
+                            static member Create (items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item4.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item4 = jsNative
 
-                        module Item7 =
+                        module Item4 =
                             /// <remarks>TypeScript type: <c>"array"</c></remarks>
                             [<Literal>]
                             let ``type`` = "array"
@@ -9315,30 +9999,81 @@ module Mcp =
                                 let ``type`` = "string"
 
                         [<Interface>]
-                        type Item8 =
+                        type Item5 =
                             /// <remarks>TypeScript type: <c>"array"</c></remarks>
                             abstract ``type``: string with get, set
                             abstract title: string option with get, set
                             abstract description: string option with get, set
                             abstract minItems: float option with get, set
                             abstract maxItems: float option with get, set
-                            abstract items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items with get, set
+                            abstract items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item5.Items with get, set
                             abstract ``default``: string[] option with get, set
                             [<ParamObject; Emit("({ type: 'array', ...$0 })")>]
-                            static member Create (items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item8.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item8 = jsNative
+                            static member Create (items: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item5.Items, ?title: string, ?description: string, ?minItems: float, ?maxItems: float, ?``default``: string[]) : Item5 = jsNative
 
-                        module Item8 =
+                        module Item5 =
                             /// <remarks>TypeScript type: <c>"array"</c></remarks>
                             [<Literal>]
                             let ``type`` = "array"
 
                             [<Interface>]
                             type Items =
-                                abstract anyOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[] with get, set
+                                abstract anyOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.OneOf.Item[] with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (anyOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item6.OneOf.Item[]) : Items = jsNative
+                                static member Create (anyOf: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item3.OneOf.Item[]) : Items = jsNative
 
-                        module Item3 =
+                        [<Interface>]
+                        type Item6 =
+                            /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
+                            abstract ``type``: string with get, set
+                            abstract title: string option with get, set
+                            abstract description: string option with get, set
+                            abstract ``default``: bool option with get, set
+                            [<ParamObject; Emit("({ type: 'boolean', ...$0 })")>]
+                            static member Create (?title: string, ?description: string, ?``default``: bool) : Item6 = jsNative
+
+                        module Item6 =
+                            /// <remarks>TypeScript type: <c>"boolean"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "boolean"
+
+                        [<Interface>]
+                        type Item7 =
+                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                            abstract ``type``: string with get, set
+                            abstract title: string option with get, set
+                            abstract description: string option with get, set
+                            abstract minLength: float option with get, set
+                            abstract maxLength: float option with get, set
+                            abstract format: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item7.Format option with get, set
+                            abstract ``default``: string option with get, set
+                            [<ParamObject; Emit("({ type: 'string', ...$0 })")>]
+                            static member Create (?title: string, ?description: string, ?minLength: float, ?maxLength: float, ?format: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item7.Format, ?``default``: string) : Item7 = jsNative
+
+                        module Item7 =
+                            /// <remarks>TypeScript type: <c>"string"</c></remarks>
+                            [<Literal>]
+                            let ``type`` = "string"
+
+                            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                            type Format =
+                                | [<CompiledName("date")>] Date
+                                | [<CompiledName("date-time")>] DateTime
+                                | [<CompiledName("email")>] Email
+                                | [<CompiledName("uri")>] Uri
+
+                        [<Interface>]
+                        type Item8 =
+                            abstract ``type``: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item8.Type with get, set
+                            abstract title: string option with get, set
+                            abstract description: string option with get, set
+                            abstract minimum: float option with get, set
+                            abstract maximum: float option with get, set
+                            abstract ``default``: float option with get, set
+                            [<ParamObject; Emit("$0")>]
+                            static member Create (``type``: Mcp.Client.ElicitRequest.Params.RequestedSchema.Properties.Item8.Type, ?title: string, ?description: string, ?minimum: float, ?maximum: float, ?``default``: float) : Item8 = jsNative
+
+                        module Item8 =
                             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                             type Type =
                                 | [<CompiledName("integer")>] Integer
@@ -9393,8 +10128,7 @@ module Mcp =
             static member normalizeServerId (input: string) : string = jsNative
             /// <summary>
             /// A Durable Object capability that persists and aggregates MCP client
-            /// connections. Installing it directly on a Lifecycle (outside <c>agent.mcp</c>)
-            /// is experimental: that capability surface may change before stabilizing.
+            /// connections. Install it on any Lifecycle, or use <c>agent.mcp</c> on an Agent.
             /// </summary>
             [<Import("MCPClientManager", "agents/mcp/client"); EmitConstructor>]
             static member MCPClientManager (_name: string, _version: string, ?options: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManagerOptions) : FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager = jsNative
@@ -9432,7 +10166,7 @@ module Mcp =
                     /// <summary>
                     /// Can be used to cancel an in-flight request. This will cause an <c>AbortError</c> to be raised from request().
                     /// </summary>
-                    abstract signal: obj option with get, set
+                    abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// A timeout (in milliseconds) for this request. If exceeded, an SdkError with code SdkErrorCode.RequestTimeout will be raised from request().
                     /// <br /><br />
@@ -9472,7 +10206,7 @@ module Mcp =
                     /// <summary>
                     /// If present, <c>relatedRequestId</c> is used to indicate to the transport which incoming request to associate this outgoing message with.
                     /// </summary>
-                    abstract relatedRequestId: U2<string, float> option with get, set
+                    abstract relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// The resumption token used to continue long-running requests that were interrupted.
                     /// <br /><br />
@@ -9493,7 +10227,7 @@ module Mcp =
                     /// transport. Transports that share a single channel (stdio, in-memory)
                     /// ignore it.
                     /// </summary>
-                    abstract requestSignal: obj option with get, set
+                    abstract requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// Fired by transports that open a per-request stream (the Streamable HTTP
                     /// transport's POST-per-request SSE response) when that stream ends or
@@ -9524,7 +10258,7 @@ module Mcp =
                     /// </summary>
                     abstract toolDefinition: MCPClientConnection.Tools.Item option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?toolDefinition: MCPClientConnection.Tools.Item) : Options = jsNative
+                    static member Create (?onprogress: obj, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?toolDefinition: MCPClientConnection.Tools.Item) : Options = jsNative
 
                 [<Interface>]
                 type Params =
@@ -9563,108 +10297,38 @@ module Mcp =
                                 | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
                                 | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
                                 | [<CompiledName("resource_link")>] ResourceLink of uri: string * description: string option * mimeType: string option * size: float option * annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[] option * name: string * title: string option
-                                | [<CompiledName("resource")>] Resource of resource: U2<Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2> * annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
-
-                            [<Interface>]
-                            type Item2 =
-                                /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                                abstract ``type``: string with get, set
-                                abstract text: string with get, set
-                                abstract annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
+                                | [<CompiledName("resource")>] Resource of resource: U2<Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item.Cases.Resource.Resource, Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item.Cases.Resource.Resource2> * annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option * _meta: JS.Record<string, obj> option
                                 [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-                                static member Create (text: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item2 = jsNative
-
-                            module Item2 =
-                                /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                                [<Literal>]
-                                let ``type`` = "text"
-
-                            [<Interface>]
-                            type Item3 =
-                                /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                                abstract ``type``: string with get, set
-                                abstract data: string with get, set
-                                abstract mimeType: string with get, set
-                                abstract annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
+                                static member CreateText (text: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                                 [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
-                                static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item3 = jsNative
-
-                            module Item3 =
-                                /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                                [<Literal>]
-                                let ``type`` = "image"
-
-                            [<Interface>]
-                            type Item4 =
-                                /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                                abstract ``type``: string with get, set
-                                abstract data: string with get, set
-                                abstract mimeType: string with get, set
-                                abstract annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
+                                static member CreateImage (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                                 [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
-                                static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item4 = jsNative
-
-                            module Item4 =
-                                /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                                [<Literal>]
-                                let ``type`` = "audio"
-
-                            [<Interface>]
-                            type Item5 =
-                                abstract uri: string with get, set
-                                abstract description: string option with get, set
-                                abstract mimeType: string option with get, set
-                                abstract size: float option with get, set
-                                abstract annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
-                                abstract icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[] option with get, set
-                                abstract name: string with get, set
-                                abstract title: string option with get, set
-                                /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                                abstract ``type``: string with get, set
+                                static member CreateAudio (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                                 [<ParamObject; Emit("({ type: 'resource_link', ...$0 })")>]
-                                static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item5 = jsNative
-
-                            module Item5 =
-                                /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                                [<Literal>]
-                                let ``type`` = "resource_link"
-
-                            [<Interface>]
-                            type Item6 =
-                                /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                                abstract ``type``: string with get, set
-                                abstract resource: U2<Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2> with get, set
-                                abstract annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
+                                static member CreateResourceLink (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Prompts.Item.Icons.Item[], ?title: string) : Item = jsNative
                                 [<ParamObject; Emit("({ type: 'resource', ...$0 })")>]
-                                static member Create (resource: U2<Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource, Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item6.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item6 = jsNative
+                                static member CreateResource (resource: U2<Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item.Cases.Resource.Resource, Mcp.Client.MCPClientManager.CallTool.Result.Item.Content.Item.Cases.Resource.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.ResourceTemplates.Item.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
 
-                            module Item6 =
-                                /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                                [<Literal>]
-                                let ``type`` = "resource"
+                            module Item =
+                                module Cases =
+                                    module Resource =
+                                        [<Interface>]
+                                        type Resource =
+                                            abstract uri: string with get, set
+                                            abstract mimeType: string option with get, set
+                                            abstract _meta: JS.Record<string, obj> option with get, set
+                                            abstract text: string with get, set
+                                            [<ParamObject; Emit("$0")>]
+                                            static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
 
-                                [<Interface>]
-                                type Resource =
-                                    abstract uri: string with get, set
-                                    abstract mimeType: string option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
-                                    abstract text: string with get, set
-                                    [<ParamObject; Emit("$0")>]
-                                    static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
-
-                                [<Interface>]
-                                type Resource2 =
-                                    abstract uri: string with get, set
-                                    abstract mimeType: string option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
-                                    abstract blob: string with get, set
-                                    [<ParamObject; Emit("$0")>]
-                                    static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
+                                        [<Interface>]
+                                        type Resource2 =
+                                            abstract uri: string with get, set
+                                            abstract mimeType: string option with get, set
+                                            abstract _meta: JS.Record<string, obj> option with get, set
+                                            abstract blob: string with get, set
+                                            [<ParamObject; Emit("$0")>]
+                                            static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
 
             module Connect =
                 [<Interface>]
@@ -9710,7 +10374,7 @@ module Mcp =
                     /// <summary>
                     /// Can be used to cancel an in-flight request. This will cause an <c>AbortError</c> to be raised from request().
                     /// </summary>
-                    abstract signal: obj option with get, set
+                    abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// A timeout (in milliseconds) for this request. If exceeded, an SdkError with code SdkErrorCode.RequestTimeout will be raised from request().
                     /// <br /><br />
@@ -9750,7 +10414,7 @@ module Mcp =
                     /// <summary>
                     /// If present, <c>relatedRequestId</c> is used to indicate to the transport which incoming request to associate this outgoing message with.
                     /// </summary>
-                    abstract relatedRequestId: U2<string, float> option with get, set
+                    abstract relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// The resumption token used to continue long-running requests that were interrupted.
                     /// <br /><br />
@@ -9771,7 +10435,7 @@ module Mcp =
                     /// transport. Transports that share a single channel (stdio, in-memory)
                     /// ignore it.
                     /// </summary>
-                    abstract requestSignal: obj option with get, set
+                    abstract requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// Fired by transports that open a per-request stream (the Streamable HTTP
                     /// transport's POST-per-request SSE response) when that stream ends or
@@ -9794,7 +10458,7 @@ module Mcp =
                     /// </summary>
                     abstract headers: JS.ReadonlyRecord<string, string> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>) : Options = jsNative
+                    static member Create (?onprogress: obj, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>) : Options = jsNative
 
                 [<Interface>]
                 type Params =
@@ -9833,170 +10497,104 @@ module Mcp =
                         module Messages =
                             [<Interface>]
                             type Item =
-                                abstract role: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item with get, set
+                                abstract role: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role with get, set
                                 abstract content: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (role: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item, content: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content) : Item = jsNative
+                                static member Create (role: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role, content: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content) : Item = jsNative
 
                             module Item =
                                 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                                 type Content =
-                                    | [<CompiledName("text")>] Text of text: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations option * _meta: JS.Record<string, obj> option
-                                    | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations option * _meta: JS.Record<string, obj> option
-                                    | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations option * _meta: JS.Record<string, obj> option
-                                    | [<CompiledName("resource_link")>] ResourceLink of uri: string * name: string * description: string option * mimeType: string option * size: float option * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[] option * title: string option
-                                    | [<CompiledName("resource")>] Resource of resource: U2<Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option * _meta: JS.Record<string, obj> option
-
-                                [<Interface>]
-                                type Content2 =
-                                    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                                    abstract ``type``: string with get, set
-                                    abstract text: string with get, set
-                                    abstract annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
+                                    | [<CompiledName("text")>] Text of text: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Text.Annotations option * _meta: JS.Record<string, obj> option
+                                    | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Image.Annotations option * _meta: JS.Record<string, obj> option
+                                    | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option
+                                    | [<CompiledName("resource_link")>] ResourceLink of uri: string * name: string * description: string option * mimeType: string option * size: float option * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.ResourceLink.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.ResourceLink.Icons.Item[] option * title: string option
+                                    | [<CompiledName("resource")>] Resource of resource: U2<Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Resource, Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Resource2> * annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Annotations option * _meta: JS.Record<string, obj> option
                                     [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-                                    static member Create (text: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content2.Annotations, ?_meta: JS.Record<string, obj>) : Content2 = jsNative
-
-                                module Content2 =
-                                    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                                    [<Literal>]
-                                    let ``type`` = "text"
-
-                                    [<Interface>]
-                                    type Annotations =
-                                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                        abstract priority: float option with get, set
-                                        abstract lastModified: string option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                                [<Interface>]
-                                type Content3 =
-                                    /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                                    abstract ``type``: string with get, set
-                                    abstract data: string with get, set
-                                    abstract mimeType: string with get, set
-                                    abstract annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
+                                    static member CreateText (text: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Text.Annotations, ?_meta: JS.Record<string, obj>) : Content = jsNative
                                     [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
-                                    static member Create (data: string, mimeType: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content3.Annotations, ?_meta: JS.Record<string, obj>) : Content3 = jsNative
-
-                                module Content3 =
-                                    /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                                    [<Literal>]
-                                    let ``type`` = "image"
-
-                                    [<Interface>]
-                                    type Annotations =
-                                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                        abstract priority: float option with get, set
-                                        abstract lastModified: string option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                                [<Interface>]
-                                type Content4 =
-                                    /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                                    abstract ``type``: string with get, set
-                                    abstract data: string with get, set
-                                    abstract mimeType: string with get, set
-                                    abstract annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
+                                    static member CreateImage (data: string, mimeType: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Image.Annotations, ?_meta: JS.Record<string, obj>) : Content = jsNative
                                     [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
-                                    static member Create (data: string, mimeType: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content4.Annotations, ?_meta: JS.Record<string, obj>) : Content4 = jsNative
-
-                                module Content4 =
-                                    /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                                    [<Literal>]
-                                    let ``type`` = "audio"
-
-                                    [<Interface>]
-                                    type Annotations =
-                                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                        abstract priority: float option with get, set
-                                        abstract lastModified: string option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                                [<Interface>]
-                                type Content5 =
-                                    abstract uri: string with get, set
-                                    abstract name: string with get, set
-                                    /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                                    abstract ``type``: string with get, set
-                                    abstract description: string option with get, set
-                                    abstract mimeType: string option with get, set
-                                    abstract size: float option with get, set
-                                    abstract annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
-                                    abstract icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[] option with get, set
-                                    abstract title: string option with get, set
+                                    static member CreateAudio (data: string, mimeType: string, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>) : Content = jsNative
                                     [<ParamObject; Emit("({ type: 'resource_link', ...$0 })")>]
-                                    static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content5.Icons.Item[], ?title: string) : Content5 = jsNative
-
-                                module Content5 =
-                                    /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                                    [<Literal>]
-                                    let ``type`` = "resource_link"
-
-                                    [<Interface>]
-                                    type Annotations =
-                                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                        abstract priority: float option with get, set
-                                        abstract lastModified: string option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                                    module Icons =
-                                        [<Interface>]
-                                        type Item =
-                                            abstract src: string with get, set
-                                            abstract mimeType: string option with get, set
-                                            abstract sizes: string[] option with get, set
-                                            abstract theme: Mcp.Client.MCPServerOptions.DiscoverResult.MetaIoModelcontextprotocolServerInfo.Icons.Item.Theme option with get, set
-                                            [<ParamObject; Emit("$0")>]
-                                            static member Create (src: string, ?mimeType: string, ?sizes: string[], ?theme: Mcp.Client.MCPServerOptions.DiscoverResult.MetaIoModelcontextprotocolServerInfo.Icons.Item.Theme) : Item = jsNative
-
-                                [<Interface>]
-                                type Content6 =
-                                    /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                                    abstract ``type``: string with get, set
-                                    abstract resource: U2<Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2> with get, set
-                                    abstract annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations option with get, set
-                                    abstract _meta: JS.Record<string, obj> option with get, set
+                                    static member CreateResourceLink (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.ResourceLink.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsMcpClient.Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.ResourceLink.Icons.Item[], ?title: string) : Content = jsNative
                                     [<ParamObject; Emit("({ type: 'resource', ...$0 })")>]
-                                    static member Create (resource: U2<Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource, Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Resource2>, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content6.Annotations, ?_meta: JS.Record<string, obj>) : Content6 = jsNative
+                                    static member CreateResource (resource: U2<Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Resource, Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Resource2>, ?annotations: Mcp.Client.MCPClientManager.GetPrompt.Result.Item.Messages.Item.Content.Cases.Resource.Annotations, ?_meta: JS.Record<string, obj>) : Content = jsNative
 
-                                module Content6 =
-                                    /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                                    [<Literal>]
-                                    let ``type`` = "resource"
+                                module Content =
+                                    module Cases =
+                                        module Audio =
+                                            [<Interface>]
+                                            type Annotations =
+                                                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                                abstract priority: float option with get, set
+                                                abstract lastModified: string option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
-                                    [<Interface>]
-                                    type Annotations =
-                                        abstract audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[] option with get, set
-                                        abstract priority: float option with get, set
-                                        abstract lastModified: string option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsMcpClient.MCPClientConnection.Resources.Item.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+                                        module Image =
+                                            [<Interface>]
+                                            type Annotations =
+                                                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                                abstract priority: float option with get, set
+                                                abstract lastModified: string option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
-                                    [<Interface>]
-                                    type Resource =
-                                        abstract uri: string with get, set
-                                        abstract text: string with get, set
-                                        abstract mimeType: string option with get, set
-                                        abstract _meta: JS.Record<string, obj> option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
+                                        module Resource =
+                                            [<Interface>]
+                                            type Annotations =
+                                                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                                abstract priority: float option with get, set
+                                                abstract lastModified: string option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
-                                    [<Interface>]
-                                    type Resource2 =
-                                        abstract uri: string with get, set
-                                        abstract blob: string with get, set
-                                        abstract mimeType: string option with get, set
-                                        abstract _meta: JS.Record<string, obj> option with get, set
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
+                                            [<Interface>]
+                                            type Resource =
+                                                abstract uri: string with get, set
+                                                abstract text: string with get, set
+                                                abstract mimeType: string option with get, set
+                                                abstract _meta: JS.Record<string, obj> option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
+
+                                            [<Interface>]
+                                            type Resource2 =
+                                                abstract uri: string with get, set
+                                                abstract blob: string with get, set
+                                                abstract mimeType: string option with get, set
+                                                abstract _meta: JS.Record<string, obj> option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
+
+                                        module ResourceLink =
+                                            [<Interface>]
+                                            type Annotations =
+                                                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                                abstract priority: float option with get, set
+                                                abstract lastModified: string option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
+
+                                            module Icons =
+                                                [<Interface>]
+                                                type Item =
+                                                    abstract src: string with get, set
+                                                    abstract mimeType: string option with get, set
+                                                    abstract sizes: string[] option with get, set
+                                                    abstract theme: Mcp.Client.MCPServerOptions.DiscoverResult.MetaIoModelcontextprotocolServerInfo.Icons.Item.Theme option with get, set
+                                                    [<ParamObject; Emit("$0")>]
+                                                    static member Create (src: string, ?mimeType: string, ?sizes: string[], ?theme: Mcp.Client.MCPServerOptions.DiscoverResult.MetaIoModelcontextprotocolServerInfo.Icons.Item.Theme) : Item = jsNative
+
+                                        module Text =
+                                            [<Interface>]
+                                            type Annotations =
+                                                abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                                abstract priority: float option with get, set
+                                                abstract lastModified: string option with get, set
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
                         module MetaIoModelcontextprotocolServerInfo =
                             module Icons =
@@ -10020,7 +10618,7 @@ module Mcp =
                         abstract auth_url: string option with get, set
                         abstract callback_url: string with get, set
                         abstract server_options: string option with get, set
-                        [<ParamObject; Emit("$0")>]
+                        [<ParamObject; Emit("(o => ({...o, \"client_id\": o[\"client_id\"] ?? null, \"auth_url\": o[\"auth_url\"] ?? null, \"server_options\": o[\"server_options\"] ?? null}))($0)")>]
                         static member Create (id: string, name: string, server_url: string, callback_url: string, ?client_id: string, ?auth_url: string, ?server_options: string) : Item = jsNative
 
             module ListPrompts =
@@ -10069,7 +10667,7 @@ module Mcp =
                     /// <summary>
                     /// Can be used to cancel an in-flight request. This will cause an <c>AbortError</c> to be raised from request().
                     /// </summary>
-                    abstract signal: obj option with get, set
+                    abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// A timeout (in milliseconds) for this request. If exceeded, an SdkError with code SdkErrorCode.RequestTimeout will be raised from request().
                     /// <br /><br />
@@ -10109,7 +10707,7 @@ module Mcp =
                     /// <summary>
                     /// If present, <c>relatedRequestId</c> is used to indicate to the transport which incoming request to associate this outgoing message with.
                     /// </summary>
-                    abstract relatedRequestId: U2<string, float> option with get, set
+                    abstract relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// The resumption token used to continue long-running requests that were interrupted.
                     /// <br /><br />
@@ -10130,7 +10728,7 @@ module Mcp =
                     /// transport. Transports that share a single channel (stdio, in-memory)
                     /// ignore it.
                     /// </summary>
-                    abstract requestSignal: obj option with get, set
+                    abstract requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// Fired by transports that open a per-request stream (the Streamable HTTP
                     /// transport's POST-per-request SSE response) when that stream ends or
@@ -10161,7 +10759,7 @@ module Mcp =
                     /// </summary>
                     abstract cacheMode: CacheMode option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?cacheMode: CacheMode) : Options = jsNative
+                    static member Create (?onprogress: obj, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?cacheMode: CacheMode) : Options = jsNative
 
                 [<Interface>]
                 type Params =
@@ -10258,8 +10856,8 @@ module Mcp =
             [<Interface>]
             type Transport =
                 abstract ``type``: TransportType option with get, set
-                abstract headers: obj option with get, set
-                abstract requestInit: obj option with get, set
+                abstract headers: FSharp.CloudEdge.Runtime.Workers.HeadersInit option with get, set
+                abstract requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option with get, set
                 abstract reconnectionOptions: obj option with get, set
                 abstract skipIssuerMetadataValidation: bool option with get, set
                 abstract onInsufficientScope: Mcp.Client.MCPServerOptions.Transport.OnInsufficientScope option with get, set
@@ -10267,7 +10865,7 @@ module Mcp =
                 abstract sessionId: string option with get, set
                 abstract protocolVersion: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?``type``: TransportType, ?headers: obj, ?requestInit: obj, ?reconnectionOptions: obj, ?skipIssuerMetadataValidation: bool, ?onInsufficientScope: Mcp.Client.MCPServerOptions.Transport.OnInsufficientScope, ?maxStepUpRetries: float, ?sessionId: string, ?protocolVersion: string) : Transport = jsNative
+                static member Create (?``type``: TransportType, ?headers: FSharp.CloudEdge.Runtime.Workers.HeadersInit, ?requestInit: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?reconnectionOptions: obj, ?skipIssuerMetadataValidation: bool, ?onInsufficientScope: Mcp.Client.MCPServerOptions.Transport.OnInsufficientScope, ?maxStepUpRetries: float, ?sessionId: string, ?protocolVersion: string) : Transport = jsNative
 
             module Client =
                 [<Interface>]
@@ -10361,506 +10959,13 @@ module Mcp =
                     | [<CompiledName("reauthorize")>] Reauthorize
                     | [<CompiledName("throw")>] Throw
 
-                module RequestInit =
-                    type Item<'HostMetadata> =
-                        /// <summary>
-                        /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-                        /// </summary>
-                        /// <example><c>395747</c></example>
-                        abstract asn: float option with get, set
-                        /// <summary>
-                        /// The organization which owns the ASN of the incoming request.
-                        /// </summary>
-                        /// <example><c>"Google Cloud"</c></example>
-                        abstract asOrganization: string option with get, set
-                        /// <summary>
-                        /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-                        /// </summary>
-                        /// <example><c>"gzip, deflate, br"</c></example>
-                        abstract clientAcceptEncoding: string option with get, set
-                        /// <summary>
-                        /// The number of milliseconds it took for the request to reach your worker.
-                        /// </summary>
-                        /// <example><c>22</c></example>
-                        abstract clientTcpRtt: float option with get, set
-                        /// <summary>
-                        /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-                        /// airport code of the data center that the request hit.
-                        /// </summary>
-                        /// <example><c>"DFW"</c></example>
-                        abstract colo: string with get, set
-                        /// <summary>
-                        /// Represents the upstream's response to a
-                        /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-                        /// from cloudflare.
-                        /// <br /><br />
-                        /// For workers with no upstream, this will always be <c>1</c>.
-                        /// </summary>
-                        /// <example><c>3</c></example>
-                        abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-                        /// <summary>
-                        /// The HTTP Protocol the request used.
-                        /// </summary>
-                        /// <example><c>"HTTP/2"</c></example>
-                        abstract httpProtocol: string with get, set
-                        /// <summary>
-                        /// The browser-requested prioritization information in the request object.
-                        /// <br /><br />
-                        /// If no information was set, defaults to the empty string <c>""</c>
-                        /// </summary>
-                        /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-                        /// <defaultValue>""</defaultValue>
-                        abstract requestPriority: string with get, set
-                        /// <summary>
-                        /// The TLS version of the connection to Cloudflare.
-                        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                        /// </summary>
-                        /// <example><c>"TLSv1.3"</c></example>
-                        abstract tlsVersion: string with get, set
-                        /// <summary>
-                        /// The cipher for the connection to Cloudflare.
-                        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                        /// </summary>
-                        /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-                        abstract tlsCipher: string with get, set
-                        /// <summary>
-                        /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-                        /// <br /><br />
-                        /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-                        /// </summary>
-                        abstract tlsExportedAuthenticator: obj option with get, set
-                        /// <summary>
-                        /// Results of Cloudflare's Bot Management analysis
-                        /// </summary>
-                        abstract botManagement: Mcp.Client.MCPServerOptions.Transport.RequestInit.Item.BotManagement with get, set
-                        /// <summary>
-                        /// Duplicate of <c>botManagement.score</c>.
-                        /// </summary>
-                        /// <remarks>@deprecated</remarks>
-                        abstract clientTrustScore: float with get, set
-                        /// <summary>
-                        /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-                        /// <br /><br />
-                        /// This field is only present if you have Cloudflare for SaaS enabled on your account
-                        /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-                        /// </summary>
-                        abstract hostMetadata: 'HostMetadata option with get, set
-                        /// <summary>
-                        /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-                        /// <br /><br />
-                        /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-                        /// <br /><br />
-                        /// If Cloudflare is unable to determine where the request originated this property is omitted.
-                        /// <br /><br />
-                        /// The country code <c>"T1"</c> is used for requests originating on TOR.
-                        /// </summary>
-                        /// <example><c>"GB"</c></example>
-                        abstract country: Mcp.Client.MCPServerOptions.Transport.RequestInit.Item.Country option with get, set
-                        /// <summary>
-                        /// If present, this property indicates that the request originated in the EU
-                        /// </summary>
-                        /// <example><c>"1"</c></example>
-                        abstract isEUCountry: string option with get, set
-                        /// <summary>
-                        /// A two-letter code indicating the continent the request originated from.
-                        /// </summary>
-                        /// <example><c>"AN"</c></example>
-                        abstract continent: ContinentCode option with get, set
-                        /// <summary>
-                        /// The city the request originated from
-                        /// </summary>
-                        /// <example><c>"Austin"</c></example>
-                        abstract city: string option with get, set
-                        /// <summary>
-                        /// Postal code of the incoming request
-                        /// </summary>
-                        /// <example><c>"78701"</c></example>
-                        abstract postalCode: string option with get, set
-                        /// <summary>
-                        /// Latitude of the incoming request
-                        /// </summary>
-                        /// <example><c>"30.27130"</c></example>
-                        abstract latitude: string option with get, set
-                        /// <summary>
-                        /// Longitude of the incoming request
-                        /// </summary>
-                        /// <example><c>"-97.74260"</c></example>
-                        abstract longitude: string option with get, set
-                        /// <summary>
-                        /// Timezone of the incoming request
-                        /// </summary>
-                        /// <example><c>"America/Chicago"</c></example>
-                        abstract timezone: string option with get, set
-                        /// <summary>
-                        /// If known, the ISO 3166-2 name for the first level region associated with
-                        /// the IP address of the incoming request
-                        /// </summary>
-                        /// <example><c>"Texas"</c></example>
-                        abstract region: string option with get, set
-                        /// <summary>
-                        /// If known, the ISO 3166-2 code for the first-level region associated with
-                        /// the IP address of the incoming request
-                        /// </summary>
-                        /// <example><c>"TX"</c></example>
-                        abstract regionCode: string option with get, set
-                        /// <summary>
-                        /// Metro code (DMA) of the incoming request
-                        /// </summary>
-                        /// <example><c>"635"</c></example>
-                        abstract metroCode: string option with get, set
-                        /// <summary>
-                        /// Information about the client certificate presented to Cloudflare.
-                        /// <br /><br />
-                        /// This is populated when the incoming request is served over TLS using
-                        /// either Cloudflare Access or API Shield (mTLS)
-                        /// and the presented SSL certificate has a valid
-                        /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-                        /// (i.e., not <c>null</c> or <c>""</c>).
-                        /// <br /><br />
-                        /// Otherwise, a set of placeholder values are used.
-                        /// <br /><br />
-                        /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-                        /// the object is populated (i.e. the above conditions were met).
-                        /// </summary>
-                        abstract tlsClientAuth: obj with get, set
-                        [<EmitIndexer>]
-                        abstract Item: string -> obj with get, set
-
-                    module Item =
-                        [<Interface>]
-                        type BotManagement =
-                            /// <summary>
-                            /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                            /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                            /// </summary>
-                            /// <example><c>54</c></example>
-                            abstract score: float with get, set
-                            /// <summary>
-                            /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                            /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                            /// </summary>
-                            abstract verifiedBot: bool with get, set
-                            /// <summary>
-                            /// A boolean value that is true if the request originates from a
-                            /// Cloudflare-verified proxy service.
-                            /// </summary>
-                            abstract corporateProxy: bool with get, set
-                            /// <summary>
-                            /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                            /// </summary>
-                            abstract staticResource: bool with get, set
-                            /// <summary>
-                            /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                            /// </summary>
-                            abstract detectionIds: float[] with get, set
-                            /// <summary>
-                            /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                            /// across different destination IPs, Ports, and X509 certificates.
-                            /// </summary>
-                            abstract ja3Hash: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                        type Country =
-                            | AD
-                            | AE
-                            | AF
-                            | AG
-                            | AI
-                            | AL
-                            | AM
-                            | AO
-                            | AQ
-                            | AR
-                            | AS
-                            | AT
-                            | AU
-                            | AW
-                            | AX
-                            | AZ
-                            | BA
-                            | BB
-                            | BD
-                            | BE
-                            | BF
-                            | BG
-                            | BH
-                            | BI
-                            | BJ
-                            | BL
-                            | BM
-                            | BN
-                            | BO
-                            | BQ
-                            | BR
-                            | BS
-                            | BT
-                            | BV
-                            | BW
-                            | BY
-                            | BZ
-                            | CA
-                            | CC
-                            | CD
-                            | CF
-                            | CG
-                            | CH
-                            | CI
-                            | CK
-                            | CL
-                            | CM
-                            | CN
-                            | CO
-                            | CR
-                            | CU
-                            | CV
-                            | CW
-                            | CX
-                            | CY
-                            | CZ
-                            | DE
-                            | DJ
-                            | DK
-                            | DM
-                            | DO
-                            | DZ
-                            | EC
-                            | EE
-                            | EG
-                            | EH
-                            | ER
-                            | ES
-                            | ET
-                            | FI
-                            | FJ
-                            | FK
-                            | FM
-                            | FO
-                            | FR
-                            | GA
-                            | GB
-                            | GD
-                            | GE
-                            | GF
-                            | GG
-                            | GH
-                            | GI
-                            | GL
-                            | GM
-                            | GN
-                            | GP
-                            | GQ
-                            | GR
-                            | GS
-                            | GT
-                            | GU
-                            | GW
-                            | GY
-                            | HK
-                            | HM
-                            | HN
-                            | HR
-                            | HT
-                            | HU
-                            | ID
-                            | IE
-                            | IL
-                            | IM
-                            | IN
-                            | IO
-                            | IQ
-                            | IR
-                            | IS
-                            | IT
-                            | JE
-                            | JM
-                            | JO
-                            | JP
-                            | KE
-                            | KG
-                            | KH
-                            | KI
-                            | KM
-                            | KN
-                            | KP
-                            | KR
-                            | KW
-                            | KY
-                            | KZ
-                            | LA
-                            | LB
-                            | LC
-                            | LI
-                            | LK
-                            | LR
-                            | LS
-                            | LT
-                            | LU
-                            | LV
-                            | LY
-                            | MA
-                            | MC
-                            | MD
-                            | ME
-                            | MF
-                            | MG
-                            | MH
-                            | MK
-                            | ML
-                            | MM
-                            | MN
-                            | MO
-                            | MP
-                            | MQ
-                            | MR
-                            | MS
-                            | MT
-                            | MU
-                            | MV
-                            | MW
-                            | MX
-                            | MY
-                            | MZ
-                            | NA
-                            | NC
-                            | NE
-                            | NF
-                            | NG
-                            | NI
-                            | NL
-                            | NO
-                            | NP
-                            | NR
-                            | NU
-                            | NZ
-                            | OM
-                            | PA
-                            | PE
-                            | PF
-                            | PG
-                            | PH
-                            | PK
-                            | PL
-                            | PM
-                            | PN
-                            | PR
-                            | PS
-                            | PT
-                            | PW
-                            | PY
-                            | QA
-                            | RE
-                            | RO
-                            | RS
-                            | RU
-                            | RW
-                            | SA
-                            | SB
-                            | SC
-                            | SD
-                            | SE
-                            | SG
-                            | SH
-                            | SI
-                            | SJ
-                            | SK
-                            | SL
-                            | SM
-                            | SN
-                            | SO
-                            | SR
-                            | SS
-                            | ST
-                            | SV
-                            | SX
-                            | SY
-                            | SZ
-                            | T1
-                            | TC
-                            | TD
-                            | TF
-                            | TG
-                            | TH
-                            | TJ
-                            | TK
-                            | TL
-                            | TM
-                            | TN
-                            | TO
-                            | TR
-                            | TT
-                            | TV
-                            | TW
-                            | TZ
-                            | UA
-                            | UG
-                            | UM
-                            | US
-                            | UY
-                            | UZ
-                            | VA
-                            | VC
-                            | VE
-                            | VG
-                            | VI
-                            | VN
-                            | VU
-                            | WF
-                            | WS
-                            | YE
-                            | YT
-                            | ZA
-                            | ZM
-                            | ZW
-
 module McpAgent =
-    module CfInitAsFacet =
-        module ParentPath =
-            [<Interface>]
-            type Item =
-                abstract className: string with get, set
-                abstract name: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (className: string, name: string) : Item = jsNative
-
-    module CfInvokeSubAgentPath =
-        module Path =
-            [<Interface>]
-            type Item =
-                abstract className: string with get, set
-                abstract name: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (className: string, name: string) : Item = jsNative
-
-    module CfSubAgentConnectionMetas =
-        module Result =
-            module Item =
-                [<Interface>]
-                type Item =
-                    abstract id: string with get, set
-                    abstract uri: string option with get, set
-                    abstract tags: string[] with get, set
-                    abstract state: obj with get, set
-                    abstract requestHeaders: (string * string)[] option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: string, tags: string[], state: obj, ?uri: string, ?requestHeaders: (string * string)[]) : Item = jsNative
-
-    module DeleteFibers =
-        [<Interface>]
-        type Options =
-            abstract status: U2<string, FiberStatus[]> option with get, set
-            abstract settledBefore: Fable.Core.TS.Es.Date option with get, set
-            abstract limit: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, FiberStatus[]>, ?settledBefore: Fable.Core.TS.Es.Date, ?limit: float) : Options = jsNative
-
     module ElicitInput =
         [<Interface>]
         type Options =
-            abstract relatedRequestId: U2<string, float> option with get, set
+            abstract relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?relatedRequestId: U2<string, float>) : Options = jsNative
+            static member Create (?relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue) : Options = jsNative
 
         [<Interface>]
         type Params =
@@ -10888,7 +10993,7 @@ module McpAgent =
                     /// <summary>
                     /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                     /// </summary>
-                    abstract progressToken: U2<string, float> option with get, set
+                    abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// If specified, this request is related to the provided task.
                     /// </summary>
@@ -10902,400 +11007,14 @@ module McpAgent =
                     [<ParamObject; Emit("$0")>]
                     static member Create (taskId: string) : MetaIoModelcontextprotocolRelatedTask = jsNative
 
-    module Emit =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Type =
-            | [<CompiledName("action:ledger:conflict")>] ActionLedgerConflict
-            | [<CompiledName("action:ledger:pending")>] ActionLedgerPending
-            | [<CompiledName("action:ledger:reclaimed")>] ActionLedgerReclaimed
-            | [<CompiledName("action:ledger:replayed")>] ActionLedgerReplayed
-            | [<CompiledName("action:ledger:serialize_failed")>] ActionLedgerSerializeFailed
-            | [<CompiledName("action:ledger:settled")>] ActionLedgerSettled
-            | [<CompiledName("action:ledger:swept")>] ActionLedgerSwept
-            | [<CompiledName("action:pause:approved")>] ActionPauseApproved
-            | [<CompiledName("action:pause:created")>] ActionPauseCreated
-            | [<CompiledName("action:pause:rejected")>] ActionPauseRejected
-            | [<CompiledName("action:pause:swept")>] ActionPauseSwept
-            | [<CompiledName("action:reply-attached")>] ActionReplyAttached
-            | [<CompiledName("agent_tool:detached:delivery_failed")>] AgentToolDetachedDeliveryFailed
-            | [<CompiledName("agent_tool:detached:live_count_warning")>] AgentToolDetachedLiveCountWarning
-            | [<CompiledName("agent_tool:recovery:begin")>] AgentToolRecoveryBegin
-            | [<CompiledName("agent_tool:recovery:complete")>] AgentToolRecoveryComplete
-            | [<CompiledName("agent_tool:recovery:deadline")>] AgentToolRecoveryDeadline
-            | [<CompiledName("agent_tool:recovery:failed")>] AgentToolRecoveryFailed
-            | [<CompiledName("agent_tool:recovery:reattach")>] AgentToolRecoveryReattach
-            | [<CompiledName("agent_tool:recovery:row")>] AgentToolRecoveryRow
-            | [<CompiledName("alarm:memory_limit_reset")>] AlarmMemoryLimitReset
-            | [<CompiledName("channel:delivered")>] ChannelDelivered
-            | [<CompiledName("channel:resolved")>] ChannelResolved
-            | [<CompiledName("chat:context:compacted")>] ChatContextCompacted
-            | [<CompiledName("chat:hydration:windowed")>] ChatHydrationWindowed
-            | [<CompiledName("chat:media:evicted")>] ChatMediaEvicted
-            | [<CompiledName("chat:onstart:degraded")>] ChatOnstartDegraded
-            | [<CompiledName("chat:recovery:attempt")>] ChatRecoveryAttempt
-            | [<CompiledName("chat:recovery:completed")>] ChatRecoveryCompleted
-            | [<CompiledName("chat:recovery:detected")>] ChatRecoveryDetected
-            | [<CompiledName("chat:recovery:exhausted")>] ChatRecoveryExhausted
-            | [<CompiledName("chat:recovery:failed")>] ChatRecoveryFailed
-            | [<CompiledName("chat:recovery:scheduled")>] ChatRecoveryScheduled
-            | [<CompiledName("chat:recovery:skipped")>] ChatRecoverySkipped
-            | [<CompiledName("chat:request:failed")>] ChatRequestFailed
-            | [<CompiledName("chat:stream:stalled")>] ChatStreamStalled
-            | [<CompiledName("chat:transcript:repaired")>] ChatTranscriptRepaired
-            | [<CompiledName("chat:turn:finish")>] ChatTurnFinish
-            | [<CompiledName("chat:turn:start")>] ChatTurnStart
-            | [<CompiledName("connect")>] Connect
-            | [<CompiledName("destroy")>] Destroy
-            | [<CompiledName("disconnect")>] Disconnect
-            | [<CompiledName("email:receive")>] EmailReceive
-            | [<CompiledName("email:reply")>] EmailReply
-            | [<CompiledName("email:send")>] EmailSend
-            | [<CompiledName("fiber:recovery:attempt")>] FiberRecoveryAttempt
-            | [<CompiledName("fiber:recovery:detected")>] FiberRecoveryDetected
-            | [<CompiledName("fiber:recovery:failed")>] FiberRecoveryFailed
-            | [<CompiledName("fiber:recovery:handled")>] FiberRecoveryHandled
-            | [<CompiledName("fiber:recovery:skipped")>] FiberRecoverySkipped
-            | [<CompiledName("fiber:run:completed")>] FiberRunCompleted
-            | [<CompiledName("fiber:run:failed")>] FiberRunFailed
-            | [<CompiledName("fiber:run:interrupted")>] FiberRunInterrupted
-            | [<CompiledName("fiber:run:started")>] FiberRunStarted
-            | [<CompiledName("mcp:client:authorize")>] McpClientAuthorize
-            | [<CompiledName("mcp:client:close")>] McpClientClose
-            | [<CompiledName("mcp:client:connect")>] McpClientConnect
-            | [<CompiledName("mcp:client:discover")>] McpClientDiscover
-            | [<CompiledName("mcp:client:preconnect")>] McpClientPreconnect
-            | [<CompiledName("message:cancel")>] MessageCancel
-            | [<CompiledName("message:clear")>] MessageClear
-            | [<CompiledName("message:error")>] MessageError
-            | [<CompiledName("message:request")>] MessageRequest
-            | [<CompiledName("message:response")>] MessageResponse
-            | [<CompiledName("notice:delivered")>] NoticeDelivered
-            | [<CompiledName("notice:failed")>] NoticeFailed
-            | [<CompiledName("queue:create")>] QueueCreate
-            | [<CompiledName("queue:error")>] QueueError
-            | [<CompiledName("queue:retry")>] QueueRetry
-            | [<CompiledName("rpc")>] Rpc
-            | [<CompiledName("rpc:error")>] RpcError
-            | [<CompiledName("schedule:cancel")>] ScheduleCancel
-            | [<CompiledName("schedule:create")>] ScheduleCreate
-            | [<CompiledName("schedule:duplicate_warning")>] ScheduleDuplicateWarning
-            | [<CompiledName("schedule:error")>] ScheduleError
-            | [<CompiledName("schedule:execute")>] ScheduleExecute
-            | [<CompiledName("schedule:retry")>] ScheduleRetry
-            | [<CompiledName("state:update")>] StateUpdate
-            | [<CompiledName("submission:create")>] SubmissionCreate
-            | [<CompiledName("submission:error")>] SubmissionError
-            | [<CompiledName("submission:status")>] SubmissionStatus
-            | [<CompiledName("tool:approval")>] ToolApproval
-            | [<CompiledName("tool:result")>] ToolResult
-            | [<CompiledName("workflow:approved")>] WorkflowApproved
-            | [<CompiledName("workflow:event")>] WorkflowEvent
-            | [<CompiledName("workflow:paused")>] WorkflowPaused
-            | [<CompiledName("workflow:rejected")>] WorkflowRejected
-            | [<CompiledName("workflow:restarted")>] WorkflowRestarted
-            | [<CompiledName("workflow:resumed")>] WorkflowResumed
-            | [<CompiledName("workflow:start")>] WorkflowStart
-            | [<CompiledName("workflow:terminated")>] WorkflowTerminated
-
-    module GetQueue =
-        [<Interface>]
-        type Result =
-            abstract id: string with get, set
-            abstract payload: string with get, set
-            abstract callback: McpAgent.GetQueue.Result.Callback with get, set
-            abstract created_at: float with get, set
-            abstract retry: RetryOptions option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: string, payload: string, callback: McpAgent.GetQueue.Result.Callback, created_at: float, ?retry: RetryOptions) : Result = jsNative
-
-        module Result =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Callback =
-                | [<CompiledName("__DURABLE_OBJECT_BRAND")>] DURABLEOBJECTBRAND
-                | [<CompiledName("__unsafe_ensureInitialized")>] UnsafeEnsureInitialized
-                | [<CompiledName("_cfDetachedReconcileTick")>] CfDetachedReconcileTick
-                | [<CompiledName("_cf_acquireFacetKeepAlive")>] CfAcquireFacetKeepAlive
-                | [<CompiledName("_cf_broadcastToSubAgent")>] CfBroadcastToSubAgent
-                | [<CompiledName("_cf_checkRunFibersForFacet")>] CfCheckRunFibersForFacet
-                | [<CompiledName("_cf_cleanupFacetPrefix")>] CfCleanupFacetPrefix
-                | [<CompiledName("_cf_closeSubAgentConnection")>] CfCloseSubAgentConnection
-                | [<CompiledName("_cf_destroyDescendantFacet")>] CfDestroyDescendantFacet
-                | [<CompiledName("_cf_handleSubAgentWebSocketClose")>] CfHandleSubAgentWebSocketClose
-                | [<CompiledName("_cf_handleSubAgentWebSocketConnect")>] CfHandleSubAgentWebSocketConnect
-                | [<CompiledName("_cf_handleSubAgentWebSocketMessage")>] CfHandleSubAgentWebSocketMessage
-                | [<CompiledName("_cf_initAsFacet")>] CfInitAsFacet
-                | [<CompiledName("_cf_invokeAgentPath")>] CfInvokeAgentPath
-                | [<CompiledName("_cf_invokeSubAgent")>] CfInvokeSubAgent
-                | [<CompiledName("_cf_invokeSubAgentPath")>] CfInvokeSubAgentPath
-                | [<CompiledName("_cf_registerFacetRun")>] CfRegisterFacetRun
-                | [<CompiledName("_cf_releaseFacetKeepAlive")>] CfReleaseFacetKeepAlive
-                | [<CompiledName("_cf_routeLifecycle")>] CfRouteLifecycle
-                | [<CompiledName("_cf_scheduleDestroy")>] CfScheduleDestroy
-                | [<CompiledName("_cf_sendToSubAgentConnection")>] CfSendToSubAgentConnection
-                | [<CompiledName("_cf_setSubAgentConnectionState")>] CfSetSubAgentConnectionState
-                | [<CompiledName("_cf_subAgentConnectionMetas")>] CfSubAgentConnectionMetas
-                | [<CompiledName("_cf_unregisterFacetRun")>] CfUnregisterFacetRun
-                | [<CompiledName("_keepAliveRefs")>] KeepAliveRefs
-                | [<CompiledName("_onAlarmHousekeeping")>] OnAlarmHousekeeping
-                | [<CompiledName("_onEmail")>] OnEmail
-                | [<CompiledName("_unsafe_getConnectionFlag")>] UnsafeGetConnectionFlag
-                | [<CompiledName("_unsafe_setConnectionFlag")>] UnsafeSetConnectionFlag
-                | [<CompiledName("_workflow_broadcast")>] WorkflowBroadcast
-                | [<CompiledName("_workflow_handleCallback")>] WorkflowHandleCallback
-                | [<CompiledName("_workflow_updateState")>] WorkflowUpdateState
-                | [<CompiledName("abortSubAgent")>] AbortSubAgent
-                | [<CompiledName("addMcpServer")>] AddMcpServer
-                | [<CompiledName("alarm")>] Alarm
-                | [<CompiledName("approveWorkflow")>] ApproveWorkflow
-                | [<CompiledName("broadcast")>] Broadcast
-                | [<CompiledName("cancelAgentTool")>] CancelAgentTool
-                | [<CompiledName("cancelFiber")>] CancelFiber
-                | [<CompiledName("cancelFiberByKey")>] CancelFiberByKey
-                | [<CompiledName("cancelSchedule")>] CancelSchedule
-                | [<CompiledName("clearAgentToolRuns")>] ClearAgentToolRuns
-                | [<CompiledName("connect")>] Connect
-                | [<CompiledName("createMcpOAuthProvider")>] CreateMcpOAuthProvider
-                | [<CompiledName("deleteFibers")>] DeleteFibers
-                | [<CompiledName("deleteSubAgent")>] DeleteSubAgent
-                | [<CompiledName("deleteWorkflow")>] DeleteWorkflow
-                | [<CompiledName("deleteWorkflows")>] DeleteWorkflows
-                | [<CompiledName("dequeue")>] Dequeue
-                | [<CompiledName("dequeueAll")>] DequeueAll
-                | [<CompiledName("dequeueAllByCallback")>] DequeueAllByCallback
-                | [<CompiledName("destroy")>] Destroy
-                | [<CompiledName("fetch")>] Fetch
-                | [<CompiledName("getCallableMethods")>] GetCallableMethods
-                | [<CompiledName("getConnection")>] GetConnection
-                | [<CompiledName("getConnectionTags")>] GetConnectionTags
-                | [<CompiledName("getConnections")>] GetConnections
-                | [<CompiledName("getMcpServers")>] GetMcpServers
-                | [<CompiledName("getNextAlarm")>] GetNextAlarm
-                | [<CompiledName("getQueue")>] GetQueue
-                | [<CompiledName("getQueues")>] GetQueues
-                | [<CompiledName("getSchedule")>] GetSchedule
-                | [<CompiledName("getScheduleById")>] GetScheduleById
-                | [<CompiledName("getSchedules")>] GetSchedules
-                | [<CompiledName("getWorkflow")>] GetWorkflow
-                | [<CompiledName("getWorkflowStatus")>] GetWorkflowStatus
-                | [<CompiledName("getWorkflows")>] GetWorkflows
-                | [<CompiledName("hasAgentToolRun")>] HasAgentToolRun
-                | [<CompiledName("hasSubAgent")>] HasSubAgent
-                | [<CompiledName("initialState")>] InitialState
-                | [<CompiledName("inspectFiber")>] InspectFiber
-                | [<CompiledName("inspectFiberByKey")>] InspectFiberByKey
-                | [<CompiledName("isConnectionProtocolEnabled")>] IsConnectionProtocolEnabled
-                | [<CompiledName("isConnectionReadonly")>] IsConnectionReadonly
-                | [<CompiledName("keepAlive")>] KeepAlive
-                | [<CompiledName("keepAliveWhile")>] KeepAliveWhile
-                | [<CompiledName("lifecycle")>] Lifecycle
-                | [<CompiledName("listFibers")>] ListFibers
-                | [<CompiledName("listSchedules")>] ListSchedules
-                | [<CompiledName("listSubAgents")>] ListSubAgents
-                | [<CompiledName("maxConcurrentAgentTools")>] MaxConcurrentAgentTools
-                | [<CompiledName("mcp")>] Mcp
-                | [<CompiledName("migrateWorkflowBinding")>] MigrateWorkflowBinding
-                | [<CompiledName("name")>] Name
-                | [<CompiledName("observability")>] Observability
-                | [<CompiledName("onAgentToolFinish")>] OnAgentToolFinish
-                | [<CompiledName("onAgentToolStart")>] OnAgentToolStart
-                | [<CompiledName("onAlarm")>] OnAlarm
-                | [<CompiledName("onBeforeSubAgent")>] OnBeforeSubAgent
-                | [<CompiledName("onClose")>] OnClose
-                | [<CompiledName("onConnect")>] OnConnect
-                | [<CompiledName("onError")>] OnError
-                | [<CompiledName("onFiberRecovered")>] OnFiberRecovered
-                | [<CompiledName("onMessage")>] OnMessage
-                | [<CompiledName("onProgress")>] OnProgress
-                | [<CompiledName("onRequest")>] OnRequest
-                | [<CompiledName("onStart")>] OnStart
-                | [<CompiledName("onStateChanged")>] OnStateChanged
-                | [<CompiledName("onStateUpdate")>] OnStateUpdate
-                | [<CompiledName("onWorkflowCallback")>] OnWorkflowCallback
-                | [<CompiledName("onWorkflowComplete")>] OnWorkflowComplete
-                | [<CompiledName("onWorkflowError")>] OnWorkflowError
-                | [<CompiledName("onWorkflowEvent")>] OnWorkflowEvent
-                | [<CompiledName("onWorkflowProgress")>] OnWorkflowProgress
-                | [<CompiledName("parentAgent")>] ParentAgent
-                | [<CompiledName("parentPath")>] ParentPath
-                | [<CompiledName("pauseWorkflow")>] PauseWorkflow
-                | [<CompiledName("queue")>] Queue
-                | [<CompiledName("rejectWorkflow")>] RejectWorkflow
-                | [<CompiledName("removeMcpServer")>] RemoveMcpServer
-                | [<CompiledName("render")>] Render
-                | [<CompiledName("replyToEmail")>] ReplyToEmail
-                | [<CompiledName("reportProgress")>] ReportProgress
-                | [<CompiledName("resolveFiber")>] ResolveFiber
-                | [<CompiledName("restartWorkflow")>] RestartWorkflow
-                | [<CompiledName("resumeWorkflow")>] ResumeWorkflow
-                | [<CompiledName("retry")>] Retry
-                | [<CompiledName("runAgentTool")>] RunAgentTool
-                | [<CompiledName("runFiber")>] RunFiber
-                | [<CompiledName("runWorkflow")>] RunWorkflow
-                | [<CompiledName("schedule")>] Schedule
-                | [<CompiledName("scheduleEvery")>] ScheduleEvery
-                | [<CompiledName("scheduler")>] Scheduler
-                | [<CompiledName("selfPath")>] SelfPath
-                | [<CompiledName("sendEmail")>] SendEmail
-                | [<CompiledName("sendWorkflowEvent")>] SendWorkflowEvent
-                | [<CompiledName("sessionAffinity")>] SessionAffinity
-                | [<CompiledName("setConnectionReadonly")>] SetConnectionReadonly
-                | [<CompiledName("setState")>] SetState
-                | [<CompiledName("shouldConnectionBeReadonly")>] ShouldConnectionBeReadonly
-                | [<CompiledName("shouldSendProtocolMessages")>] ShouldSendProtocolMessages
-                | [<CompiledName("sql")>] Sql
-                | [<CompiledName("startFiber")>] StartFiber
-                | [<CompiledName("stash")>] Stash
-                | [<CompiledName("state")>] State
-                | [<CompiledName("subAgent")>] SubAgent
-                | [<CompiledName("terminateWorkflow")>] TerminateWorkflow
-                | [<CompiledName("validateStateChange")>] ValidateStateChange
-                | [<CompiledName("webSocketClose")>] WebSocketClose
-                | [<CompiledName("webSocketError")>] WebSocketError
-                | [<CompiledName("webSocketMessage")>] WebSocketMessage
-
     module GetStreamForRequestId =
         module Result =
             [<Interface>]
             type Item =
                 abstract streamId: string with get, set
-                abstract requestIds: U2<string, float>[] with get, set
+                abstract requestIds: FSharp.CloudEdge.Support.Zod.V4.EnumValue[] with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (streamId: string, requestIds: U2<string, float>[]) : Item = jsNative
-
-    module HasAgentToolRun =
-        type ClsConstructor<'T when 'T :> Agent<obj, obj, JS.Record<string, obj>>> =
-            [<EmitConstructor>]
-            abstract Create: ctx: obj * env: unit -> 'T
-
-    module InspectFiber =
-        module Result =
-            [<Interface>]
-            type Item =
-                abstract fiberId: string with get, set
-                abstract name: string with get, set
-                abstract idempotencyKey: string option with get, set
-                abstract status: FiberStatus with get, set
-                abstract snapshot: obj option with get, set
-                abstract error: string option with get, set
-                abstract metadata: JS.Record<string, obj> option with get, set
-                abstract createdAt: float with get, set
-                abstract startedAt: float option with get, set
-                abstract settledAt: float option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
-
-    module ListFibers =
-        [<Interface>]
-        type Options =
-            abstract status: U2<string, FiberStatus[]> option with get, set
-            abstract name: string option with get, set
-            abstract limit: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?status: U2<string, FiberStatus[]>, ?name: string, ?limit: float) : Options = jsNative
-
-    module OnAgentToolFinish =
-        [<Interface>]
-        type Result =
-            abstract status: AgentToolTerminalStatus with get, set
-            abstract summary: string option with get, set
-            abstract error: string option with get, set
-            abstract reason: AgentToolInterruptedReason option with get, set
-            /// <summary>
-            /// Present only when <c>status</c> is <c>interrupted</c>. Whether the child facet was
-            /// still non-terminal when the parent stopped waiting (before any teardown).
-            /// </summary>
-            abstract childStillRunning: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (status: AgentToolTerminalStatus, ?summary: string, ?error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : Result = jsNative
-
-    module OnAgentToolStart =
-        [<Interface>]
-        type Run =
-            abstract runId: string with get, set
-            abstract parentToolCallId: string option with get, set
-            abstract agentType: string with get, set
-            abstract inputPreview: obj option with get, set
-            abstract status: AgentToolRunStatus with get, set
-            abstract display: McpAgent.OnAgentToolStart.Run.Display option with get, set
-            /// <summary>
-            /// Caller-controlled <c>metadata.source</c> for chat-agent <c>detached.notify</c>
-            /// completions. Present only for detached notify runs that supplied one.
-            /// </summary>
-            abstract notifySource: string option with get, set
-            abstract displayOrder: float with get, set
-            abstract startedAt: float with get, set
-            abstract completedAt: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (runId: string, agentType: string, status: AgentToolRunStatus, displayOrder: float, startedAt: float, ?parentToolCallId: string, ?inputPreview: obj, ?display: McpAgent.OnAgentToolStart.Run.Display, ?notifySource: string, ?completedAt: float) : Run = jsNative
-
-        module Run =
-            type Display =
-                abstract name: string option with get, set
-                abstract icon: string option with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
-
-    module OnBeforeSubAgent =
-        [<Interface>]
-        type Child =
-            abstract className: string with get, set
-            abstract name: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (className: string, name: string) : Child = jsNative
-
-    module OnEmail =
-        [<Interface>]
-        type Payload =
-            abstract from: string with get, set
-            abstract ``to``: string with get, set
-            abstract headers: obj with get, set
-            abstract rawSize: float with get, set
-            abstract _secureRouted: bool option with get, set
-            abstract _bridge: EmailBridge with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (from: string, ``to``: string, headers: obj, rawSize: float, _bridge: EmailBridge, ?_secureRouted: bool) : Payload = jsNative
-
-    module OnFiberRecovered =
-        type Ctx =
-            /// <summary>
-            /// Fiber ID.
-            /// </summary>
-            abstract id: string with get, set
-            abstract name: string with get, set
-            abstract status: FiberStatus option with get, set
-            abstract idempotencyKey: string option with get, set
-            abstract metadata: JS.Record<string, obj> option with get, set
-            abstract snapshot: obj with get, set
-            /// <summary>
-            /// Epoch milliseconds when the fiber row was inserted (when <c>runFiber</c>
-            /// started). Use <c>Date.now() - createdAt</c> to gate stale recoveries.
-            /// </summary>
-            abstract createdAt: float with get, set
-            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
-            abstract recoveryReason: string with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
-        module Ctx =
-            /// <remarks>TypeScript type: <c>"interrupted"</c></remarks>
-            [<Literal>]
-            let recoveryReason = "interrupted"
-
-    module OnProgress =
-        [<Interface>]
-        type Progress =
-            abstract fraction: float option with get, set
-            abstract message: string option with get, set
-            abstract phase: string option with get, set
-            /// <summary>
-            /// Set when this signal was a durable milestone (<c>reportProgress({ milestone })</c>).
-            /// Lets an <c>onProgress</c> consumer branch on milestone vs. ephemeral progress.
-            /// </summary>
-            abstract milestone: string option with get, set
-            abstract at: float with get, set
-            abstract data: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (at: float, ?fraction: float, ?message: string, ?phase: string, ?milestone: string, ?data: obj) : Progress = jsNative
+                static member Create (streamId: string, requestIds: FSharp.CloudEdge.Support.Zod.V4.EnumValue[]) : Item = jsNative
 
     module Queue =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -11308,6 +11027,7 @@ module McpAgent =
             | [<CompiledName("_cf_checkRunFibersForFacet")>] CfCheckRunFibersForFacet
             | [<CompiledName("_cf_cleanupFacetPrefix")>] CfCleanupFacetPrefix
             | [<CompiledName("_cf_closeSubAgentConnection")>] CfCloseSubAgentConnection
+            | [<CompiledName("_cf_closeSubAgentConnectionsForPrefix")>] CfCloseSubAgentConnectionsForPrefix
             | [<CompiledName("_cf_destroyDescendantFacet")>] CfDestroyDescendantFacet
             | [<CompiledName("_cf_handleSubAgentWebSocketClose")>] CfHandleSubAgentWebSocketClose
             | [<CompiledName("_cf_handleSubAgentWebSocketConnect")>] CfHandleSubAgentWebSocketConnect
@@ -11323,10 +11043,12 @@ module McpAgent =
             | [<CompiledName("_cf_sendToSubAgentConnection")>] CfSendToSubAgentConnection
             | [<CompiledName("_cf_setSubAgentConnectionState")>] CfSetSubAgentConnectionState
             | [<CompiledName("_cf_subAgentConnectionMetas")>] CfSubAgentConnectionMetas
+            | [<CompiledName("_cf_terminateSession")>] CfTerminateSession
             | [<CompiledName("_cf_unregisterFacetRun")>] CfUnregisterFacetRun
             | [<CompiledName("_keepAliveRefs")>] KeepAliveRefs
             | [<CompiledName("_onAlarmHousekeeping")>] OnAlarmHousekeeping
             | [<CompiledName("_onEmail")>] OnEmail
+            | [<CompiledName("_state")>] State
             | [<CompiledName("_unsafe_getConnectionFlag")>] UnsafeGetConnectionFlag
             | [<CompiledName("_unsafe_setConnectionFlag")>] UnsafeSetConnectionFlag
             | [<CompiledName("_workflow_broadcast")>] WorkflowBroadcast
@@ -11353,6 +11075,7 @@ module McpAgent =
             | [<CompiledName("dequeueAll")>] DequeueAll
             | [<CompiledName("dequeueAllByCallback")>] DequeueAllByCallback
             | [<CompiledName("destroy")>] Destroy
+            | [<CompiledName("dynamicAgents")>] DynamicAgents
             | [<CompiledName("elicitInput")>] ElicitInput
             | [<CompiledName("fetch")>] Fetch
             | [<CompiledName("getCallableMethods")>] GetCallableMethods
@@ -11361,7 +11084,6 @@ module McpAgent =
             | [<CompiledName("getConnections")>] GetConnections
             | [<CompiledName("getInitializeRequest")>] GetInitializeRequest
             | [<CompiledName("getMcpServers")>] GetMcpServers
-            | [<CompiledName("getNextAlarm")>] GetNextAlarm
             | [<CompiledName("getQueue")>] GetQueue
             | [<CompiledName("getQueues")>] GetQueues
             | [<CompiledName("getSchedule")>] GetSchedule
@@ -11403,6 +11125,7 @@ module McpAgent =
             | [<CompiledName("onConnect")>] OnConnect
             | [<CompiledName("onError")>] OnError
             | [<CompiledName("onFiberRecovered")>] OnFiberRecovered
+            | [<CompiledName("onJob")>] OnJob
             | [<CompiledName("onMessage")>] OnMessage
             | [<CompiledName("onProgress")>] OnProgress
             | [<CompiledName("onRequest")>] OnRequest
@@ -11450,324 +11173,16 @@ module McpAgent =
             | [<CompiledName("sql")>] Sql
             | [<CompiledName("startFiber")>] StartFiber
             | [<CompiledName("stash")>] Stash
-            | [<CompiledName("state")>] State
+            | [<CompiledName("state")>] State2
             | [<CompiledName("subAgent")>] SubAgent
+            | [<CompiledName("taskDefinitions")>] TaskDefinitions
+            | [<CompiledName("tasks")>] Tasks
             | [<CompiledName("terminateWorkflow")>] TerminateWorkflow
             | [<CompiledName("updateProps")>] UpdateProps
             | [<CompiledName("validateStateChange")>] ValidateStateChange
             | [<CompiledName("webSocketClose")>] WebSocketClose
             | [<CompiledName("webSocketError")>] WebSocketError
             | [<CompiledName("webSocketMessage")>] WebSocketMessage
-
-        [<Interface>]
-        type Options =
-            abstract retry: RetryOptions option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?retry: RetryOptions) : Options = jsNative
-
-    module ReplyToEmail =
-        [<Interface>]
-        type Email =
-            abstract from: string with get, set
-            abstract ``to``: string with get, set
-            abstract getRaw: (unit -> JS.Promise<obj>) with get, set
-            abstract headers: obj with get, set
-            abstract rawSize: float with get, set
-            abstract setReject: (string -> unit) with get, set
-            abstract forward: McpAgent.ReplyToEmail.Email.Forward with get, set
-            abstract reply: (FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.ReplyToEmail.Email.Reply.Options -> JS.Promise<obj>) with get, set
-            abstract _secureRouted: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (from: string, ``to``: string, getRaw: (unit -> JS.Promise<obj>), headers: obj, rawSize: float, setReject: (string -> unit), forward: McpAgent.ReplyToEmail.Email.Forward, reply: (FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.ReplyToEmail.Email.Reply.Options -> JS.Promise<obj>), ?_secureRouted: bool) : Email = jsNative
-
-        [<Interface>]
-        type Options =
-            abstract fromName: string with get, set
-            abstract subject: string option with get, set
-            abstract body: string with get, set
-            abstract contentType: string option with get, set
-            abstract headers: JS.Record<string, string> option with get, set
-            abstract secret: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (fromName: string, body: string, ?subject: string, ?contentType: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
-
-        module Email =
-            type Forward = delegate of rcptTo: string * headers: obj option -> JS.Promise<obj>
-
-            module Reply =
-                [<Interface>]
-                type Options =
-                    abstract from: string with get, set
-                    abstract ``to``: string with get, set
-                    abstract raw: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (from: string, ``to``: string, raw: string) : Options = jsNative
-
-    module ReportProgress =
-        [<Interface>]
-        type Options =
-            abstract persist: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?persist: bool) : Options = jsNative
-
-        [<Interface>]
-        type Progress<'T> =
-            /// <summary>
-            /// 0..1 — drives a progress bar.
-            /// </summary>
-            abstract fraction: float option with get, set
-            abstract message: string option with get, set
-            abstract phase: string option with get, set
-            /// <summary>
-            /// Present ⇒ a <b>durable</b> milestone: persisted, replayable, and surfaced as a
-            /// distinct row in <c>AgentToolRunState.milestones</c> / <c>inspectAgentToolRun</c>. Use
-            /// for named phase boundaries ("schema-ready", "preview-ready", "deployed").
-            /// </summary>
-            abstract milestone: string option with get, set
-            abstract data: 'T option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?fraction: float, ?message: string, ?phase: string, ?milestone: string, ?data: 'T) : Progress<'T> = jsNative
-
-    module Retry =
-        [<Interface>]
-        type Options =
-            inherit RetryOptions
-            /// <summary>
-            /// Return false to stop retrying a specific error. Receives the error and the next attempt number. Default: retry all errors.
-            /// </summary>
-            abstract shouldRetry: McpAgent.Retry.Options.ShouldRetry option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?maxAttempts: float, ?baseDelayMs: float, ?maxDelayMs: float, ?shouldRetry: McpAgent.Retry.Options.ShouldRetry) : Options = jsNative
-
-        module Options =
-            type ShouldRetry = delegate of err: obj * nextAttempt: float -> bool
-
-    module RunAgentTool =
-        [<Interface>]
-        type Options<'Input> =
-            inherit FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.RunAgentTool.Options2<'Input>
-            /// <summary>
-            /// Run the sub-agent <b>detached</b>: dispatch it, let the current turn continue,
-            /// and (optionally) get a durable callback when it finishes. <c>true</c> is
-            /// fire-and-forget (observe via <c>agent-tool-event</c> frames + the global
-            /// <c>onAgentToolFinish</c> hook); an object adds the targeted, eviction-surviving
-            /// <c>onFinish</c> callback. A detached run does NOT inherit <c>options.signal</c> — it
-            /// must outlive the spawning turn; cancel it explicitly via <c>cancelAgentTool</c>.
-            /// </summary>
-            abstract detached: obj with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (input: 'Input, detached: obj, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: obj, ?inputPreview: obj, ?display: McpAgent.OnAgentToolStart.Run.Display) : Options<'Input> = jsNative
-
-        [<Interface>]
-        type Options2<'Input> =
-            abstract input: 'Input with get, set
-            abstract runId: string option with get, set
-            abstract parentToolCallId: string option with get, set
-            abstract displayOrder: float option with get, set
-            abstract signal: obj option with get, set
-            abstract inputPreview: obj option with get, set
-            abstract display: McpAgent.OnAgentToolStart.Run.Display option with get, set
-            /// <summary>
-            /// Run the sub-agent <b>detached</b>: dispatch it, let the current turn continue,
-            /// and (optionally) get a durable callback when it finishes. <c>true</c> is
-            /// fire-and-forget (observe via <c>agent-tool-event</c> frames + the global
-            /// <c>onAgentToolFinish</c> hook); an object adds the targeted, eviction-surviving
-            /// <c>onFinish</c> callback. A detached run does NOT inherit <c>options.signal</c> — it
-            /// must outlive the spawning turn; cancel it explicitly via <c>cancelAgentTool</c>.
-            /// </summary>
-            abstract detached: U2<bool, McpAgent.RunAgentTool.Options.Detached> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (input: 'Input, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: obj, ?inputPreview: obj, ?display: McpAgent.OnAgentToolStart.Run.Display, ?detached: U2<bool, McpAgent.RunAgentTool.Options.Detached>) : Options2<'Input> = jsNative
-
-        module Options =
-            [<Interface>]
-            type Detached =
-                /// <summary>
-                /// Method invoked once per terminal delivery. Branch on <c>result.status</c>:
-                /// <c>"completed" | "error" | "aborted" | "interrupted"</c>. A budget give-up
-                /// arrives as <c>status: "interrupted"</c> with <c>reason: "budget-exceeded"</c>; because
-                /// <c>interrupted</c> is soft, a child that later completes can fire the hook again
-                /// with <c>"completed"</c>, so a give-up never hides a late real result. Make the
-                /// handler idempotent.
-                /// </summary>
-                abstract onFinish: string option with get, set
-                /// <summary>
-                /// Absolute safety ceiling — a backstop against a child that runs forever. On
-                /// expiry the parent gives up watching (delivers <c>onFinish</c> with
-                /// <c>interrupted</c> / <c>budget-exceeded</c>) and tears the child down. Defaults to the
-                /// parent-level <c>detachedMaxBudgetMs</c>.
-                /// </summary>
-                abstract maxBudgetMs: float option with get, set
-                /// <summary>
-                /// Per-run override of the resetting no-progress window (ms). Once the child
-                /// emits its first <c>reportProgress</c>, the parent gives up if it then goes silent
-                /// for this long (resets on each signal). Defaults to the parent-level
-                /// <c>detachedNoProgressBudgetMs</c> (1h). <c>0</c>/<c>Infinity</c> disables it.
-                /// </summary>
-                abstract noProgressBudgetMs: float option with get, set
-                /// <summary>
-                /// Chat-agent convenience (<c>@cloudflare/think</c> / <c>AIChatAgent</c>): when the run
-                /// finishes, inject a message into the chat so the model can react to the
-                /// result, instead of you wiring <c>onFinish</c> by hand. Sugar that auto-targets
-                /// the agent's <c>_cfDetachedNotifyFinish</c> hook; ignored on a base <c>Agent</c> that
-                /// does not implement it, and ignored when <c>onFinish</c> is also set (an explicit
-                /// <c>onFinish</c> wins). Pass <c>{ source }</c> to fit the injected message into your
-                /// app's existing metadata taxonomy. Override <c>formatDetachedCompletion()</c> to
-                /// customize the injected text.
-                /// </summary>
-                abstract notify: U2<bool, McpAgent.RunAgentTool.Options.Detached.Notify> option with get, set
-                /// <summary>
-                /// Chat-agent convenience: milestone names that, when the detached run reaches
-                /// them, surface an idempotent synthetic message in the chat BEFORE the run
-                /// finishes. Each <c>(runId, name)</c> fires at most once (idempotency-keyed),
-                /// whether observed live or reconciled after eviction. Override the wording via
-                /// <c>formatDetachedMilestone()</c>. Requires a chat host (<c>@cloudflare/think</c>); a
-                /// no-op on a base <c>Agent</c>.
-                /// <br /><br />
-                /// Two delivery modes (the string-array shorthand defaults to <c>"narrate"</c>):
-                /// - <c>"narrate"</c> (default) — inject a synthetic <b>assistant</b> message directly
-                ///   (no inference): a cheap, honest status line ("Found 2 sources…") that does
-                ///   not trigger a model turn. Best for pure progress narration.
-                /// - <c>"react"</c> — inject a <b>user-role</b> turn so the model responds to the
-                ///   milestone (steer, start dependent work, narrate with context). Costs a
-                ///   model turn. Opt in for milestones the agent should <i>act on</i>.
-                /// </summary>
-                abstract onMilestones: U2<string[], McpAgent.RunAgentTool.Options.Detached.OnMilestones> option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (?onFinish: string, ?maxBudgetMs: float, ?noProgressBudgetMs: float, ?notify: U2<bool, McpAgent.RunAgentTool.Options.Detached.Notify>, ?onMilestones: U2<string[], McpAgent.RunAgentTool.Options.Detached.OnMilestones>) : Detached = jsNative
-
-            module Detached =
-                [<Interface>]
-                type Notify =
-                    abstract source: string option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (?source: string) : Notify = jsNative
-
-                [<Interface>]
-                type OnMilestones =
-                    abstract names: string[] with get, set
-                    abstract mode: Agent.DeliverDetachedMilestone.Mode option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (names: string[], ?mode: Agent.DeliverDetachedMilestone.Mode) : OnMilestones = jsNative
-
-        module Result =
-            [<Interface>]
-            type Item =
-                abstract runId: string with get, set
-                abstract agentType: string with get, set
-                /// <summary>
-                /// <c>"running"</c> on a successful dispatch; <c>"error"</c> if dispatch itself failed
-                /// (e.g. the <c>maxConcurrentAgentTools</c> cap was exceeded — rejected
-                /// synchronously, no child started, no callback wired).
-                /// </summary>
-                abstract status: McpAgent.RunAgentTool.Result.Item.Status with get, set
-                abstract error: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (runId: string, agentType: string, status: McpAgent.RunAgentTool.Result.Item.Status, ?error: string) : Item = jsNative
-
-            [<Interface>]
-            type Item2<'Output> =
-                abstract runId: string with get, set
-                abstract agentType: string with get, set
-                abstract status: AgentToolTerminalStatus with get, set
-                abstract output: 'Output option with get, set
-                abstract summary: string option with get, set
-                abstract error: string option with get, set
-                /// <summary>
-                /// Present only when <c>status</c> is <c>interrupted</c> — a machine-readable cause so
-                /// callers don't pattern-match the <c>error</c> prose (#1630 follow-up).
-                /// </summary>
-                abstract reason: AgentToolInterruptedReason option with get, set
-                /// <summary>
-                /// Present only when <c>status</c> is <c>interrupted</c>. <c>true</c> when the child facet was
-                /// still non-terminal (running / advancing) at the moment the parent stopped
-                /// waiting and before any teardown; <c>false</c> once the parent has torn the child
-                /// down so it is no longer doing work.
-                /// </summary>
-                abstract childStillRunning: bool option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (runId: string, agentType: string, status: AgentToolTerminalStatus, ?output: 'Output, ?summary: string, ?error: string, ?reason: AgentToolInterruptedReason, ?childStillRunning: bool) : Item2<'Output> = jsNative
-
-            module Item =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Status =
-                    | [<CompiledName("error")>] Error
-                    | [<CompiledName("running")>] Running
-
-    module RunFiber =
-        module Fn =
-            [<Interface>]
-            type Ctx =
-                /// <summary>
-                /// Unique identifier for this fiber execution.
-                /// </summary>
-                abstract id: string with get, set
-                abstract signal: obj with get, set
-                abstract stash: data: obj -> unit
-                abstract snapshot: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, signal: obj, stash: (obj -> unit), snapshot: obj) : Ctx = jsNative
-
-    module RunFiberWithStashWrapper =
-        [<Interface>]
-        type Options =
-            abstract initialSnapshot: obj option with get, set
-            abstract wrapStash: (obj -> obj) option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?initialSnapshot: obj, ?wrapStash: (obj -> obj)) : Options = jsNative
-
-    module Schedule =
-        [<Interface>]
-        type Options =
-            abstract retry: RetryOptions option with get, set
-            abstract idempotent: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?retry: RetryOptions, ?idempotent: bool) : Options = jsNative
-
-    module ScheduleEvery =
-        [<Interface>]
-        type Options =
-            abstract retry: RetryOptions option with get, set
-            abstract _idempotent: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?retry: RetryOptions, ?_idempotent: bool) : Options = jsNative
-
-    module Scheduler =
-        module Item =
-            type Item = delegate of payload: obj * schedule: FSharp.CloudEdge.Runtime.AgentsMcpClient.Scheduler.Set.Result.Item<obj> -> obj
-
-    module SendEmail =
-        [<Interface>]
-        type Options =
-            abstract binding: obj with get, set
-            abstract ``to``: U2<string, string[]> with get, set
-            abstract from: U2<string, McpAgent.SendEmail.Options.From> with get, set
-            abstract subject: string with get, set
-            abstract text: string option with get, set
-            abstract html: string option with get, set
-            abstract replyTo: U2<string, McpAgent.SendEmail.Options.ReplyTo> option with get, set
-            abstract cc: U2<string, string[]> option with get, set
-            abstract bcc: U2<string, string[]> option with get, set
-            abstract inReplyTo: string option with get, set
-            abstract headers: JS.Record<string, string> option with get, set
-            abstract secret: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (binding: obj, ``to``: U2<string, string[]>, from: U2<string, McpAgent.SendEmail.Options.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, McpAgent.SendEmail.Options.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: JS.Record<string, string>, ?secret: string) : Options = jsNative
-
-        module Options =
-            [<Interface>]
-            type From =
-                abstract email: string with get, set
-                abstract name: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (email: string, ?name: string) : From = jsNative
-
-            [<Interface>]
-            type ReplyTo =
-                abstract email: string with get, set
-                abstract name: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (email: string, ?name: string) : ReplyTo = jsNative
 
     module Server =
         module Item =
@@ -11794,9 +11209,9 @@ module McpAgent =
             abstract ``params``: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3 option with get, set
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
             abstract jsonrpc: string with get, set
-            abstract id: U2<string, float> with get, set
+            abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (``method``: string, id: U2<string, float>, ?``params``: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3) : InitializeRequest = jsNative
+            static member Create (``method``: string, id: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?``params``: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3) : InitializeRequest = jsNative
 
         module InitializeRequest =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -11821,10 +11236,10 @@ module McpAgent =
         type InitializeRequest3 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
             abstract jsonrpc: string with get, set
-            abstract id: U2<string, float> with get, set
+            abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue with get, set
             abstract result: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3 with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (id: U2<string, float>, result: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3) : InitializeRequest3 = jsNative
+            static member Create (id: FSharp.CloudEdge.Support.Zod.V4.EnumValue, result: FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.Server.Item.Item3) : InitializeRequest3 = jsNative
 
         module InitializeRequest3 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -11835,10 +11250,10 @@ module McpAgent =
         type InitializeRequest4 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
             abstract jsonrpc: string with get, set
-            abstract id: U2<string, float> option with get, set
+            abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
             abstract error: McpAgent.SetInitializeRequest.InitializeRequest4.Error with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (error: McpAgent.SetInitializeRequest.InitializeRequest4.Error, ?id: U2<string, float>) : InitializeRequest4 = jsNative
+            static member Create (error: McpAgent.SetInitializeRequest.InitializeRequest4.Error, ?id: FSharp.CloudEdge.Support.Zod.V4.EnumValue) : InitializeRequest4 = jsNative
 
         module InitializeRequest4 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -11854,118 +11269,9 @@ module McpAgent =
                 static member Create (code: float, message: string, ?data: obj) : Error = jsNative
 
     module ShouldSendProtocolMessages =
+        [<Interface>]
         type Connection<'TState> =
-            /// <summary>
-            /// The <b><c>WebSocket.binaryType</c></b> property controls the type of binary data being received over the WebSocket connection.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType">MDN Reference</a>
-            /// </summary>
-            abstract binaryType: BinaryType with get, set
-            /// <summary>
-            /// The <b><c>WebSocket.bufferedAmount</c></b> read-only property returns the number of bytes of data that have been queued using calls to send() but not yet transmitted to the network. This value resets to zero once all queued data has been sent. This value does not reset to zero when the connection is closed; if you keep calling send(), this will continue to climb.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/bufferedAmount">MDN Reference</a>
-            /// </summary>
-            abstract bufferedAmount: float
-            /// <summary>
-            /// The <b><c>WebSocket.extensions</c></b> read-only property returns the extensions selected by the server. This is currently only the empty string or a list of extensions as negotiated by the connection.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/extensions">MDN Reference</a>
-            /// </summary>
-            abstract extensions: string
-            /// <summary>
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/close_event">MDN Reference</a>
-            /// </summary>
-            abstract onclose: (Fable.Core.TS.Dom.CloseEvent -> obj) option with get, set
-            /// <summary>
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/error_event">MDN Reference</a>
-            /// </summary>
-            abstract onerror: (obj -> obj) option with get, set
-            /// <summary>
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/message_event">MDN Reference</a>
-            /// </summary>
-            abstract onmessage: (obj -> obj) option with get, set
-            /// <summary>
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/open_event">MDN Reference</a>
-            /// </summary>
-            abstract onopen: (obj -> obj) option with get, set
-            /// <summary>
-            /// The <b><c>WebSocket.protocol</c></b> read-only property returns the name of the sub-protocol the server selected; this will be one of the strings specified in the protocols parameter when creating the WebSocket object, or the empty string if no connection is established.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/protocol">MDN Reference</a>
-            /// </summary>
-            abstract protocol: string
-            /// <summary>
-            /// The <b><c>WebSocket.readyState</c></b> read-only property returns the current state of the WebSocket connection.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/readyState">MDN Reference</a>
-            /// </summary>
-            abstract readyState: McpAgent.ShouldSendProtocolMessages.Connection.ReadyState
-            /// <summary>
-            /// The <b><c>WebSocket.url</c></b> read-only property returns the absolute URL of the WebSocket as resolved by the constructor.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/url">MDN Reference</a>
-            /// </summary>
-            abstract url: string
-            /// <summary>
-            /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/close">MDN Reference</a>
-            /// </summary>
-            abstract close: ?code: float * ?reason: string -> unit
-            /// <summary>
-            /// The <b><c>WebSocket.send()</c></b> method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
-            /// </summary>
-            abstract send: data: obj -> unit
-            /// <summary>
-            /// The <b><c>WebSocket.send()</c></b> method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
-            /// </summary>
-            abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
-            /// <remarks>TypeScript type: <c>0</c></remarks>
-            abstract CONNECTING: float
-            /// <remarks>TypeScript type: <c>1</c></remarks>
-            abstract OPEN: float
-            /// <remarks>TypeScript type: <c>2</c></remarks>
-            abstract CLOSING: float
-            /// <remarks>TypeScript type: <c>3</c></remarks>
-            abstract CLOSED: float
-            /// <summary>
-            /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
-            /// </summary>
-            abstract addEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.WebSocketEventMap, 'E> * listener: ('E -> obj) * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
-            /// <summary>
-            /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
-            /// </summary>
-            abstract addEventListener: ``type``: string * listener: obj * ?options: U2<bool, Fable.Core.TS.Dom.AddEventListenerOptions> -> unit
-            /// <summary>
-            /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
-            /// </summary>
-            abstract removeEventListener<'E>: ``type``: typekeyof<Fable.Core.TS.Dom.WebSocketEventMap, 'E> * listener: ('E -> obj) * ?options: obj -> unit
-            /// <summary>
-            /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
-            /// </summary>
-            abstract removeEventListener: ``type``: string * listener: obj * ?options: obj -> unit
-            abstract accept: ?options: obj -> unit
-            abstract serializeAttachment: attachment: obj -> unit
-            abstract deserializeAttachment: unit -> obj
-            /// <summary>
-            /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-            /// <br /><br />
-            /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
-            /// </summary>
-            abstract dispatchEvent: ``event``: obj -> bool
+            inherit FSharp.CloudEdge.Runtime.Workers.WebSocket
             /// <summary>
             /// Connection identifier
             /// </summary>
@@ -12000,53 +11306,17 @@ module McpAgent =
             /// Always includes the connection id as the first tag.
             /// </summary>
             abstract tags: string[] with get, set
-
-        module Connection =
-            /// <remarks>TypeScript type: <c>0</c></remarks>
-            [<Literal>]
-            let CONNECTING = 0.0
-            /// <remarks>TypeScript type: <c>1</c></remarks>
-            [<Literal>]
-            let OPEN = 1.0
-            /// <remarks>TypeScript type: <c>2</c></remarks>
-            [<Literal>]
-            let CLOSING = 2.0
-            /// <remarks>TypeScript type: <c>3</c></remarks>
-            [<Literal>]
-            let CLOSED = 3.0
-
-            type ReadyState =
-                | N0 = 0
-                | N1 = 1
-                | N2 = 2
-                | N3 = 3
+            [<ParamObject; Emit("(o => ({...o, \"url\": o[\"url\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"extensions\": o[\"extensions\"] ?? null, \"uri\": o[\"uri\"] ?? null, \"state\": o[\"state\"] ?? null}))($0)")>]
+            static member Create (accept: (FSharp.CloudEdge.Runtime.Workers.WebSocketAcceptOptions option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: FSharp.CloudEdge.Runtime.Workers.WebSocket.BinaryType, addEventListener: Action<'Type, U2<(U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.MessageEvent, FSharp.CloudEdge.Runtime.Workers.Event> -> unit), FSharp.CloudEdge.Runtime.Workers.EventListenerObject<FSharp.CloudEdge.Runtime.Workers.Event>>, U2<bool, FSharp.CloudEdge.Runtime.Workers.EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.MessageEvent, FSharp.CloudEdge.Runtime.Workers.Event> -> unit), FSharp.CloudEdge.Runtime.Workers.EventListenerObject<FSharp.CloudEdge.Runtime.Workers.Event>>, U2<bool, FSharp.CloudEdge.Runtime.Workers.EventTargetEventListenerOptions> option>, dispatchEvent: (U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.Event, FSharp.CloudEdge.Runtime.Workers.MessageEvent> -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
 
         [<Interface>]
         type Ctx =
             /// <summary>
             /// Original WebSocket upgrade request.
             /// </summary>
-            abstract request: obj with get, set
+            abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (request: obj) : Ctx = jsNative
-
-    module StartFiber =
-        [<Interface>]
-        type Options =
-            abstract fiberId: string option with get, set
-            abstract idempotencyKey: string option with get, set
-            abstract metadata: JS.Record<string, obj> option with get, set
-            abstract waitForCompletion: bool option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?fiberId: string, ?idempotencyKey: string, ?metadata: JS.Record<string, obj>, ?waitForCompletion: bool) : Options = jsNative
-
-        module Result =
-            [<Interface>]
-            type Item =
-                inherit FSharp.CloudEdge.Runtime.AgentsMcpClient.McpAgent.InspectFiber.Result.Item
-                abstract accepted: bool with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (fiberId: string, name: string, status: FiberStatus, createdAt: float, accepted: bool, ?idempotencyKey: string, ?snapshot: obj, ?error: string, ?metadata: JS.Record<string, obj>, ?startedAt: float, ?settledAt: float) : Item = jsNative
+            static member Create (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Ctx = jsNative
 
 module RPCClientTransport =
     type Onmessage = delegate of message: U4<RPCClientTransport.Onmessage.Message, RPCClientTransport.Onmessage.Message2, RPCClientTransport.Onmessage.Message3, RPCClientTransport.Onmessage.Message4> * extra: obj option -> unit
@@ -12058,9 +11328,9 @@ module RPCClientTransport =
             abstract ``params``: RPCClientTransport.Onmessage.Message.Params option with get, set
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
             abstract jsonrpc: string with get, set
-            abstract id: U2<string, float> with get, set
+            abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (``method``: string, id: U2<string, float>, ?``params``: RPCClientTransport.Onmessage.Message.Params) : Message = jsNative
+            static member Create (``method``: string, id: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?``params``: RPCClientTransport.Onmessage.Message.Params) : Message = jsNative
 
         module Message =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -12090,10 +11360,10 @@ module RPCClientTransport =
         type Message3 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
             abstract jsonrpc: string with get, set
-            abstract id: U2<string, float> option with get, set
+            abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
             abstract error: RPCClientTransport.Onmessage.Message3.Error with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (error: RPCClientTransport.Onmessage.Message3.Error, ?id: U2<string, float>) : Message3 = jsNative
+            static member Create (error: RPCClientTransport.Onmessage.Message3.Error, ?id: FSharp.CloudEdge.Support.Zod.V4.EnumValue) : Message3 = jsNative
 
         module Message3 =
             /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -12113,16 +11383,16 @@ module RPCClientTransport =
             inherit RPCClientTransport.Onmessage.Message4.Base
             abstract result: RPCClientTransport.Onmessage.Message4.Result with get, set
             [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-            static member Create (id: U2<string, float>, result: RPCClientTransport.Onmessage.Message4.Result) : Message4 = jsNative
+            static member Create (id: FSharp.CloudEdge.Support.Zod.V4.EnumValue, result: RPCClientTransport.Onmessage.Message4.Result) : Message4 = jsNative
 
         module Message4 =
             [<Interface>]
             type Base =
                 /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
                 abstract jsonrpc: string with get, set
-                abstract id: U2<string, float> with get, set
+                abstract id: FSharp.CloudEdge.Support.Zod.V4.EnumValue with get, set
                 [<ParamObject; Emit("({ jsonrpc: '2.0', ...$0 })")>]
-                static member Create (id: U2<string, float>) : Base = jsNative
+                static member Create (id: FSharp.CloudEdge.Support.Zod.V4.EnumValue) : Base = jsNative
 
             module Base =
                 /// <remarks>TypeScript type: <c>"2.0"</c></remarks>
@@ -12139,74 +11409,6 @@ module RPCClientTransport =
                 abstract Item: string -> obj with get, set
 
 module Scheduler =
-    [<Interface>]
-    type LifecycleServices =
-        abstract storage: obj
-        abstract ready: (unit -> JS.Promise<unit>)
-        abstract starting: (unit -> bool)
-        abstract alarms: Scheduler.LifecycleServices.Alarms
-        /// <summary>
-        /// Run a capability-held user callback inside the host invocation context.
-        /// Capability hooks run outside host context; this is the one boundary for
-        /// entering it, and a host composition root may substitute its own wrapper
-        /// (Agent adds tracing span scope).
-        /// </summary>
-        abstract runInHostContext: ((unit -> obj) -> JS.Promise<obj>)
-        abstract events: Scheduler.LifecycleServices.Events
-        abstract routes: Scheduler.LifecycleServices.Routes
-        [<ParamObject; Emit("$0")>]
-        static member Create (storage: obj, ready: (unit -> JS.Promise<unit>), starting: (unit -> bool), alarms: Scheduler.LifecycleServices.Alarms, runInHostContext: ((unit -> obj) -> JS.Promise<obj>), events: Scheduler.LifecycleServices.Events, routes: Scheduler.LifecycleServices.Routes) : LifecycleServices = jsNative
-
-    module DONOTUSEWILLBREAKHandleAlarmMemoryLimit =
-        [<Interface>]
-        type Options =
-            abstract callbacks: string[]
-            abstract ``sealed``: bool
-            abstract nextTime: float option
-            [<ParamObject; Emit("$0")>]
-            static member Create (callbacks: string[], ``sealed``: bool, ?nextTime: float) : Options = jsNative
-
-    module LifecycleServices =
-        [<Interface>]
-        type Alarms =
-            /// <summary>
-            /// Recompute the physical alarm from installed capability state.
-            /// </summary>
-            abstract rearm: (unit -> JS.Promise<unit>)
-            /// <summary>
-            /// True once explicit host teardown permanently disabled alarm arming.
-            /// Capabilities stop dispatching durable work when this reports true.
-            /// </summary>
-            abstract disabled: (unit -> bool)
-            [<ParamObject; Emit("$0")>]
-            static member Create (rearm: (unit -> JS.Promise<unit>), disabled: (unit -> bool)) : Alarms = jsNative
-
-        [<Interface>]
-        type Events =
-            /// <summary>
-            /// Publish an event under this capability's stable identity.
-            /// </summary>
-            abstract emit: Scheduler.LifecycleServices.Events.Emit
-            [<ParamObject; Emit("$0")>]
-            static member Create (emit: Scheduler.LifecycleServices.Events.Emit) : Events = jsNative
-
-        [<Interface>]
-        type Routes =
-            /// <summary>
-            /// This Lifecycle's transport address, or undefined at the route root.
-            /// </summary>
-            abstract source: DurableObjectCapability.OnRoute.Context.Source option
-            abstract toRoot: (obj -> JS.Promise<obj>)
-            abstract ``to``: Scheduler.LifecycleServices.Routes.To
-            [<ParamObject; Emit("$0")>]
-            static member Create (toRoot: (obj -> JS.Promise<obj>), ``to``: Scheduler.LifecycleServices.Routes.To, ?source: DurableObjectCapability.OnRoute.Context.Source) : Routes = jsNative
-
-        module Events =
-            type Emit = delegate of ``type``: string * payload: obj -> unit
-
-        module Routes =
-            type To = delegate of target: DurableObjectCapability.OnRoute.Context.Source * payload: obj -> JS.Promise<obj>
-
     module List =
         [<Interface>]
         type Criteria =
@@ -12250,143 +11452,220 @@ module Scheduler =
         module Result =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
             type Item<'T> =
+                /// <param name="id">Unique schedule identifier.</param>
+                /// <param name="callback"></param>
+                /// <param name="payload"></param>
+                /// <param name="retry"></param>
+                /// <param name="time"></param>
                 | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float
+                /// <param name="id">Unique schedule identifier.</param>
+                /// <param name="callback"></param>
+                /// <param name="payload"></param>
+                /// <param name="retry"></param>
+                /// <param name="time"></param>
+                /// <param name="delayInSeconds"></param>
                 | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * delayInSeconds: float
+                /// <param name="id">Unique schedule identifier.</param>
+                /// <param name="callback"></param>
+                /// <param name="payload"></param>
+                /// <param name="retry"></param>
+                /// <param name="time"></param>
+                /// <param name="cron"></param>
                 | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * cron: string
+                /// <param name="id">Unique schedule identifier.</param>
+                /// <param name="callback"></param>
+                /// <param name="payload"></param>
+                /// <param name="retry"></param>
+                /// <param name="time"></param>
+                /// <param name="intervalSeconds"></param>
                 | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * intervalSeconds: float
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
                 [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
-                static member Create (id: string, callback: string, payload: 'T, time: float, ?retry: RetryOptions) : Item2<'T> = jsNative
-
-            module Item2 =
-                /// <summary>
-                /// One-time execution at a specific date.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-                [<Literal>]
-                let ``type`` = "scheduled"
-
-            [<Interface>]
-            type Item3<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract delayInSeconds: float with get, set
+                static member CreateScheduled (id: string, callback: string, payload: 'T, time: float, ?retry: RetryOptions) : Item<'T> = jsNative
                 [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
-                static member Create (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: RetryOptions) : Item3<'T> = jsNative
-
-            module Item3 =
-                /// <summary>
-                /// One-time execution after a relative delay.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-                [<Literal>]
-                let ``type`` = "delayed"
-
-            [<Interface>]
-            type Item4<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract cron: string with get, set
+                static member CreateDelayed (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: RetryOptions) : Item<'T> = jsNative
                 [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
-                static member Create (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: RetryOptions) : Item4<'T> = jsNative
-
-            module Item4 =
-                /// <summary>
-                /// Recurring execution from a cron expression.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-                [<Literal>]
-                let ``type`` = "cron"
-
-            [<Interface>]
-            type Item5<'T> =
-                /// <summary>
-                /// Unique schedule identifier.
-                /// </summary>
-                abstract id: string with get, set
-                abstract callback: string with get, set
-                abstract payload: 'T with get, set
-                abstract retry: RetryOptions option with get, set
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"interval"</c></remarks>
-                abstract ``type``: string with get, set
-                abstract time: float with get, set
-                abstract intervalSeconds: float with get, set
+                static member CreateCron (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: RetryOptions) : Item<'T> = jsNative
                 [<ParamObject; Emit("({ type: 'interval', ...$0 })")>]
-                static member Create (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: RetryOptions) : Item5<'T> = jsNative
+                static member CreateInterval (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: RetryOptions) : Item<'T> = jsNative
 
-            module Item5 =
-                /// <summary>
-                /// Recurring execution at a fixed interval.
-                /// </summary>
-                /// <remarks>TypeScript type: <c>"interval"</c></remarks>
-                [<Literal>]
-                let ``type`` = "interval"
-
-module SubAgentConnectionBridge =
+module State =
     [<Interface>]
-    type Implements =
-        abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option
-        abstract close: ?code: float * ?reason: string -> JS.Promise<unit> option
-        abstract setState: state: obj -> obj
-        abstract broadcast: ownerPath: SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[] * message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?without: string[] -> JS.Promise<unit> option
+    type LifecycleServices =
+        /// <summary>
+        /// The host's Durable Object name; see <c>Lifecycle.name</c>.
+        /// </summary>
+        abstract name: string
+        abstract className: string
+        abstract storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage
+        abstract sockets: State.LifecycleServices.Sockets
+        /// <summary>
+        /// Resolve once Lifecycle startup has finished, starting it if needed, and
+        /// reject if that startup fails. Calls made from inside startup resolve
+        /// immediately.
+        /// <br /><br />
+        /// Await it first in any operation that can run before startup and starts
+        /// work <c>onStart</c> also awaits, such as lazily opening a store. Native RPC
+        /// bypasses the automatic startup on fetch, alarm and WebSocket events, so
+        /// such an operation can begin that work outside startup. <c>onStart</c> then
+        /// awaits it while startup holds the input gate (<c>blockConcurrencyWhile</c>),
+        /// which holds back the work's timers and I/O, and startup times out after
+        /// 30 seconds and resets the object.
+        /// </summary>
+        abstract ready: (unit -> JS.Promise<unit>)
+        /// <summary>
+        /// Startup state: <c>"zero"</c> before startup, <c>"starting"</c> while capability
+        /// and host startup hooks run, <c>"started"</c> once <c>ready()</c> resolves without
+        /// waiting.
+        /// </summary>
+        abstract status: (unit -> LifecycleStatus)
+        /// <summary>
+        /// This capability's scoped access to the Lifecycle-owned work queue.
+        /// Pushed items are dispatched to <c>onJob</c> when due; every queue mutation
+        /// re-arms the physical alarm automatically.
+        /// </summary>
+        abstract jobs: Lifecycle.Jobs
+        /// <summary>
+        /// Keep work this capability hands off at a bounded <c>onJob</c> return inside
+        /// the current alarm's memory-limit breaker domain (#1825). Returns false,
+        /// tracking nothing, outside an alarm invocation.
+        /// </summary>
+        abstract trackAlarmWork: (JS.Promise<obj> -> bool)
+        /// <summary>
+        /// Run a capability-held user callback inside the host invocation context.
+        /// Capability hooks run outside host context; this is the one boundary for
+        /// entering it, and a host composition root may substitute its own wrapper
+        /// (Agent adds tracing span scope). Pass <c>scope</c> to make a live
+        /// connection or request ambient for the callback.
+        /// </summary>
+        abstract runInHostContext: State.LifecycleServices.RunInHostContext
+        abstract events: State.LifecycleServices.Events
+        abstract routes: State.LifecycleServices.Routes
         [<ParamObject; Emit("$0")>]
-        static member Create (send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit> option), close: Func<float option, string option, JS.Promise<unit> option>, setState: (obj -> obj), broadcast: Func<SubAgentConnectionBridge.Implements.Broadcast.OwnerPath.Item[], U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, string[] option, JS.Promise<unit> option>) : Implements = jsNative
+        static member Create (name: string, className: string, storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage, sockets: State.LifecycleServices.Sockets, ready: (unit -> JS.Promise<unit>), status: (unit -> LifecycleStatus), jobs: Lifecycle.Jobs, trackAlarmWork: (JS.Promise<obj> -> bool), runInHostContext: State.LifecycleServices.RunInHostContext, events: State.LifecycleServices.Events, routes: State.LifecycleServices.Routes) : LifecycleServices = jsNative
 
-    module Broadcast =
-        module OwnerPath =
+    module LifecycleServices =
+        [<Interface>]
+        type Events =
+            /// <summary>
+            /// Publish an event under this capability's stable identity.
+            /// </summary>
+            abstract emit: State.LifecycleServices.Events.Emit
+            [<ParamObject; Emit("$0")>]
+            static member Create (emit: State.LifecycleServices.Events.Emit) : Events = jsNative
+
+        [<Interface>]
+        type Routes =
+            /// <summary>
+            /// This Lifecycle's transport address, or undefined at the route root.
+            /// </summary>
+            abstract source: DurableObjectCapability.OnRoute.Context.Source option
+            abstract toRoot: (obj -> JS.Promise<obj>)
+            abstract ``to``: State.LifecycleServices.Routes.To
+            [<ParamObject; Emit("$0")>]
+            static member Create (toRoot: (obj -> JS.Promise<obj>), ``to``: State.LifecycleServices.Routes.To, ?source: DurableObjectCapability.OnRoute.Context.Source) : Routes = jsNative
+
+        type RunInHostContext = delegate of fn: (unit -> obj) * scope: State.LifecycleServices.RunInHostContext.Scope option -> JS.Promise<obj>
+
+        [<Interface>]
+        type Sockets =
+            /// <summary>
+            /// Accept a socket into hibernation under the given tags.
+            /// </summary>
+            abstract accept: State.LifecycleServices.Sockets.Accept
+            abstract get: (string option -> FSharp.CloudEdge.Runtime.Workers.WebSocket[])
+            [<ParamObject; Emit("$0")>]
+            static member Create (accept: State.LifecycleServices.Sockets.Accept, get: (string option -> FSharp.CloudEdge.Runtime.Workers.WebSocket[])) : Sockets = jsNative
+
+        module Events =
+            type Emit = delegate of ``type``: string * payload: obj -> unit
+
+        module Routes =
+            type To = delegate of target: DurableObjectCapability.OnRoute.Context.Source * payload: obj -> JS.Promise<obj>
+
+        module RunInHostContext =
             [<Interface>]
-            type Item =
-                abstract className: string with get, set
-                abstract name: string with get, set
+            type Scope =
+                /// <summary>
+                /// The connection the callback runs on behalf of, when there is one.
+                /// </summary>
+                abstract connection: McpAgent.ShouldSendProtocolMessages.Connection<obj> option
+                abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option
                 [<ParamObject; Emit("$0")>]
-                static member Create (className: string, name: string) : Item = jsNative
+                static member Create (?connection: McpAgent.ShouldSendProtocolMessages.Connection<obj>, ?request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Scope = jsNative
 
-    module Implements =
-        module Broadcast =
-            module OwnerPath =
-                [<Interface>]
+        module Sockets =
+            type Accept = delegate of ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * tags: string[] -> unit
+
+module Task =
+    module Get =
+        module Result =
+            [<RequireQualifiedAccess; TypeScriptTaggedUnion("state", CaseRules.None)>]
+            type Item<'Output> =
+                | [<CompiledName("pending")>] Pending of runId: string * definition: string * createdAt: float * metadata: JS.Record<string, TaskJson> option
+                | [<CompiledName("running")>] Running of runId: string * definition: string * attempt: float * startedAt: float * createdAt: float * statusMessage: string option * metadata: JS.Record<string, TaskJson> option
+                | [<CompiledName("waiting")>] Waiting of runId: string * definition: string * reason: TaskWaitReason * wakeAt: float * createdAt: float * statusMessage: string option * metadata: JS.Record<string, TaskJson> option
+                | [<CompiledName("completed")>] Completed of runId: string * definition: string * result: 'Output * createdAt: float * settledAt: float * metadata: JS.Record<string, TaskJson> option
+                | [<CompiledName("failed")>] Failed of runId: string * definition: string * error: TaskError * createdAt: float * settledAt: float * metadata: JS.Record<string, TaskJson> option
+                | [<CompiledName("cancelled")>] Cancelled of runId: string * definition: string * reason: string option * createdAt: float * settledAt: float * metadata: JS.Record<string, TaskJson> option
+                [<ParamObject; Emit("({ state: 'pending', ...$0 })")>]
+                static member CreatePending (runId: string, definition: string, createdAt: float, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+                [<ParamObject; Emit("({ state: 'running', ...$0 })")>]
+                static member CreateRunning (runId: string, definition: string, attempt: float, startedAt: float, createdAt: float, ?statusMessage: string, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+                [<ParamObject; Emit("({ state: 'waiting', ...$0 })")>]
+                static member CreateWaiting (runId: string, definition: string, reason: TaskWaitReason, wakeAt: float, createdAt: float, ?statusMessage: string, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+                [<ParamObject; Emit("({ state: 'completed', ...$0 })")>]
+                static member CreateCompleted (runId: string, definition: string, result: 'Output, createdAt: float, settledAt: float, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+                [<ParamObject; Emit("({ state: 'failed', ...$0 })")>]
+                static member CreateFailed (runId: string, definition: string, error: TaskError, createdAt: float, settledAt: float, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+                [<ParamObject; Emit("({ state: 'cancelled', ...$0 })")>]
+                static member CreateCancelled (runId: string, definition: string, createdAt: float, settledAt: float, ?reason: string, ?metadata: JS.Record<string, TaskJson>) : Item<'Output> = jsNative
+
+module TaskStep =
+    [<Interface>]
+    type Interrupted =
+        abstract name: string
+        abstract attempt: float
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, attempt: float) : Interrupted = jsNative
+
+module TaskStepConfig =
+    [<Interface>]
+    type Retries =
+        /// <summary>
+        /// Total attempts, including the first.
+        /// </summary>
+        abstract limit: float option with get, set
+        abstract delay: U2<float, string> option with get, set
+        abstract backoff: FSharp.CloudEdge.Runtime.Workers.GatewayRetries.Backoff option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?limit: float, ?delay: U2<float, string>, ?backoff: FSharp.CloudEdge.Runtime.Workers.GatewayRetries.Backoff) : Retries = jsNative
+
+module Tasks =
+    module Delete =
+        [<Interface>]
+        type Options =
+            abstract status: Tasks.Delete.Options.Status.Item[] option with get, set
+            abstract settledBefore: Fable.Core.TS.Es.Date option with get, set
+            abstract limit: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?status: Tasks.Delete.Options.Status.Item[], ?settledBefore: Fable.Core.TS.Es.Date, ?limit: float) : Options = jsNative
+
+        module Options =
+            module Status =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type Item =
-                    abstract className: string with get, set
-                    abstract name: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (className: string, name: string) : Item = jsNative
+                    | [<CompiledName("cancelled")>] Cancelled
+                    | [<CompiledName("completed")>] Completed
+                    | [<CompiledName("failed")>] Failed
+
+    module List =
+        [<Interface>]
+        type Options =
+            abstract definition: string option with get, set
+            abstract status: U2<string, TaskRunState[]> option with get, set
+            abstract limit: float option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?definition: string, ?status: U2<string, TaskRunState[]>, ?limit: float) : Options = jsNative
+
+    module Register =
+        type Definition = delegate of input: obj * step: TaskStep -> U6<string, float, bool, TaskJson[], JS.Promise<TaskValue>, TaskJson2> option

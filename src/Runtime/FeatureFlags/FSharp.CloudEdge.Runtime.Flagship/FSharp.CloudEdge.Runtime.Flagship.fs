@@ -10,16 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
-
 /// <summary>
 /// Configuration options for Flagship providers.
 /// <br /><br />
@@ -98,7 +88,7 @@ type FlagshipProviderOptions =
     /// A <c>signal</c> provided here is merged with the request timeout and with any
     /// per-call signal — it is never dropped.
     /// </summary>
-    abstract fetchOptions: obj option with get, set
+    abstract fetchOptions: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option with get, set
     /// <summary>
     /// Custom <c>fetch</c> implementation used for every request. Defaults to
     /// <c>globalThis.fetch</c>, resolved at call time so a host that installs a
@@ -109,7 +99,7 @@ type FlagshipProviderOptions =
     /// binding, or for stubbing the transport in tests without touching globals.
     /// </summary>
     /// <example><c>{ appId: 'app-abc123', accountId: 'my-account', fetch: env.FLAGS_SERVICE.fetch.bind(env.FLAGS_SERVICE) }</c></example>
-    abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+    abstract fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch option with get, set
     /// <summary>
     /// Request timeout in milliseconds.
     /// </summary>
@@ -130,15 +120,7 @@ type FlagshipProviderOptions =
     /// <defaultValue>1000</defaultValue>
     abstract retryDelay: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: obj, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?timeout: float, ?retries: float, ?retryDelay: float) : FlagshipProviderOptions = jsNative
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
+    static member Create (?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch, ?timeout: float, ?retries: float, ?retryDelay: float) : FlagshipProviderOptions = jsNative
 
 /// <summary>
 /// Per-call options accepted by <c>FlagshipClient.evaluate</c>.
@@ -151,7 +133,7 @@ type FlagshipRequestOptions =
     /// <summary>
     /// Overrides the client-level <c>fetch</c> for this call only.
     /// </summary>
-    abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+    abstract fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch option with get, set
     /// <summary>
     /// Caller cancellation signal. Aborting it aborts the underlying HTTP
     /// request, not just the pending promise. The signal is merged with the
@@ -161,9 +143,9 @@ type FlagshipRequestOptions =
     /// A caller abort rejects with <c>FlagshipErrorCode.ABORTED</c> and is never
     /// retried. An already-aborted signal rejects without issuing a request.
     /// </summary>
-    abstract signal: obj option with get, set
+    abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?fetch: Func<obj, obj option, JS.Promise<obj>>, ?signal: obj) : FlagshipRequestOptions = jsNative
+    static member Create (?fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal) : FlagshipRequestOptions = jsNative
 
 /// <summary>
 /// Configuration options for <c>FlagshipClientProvider</c> (browser / static-context environments).
@@ -180,7 +162,7 @@ type FlagshipClientProviderOptions =
     /// <example><c>prefetchFlags: ['dark-mode', 'welcome-message', 'max-uploads']</c></example>
     abstract prefetchFlags: string[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?prefetchFlags: string[], ?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: obj, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?timeout: float, ?retries: float, ?retryDelay: float) : FlagshipClientProviderOptions = jsNative
+    static member Create (?prefetchFlags: string[], ?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch, ?timeout: float, ?retries: float, ?retryDelay: float) : FlagshipClientProviderOptions = jsNative
 
 /// <summary>
 /// A single entry in the client provider's in-memory flag cache.
@@ -209,6 +191,7 @@ type FlagshipEvaluationResponse =
     abstract variant: string with get, set
     /// <summary>
     /// Why this value was returned:
+    /// - <c>STATIC</c>          — the flag is enabled and has no rules; the default variation was served
     /// - <c>TARGETING_MATCH</c> — a rule matched the evaluation context
     /// - <c>SPLIT</c>           — a percentage rollout rule matched
     /// - <c>DEFAULT</c>         — no rule matched; the default variation was served
@@ -218,21 +201,7 @@ type FlagshipEvaluationResponse =
     [<ParamObject; Emit("$0")>]
     static member Create (flagKey: string, value: obj, variant: string, reason: FlagshipEvaluationResponse.Reason) : FlagshipEvaluationResponse = jsNative
 
-/// <summary>
-/// Shape of the Flagship wrangler binding exposed on <c>env</c> in Cloudflare Workers.
-/// <br /><br />
-/// This is an alias for the <c>Flagship</c> class from <c>@cloudflare/workers-types</c>.
-/// The binding communicates directly with the Flagship service via workerd RPC —
-/// no HTTP overhead, no auth tokens required. Configure it in <c>wrangler.json</c>:
-/// <code lang="jsonc">
-/// {
-///   "flagship": [
-///     { "binding": "FLAGS", "app_id": "&lt;your-app-id&gt;" }
-///   ]
-/// }
-/// </code>
-/// </summary>
-type FlagshipBinding = obj
+type FlagshipBinding = FSharp.CloudEdge.Runtime.Workers.Flagship
 
 /// <summary>
 /// Evaluation details returned by the Flagship binding's <c>*Details</c> methods.
@@ -242,8 +211,7 @@ type FlagshipBinding = obj
 /// This is an alias for the <c>FlagshipEvaluationDetails</c> interface from
 /// <c>@cloudflare/workers-types</c>.
 /// </summary>
-[<Erase>]
-type FlagshipBindingEvaluationDetails<'T> = private FlagshipBindingEvaluationDetails__ of obj
+type FlagshipBindingEvaluationDetails<'T> = FSharp.CloudEdge.Runtime.Workers.FlagshipEvaluationDetails<'T>
 
 /// <summary>
 /// Configuration for <c>FlagshipServerProvider</c> when using a wrangler binding.
@@ -265,14 +233,14 @@ type FlagshipBindingProviderOptions =
     /// <summary>
     /// The Flagship binding from the Worker's <c>env</c> object.
     /// </summary>
-    abstract binding: FlagshipBinding with get, set
+    abstract binding: FSharp.CloudEdge.Runtime.Workers.Flagship with get, set
     /// <summary>
     /// Enable SDK-level logging.
     /// </summary>
     /// <defaultValue>false</defaultValue>
     abstract logging: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: FlagshipBinding, ?logging: bool) : FlagshipBindingProviderOptions = jsNative
+    static member Create (binding: FSharp.CloudEdge.Runtime.Workers.Flagship, ?logging: bool) : FlagshipBindingProviderOptions = jsNative
 
 /// <summary>
 /// Opt-in server-side response cache options. Caching is disabled unless
@@ -299,12 +267,39 @@ type FlagshipCacheOptions =
     static member Create (?cacheTtl: float, ?cacheMaxSize: float) : FlagshipCacheOptions = jsNative
 
 /// <summary>
+/// Local in-process evaluation options for <c>FlagshipServerProvider</c>.
+/// <br /><br />
+/// When enabled, the provider downloads flag definitions once at initialize,
+/// evaluates flags in-process, and refreshes definitions in the background
+/// (lazy stale-while-revalidate on evaluate).
+/// <br /><br />
+/// Requires a token with app <b>read</b> permission (not evaluate). Local mode is
+/// incompatible with <c>binding</c> and with <c>cacheTtl</c>.
+/// </summary>
+[<Interface>]
+type FlagshipLocalEvaluationOptions =
+    /// <summary>
+    /// Enable local in-process evaluation.
+    /// </summary>
+    /// <defaultValue>false</defaultValue>
+    abstract localEvaluation: bool option with get, set
+    /// <summary>
+    /// Minimum interval between background definition refreshes, in milliseconds.
+    /// Refresh is lazy (triggered on evaluate) rather than a background timer,
+    /// so it works in both Node and Cloudflare Workers.
+    /// </summary>
+    /// <defaultValue>30_000</defaultValue>
+    abstract refreshInterval: float option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (?localEvaluation: bool, ?refreshInterval: float) : FlagshipLocalEvaluationOptions = jsNative
+
+/// <summary>
 /// Options accepted by <c>FlagshipServerProvider</c>.
 /// <br /><br />
 /// Provide <b>either</b> HTTP configuration (<c>appId</c>/<c>endpoint</c> + credentials) <b>or</b>
 /// a wrangler <c>binding</c> — never both. The provider detects which mode to use
 /// based on the presence of the <c>binding</c> field. Caching options apply to both
-/// modes.
+/// modes. Local evaluation options apply only to HTTP mode.
 /// </summary>
 type FlagshipServerProviderOptions = U2<FlagshipServerProviderOptions2, FlagshipServerProviderOptions3>
 
@@ -312,15 +307,17 @@ type FlagshipServerProviderOptions = U2<FlagshipServerProviderOptions2, Flagship
 type FlagshipServerProviderOptions2 =
     inherit FlagshipBindingProviderOptions
     inherit FlagshipCacheOptions
+    inherit FlagshipLocalEvaluationOptions
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: FlagshipBinding, ?logging: bool, ?cacheTtl: float, ?cacheMaxSize: float) : FlagshipServerProviderOptions2 = jsNative
+    static member Create (binding: FSharp.CloudEdge.Runtime.Workers.Flagship, ?logging: bool, ?cacheTtl: float, ?cacheMaxSize: float, ?localEvaluation: bool, ?refreshInterval: float) : FlagshipServerProviderOptions2 = jsNative
 
 [<Interface>]
 type FlagshipServerProviderOptions3 =
     inherit FlagshipProviderOptions
     inherit FlagshipCacheOptions
+    inherit FlagshipLocalEvaluationOptions
     [<ParamObject; Emit("$0")>]
-    static member Create (?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: obj, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?timeout: float, ?retries: float, ?retryDelay: float, ?cacheTtl: float, ?cacheMaxSize: float) : FlagshipServerProviderOptions3 = jsNative
+    static member Create (?appId: string, ?baseUrl: string, ?accountId: string, ?endpoint: string, ?logging: bool, ?authToken: string, ?fetchOptions: FSharp.CloudEdge.Runtime.Workers.RequestInit<U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?fetch: FSharp.CloudEdge.Runtime.WorkersTypes.Fetch, ?timeout: float, ?retries: float, ?retryDelay: float, ?cacheTtl: float, ?cacheMaxSize: float, ?localEvaluation: bool, ?refreshInterval: float) : FlagshipServerProviderOptions3 = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type FlagshipErrorCode =
@@ -331,7 +328,7 @@ type FlagshipErrorCode =
     | [<CompiledName("INVALID_CONTEXT")>] INVALIDCONTEXT
 
 [<Interface>]
-type FlagshipErrorCode2 =
+type FlagshipErrorCodeEnum =
     /// <summary>
     /// HTTP or fetch-level failure (non-2xx status, connection refused, etc.)
     /// </summary>
@@ -353,7 +350,7 @@ type FlagshipErrorCode2 =
     /// </summary>
     abstract INVALID_CONTEXT: string
     [<ParamObject; Emit("$0")>]
-    static member Create (NETWORK_ERROR: string, TIMEOUT_ERROR: string, ABORTED: string, PARSE_ERROR: string, INVALID_CONTEXT: string) : FlagshipErrorCode2 = jsNative
+    static member Create (NETWORK_ERROR: string, TIMEOUT_ERROR: string, ABORTED: string, PARSE_ERROR: string, INVALID_CONTEXT: string) : FlagshipErrorCodeEnum = jsNative
 
 /// <summary>
 /// Error thrown by <c>FlagshipClient</c> for all abnormal conditions.
@@ -458,15 +455,12 @@ type EvaluationContextValue2 =
     [<EmitIndexer>]
     abstract Item: string -> EvaluationContextValue with get, set
 
-[<Interface>]
 type FlagshipClient =
-    abstract options: obj
     /// <summary>
     /// Evaluate a flag with the given context.
     /// <br /><br />
-    /// Throws a <c>FlagshipError</c> with <c>FlagshipErrorCode.INVALID_CONTEXT</c> if the
-    /// evaluation context contains complex values (objects or arrays) that cannot
-    /// be serialized to query parameters.
+    /// Primitive-only context uses query parameters. Structured context uses a JSON
+    /// request body. Unsupported or cyclic values throw <c>FlagshipErrorCode.INVALID_CONTEXT</c>.
     /// <br /><br />
     /// <c>options.fetch</c> overrides the transport for this call, and
     /// <c>options.signal</c> cancels the in-flight HTTP request — aborting rejects
@@ -474,18 +468,13 @@ type FlagshipClient =
     /// </summary>
     abstract evaluate: flagKey: string * context: FlagshipClient.Evaluate.Context * ?options: FlagshipRequestOptions -> JS.Promise<FlagshipEvaluationResponse>
     /// <summary>
-    /// Fetch with retry logic. Only retries failures marked as retryable —
-    /// terminal responses (400, 401, 403, 404, …) and caller aborts are
-    /// propagated immediately.
+    /// Fetch the app's flag definitions for local evaluation.
+    /// <br /><br />
+    /// Sends <c>If-None-Match</c> when <c>etag</c> is provided. A <c>304</c> response yields
+    /// <c>'not-modified'</c>; a <c>200</c> yields the parsed flags map and the new ETag.
     /// </summary>
-    abstract fetchWithRetry: obj with get, set
-    /// <summary>
-    /// Issues a single request against the resolved transport, aborting it when
-    /// the timeout elapses or when any caller-supplied signal fires.
-    /// </summary>
-    abstract fetchWithTimeout: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (options: obj, evaluate: Func<string, FlagshipClient.Evaluate.Context, FlagshipRequestOptions option, JS.Promise<FlagshipEvaluationResponse>>, fetchWithRetry: obj, fetchWithTimeout: obj) : FlagshipClient = jsNative
+    /// <remarks>@internal</remarks>
+    abstract fetchDefinitions: ?etag: string * ?options: FlagshipRequestOptions -> JS.Promise<U2<string, FlagshipClient.FetchDefinitions.Result.Item>>
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ErrorCode =
@@ -523,7 +512,7 @@ type Exports =
     /// These are mapped to OpenFeature <c>ErrorCode</c> values by the providers.
     /// </summary>
     [<Import("FlagshipErrorCode", "@cloudflare/flagship")>]
-    static member FlagshipErrorCode: FlagshipErrorCode2 = jsNative
+    static member FlagshipErrorCode: FlagshipErrorCodeEnum = jsNative
     /// <summary>
     /// Error thrown by <c>FlagshipClient</c> for all abnormal conditions.
     /// Carries a <c>code</c> for programmatic handling and an optional <c>cause</c> which
@@ -576,477 +565,37 @@ module FlagshipClient =
             [<EmitIndexer>]
             abstract Item: string -> EvaluationContextValue with get, set
 
+    module FetchDefinitions =
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract etag: string with get, set
+                abstract flags: JS.Record<string, obj> with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (etag: string, flags: JS.Record<string, obj>) : Item = jsNative
+
 module FlagshipEvaluationResponse =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type Reason =
         | DEFAULT
         | DISABLED
         | SPLIT
+        | STATIC
         | [<CompiledName("TARGETING_MATCH")>] TARGETINGMATCH
-
-module FlagshipProviderOptions =
-    module FetchOptions =
-        type Item<'HostMetadata> =
-            /// <summary>
-            /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-            /// </summary>
-            /// <example><c>395747</c></example>
-            abstract asn: float option with get, set
-            /// <summary>
-            /// The organization which owns the ASN of the incoming request.
-            /// </summary>
-            /// <example><c>"Google Cloud"</c></example>
-            abstract asOrganization: string option with get, set
-            /// <summary>
-            /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-            /// </summary>
-            /// <example><c>"gzip, deflate, br"</c></example>
-            abstract clientAcceptEncoding: string option with get, set
-            /// <summary>
-            /// The number of milliseconds it took for the request to reach your worker.
-            /// </summary>
-            /// <example><c>22</c></example>
-            abstract clientTcpRtt: float option with get, set
-            /// <summary>
-            /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-            /// airport code of the data center that the request hit.
-            /// </summary>
-            /// <example><c>"DFW"</c></example>
-            abstract colo: string with get, set
-            /// <summary>
-            /// Represents the upstream's response to a
-            /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-            /// from cloudflare.
-            /// <br /><br />
-            /// For workers with no upstream, this will always be <c>1</c>.
-            /// </summary>
-            /// <example><c>3</c></example>
-            abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-            /// <summary>
-            /// The HTTP Protocol the request used.
-            /// </summary>
-            /// <example><c>"HTTP/2"</c></example>
-            abstract httpProtocol: string with get, set
-            /// <summary>
-            /// The browser-requested prioritization information in the request object.
-            /// <br /><br />
-            /// If no information was set, defaults to the empty string <c>""</c>
-            /// </summary>
-            /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-            /// <defaultValue>""</defaultValue>
-            abstract requestPriority: string with get, set
-            /// <summary>
-            /// The TLS version of the connection to Cloudflare.
-            /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-            /// </summary>
-            /// <example><c>"TLSv1.3"</c></example>
-            abstract tlsVersion: string with get, set
-            /// <summary>
-            /// The cipher for the connection to Cloudflare.
-            /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-            /// </summary>
-            /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-            abstract tlsCipher: string with get, set
-            /// <summary>
-            /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-            /// <br /><br />
-            /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-            /// </summary>
-            abstract tlsExportedAuthenticator: obj option with get, set
-            /// <summary>
-            /// Results of Cloudflare's Bot Management analysis
-            /// </summary>
-            abstract botManagement: FlagshipProviderOptions.FetchOptions.Item.BotManagement with get, set
-            /// <summary>
-            /// Duplicate of <c>botManagement.score</c>.
-            /// </summary>
-            /// <remarks>@deprecated</remarks>
-            abstract clientTrustScore: float with get, set
-            /// <summary>
-            /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-            /// <br /><br />
-            /// This field is only present if you have Cloudflare for SaaS enabled on your account
-            /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-            /// </summary>
-            abstract hostMetadata: 'HostMetadata option with get, set
-            /// <summary>
-            /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-            /// <br /><br />
-            /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-            /// <br /><br />
-            /// If Cloudflare is unable to determine where the request originated this property is omitted.
-            /// <br /><br />
-            /// The country code <c>"T1"</c> is used for requests originating on TOR.
-            /// </summary>
-            /// <example><c>"GB"</c></example>
-            abstract country: FlagshipProviderOptions.FetchOptions.Item.Country option with get, set
-            /// <summary>
-            /// If present, this property indicates that the request originated in the EU
-            /// </summary>
-            /// <example><c>"1"</c></example>
-            abstract isEUCountry: string option with get, set
-            /// <summary>
-            /// A two-letter code indicating the continent the request originated from.
-            /// </summary>
-            /// <example><c>"AN"</c></example>
-            abstract continent: ContinentCode option with get, set
-            /// <summary>
-            /// The city the request originated from
-            /// </summary>
-            /// <example><c>"Austin"</c></example>
-            abstract city: string option with get, set
-            /// <summary>
-            /// Postal code of the incoming request
-            /// </summary>
-            /// <example><c>"78701"</c></example>
-            abstract postalCode: string option with get, set
-            /// <summary>
-            /// Latitude of the incoming request
-            /// </summary>
-            /// <example><c>"30.27130"</c></example>
-            abstract latitude: string option with get, set
-            /// <summary>
-            /// Longitude of the incoming request
-            /// </summary>
-            /// <example><c>"-97.74260"</c></example>
-            abstract longitude: string option with get, set
-            /// <summary>
-            /// Timezone of the incoming request
-            /// </summary>
-            /// <example><c>"America/Chicago"</c></example>
-            abstract timezone: string option with get, set
-            /// <summary>
-            /// If known, the ISO 3166-2 name for the first level region associated with
-            /// the IP address of the incoming request
-            /// </summary>
-            /// <example><c>"Texas"</c></example>
-            abstract region: string option with get, set
-            /// <summary>
-            /// If known, the ISO 3166-2 code for the first-level region associated with
-            /// the IP address of the incoming request
-            /// </summary>
-            /// <example><c>"TX"</c></example>
-            abstract regionCode: string option with get, set
-            /// <summary>
-            /// Metro code (DMA) of the incoming request
-            /// </summary>
-            /// <example><c>"635"</c></example>
-            abstract metroCode: string option with get, set
-            /// <summary>
-            /// Information about the client certificate presented to Cloudflare.
-            /// <br /><br />
-            /// This is populated when the incoming request is served over TLS using
-            /// either Cloudflare Access or API Shield (mTLS)
-            /// and the presented SSL certificate has a valid
-            /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-            /// (i.e., not <c>null</c> or <c>""</c>).
-            /// <br /><br />
-            /// Otherwise, a set of placeholder values are used.
-            /// <br /><br />
-            /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-            /// the object is populated (i.e. the above conditions were met).
-            /// </summary>
-            abstract tlsClientAuth: obj with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
-        module Item =
-            [<Interface>]
-            type BotManagement =
-                /// <summary>
-                /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                /// </summary>
-                /// <example><c>54</c></example>
-                abstract score: float with get, set
-                /// <summary>
-                /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                /// </summary>
-                abstract verifiedBot: bool with get, set
-                /// <summary>
-                /// A boolean value that is true if the request originates from a
-                /// Cloudflare-verified proxy service.
-                /// </summary>
-                abstract corporateProxy: bool with get, set
-                /// <summary>
-                /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                /// </summary>
-                abstract staticResource: bool with get, set
-                /// <summary>
-                /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                /// </summary>
-                abstract detectionIds: float[] with get, set
-                /// <summary>
-                /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                /// across different destination IPs, Ports, and X509 certificates.
-                /// </summary>
-                abstract ja3Hash: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Country =
-                | AD
-                | AE
-                | AF
-                | AG
-                | AI
-                | AL
-                | AM
-                | AO
-                | AQ
-                | AR
-                | AS
-                | AT
-                | AU
-                | AW
-                | AX
-                | AZ
-                | BA
-                | BB
-                | BD
-                | BE
-                | BF
-                | BG
-                | BH
-                | BI
-                | BJ
-                | BL
-                | BM
-                | BN
-                | BO
-                | BQ
-                | BR
-                | BS
-                | BT
-                | BV
-                | BW
-                | BY
-                | BZ
-                | CA
-                | CC
-                | CD
-                | CF
-                | CG
-                | CH
-                | CI
-                | CK
-                | CL
-                | CM
-                | CN
-                | CO
-                | CR
-                | CU
-                | CV
-                | CW
-                | CX
-                | CY
-                | CZ
-                | DE
-                | DJ
-                | DK
-                | DM
-                | DO
-                | DZ
-                | EC
-                | EE
-                | EG
-                | EH
-                | ER
-                | ES
-                | ET
-                | FI
-                | FJ
-                | FK
-                | FM
-                | FO
-                | FR
-                | GA
-                | GB
-                | GD
-                | GE
-                | GF
-                | GG
-                | GH
-                | GI
-                | GL
-                | GM
-                | GN
-                | GP
-                | GQ
-                | GR
-                | GS
-                | GT
-                | GU
-                | GW
-                | GY
-                | HK
-                | HM
-                | HN
-                | HR
-                | HT
-                | HU
-                | ID
-                | IE
-                | IL
-                | IM
-                | IN
-                | IO
-                | IQ
-                | IR
-                | IS
-                | IT
-                | JE
-                | JM
-                | JO
-                | JP
-                | KE
-                | KG
-                | KH
-                | KI
-                | KM
-                | KN
-                | KP
-                | KR
-                | KW
-                | KY
-                | KZ
-                | LA
-                | LB
-                | LC
-                | LI
-                | LK
-                | LR
-                | LS
-                | LT
-                | LU
-                | LV
-                | LY
-                | MA
-                | MC
-                | MD
-                | ME
-                | MF
-                | MG
-                | MH
-                | MK
-                | ML
-                | MM
-                | MN
-                | MO
-                | MP
-                | MQ
-                | MR
-                | MS
-                | MT
-                | MU
-                | MV
-                | MW
-                | MX
-                | MY
-                | MZ
-                | NA
-                | NC
-                | NE
-                | NF
-                | NG
-                | NI
-                | NL
-                | NO
-                | NP
-                | NR
-                | NU
-                | NZ
-                | OM
-                | PA
-                | PE
-                | PF
-                | PG
-                | PH
-                | PK
-                | PL
-                | PM
-                | PN
-                | PR
-                | PS
-                | PT
-                | PW
-                | PY
-                | QA
-                | RE
-                | RO
-                | RS
-                | RU
-                | RW
-                | SA
-                | SB
-                | SC
-                | SD
-                | SE
-                | SG
-                | SH
-                | SI
-                | SJ
-                | SK
-                | SL
-                | SM
-                | SN
-                | SO
-                | SR
-                | SS
-                | ST
-                | SV
-                | SX
-                | SY
-                | SZ
-                | T1
-                | TC
-                | TD
-                | TF
-                | TG
-                | TH
-                | TJ
-                | TK
-                | TL
-                | TM
-                | TN
-                | TO
-                | TR
-                | TT
-                | TV
-                | TW
-                | TZ
-                | UA
-                | UG
-                | UM
-                | US
-                | UY
-                | UZ
-                | VA
-                | VC
-                | VE
-                | VG
-                | VI
-                | VN
-                | VU
-                | WF
-                | WS
-                | YE
-                | YT
-                | ZA
-                | ZM
-                | ZW
 
 /// <summary>@cloudflare/flagship/server</summary>
 module Server =
     /// <summary>
     /// OpenFeature provider for Flagship (server-side / dynamic context).
     /// <br /><br />
-    /// Supports two modes of operation:
+    /// Supports three modes of operation:
     /// <br /><br />
     /// <b>HTTP mode</b> — evaluates flags via HTTP requests to the Flagship API.
     /// Requires <c>appId</c>/<c>endpoint</c>, <c>accountId</c>, and optionally <c>authToken</c>.
+    /// <br /><br />
+    /// <b>Local evaluation mode</b> — downloads flag definitions once, evaluates
+    /// in-process, and refreshes definitions lazily. Requires <c>localEvaluation: true</c>
+    /// plus HTTP config and a token with app <b>read</b> permission.
     /// <br /><br />
     /// <b>Binding mode</b> — evaluates flags via a Cloudflare Workers wrangler binding.
     /// Only requires the <c>binding</c> field (the <c>Flagship</c> object from <c>env</c>). No HTTP
@@ -1064,6 +613,22 @@ module Server =
     /// appId: 'app-abc123',
     /// accountId: 'your-account-id',
     /// authToken: 'your-token',
+    /// })
+    /// );
+    /// </code>
+    /// <code>
+    /// </code>
+    /// </example>
+    /// <example>
+    /// <code>
+    /// Local evaluation mode
+    /// ```typescript
+    /// await OpenFeature.setProviderAndWait(
+    /// new FlagshipServerProvider({
+    /// appId: 'app-abc123',
+    /// accountId: 'your-account-id',
+    /// authToken: 'your-read-token',
+    /// localEvaluation: true,
     /// })
     /// );
     /// </code>
@@ -1091,48 +656,21 @@ module Server =
     /// <code>
     /// </code>
     /// </example>
-    [<Interface>]
     type FlagshipServerProvider =
         abstract metadata: obj
         /// <remarks>TypeScript type: <c>"server"</c></remarks>
         abstract runsOn: string
         abstract events: obj
         /// <summary>
-        /// Set when operating in HTTP mode; <c>undefined</c> in binding mode.
+        /// In local mode, blocks until the first definitions fetch succeeds.
+        /// Failure puts the OpenFeature provider in ERROR.
         /// </summary>
-        abstract client: obj
-        /// <summary>
-        /// Set when operating in binding mode; <c>undefined</c> in HTTP mode.
-        /// </summary>
-        abstract binding: obj
-        abstract logging: obj
-        /// <summary>
-        /// TTL + LRU response cache; <c>undefined</c> when caching is disabled.
-        /// </summary>
-        abstract cache: obj
-        abstract resolve: obj
-        /// <summary>
-        /// Returns the provided logger when logging is enabled, or a no-op logger
-        /// when <c>logging</c> is <c>false</c>. Using this in every resolve method ensures
-        /// the SDK produces no console output unless the caller opts in.
-        /// </summary>
-        abstract logger: obj with get, set
+        abstract initialize: unit -> JS.Promise<unit>
         abstract onClose: unit -> JS.Promise<unit>
         abstract resolveBooleanEvaluation: flagKey: string * defaultValue: bool * context: ContextTransformer.ToQueryParams.Context * logger: obj -> JS.Promise<obj>
         abstract resolveStringEvaluation: flagKey: string * defaultValue: string * context: ContextTransformer.ToQueryParams.Context * logger: obj -> JS.Promise<obj>
         abstract resolveNumberEvaluation: flagKey: string * defaultValue: float * context: ContextTransformer.ToQueryParams.Context * logger: obj -> JS.Promise<obj>
         abstract resolveObjectEvaluation<'T>: flagKey: string * defaultValue: 'T * context: ContextTransformer.ToQueryParams.Context * logger: obj -> JS.Promise<obj>
-        abstract resolveCached: obj with get, set
-        abstract resolveViaHttp: obj with get, set
-        abstract handleHttpError: obj with get, set
-        abstract resolveViaBinding: obj with get, set
-        /// <summary>
-        /// Calls the appropriate <c>*Details</c> method on the binding based on the
-        /// expected type. Falls back to <c>get</c> + synthetic details for unknown types.
-        /// </summary>
-        abstract evaluateBinding: obj with get, set
-        [<ParamObject; Emit("({ runsOn: 'server', ...$0 })")>]
-        static member Create (metadata: obj, events: obj, client: obj, binding: obj, logging: obj, cache: obj, resolve: obj, logger: obj, onClose: (unit -> JS.Promise<unit>), resolveBooleanEvaluation: Func<string, bool, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveStringEvaluation: Func<string, string, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveNumberEvaluation: Func<string, float, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveObjectEvaluation: Func<string, 'T, ContextTransformer.ToQueryParams.Context, obj, JS.Promise<obj>>, resolveCached: obj, resolveViaHttp: obj, handleHttpError: obj, resolveViaBinding: obj, evaluateBinding: obj) : FlagshipServerProvider = jsNative
 
     module FlagshipServerProvider =
         /// <remarks>TypeScript type: <c>"server"</c></remarks>
@@ -1157,15 +695,11 @@ module Server =
     /// <code>
     /// </code>
     /// </example>
-    [<Interface>]
     type LoggingHook =
-        abstract logger: obj
         abstract before: hookContext: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract ``finally``: _hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (logger: obj, before: Action<obj, JS.ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, JS.ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>) : LoggingHook = jsNative
 
     /// <summary>
     /// Telemetry event data
@@ -1213,18 +747,11 @@ module Server =
     /// <code>
     /// </code>
     /// </example>
-    [<Interface>]
     type TelemetryHook =
-        abstract startTimes: obj with get, set
-        abstract contextKeys: obj with get, set
-        abstract hints: obj with get, set
-        abstract onEvent: obj
         abstract before: hookContext: obj * ?hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract after: hookContext: Server.LoggingHook.After.HookContext * evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract error: hookContext: Server.LoggingHook.After.HookContext * error: obj * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
         abstract ``finally``: hookContext: Server.LoggingHook.After.HookContext * _evaluationDetails: Server.LoggingHook.After.EvaluationDetails<obj option> * ?_hookHints: JS.ReadonlyRecord<string, obj> -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (startTimes: obj, contextKeys: obj, hints: obj, onEvent: obj, before: Action<obj, JS.ReadonlyRecord<string, obj> option>, after: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>, error: Action<Server.LoggingHook.After.HookContext, obj, JS.ReadonlyRecord<string, obj> option>, ``finally``: Action<Server.LoggingHook.After.HookContext, Server.LoggingHook.After.EvaluationDetails<obj option>, JS.ReadonlyRecord<string, obj> option>) : TelemetryHook = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -1244,7 +771,7 @@ module Server =
         /// These are mapped to OpenFeature <c>ErrorCode</c> values by the providers.
         /// </summary>
         [<Import("FlagshipErrorCode", "@cloudflare/flagship/server")>]
-        static member FlagshipErrorCode: FlagshipErrorCode2 = jsNative
+        static member FlagshipErrorCode: FlagshipErrorCodeEnum = jsNative
         /// <summary>
         /// Error thrown by <c>FlagshipClient</c> for all abnormal conditions.
         /// Carries a <c>code</c> for programmatic handling and an optional <c>cause</c> which
@@ -1270,10 +797,14 @@ module Server =
         /// <summary>
         /// OpenFeature provider for Flagship (server-side / dynamic context).
         /// <br /><br />
-        /// Supports two modes of operation:
+        /// Supports three modes of operation:
         /// <br /><br />
         /// <b>HTTP mode</b> — evaluates flags via HTTP requests to the Flagship API.
         /// Requires <c>appId</c>/<c>endpoint</c>, <c>accountId</c>, and optionally <c>authToken</c>.
+        /// <br /><br />
+        /// <b>Local evaluation mode</b> — downloads flag definitions once, evaluates
+        /// in-process, and refreshes definitions lazily. Requires <c>localEvaluation: true</c>
+        /// plus HTTP config and a token with app <b>read</b> permission.
         /// <br /><br />
         /// <b>Binding mode</b> — evaluates flags via a Cloudflare Workers wrangler binding.
         /// Only requires the <c>binding</c> field (the <c>Flagship</c> object from <c>env</c>). No HTTP
@@ -1291,6 +822,22 @@ module Server =
         /// appId: 'app-abc123',
         /// accountId: 'your-account-id',
         /// authToken: 'your-token',
+        /// })
+        /// );
+        /// </code>
+        /// <code>
+        /// </code>
+        /// </example>
+        /// <example>
+        /// <code>
+        /// Local evaluation mode
+        /// ```typescript
+        /// await OpenFeature.setProviderAndWait(
+        /// new FlagshipServerProvider({
+        /// appId: 'app-abc123',
+        /// accountId: 'your-account-id',
+        /// authToken: 'your-read-token',
+        /// localEvaluation: true,
         /// })
         /// );
         /// </code>
@@ -1388,7 +935,7 @@ module Server =
                 abstract providerMetadata: obj
                 abstract logger: obj
                 abstract hookData: obj
-                [<ParamObject; Emit("$0")>]
+                [<ParamObject; Emit("(o => ({...o, \"defaultValue\": o[\"defaultValue\"] ?? null}))($0)")>]
                 static member Create (flagKey: string, flagValueType: FlagValueType, context: Server.LoggingHook.After.HookContext.Context, clientMetadata: obj, providerMetadata: obj, logger: obj, hookData: obj, ?defaultValue: obj) : HookContext = jsNative
 
             module EvaluationDetails =

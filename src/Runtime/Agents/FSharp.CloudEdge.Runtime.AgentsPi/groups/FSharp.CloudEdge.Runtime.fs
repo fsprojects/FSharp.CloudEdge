@@ -12,31 +12,6 @@ open Fable.Core.TS.Dom
 
 module AgentsPi =
     [<Interface>]
-    type ContextEdit2 =
-        /// <summary>
-        /// Entry whose model messages are omitted or replaced.
-        /// </summary>
-        abstract target: float
-        abstract action: string
-        abstract messages: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (target: float, action: string, ?messages: unit) : ContextEdit2 = jsNative
-
-    [<Interface>]
-    type ContextEdit3 =
-        /// <summary>
-        /// Entry whose model messages are omitted or replaced.
-        /// </summary>
-        abstract target: float
-        abstract action: string
-        /// <summary>
-        /// Messages contributed instead of the target entry's model messages.
-        /// </summary>
-        abstract messages: FSharp.CloudEdge.Runtime.PiAi.Message[]
-        [<ParamObject; Emit("$0")>]
-        static member Create (target: float, action: string, messages: FSharp.CloudEdge.Runtime.PiAi.Message[]) : ContextEdit3 = jsNative
-
-    [<Interface>]
     type DocumentRecord2 =
         /// <summary>
         /// Unique incarnation ID; never reused when the same logical document is recreated.
@@ -58,11 +33,11 @@ module AgentsPi =
         /// Commit that retired the incarnation; absent while it is current.
         /// </summary>
         abstract retiredAt: float option
-        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record.Scope
+        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record.Scope
         abstract history: unit option
         abstract fork: unit option
         [<ParamObject; Emit("$0")>]
-        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record.Scope, ?key: string, ?retiredAt: float, ?history: unit, ?fork: unit) : DocumentRecord2 = jsNative
+        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record.Scope, ?key: string, ?retiredAt: float, ?history: unit, ?fork: unit) : DocumentRecord2 = jsNative
 
     [<Interface>]
     type DocumentRecord3 =
@@ -86,11 +61,11 @@ module AgentsPi =
         /// Commit that retired the incarnation; absent while it is current.
         /// </summary>
         abstract retiredAt: float option
-        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record2.Scope
+        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record2.Scope
         abstract history: unit option
         abstract fork: unit option
         [<ParamObject; Emit("$0")>]
-        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record2.Scope, ?key: string, ?retiredAt: float, ?history: unit, ?fork: unit) : DocumentRecord3 = jsNative
+        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record2.Scope, ?key: string, ?retiredAt: float, ?history: unit, ?fork: unit) : DocumentRecord3 = jsNative
 
     [<Interface>]
     type DocumentRecord4 =
@@ -114,17 +89,26 @@ module AgentsPi =
         /// Commit that retired the incarnation; absent while it is current.
         /// </summary>
         abstract retiredAt: float option
-        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Scope
+        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Scope
         /// <summary>
         /// Retain only current state.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"latest"</c></remarks>
         abstract history: string
         /// <summary>
         /// Initialize a fork from current source state or the definition's initial value.
         /// </summary>
-        abstract fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Fork
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Scope, history: string, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Fork, ?key: string, ?retiredAt: float) : DocumentRecord4 = jsNative
+        abstract fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Fork
+        [<ParamObject; Emit("({ history: 'latest', ...$0 })")>]
+        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Scope, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Fork, ?key: string, ?retiredAt: float) : DocumentRecord4 = jsNative
+
+    module DocumentRecord4 =
+        /// <summary>
+        /// Retain only current state.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"latest"</c></remarks>
+        [<Literal>]
+        let history = "latest"
 
     [<Interface>]
     type DocumentRecord5 =
@@ -148,193 +132,26 @@ module AgentsPi =
         /// Commit that retired the incarnation; absent while it is current.
         /// </summary>
         abstract retiredAt: float option
-        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Scope
+        abstract scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Scope
         /// <summary>
         /// Retain history needed for as-of reads.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
         abstract history: string
         /// <summary>
         /// Initialize a fork at its cutoff, from current state, or from the initial value.
         /// </summary>
-        abstract fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record4.Fork
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record3.Scope, history: string, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite6.Record4.Fork, ?key: string, ?retiredAt: float) : DocumentRecord5 = jsNative
+        abstract fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record4.Fork
+        [<ParamObject; Emit("({ history: 'rewindable', ...$0 })")>]
+        static member Create (id: float, kind: string, createdAt: float, scope: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Scope, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record4.Fork, ?key: string, ?retiredAt: float) : DocumentRecord5 = jsNative
 
-    [<Interface>]
-    type SubmissionRecord2 =
-        abstract id: float
-        abstract conversationId: float
+    module DocumentRecord5 =
         /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
+        /// Retain history needed for as-of reads.
         /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Admitted but not yet represented in the transcript.
-        /// </summary>
-        abstract status: string
-        abstract entry: unit option
-        abstract answer: unit option
-        abstract reason: unit option
-        abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord2 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord3 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Added to the transcript and owned by an active run.
-        /// </summary>
-        abstract status: string
-        abstract entry: float
-        abstract answer: unit option
-        abstract reason: unit option
-        abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, entry: float, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord3 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord4 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Successfully answered user input.
-        /// </summary>
-        abstract status: string
-        abstract entry: float
-        abstract answer: float
-        abstract reason: unit option
-        abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, entry: float, answer: float, ?requestId: string, ?reason: unit, ?detail: unit) : SubmissionRecord4 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord5 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Terminal input that can no longer receive an answer.
-        /// </summary>
-        abstract status: string
-        abstract entry: float option
-        abstract answer: unit option
-        abstract reason: string
-        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : SubmissionRecord5 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord6 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Admitted but not yet appended to the transcript.
-        /// </summary>
-        abstract status: string
-        abstract entry: unit option
-        abstract answer: unit option
-        abstract reason: unit option
-        abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord6 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord7 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Successfully appended passive entry.
-        /// </summary>
-        abstract status: string
-        abstract entry: float
-        abstract answer: unit option
-        abstract reason: unit option
-        abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, entry: float, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord7 = jsNative
-
-    [<Interface>]
-    type SubmissionRecord8 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
-        abstract ``type``: string
-        /// <summary>
-        /// Terminal passive write that could not be placed.
-        /// </summary>
-        abstract status: string
-        abstract entry: unit option
-        abstract answer: unit option
-        abstract reason: string
-        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : SubmissionRecord8 = jsNative
-
-    [<Interface>]
-    type AuthPrompt2 =
-        abstract signal: obj option with get, set
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        abstract placeholder: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string, ?signal: obj, ?placeholder: string) : AuthPrompt2 = jsNative
-
-    [<Interface>]
-    type AuthPrompt3 =
-        abstract signal: obj option with get, set
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        abstract placeholder: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string, ?signal: obj, ?placeholder: string) : AuthPrompt3 = jsNative
-
-    [<Interface>]
-    type AuthPrompt4 =
-        abstract signal: obj option with get, set
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        abstract options: AuthPrompt4.Options.Item[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string, options: AuthPrompt4.Options.Item[], ?signal: obj) : AuthPrompt4 = jsNative
-
-    [<Interface>]
-    type AuthPrompt5 =
-        abstract signal: obj option with get, set
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        abstract placeholder: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string, ?signal: obj, ?placeholder: string) : AuthPrompt5 = jsNative
+        /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
+        [<Literal>]
+        let history = "rewindable"
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type ContinentCode =
@@ -356,93 +173,115 @@ module AgentsPi =
 
     [<Interface>]
     type SettledSubmissionRecord2 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
+        inherit FSharp.CloudEdge.Runtime.PiDurable.SubmissionRecord.Cases.Input.Base
+        /// <remarks>TypeScript type: <c>"input"</c></remarks>
         abstract ``type``: string
         /// <summary>
         /// Successfully answered user input.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"done"</c></remarks>
         abstract status: string
         abstract entry: float
         abstract answer: float
         abstract reason: unit option
         abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, entry: float, answer: float, ?requestId: string, ?reason: unit, ?detail: unit) : SettledSubmissionRecord2 = jsNative
+        [<ParamObject; Emit("({ type: 'input', status: 'done', ...$0 })")>]
+        static member Create (id: float, conversationId: float, entry: float, answer: float, ?trace: JS.Record<string, string>, ?requestId: string, ?reason: unit, ?detail: unit) : SettledSubmissionRecord2 = jsNative
+
+    module SettledSubmissionRecord2 =
+        /// <remarks>TypeScript type: <c>"input"</c></remarks>
+        [<Literal>]
+        let ``type`` = "input"
+        /// <summary>
+        /// Successfully answered user input.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"done"</c></remarks>
+        [<Literal>]
+        let status = "done"
 
     [<Interface>]
     type SettledSubmissionRecord3 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
+        inherit FSharp.CloudEdge.Runtime.PiDurable.SubmissionRecord.Cases.Input.Base
+        /// <remarks>TypeScript type: <c>"input"</c></remarks>
         abstract ``type``: string
         /// <summary>
         /// Terminal input that can no longer receive an answer.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
         abstract status: string
         abstract entry: float option
         abstract answer: unit option
         abstract reason: string
-        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : SettledSubmissionRecord3 = jsNative
+        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+        [<ParamObject; Emit("({ type: 'input', status: 'unanswered', ...$0 })")>]
+        static member Create (id: float, conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : SettledSubmissionRecord3 = jsNative
+
+    module SettledSubmissionRecord3 =
+        /// <remarks>TypeScript type: <c>"input"</c></remarks>
+        [<Literal>]
+        let ``type`` = "input"
+        /// <summary>
+        /// Terminal input that can no longer receive an answer.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
+        [<Literal>]
+        let status = "unanswered"
 
     [<Interface>]
     type SettledSubmissionRecord4 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
+        inherit FSharp.CloudEdge.Runtime.PiDurable.SubmissionRecord.Cases.Input.Base
+        /// <remarks>TypeScript type: <c>"write"</c></remarks>
         abstract ``type``: string
         /// <summary>
         /// Successfully appended passive entry.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"done"</c></remarks>
         abstract status: string
         abstract entry: float
         abstract answer: unit option
         abstract reason: unit option
         abstract detail: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, entry: float, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SettledSubmissionRecord4 = jsNative
+        [<ParamObject; Emit("({ type: 'write', status: 'done', ...$0 })")>]
+        static member Create (id: float, conversationId: float, entry: float, ?trace: JS.Record<string, string>, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SettledSubmissionRecord4 = jsNative
+
+    module SettledSubmissionRecord4 =
+        /// <remarks>TypeScript type: <c>"write"</c></remarks>
+        [<Literal>]
+        let ``type`` = "write"
+        /// <summary>
+        /// Successfully appended passive entry.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"done"</c></remarks>
+        [<Literal>]
+        let status = "done"
 
     [<Interface>]
     type SettledSubmissionRecord5 =
-        abstract id: float
-        abstract conversationId: float
-        /// <summary>
-        /// Host-provided deduplication key, scoped to the conversation.
-        /// </summary>
-        abstract requestId: string option
+        inherit FSharp.CloudEdge.Runtime.PiDurable.SubmissionRecord.Cases.Input.Base
+        /// <remarks>TypeScript type: <c>"write"</c></remarks>
         abstract ``type``: string
         /// <summary>
         /// Terminal passive write that could not be placed.
         /// </summary>
+        /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
         abstract status: string
         abstract entry: unit option
         abstract answer: unit option
         abstract reason: string
-        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: float, conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : SettledSubmissionRecord5 = jsNative
+        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+        [<ParamObject; Emit("({ type: 'write', status: 'unanswered', ...$0 })")>]
+        static member Create (id: float, conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : SettledSubmissionRecord5 = jsNative
 
-    [<Interface>]
-    type SubmissionDraft2 =
-        abstract requestId: string option
-        abstract ``type``: string
-        abstract entry: FSharp.CloudEdge.Runtime.PiDurable.Tx.AppendEntry.Value
-        abstract content: unit option
-        abstract whenBusy: unit option
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, entry: FSharp.CloudEdge.Runtime.PiDurable.Tx.AppendEntry.Value, ?requestId: string, ?content: unit, ?whenBusy: unit) : SubmissionDraft2 = jsNative
+    module SettledSubmissionRecord5 =
+        /// <remarks>TypeScript type: <c>"write"</c></remarks>
+        [<Literal>]
+        let ``type`` = "write"
+        /// <summary>
+        /// Terminal passive write that could not be placed.
+        /// </summary>
+        /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
+        [<Literal>]
+        let status = "unanswered"
 
     [<Interface>]
     type LifecycleCapability<'Props> =
@@ -498,7 +337,7 @@ module AgentsPi =
         abstract rawContent: string option with get, set
         abstract resources: SkillResourceDescriptor[] option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (body: string, name: string, description: string, ?rawContent: string, ?resources: SkillResourceDescriptor[], ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>, ?sourceId: string, ?version: string) : SkillContent = jsNative
+        static member Create (body: string, name: string, description: string, ?rawContent: string, ?resources: SkillResourceDescriptor[], ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>, ?sourceId: string, ?version: string) : SkillContent = jsNative
 
     [<Interface>]
     type SkillDescriptor =
@@ -507,11 +346,11 @@ module AgentsPi =
         abstract compatibility: string option with get, set
         abstract license: string option with get, set
         abstract allowedTools: string option with get, set
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         abstract sourceId: string option with get, set
         abstract version: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (name: string, description: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: Record<string, obj>, ?sourceId: string, ?version: string) : SkillDescriptor = jsNative
+        static member Create (name: string, description: string, ?compatibility: string, ?license: string, ?allowedTools: string, ?metadata: JS.Record<string, obj>, ?sourceId: string, ?version: string) : SkillDescriptor = jsNative
 
     [<Interface>]
     type SkillResource =
@@ -557,7 +396,7 @@ module AgentsPi =
         /// </summary>
         abstract gateway: U2<string, Models.PiAi.GatewayOptions> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?gateway: U2<string, Models.PiAi.GatewayOptions>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries) : ProviderGatewaySettings = jsNative
+        static member Create (?gateway: U2<string, Models.PiAi.GatewayOptions>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool) : ProviderGatewaySettings = jsNative
 
     [<Interface>]
     type CompatWarning =
@@ -568,17 +407,303 @@ module AgentsPi =
 
     type PiFallbackLeg = U2<string, FSharp.CloudEdge.Runtime.PiAi.Model<FSharp.CloudEdge.Runtime.PiAi.Api>>
 
-    module AuthPrompt4 =
-        module Options =
-            [<Interface>]
-            type Item =
-                abstract id: string with get, set
-                abstract label: string with get, set
-                abstract description: string option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (id: string, label: string, ?description: string) : Item = jsNative
+    [<Interface>]
+    type AccountAccess =
+        /// <summary>
+        /// The account the gateway belongs to.
+        /// </summary>
+        abstract accountId: string with get, set
+        /// <summary>
+        /// A Cloudflare API token for that account, with Workers AI Read (model ids,
+        /// on the REST API) and AI Gateway Run (model objects, on the
+        /// provider-native path).
+        /// </summary>
+        abstract apiToken: string with get, set
+        abstract binding: unit option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (accountId: string, apiToken: string, ?binding: unit) : AccountAccess = jsNative
+
+    [<Interface>]
+    type BindingAccess =
+        /// <summary>
+        /// The <c>AI</c> binding from a Worker's env.
+        /// </summary>
+        abstract binding: obj with get, set
+        abstract accountId: unit option with get, set
+        abstract apiToken: unit option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (binding: obj, ?accountId: unit, ?apiToken: unit) : BindingAccess = jsNative
 
     module Harness =
+        module AbortSubmission =
+            module Result =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("aborted")>] Aborted
+                    | [<CompiledName("already_placed")>] AlreadyPlaced
+                    | [<CompiledName("not_found")>] NotFound
+                    | [<CompiledName("settled")>] Settled
+
+        module AbortTask =
+            module Result =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("marked")>] Marked
+                    | [<CompiledName("terminal")>] Terminal
+
+        module DocumentState =
+            module Token =
+                [<Interface>]
+                type Item<'T> =
+                    inherit Harness.DocumentState.Token.Item.Base<'T>
+                    /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                    abstract scope: string
+                    [<ParamObject; Emit("({ scope: 'session', ...$0 })")>]
+                    static member Create (kind: string, version: float, initial: (unit -> 'T), checkpointWhen: Func<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T>, FSharp.CloudEdge.Runtime.Chord.Op[], FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info, bool>, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item<'T> = jsNative
+
+                module Item =
+                    /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                    [<Literal>]
+                    let scope = "session"
+
+                    [<Interface>]
+                    type Base<'T> =
+                        /// <summary>
+                        /// Stable persisted kind; part of the public protocol.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Positive integer version of the stored value shape.
+                        /// </summary>
+                        abstract version: float
+                        abstract initial: unit -> 'T
+                        abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
+                        /// <summary>
+                        /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                        /// </summary>
+                        abstract checkpointWhen: value: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> * ops: FSharp.CloudEdge.Runtime.Chord.Op[] * info: FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info -> bool
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (kind: string, version: float, initial: (unit -> 'T), checkpointWhen: Func<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T>, FSharp.CloudEdge.Runtime.Chord.Op[], FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info, bool>, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Base<'T> = jsNative
+
+                    [<Interface>]
+                    type Base2 =
+                        /// <summary>
+                        /// Stable persisted kind; part of the public protocol.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Positive integer version of the stored value shape.
+                        /// </summary>
+                        abstract version: float
+                        abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<FSharp.CloudEdge.Runtime.PiDurable.JsonObject> option with get, set
+                        /// <summary>
+                        /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                        /// </summary>
+                        abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<FSharp.CloudEdge.Runtime.PiDurable.JsonObject> with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (kind: string, version: float, checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<FSharp.CloudEdge.Runtime.PiDurable.JsonObject>, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<FSharp.CloudEdge.Runtime.PiDurable.JsonObject>) : Base2 = jsNative
+
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("history", CaseRules.None)>]
+                type Item2<'T> =
+                    | [<CompiledName("latest"); Fickl.Core.InlineInterface>] Latest of FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item22<'T>
+                    | [<CompiledName("rewindable"); Fickl.Core.InlineInterface>] Rewindable of FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item23<'T>
+
+                [<Interface>]
+                type Item22<'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base<'T>
+                    inherit FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item2.Cases.Latest.Base2
+                    [<ParamObject; Emit("({ scope: 'conversation', history: 'latest', ...$0 })")>]
+                    static member Create (kind: string, version: float, initial: (unit -> 'T), checkpointWhen: Func<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T>, FSharp.CloudEdge.Runtime.Chord.Op[], FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info, bool>, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Fork, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item22<'T> = jsNative
+
+                [<Interface>]
+                type Item23<'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base<'T>
+                    inherit FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item2.Cases.Rewindable.Base
+                    [<ParamObject; Emit("({ scope: 'conversation', history: 'rewindable', ...$0 })")>]
+                    static member Create (kind: string, version: float, initial: (unit -> 'T), checkpointWhen: Func<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T>, FSharp.CloudEdge.Runtime.Chord.Op[], FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info, bool>, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record4.Fork, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item23<'T> = jsNative
+
+                [<Interface>]
+                type Item3<'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base<'T>
+                    /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                    abstract scope: string
+                    [<ParamObject; Emit("({ scope: 'task', ...$0 })")>]
+                    static member Create (kind: string, version: float, initial: (unit -> 'T), checkpointWhen: Func<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T>, FSharp.CloudEdge.Runtime.Chord.Op[], FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info, bool>, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item3<'T> = jsNative
+
+                module Item3 =
+                    /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                    [<Literal>]
+                    let scope = "task"
+
+                [<Interface>]
+                type Item4<'I, 'T> =
+                    inherit Harness.DocumentState.Token.Item.Base2
+                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
+                    /// <summary>
+                    /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                    /// </summary>
+                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> with get, set
+                    /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                    abstract scope: string
+                    abstract history: unit option
+                    abstract fork: unit option
+                    abstract family: bool
+                    abstract initial: seed: 'I -> 'T
+                    [<ParamObject; Emit("({ scope: 'session', ...$0 })")>]
+                    static member Create (kind: string, version: float, checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?history: unit, ?fork: unit) : Item4<'I, 'T> = jsNative
+
+                module Item4 =
+                    /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                    [<Literal>]
+                    let scope = "session"
+
+                [<Interface>]
+                type Item5<'I, 'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base2
+                    inherit FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item2.Cases.Latest.Base2
+                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
+                    /// <summary>
+                    /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                    /// </summary>
+                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> with get, set
+                    abstract family: bool
+                    abstract initial: seed: 'I -> 'T
+                    [<ParamObject; Emit("({ scope: 'conversation', history: 'latest', ...$0 })")>]
+                    static member Create (kind: string, version: float, checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record3.Fork, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item5<'I, 'T> = jsNative
+
+                [<Interface>]
+                type Item6<'I, 'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base2
+                    inherit FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item2.Cases.Rewindable.Base
+                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
+                    /// <summary>
+                    /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                    /// </summary>
+                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> with get, set
+                    abstract family: bool
+                    abstract initial: seed: 'I -> 'T
+                    [<ParamObject; Emit("({ scope: 'conversation', history: 'rewindable', ...$0 })")>]
+                    static member Create (kind: string, version: float, checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, fork: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.DocumentCreate.Record4.Fork, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>) : Item6<'I, 'T> = jsNative
+
+                [<Interface>]
+                type Item7<'I, 'T> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item.Base2
+                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
+                    /// <summary>
+                    /// Required policy: return true to store this ordinary change as a complete base instead of a delta.
+                    /// </summary>
+                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> with get, set
+                    /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                    abstract scope: string
+                    abstract history: unit option
+                    abstract fork: unit option
+                    abstract family: bool
+                    abstract initial: seed: 'I -> 'T
+                    [<ParamObject; Emit("({ scope: 'task', ...$0 })")>]
+                    static member Create (kind: string, version: float, checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?history: unit, ?fork: unit) : Item7<'I, 'T> = jsNative
+
+                module Item7 =
+                    /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                    [<Literal>]
+                    let scope = "task"
+
+        module GetTask =
+            module Result =
+                [<Interface>]
+                type Item<'R> =
+                    inherit Harness.GetTask.Result.Item.Base<'R>
+                    abstract state: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State
+                    /// <summary>
+                    /// Small first-writer-wins values retained while the task can run.
+                    /// </summary>
+                    abstract memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item<'R> = jsNative
+
+                [<Interface>]
+                type Item2<'R> =
+                    inherit Harness.GetTask.Result.Item.Base<'R>
+                    abstract state: Harness.GetTask.Result.Item2.State<'R>
+                    abstract memos: unit option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: Harness.GetTask.Result.Item2.State<'R>, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: unit) : Item2<'R> = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type Base<'R> =
+                        /// <summary>
+                        /// Adapter-owned context that created this task; phase invocations extract it as their parent.
+                        /// </summary>
+                        abstract trace: JS.Record<string, string> option
+                        /// <summary>
+                        /// Immutable creation-time links for the task's first invocation.
+                        /// </summary>
+                        abstract links: JS.Record<string, string>[] option
+                        abstract id: float
+                        abstract conversationId: float
+                        /// <summary>
+                        /// Registered task definition name.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Definition version used to migrate live input and checkpoints.
+                        /// </summary>
+                        abstract version: float
+                        /// <summary>
+                        /// Original task input retained while the task is live or terminal.
+                        /// </summary>
+                        abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        /// <summary>
+                        /// Owning task of a child task; absent for a task its conversation owns. Immutable.
+                        /// </summary>
+                        abstract owner: float option
+                        /// <summary>
+                        /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
+                        /// </summary>
+                        abstract background: bool
+                        /// <summary>
+                        /// Durable abort mark checked before run-mode progress is committed.
+                        /// </summary>
+                        abstract abortRequested: bool
+                        /// <summary>
+                        /// Why the mark was set when not by an abort request: <c>restart</c> for a task abandoned after a restart
+                        /// (<c>TaskOptions.abandonOnRestart</c>) or below one. Such a task waits for its definition instead of becoming <c>orphaned</c>.
+                        /// A later abort request clears it.
+                        /// </summary>
+                        abstract abortReason: string option
+                        /// <summary>
+                        /// Set from <c>TaskOptions.abandonOnRestart</c>. Immutable.
+                        /// </summary>
+                        abstract abandonOnRestart: bool option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
+                        /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
+                        /// versions.
+                        /// </summary>
+                        abstract startedAt: float option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
+                        /// </summary>
+                        abstract endedAt: float option
+                        /// <summary>
+                        /// How many times in a row a crash, eviction, or reset cut the task off while it ran, without the task changing its
+                        /// state since; open counts them, and a close does not. At <c>HarnessSettings.restartLimit</c> the task is parked as blocked
+                        /// until <c>Harness.retryTask()</c>.
+                        /// </summary>
+                        abstract restarts: float option
+                        [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                        static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float) : Base<'R> = jsNative
+
+                module Item2 =
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type State<'R> =
+                        | [<CompiledName("completing")>] Completing of checkpoint: unit option * outcome: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>
+                        | [<CompiledName("terminal")>] Terminal of checkpoint: unit option * outcome: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>
+                        [<ParamObject; Emit("({ status: 'completing', ...$0 })")>]
+                        static member CreateCompleting (outcome: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>, ?checkpoint: unit) : State<'R> = jsNative
+                        [<ParamObject; Emit("({ status: 'terminal', ...$0 })")>]
+                        static member CreateTerminal (outcome: FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>, ?checkpoint: unit) : State<'R> = jsNative
+
         /// <summary>agents/harness/pi</summary>
         module Pi =
             /// <summary>
@@ -599,8 +724,16 @@ module AgentsPi =
                 abstract session: string option
                 abstract operationId: string option
                 abstract whenBusy: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiWhenBusy option
+                /// <summary>
+                /// The transcript entry the input is placed as, instead of pi's <c>pi.user</c>:
+                /// for input the user did not type, such as a scheduled prompt, a webhook,
+                /// or an approval's outcome. The model still gets the input as a user
+                /// message; <c>kind</c> and <c>data</c> record where it came from. The kind must not
+                /// start with <c>pi.</c>.
+                /// </summary>
+                abstract entry: Harness.Pi.PiSubmitOptions.Entry option
                 [<ParamObject; Emit("$0")>]
-                static member Create (?session: string, ?operationId: string, ?whenBusy: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiWhenBusy) : PiSubmitOptions = jsNative
+                static member Create (?session: string, ?operationId: string, ?whenBusy: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiWhenBusy, ?entry: Harness.Pi.PiSubmitOptions.Entry) : PiSubmitOptions = jsNative
 
             [<Interface>]
             type PiSessionOptions =
@@ -652,6 +785,11 @@ module AgentsPi =
             type PiPendingOperation =
                 abstract operationId: string
                 abstract session: string
+                /// <summary>
+                /// <c>queued</c> in pi's inbox, or <c>running</c> as part of the current run.
+                /// <c>parked</c>: running, but pi's crash-loop guard (<c>settings.restartLimit</c>)
+                /// stopped a task of the session; <c>retry()</c> runs it again.
+                /// </summary>
                 abstract status: Harness.Pi.PiPendingOperation.Status
                 [<ParamObject; Emit("$0")>]
                 static member Create (operationId: string, session: string, status: Harness.Pi.PiPendingOperation.Status) : PiPendingOperation = jsNative
@@ -665,7 +803,7 @@ module AgentsPi =
                 static member Create (id: string, busy: bool, ?parent: string) : PiSessionInfo = jsNative
 
             /// <summary>
-            /// What the factory is handed: the two things only the harness can build.
+            /// What the factory is handed: the things only the harness can build.
             /// Everything else <c>Harness.open</c> takes (models, registry, settings, env,
             /// onReport) the factory builds itself.
             /// </summary>
@@ -676,8 +814,22 @@ module AgentsPi =
                 /// </summary>
                 abstract storage: FSharp.CloudEdge.Runtime.PiDurable.SqliteStorage
                 abstract context: FSharp.CloudEdge.Runtime.Chord.Context
+                /// <summary>
+                /// Pass this to <c>Harness.open</c> as its <c>onWake</c> option. pi calls it when it
+                /// next needs to run, and the harness sets this object's alarm for then.
+                /// <br /><br />
+                /// With it, pi sets no in-memory timer for a sleeping task (a retry
+                /// backoff, a poll, a <c>sleepUntil</c>), so the object can hibernate until the
+                /// alarm. Without it the harness still works, but pi's timer keeps the
+                /// object in memory, and billed, while a task sleeps, and the harness logs
+                /// a warning when it opens pi.
+                /// <br /><br />
+                /// The harness reads pi's wake times against <c>Date.now()</c>, so do not pass
+                /// <c>now</c> to <c>Harness.open</c>.
+                /// </summary>
+                abstract onWake: (Harness.Pi.PiHarnessContext.OnWake.Wake -> unit)
                 [<ParamObject; Emit("$0")>]
-                static member Create (storage: FSharp.CloudEdge.Runtime.PiDurable.SqliteStorage, context: FSharp.CloudEdge.Runtime.Chord.Context) : PiHarnessContext = jsNative
+                static member Create (storage: FSharp.CloudEdge.Runtime.PiDurable.SqliteStorage, context: FSharp.CloudEdge.Runtime.Chord.Context, onWake: (Harness.Pi.PiHarnessContext.OnWake.Wake -> unit)) : PiHarnessContext = jsNative
 
             type PiHarnessFactory = (FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarnessContext -> U2<FSharp.CloudEdge.Runtime.PiDurable.Harness, JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Harness>>)
 
@@ -709,9 +861,9 @@ module AgentsPi =
                 /// session's with <c>session.setModel</c>.
                 /// </summary>
                 abstract model: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiModel option
-                abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel option
+                abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel option
                 [<ParamObject; Emit("$0")>]
-                static member Create (?model: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiModel, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel) : PiSessionDefaults = jsNative
+                static member Create (?model: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiModel, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel) : PiSessionDefaults = jsNative
 
             /// <summary>
             /// <c>PiHarness</c>'s options. Only <c>harness</c>, which opens pi, is required.
@@ -738,24 +890,31 @@ module AgentsPi =
             /// <br /><br />
             /// What pi cannot do on a Durable Object is wake itself: its scheduler runs
             /// in memory, and an evicted object has no memory. The harness is that wake,
-            /// with one Lifecycle job per session. Input goes to pi once, in <c>submit()</c>,
-            /// after the session's job is scheduled. The job waits while pi has live
-            /// tasks in the session, rescheduling itself as a heartbeat, and completes
-            /// when there are none. An eviction mid-run leaves the job due, so its alarm
-            /// restarts the object, pi reopens and resumes its own tasks, and the job
-            /// waits again.
+            /// with one Lifecycle job driven by <c>pi.wake()</c>. Input goes to pi once, in
+            /// <c>submit()</c>, after the job is scheduled. While pi has work running, the
+            /// job waits on it, rescheduling itself as a heartbeat. While pi's tasks
+            /// sleep, the job is due when the first one wakes; pi tells the harness
+            /// through the <c>onWake</c> the factory passes to <c>Harness.open</c>. When pi has
+            /// nothing to do, the job completes. An eviction mid-run leaves the job due,
+            /// so its alarm restarts the object, pi reopens and resumes its own tasks,
+            /// and the job waits again.
             /// </summary>
             /// <remarks>@beta The API may change between releases.</remarks>
-            [<Interface>]
             type PiHarness =
                 inherit LifecycleCapability<obj>
-                abstract ``__#1@#private``: obj with get, set
                 abstract sessions: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessions
                 /// <summary>
                 /// Default startup hook; capabilities override when they own startup work.
                 /// </summary>
                 abstract onStart: _context: Harness.Pi.PiHarness.OnStart.Context -> JS.Promise<unit>
                 abstract onJob: context: Harness.Pi.PiHarness.OnJob.Context -> JS.Promise<U2<string, Harness.Pi.PiHarness.OnJob.Result.Item> option>
+                /// <summary>
+                /// A wake dispatch that failed through Lifecycle's retries, as when pi
+                /// cannot be opened. Lifecycle would complete the job, and pi's work would
+                /// never be woken again, so try again later: at the heartbeat, doubling
+                /// while the failures continue, up to 10 minutes.
+                /// </summary>
+                abstract onJobError: context: Harness.Pi.PiHarness.OnJob.Context * error: obj -> U2<string, Harness.Pi.PiHarness.OnJob.Result.Item> option
                 /// <summary>
                 /// Close pi's in-memory resources. Durable state is untouched.
                 /// </summary>
@@ -776,6 +935,11 @@ module AgentsPi =
                 /// Stop one operation, or everything running in a session.
                 /// </summary>
                 abstract abort: ?options: Harness.Pi.PiHarness.Abort.Options -> JS.Promise<bool>
+                /// <summary>
+                /// Run again the tasks pi's crash-loop guard parked in a session's work.
+                /// False when nothing was parked.
+                /// </summary>
+                abstract retry: ?options: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessionOptions -> JS.Promise<bool>
                 abstract wait: operationId: string * ?options: Harness.Pi.PiHarness.Wait.Options -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiOperationResult>
                 /// <summary>
                 /// The session's active transcript, as pi's entries.
@@ -795,21 +959,19 @@ module AgentsPi =
                 abstract storage: unit -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.SqliteStorage>
                 /// <remarks>@internal</remarks>
                 abstract enqueue: session: string * input: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]> * options: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiReceipt>
+                /// <remarks>@internal Run again the tasks pi's restart limit parked in a session.</remarks>
+                abstract retryParked: session: string -> JS.Promise<bool>
                 /// <remarks>@internal Withdraw a queued input, or abort the run it joined.</remarks>
                 abstract withdraw: session: string * operationId: string -> JS.Promise<bool>
                 /// <remarks>@internal Wait for pi to settle an operation, by its request id.</remarks>
                 abstract settled: session: string * operationId: string * ?signal: obj -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiOperationResult>
                 /// <remarks>@internal The per-conversation defaults supported by pi-durable.</remarks>
                 abstract agentDefaults: unit -> FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent
-                [<ParamObject; Emit("$0")>]
-                static member Create (``__#1@#private``: obj, sessions: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessions, onStart: (Harness.Pi.PiHarness.OnStart.Context -> JS.Promise<unit>), onJob: (Harness.Pi.PiHarness.OnJob.Context -> JS.Promise<U2<string, Harness.Pi.PiHarness.OnJob.Result.Item> option>), dispose: (unit -> JS.Promise<unit>), session: (string option -> FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession), prompt: Func<U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse>>, submit: Func<U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiReceipt>>, abort: (Harness.Pi.PiHarness.Abort.Options option -> JS.Promise<bool>), wait: Func<string, Harness.Pi.PiHarness.Wait.Options option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiOperationResult>>, messages: (FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessionOptions option -> JS.Promise<Harness.Pi.PiPromptResponse.Messages.Item[]>), pending: (FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessionOptions option -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPendingOperation[]>), pi: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Harness>), conversation: (string -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Conversation>), storage: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.SqliteStorage>), enqueue: Func<string, U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiReceipt>>, withdraw: Func<string, string, JS.Promise<bool>>, settled: Func<string, string, obj option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiOperationResult>>, agentDefaults: (unit -> FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent), capabilityId: string, claims: Harness.Pi.PiHarness.Claims, lifecycle: Harness.Pi.PiHarness.LifecycleServices, ?lifecycleServices: Harness.Pi.PiHarness.LifecycleServices) : PiHarness = jsNative
 
             /// <summary>
             /// One pi conversation, addressed through the harness.
             /// </summary>
-            [<Interface>]
             type PiSession =
-                abstract ``__#2@#private``: obj with get, set
                 abstract id: string
                 /// <summary>
                 /// Durably submit a prompt. Resolves before the model runs.
@@ -834,6 +996,12 @@ module AgentsPi =
                 /// </summary>
                 abstract abort: ?operationId: string -> JS.Promise<bool>
                 /// <summary>
+                /// Run again the tasks pi's crash-loop guard (<c>settings.restartLimit</c>)
+                /// parked in this session's work, including subagent sessions it owns.
+                /// False when nothing was parked.
+                /// </summary>
+                abstract retry: unit -> JS.Promise<bool>
+                /// <summary>
                 /// Start a new context, optionally from a handoff note.
                 /// </summary>
                 abstract reset: ?handoff: string -> JS.Promise<unit>
@@ -851,15 +1019,11 @@ module AgentsPi =
                 /// </summary>
                 abstract events: ?context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream>
                 abstract busy: unit -> JS.Promise<bool>
-                [<ParamObject; Emit("$0")>]
-                static member Create (``__#2@#private``: obj, id: string, submit: Func<U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiReceipt>>, prompt: Func<U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse>>, steer: Func<U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, Harness.Pi.PiSession.Steer.Options option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiReceipt>>, wait: Func<string, obj option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiOperationResult>>, abort: (string option -> JS.Promise<bool>), reset: (string option -> JS.Promise<unit>), setModel: (FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiModel -> JS.Promise<unit>), messages: (unit -> JS.Promise<Harness.Pi.PiPromptResponse.Messages.Item[]>), events: (FSharp.CloudEdge.Runtime.Chord.Context option -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream>), busy: (unit -> JS.Promise<bool>)) : PiSession = jsNative
 
             /// <summary>
             /// Every pi conversation in this object.
             /// </summary>
-            [<Interface>]
             type PiSessions =
-                abstract ``__#3@#private``: obj with get, set
                 abstract get: id: string -> FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession
                 /// <summary>
                 /// A new top-level session, configured like the root.
@@ -874,18 +1038,15 @@ module AgentsPi =
                 /// storage directly: the Harness has no conversation listing.
                 /// </summary>
                 abstract list: unit -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessionInfo[]>
-                [<ParamObject; Emit("$0")>]
-                static member Create (``__#3@#private``: obj, get: (string -> FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession), create: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession>), fork: (string -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSession>), list: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSessionInfo[]>)) : PiSessions = jsNative
 
             /// <summary>
             /// pi's session store on a Durable Object's SQLite database.
             /// <br /><br />
             /// pi owns its sessions: conversations, entries, tasks, submissions, and
             /// documents live in pi's own schema, created and migrated by pi's portable
-            /// <c>SqliteStorage</c>. This file only supplies the asynchronous database facade
-            /// pi asks for, over <c>ctx.storage.sql</c>, and moves pi's tables under a prefix
-            /// so they cannot collide with the SDK's or the host's tables in the same
-            /// object.
+            /// <c>SqliteStorage</c> through pi's own Durable Object adapter. The store keeps
+            /// pi's tables under a prefix, so they cannot collide with the SDK's or the
+            /// host's tables in the same object.
             /// <br /><br />
             /// It is the Durable Object counterpart of <c>agents/sessions</c> for a harness
             /// that brings its own session model, and has nothing pi-harness specific in
@@ -921,12 +1082,14 @@ module AgentsPi =
                 /// <br /><br />
                 /// What pi cannot do on a Durable Object is wake itself: its scheduler runs
                 /// in memory, and an evicted object has no memory. The harness is that wake,
-                /// with one Lifecycle job per session. Input goes to pi once, in <c>submit()</c>,
-                /// after the session's job is scheduled. The job waits while pi has live
-                /// tasks in the session, rescheduling itself as a heartbeat, and completes
-                /// when there are none. An eviction mid-run leaves the job due, so its alarm
-                /// restarts the object, pi reopens and resumes its own tasks, and the job
-                /// waits again.
+                /// with one Lifecycle job driven by <c>pi.wake()</c>. Input goes to pi once, in
+                /// <c>submit()</c>, after the job is scheduled. While pi has work running, the
+                /// job waits on it, rescheduling itself as a heartbeat. While pi's tasks
+                /// sleep, the job is due when the first one wakes; pi tells the harness
+                /// through the <c>onWake</c> the factory passes to <c>Harness.open</c>. When pi has
+                /// nothing to do, the job completes. An eviction mid-run leaves the job due,
+                /// so its alarm restarts the object, pi reopens and resumes its own tasks,
+                /// and the job waits again.
                 /// </summary>
                 /// <remarks>@beta The API may change between releases.</remarks>
                 [<Import("PiHarness", "agents/harness/pi"); EmitConstructor>]
@@ -955,7 +1118,7 @@ module AgentsPi =
                 /// </code>
                 /// </summary>
                 [<Import("skills", "agents/harness/pi")>]
-                static member skills (sources: SkillSource[]) : JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>> = jsNative
+                static member skills (sources: SkillSource[]) : JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>> = jsNative
 
             module PiHarness =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1152,7 +1315,7 @@ module AgentsPi =
                                 /// <br /><br />
                                 /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
                                 /// </summary>
-                                abstract send: message: U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit
+                                abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
                                 /// <summary>
                                 /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
                                 /// <br /><br />
@@ -1243,8 +1406,8 @@ module AgentsPi =
                                 /// Always includes the connection id as the first tag.
                                 /// </summary>
                                 abstract tags: string[] with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (accept: (obj option -> unit), send: (U3<string, JS.ArrayBuffer, JS.ArrayBufferView> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Harness.Pi.PiHarness.LifecycleServices.RunInHostContext.Scope.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
+                                [<ParamObject; Emit("(o => ({...o, \"url\": o[\"url\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"extensions\": o[\"extensions\"] ?? null, \"uri\": o[\"uri\"] ?? null, \"state\": o[\"state\"] ?? null}))($0)")>]
+                                static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: Harness.Pi.PiHarness.LifecycleServices.RunInHostContext.Scope.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
 
                             module Connection =
                                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1310,6 +1473,15 @@ module AgentsPi =
                         [<ParamObject; Emit("$0")>]
                         static member Create (?session: string, ?signal: obj) : Options = jsNative
 
+            module PiHarnessContext =
+                module OnWake =
+                    [<Interface>]
+                    type Wake =
+                        abstract active: bool
+                        abstract at: float option
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (active: bool, ?at: float) : Wake = jsNative
+
             module PiOperationResult =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type Status =
@@ -1319,6 +1491,7 @@ module AgentsPi =
             module PiPendingOperation =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type Status =
+                    | [<CompiledName("parked")>] Parked
                     | [<CompiledName("queued")>] Queued
                     | [<CompiledName("running")>] Running
 
@@ -1339,7 +1512,7 @@ module AgentsPi =
                         /// <summary>
                         /// JSON payload consumed by views, extensions, or bookkeeping logic.
                         /// </summary>
-                        abstract data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
+                        abstract data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
                         /// <summary>
                         /// First entry in the active context selected by this entry.
                         /// </summary>
@@ -1353,7 +1526,7 @@ module AgentsPi =
                         /// </summary>
                         abstract byTaskId: float option
                         [<ParamObject; Emit("$0")>]
-                        static member Create (id: float, conversationId: float, kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?head: float, ?edits: FSharp.CloudEdge.Runtime.PiDurable.ContextEdit[], ?byTaskId: float) : Item = jsNative
+                        static member Create (id: float, conversationId: float, kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?head: float, ?edits: FSharp.CloudEdge.Runtime.PiDurable.ContextEdit[], ?byTaskId: float) : Item = jsNative
 
             module PiSession =
                 module Steer =
@@ -1364,8 +1537,45 @@ module AgentsPi =
                         /// </summary>
                         abstract session: string option
                         abstract operationId: string option
+                        /// <summary>
+                        /// The transcript entry the input is placed as, instead of pi's <c>pi.user</c>:
+                        /// for input the user did not type, such as a scheduled prompt, a webhook,
+                        /// or an approval's outcome. The model still gets the input as a user
+                        /// message; <c>kind</c> and <c>data</c> record where it came from. The kind must not
+                        /// start with <c>pi.</c>.
+                        /// </summary>
+                        abstract entry: Harness.Pi.PiSubmitOptions.Entry option
                         [<ParamObject; Emit("$0")>]
-                        static member Create (?session: string, ?operationId: string) : Options = jsNative
+                        static member Create (?session: string, ?operationId: string, ?entry: Harness.Pi.PiSubmitOptions.Entry) : Options = jsNative
+
+            module PiSubmitOptions =
+                [<Interface>]
+                type Entry =
+                    abstract kind: string
+                    abstract data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (kind: string, ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Entry = jsNative
+
+        module WaitForTask =
+            module Result =
+                [<Interface>]
+                type Item<'R> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item.Base<'R>
+                    abstract state: U4<FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State2, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State3, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State4, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State5>
+                    /// <summary>
+                    /// Small first-writer-wins values retained while the task can run.
+                    /// </summary>
+                    abstract memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: U4<FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State2, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State3, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State4, FSharp.CloudEdge.Runtime.PiDurable.StorageWrite.Cases.Task.Value.State5>, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item<'R> = jsNative
+
+                [<Interface>]
+                type Item2<'R> =
+                    inherit FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item.Base<'R>
+                    abstract state: obj
+                    abstract memos: unit option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: obj, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: unit) : Item2<'R> = jsNative
 
     module LifecycleCapability =
         module OnStart =
@@ -1379,6 +1589,39 @@ module AgentsPi =
                 static member Create (?props: 'Props) : Context<'Props> = jsNative
 
     module Models =
+        module CancelDeferred =
+            [<Interface>]
+            type Options =
+                inherit FSharp.CloudEdge.Runtime.PiAi.ProviderRequestOptions<FSharp.CloudEdge.Runtime.PiAi.Model<FSharp.CloudEdge.Runtime.PiAi.Api>>
+                inherit FSharp.CloudEdge.Runtime.PiAi.ModelsRequestTransforms
+                /// <summary>
+                /// Optional callback for inspecting or replacing provider payloads before sending.
+                /// Return undefined to keep the payload unchanged.
+                /// </summary>
+                abstract onPayload: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.OnPayload option with get, set
+                /// <summary>
+                /// Optional callback invoked after an HTTP response is received.
+                /// </summary>
+                abstract onResponse: FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions.OnResponse option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: FSharp.CloudEdge.Runtime.PiAi.ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>)) : Options = jsNative
+
+        module Classify =
+            [<Interface>]
+            type Options =
+                inherit FSharp.CloudEdge.Runtime.PiAi.ClassifierOptions
+                inherit FSharp.CloudEdge.Runtime.PiAi.ModelsRequestTransforms
+                [<ParamObject; Emit("$0")>]
+                static member Create (?temperature: float, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.ClassifierOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.ClassifierOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: FSharp.CloudEdge.Runtime.PiAi.ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>)) : Options = jsNative
+
+        module GenerateImages =
+            [<Interface>]
+            type Options =
+                inherit FSharp.CloudEdge.Runtime.PiAi.ImagesOptions
+                inherit FSharp.CloudEdge.Runtime.PiAi.ModelsRequestTransforms
+                [<ParamObject; Emit("$0")>]
+                static member Create (?metadata: JS.Record<string, obj>, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: FSharp.CloudEdge.Runtime.PiAi.ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>)) : Options = jsNative
+
         /// <summary>agents/models/pi-ai</summary>
         module PiAi =
             /// <remarks>@beta This surface is in beta and may change.</remarks>
@@ -1406,16 +1649,8 @@ module AgentsPi =
                 abstract guidance: float option with get, set
                 abstract negativePrompt: string option with get, set
                 abstract seed: float option with get, set
-                /// <summary>
-                /// Models to try, in order, if the primary fails before any output is
-                /// produced. A leg travels with the chain's gateway options — those win over
-                /// a leg's own, and <c>metadata</c> merges — while everything a leg was built with
-                /// itself stays its own. Client-side today; becomes server-side when the
-                /// platform ships model-first routing.
-                /// </summary>
-                abstract fallback: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.WorkersAIModelId[] option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?name: string, ?width: float, ?height: float, ?steps: float, ?guidance: float, ?negativePrompt: string, ?seed: float, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?fallback: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.WorkersAIModelId[], ?headers: Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: Record<string, obj>) : PiImagesModelOptions = jsNative
+                static member Create (?name: string, ?width: float, ?height: float, ?steps: float, ?guidance: float, ?negativePrompt: string, ?seed: float, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?fallback: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.WorkersAIModelId[], ?headers: JS.Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: JS.Record<string, obj>) : PiImagesModelOptions = jsNative
 
             /// <summary>
             /// Per-call options for generateImages.
@@ -1430,7 +1665,7 @@ module AgentsPi =
                 abstract negativePrompt: string option with get, set
                 abstract seed: float option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?width: float, ?height: float, ?steps: float, ?guidance: float, ?negativePrompt: string, ?seed: float, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?metadata: Record<string, obj>) : PiImagesCallOptions = jsNative
+                static member Create (?width: float, ?height: float, ?steps: float, ?guidance: float, ?negativePrompt: string, ?seed: float, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.ImagesOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: FSharp.CloudEdge.Runtime.PiAi.ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?metadata: JS.Record<string, obj>) : PiImagesCallOptions = jsNative
 
             /// <summary>
             /// pi-ai's <c>AssistantImages</c> has no warnings channel, so a knob this catalog
@@ -1458,13 +1693,13 @@ module AgentsPi =
             /// <remarks>@beta This surface is in beta and may change.</remarks>
             [<Interface>]
             type ModelCost =
-                inherit FSharp.CloudEdge.Runtime.PiAi.ModelCostRates
-                /// <summary>
-                /// Request-wide pricing tiers. The highest matching input threshold applies to the full request.
-                /// </summary>
-                abstract tiers: FSharp.CloudEdge.Runtime.PiAi.ModelCostTier[] option with get, set
+                abstract input: float with get, set
+                abstract output: float with get, set
+                abstract cacheRead: float with get, set
+                abstract cacheWrite: float with get, set
+                abstract tiers: Models.PiAi.ModelCost.Tiers.Item[] option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (input: float, output: float, cacheRead: float, cacheWrite: float, ?tiers: FSharp.CloudEdge.Runtime.PiAi.ModelCostTier[]) : ModelCost = jsNative
+                static member Create (input: float, output: float, cacheRead: float, cacheWrite: float, ?tiers: Models.PiAi.ModelCost.Tiers.Item[]) : ModelCost = jsNative
 
             /// <summary>
             /// A model this provider routes: a Workers AI model or any pi-ai model the
@@ -1506,16 +1741,8 @@ module AgentsPi =
                 /// never trips it. <c>0</c> disables the guard. Default 300000 (five minutes).
                 /// </summary>
                 abstract streamIdleTimeoutMs: float option with get, set
-                /// <summary>
-                /// Models to try, in order, if the primary fails before any output is
-                /// produced. A leg travels with the chain's gateway options — those win over
-                /// a leg's own, and <c>metadata</c> merges — while everything a leg was built with
-                /// itself stays its own. Client-side today; becomes server-side when the
-                /// platform ships model-first routing.
-                /// </summary>
-                abstract fallback: PiFallbackLeg[] option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?name: string, ?contextWindow: float, ?maxTokens: float, ?reasoning: bool, ?input: FSharp.CloudEdge.Runtime.PiAi.Model.Input.Item[], ?cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?streamIdleTimeoutMs: float, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?fallback: PiFallbackLeg[], ?headers: Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: Record<string, obj>) : PiModelOptions = jsNative
+                static member Create (?name: string, ?contextWindow: float, ?maxTokens: float, ?reasoning: bool, ?input: FSharp.CloudEdge.Runtime.PiAi.Model.Input.Item[], ?cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?streamIdleTimeoutMs: float, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?fallback: PiFallbackLeg[], ?headers: JS.Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: JS.Record<string, obj>) : PiModelOptions = jsNative
 
             /// <summary>
             /// A leg that was tried and failed before producing output.
@@ -1607,6 +1834,17 @@ module AgentsPi =
             type WorkersAIModelId = string
 
             /// <summary>
+            /// An AI Gateway dynamic route, by name: <c>dynamic/&lt;route&gt;</c>.
+            /// <br /><br />
+            /// A dynamic route is configured on the gateway — which models it tries, in
+            /// which order, with what rate limits or budgets — and called through the
+            /// Workers AI run path like a model. It answers in the OpenAI chat-completions
+            /// shape whatever model served it, so it is a language model only.
+            /// </summary>
+            /// <remarks>@experimental This surface is experimental and may change.</remarks>
+            type DynamicRouteId = string
+
+            /// <summary>
             /// A text-embedding model id accepted by <c>ai.embedding()</c>.
             /// <br /><br />
             /// The modality methods are Workers AI only — there is no vendor route for them
@@ -1646,7 +1884,7 @@ module AgentsPi =
                 /// <summary>
                 /// Arbitrary key/values attached to the gateway log entry.
                 /// </summary>
-                abstract metadata: Record<string, U3<string, float, bool> option> option with get, set
+                abstract metadata: JS.Record<string, U3<string, float, bool> option> option with get, set
                 /// <summary>
                 /// Correlates several requests into one gateway event.
                 /// </summary>
@@ -1659,25 +1897,102 @@ module AgentsPi =
                 /// Server-side retry policy for the upstream provider call.
                 /// </summary>
                 abstract retries: Models.PiAi.PiImagesModelOptions.Retries option with get, set
+                /// <summary>
+                /// The stored BYOK key to use when the gateway holds more than one for a
+                /// provider, by alias. Sent as <c>cf-aig-byok-alias</c>, for catalog models and
+                /// for model objects reached through the provider-native path.
+                /// </summary>
+                abstract byokAlias: string option with get, set
+                /// <summary>
+                /// Zero Data Retention for this request, sent as <c>cf-aig-zdr</c>: <c>true</c> turns
+                /// it on and <c>false</c> off, whatever the gateway's own setting. Unified
+                /// billing only, and only for model objects reached through the
+                /// provider-native path — <c>/run</c> does not read it.
+                /// </summary>
+                abstract zdr: bool option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries) : GatewayOptions = jsNative
+                static member Create (?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool) : GatewayOptions = jsNative
 
             /// <summary>
-            /// How <c>createAI</c> reaches Cloudflare: the Workers AI binding, and nothing else.
-            /// Workers AI models go through <c>env.AI.run</c>, vendor models through
-            /// <c>env.AI.gateway(id).run</c> — both are the binding, so there is no HTTP
-            /// transport, no account id and no API token to hold.
+            /// How <c>createAI</c> reaches Cloudflare: the <c>AI</c> binding, or an account id and
+            /// API token. Both take the same routes — a model id to the run path, a
+            /// vendor's model object to the provider-native path — and the same gateway
+            /// options.
             /// </summary>
             /// <remarks>@experimental This surface is experimental and may change.</remarks>
             [<Interface>]
             type AISettings =
-                inherit ProviderGatewaySettings
+                /// <summary>
+                /// Gateway id or full gateway options.
+                /// </summary>
+                abstract gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions> option with get, set
+                /// <summary>
+                /// Gateway id. Defaults to <c>"default"</c> (auto-created on first use).
+                /// </summary>
+                abstract id: string option with get, set
+                /// <summary>
+                /// Bypass the cache for this request.
+                /// </summary>
+                abstract skipCache: bool option with get, set
+                /// <summary>
+                /// Cache lifetime in seconds.
+                /// </summary>
+                abstract cacheTtl: float option with get, set
+                /// <summary>
+                /// Explicit cache key, instead of the request-derived one.
+                /// </summary>
+                abstract cacheKey: string option with get, set
+                /// <summary>
+                /// Whether the gateway stores the request/response in its log.
+                /// </summary>
+                abstract collectLog: bool option with get, set
+                /// <summary>
+                /// Arbitrary key/values attached to the gateway log entry.
+                /// </summary>
+                abstract metadata: JS.Record<string, U3<string, float, bool> option> option with get, set
+                /// <summary>
+                /// Correlates several requests into one gateway event.
+                /// </summary>
+                abstract eventId: string option with get, set
+                /// <summary>
+                /// Upstream request timeout in milliseconds.
+                /// </summary>
+                abstract requestTimeoutMs: float option with get, set
+                /// <summary>
+                /// Server-side retry policy for the upstream provider call.
+                /// </summary>
+                abstract retries: Models.PiAi.PiImagesModelOptions.Retries option with get, set
+                /// <summary>
+                /// The stored BYOK key to use when the gateway holds more than one for a
+                /// provider, by alias. Sent as <c>cf-aig-byok-alias</c>, for catalog models and
+                /// for model objects reached through the provider-native path.
+                /// </summary>
+                abstract byokAlias: string option with get, set
+                /// <summary>
+                /// Zero Data Retention for this request, sent as <c>cf-aig-zdr</c>: <c>true</c> turns
+                /// it on and <c>false</c> off, whatever the gateway's own setting. Unified
+                /// billing only, and only for model objects reached through the
+                /// provider-native path — <c>/run</c> does not read it.
+                /// </summary>
+                abstract zdr: bool option with get, set
+                /// <summary>
+                /// The account the gateway belongs to.
+                /// </summary>
+                abstract accountId: string option with get, set
+                /// <summary>
+                /// A Cloudflare API token for that account, with Workers AI Read (model ids,
+                /// on the REST API) and AI Gateway Run (model objects, on the
+                /// provider-native path).
+                /// </summary>
+                abstract apiToken: string option with get, set
                 /// <summary>
                 /// The <c>AI</c> binding from a Worker's env.
                 /// </summary>
-                abstract binding: obj with get, set
+                abstract binding: obj option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (binding: obj, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries) : AISettings = jsNative
+                static member Create (accountId: string, apiToken: string, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool) : AISettings = jsNative
+                [<ParamObject; Emit("$0")>]
+                static member Create (binding: obj, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool) : AISettings = jsNative
 
             /// <summary>
             /// Per-model and per-call options. The flat gateway keys are sugar for
@@ -1708,7 +2023,7 @@ module AgentsPi =
                 /// <summary>
                 /// Extra request headers, merged last.
                 /// </summary>
-                abstract headers: Record<string, string> option with get, set
+                abstract headers: JS.Record<string, string> option with get, set
                 /// <summary>
                 /// Workers AI only: route same-key requests to the same replica for
                 /// prefix-cache hits. Sent as the <c>x-session-affinity</c> header.
@@ -1724,9 +2039,9 @@ module AgentsPi =
                 /// Workers AI only: forwarded verbatim as <c>chat_template_kwargs</c>, e.g.
                 /// <c>{ enable_thinking: false }</c>.
                 /// </summary>
-                abstract chatTemplateKwargs: Record<string, obj> option with get, set
+                abstract chatTemplateKwargs: JS.Record<string, obj> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?fallback: 'Leg[], ?headers: Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: Record<string, obj>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>) : ModelOptions<'Leg> = jsNative
+                static member Create (?fallback: 'Leg[], ?headers: JS.Record<string, string>, ?sessionAffinity: string, ?reasoningEffort: Models.PiAi.PiImagesModelOptions.ReasoningEffort, ?chatTemplateKwargs: JS.Record<string, obj>, ?id: string, ?skipCache: bool, ?cacheTtl: float, ?cacheKey: string, ?collectLog: bool, ?metadata: JS.Record<string, U3<string, float, bool> option>, ?eventId: string, ?requestTimeoutMs: float, ?retries: Models.PiAi.PiImagesModelOptions.Retries, ?byokAlias: string, ?zdr: bool, ?gateway: U2<string, FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.GatewayOptions>) : ModelOptions<'Leg> = jsNative
 
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
             type CloudflareAIErrorCode =
@@ -1793,7 +2108,7 @@ module AgentsPi =
                 /// <summary>
                 /// Response headers, when there was a response.
                 /// </summary>
-                abstract responseHeaders: Record<string, string> option
+                abstract responseHeaders: JS.Record<string, string> option
                 /// <summary>
                 /// Raw response body text, when there was a response.
                 /// </summary>
@@ -1815,29 +2130,12 @@ module AgentsPi =
                 abstract message: string with get, set
                 abstract stack: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (code: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIErrorCode, model: string, url: string, requestBodyValues: obj, isRetryable: bool, data: obj, cause: obj, name: string, message: string, ?status: float, ?logId: string, ?responseHeaders: Record<string, string>, ?responseBody: string, ?attempts: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIAttempt[], ?stack: string) : CloudflareAIError = jsNative
+                static member Create (code: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIErrorCode, model: string, url: string, requestBodyValues: obj, isRetryable: bool, data: obj, cause: obj, name: string, message: string, ?status: float, ?logId: string, ?responseHeaders: JS.Record<string, string>, ?responseBody: string, ?attempts: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIAttempt[], ?stack: string) : CloudflareAIError = jsNative
                 /// <summary>
                 /// Indicates whether the argument provided is a built-in Error instance or not.
                 /// </summary>
                 [<Import("CloudflareAIError.isError", "agents/models/pi-ai")>]
                 static member isError (error: obj) : bool = jsNative
-                /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
-                [<Import("CloudflareAIError.prepareStackTrace", "agents/models/pi-ai")>]
-                static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
-                /// <summary>
-                /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
-                /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
-                /// <c>Error.captureStackTrace(obj)</c>).
-                /// <br /><br />
-                /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
-                /// will affect any stack trace captured _after_ the value has been changed.
-                /// <br /><br />
-                /// If set to a non-number value, or set to a negative number, stack traces will
-                /// not capture any frames.
-                /// </summary>
-                static member stackTraceLimit
-                    with get (): float = jsNative
-                    and set (_: float): unit = jsNative
                 /// <summary>
                 /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
                 /// a string representing the location in the code at which
@@ -1882,7 +2180,24 @@ module AgentsPi =
                 /// </code>
                 /// </summary>
                 [<Import("CloudflareAIError.captureStackTrace", "agents/models/pi-ai")>]
-                static member captureStackTrace (targetObject: obj, ?constructorOpt: JS.Function) : unit = jsNative
+                static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+                /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+                [<Import("CloudflareAIError.prepareStackTrace", "agents/models/pi-ai")>]
+                static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+                /// <summary>
+                /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+                /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+                /// <c>Error.captureStackTrace(obj)</c>).
+                /// <br /><br />
+                /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+                /// will affect any stack trace captured _after_ the value has been changed.
+                /// <br /><br />
+                /// If set to a non-number value, or set to a negative number, stack traces will
+                /// not capture any frames.
+                /// </summary>
+                static member stackTraceLimit
+                    with get (): float = jsNative
+                    and set (_: float): unit = jsNative
 
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
             type GatewayProviderName =
@@ -1925,7 +2240,7 @@ module AgentsPi =
                 static member CLOUDFLARE_AI_API: string = jsNative
                 /// <summary>
                 /// The pi-ai provider id. A <c>Models</c> registry resolves specifiers as
-                /// <c>cloudflare/&lt;id&gt;</c>, e.g. <c>cloudflare/anthropic/claude-opus-4-8</c>.
+                /// <c>cloudflare/&lt;id&gt;</c>, e.g. <c>cloudflare/anthropic/claude-opus-4.8</c>.
                 /// </summary>
                 /// <remarks>@beta This surface is in beta and may change.</remarks>
                 [<Import("CLOUDFLARE_PROVIDER_ID", "agents/models/pi-ai")>]
@@ -1948,9 +2263,10 @@ module AgentsPi =
                 /// <summary>
                 /// Creates a pi-ai provider over Cloudflare's AI.
                 /// <br /><br />
-                /// The Workers AI binding is the only way in — Workers AI models go through
-                /// <c>env.AI.run</c>, vendor models through <c>env.AI.gateway(id).run</c>, and there is
-                /// no HTTP transport and no API token. Gateway options may be given flat
+                /// Workers AI and catalog models go through <c>env.AI.run</c>, other model objects
+                /// through the binding's <c>fetch</c> to AI Gateway's provider-native path. With
+                /// <c>{ accountId, apiToken }</c> instead of <c>binding</c>, the same requests go to the
+                /// REST API and to <c>gateway.ai.cloudflare.com</c>. Gateway options may be given flat
                 /// (<c>{ binding, id: "prod", cacheTtl: 60 }</c>) or nested under <c>gateway</c>;
                 /// per-model options and per-call pi-ai options (<c>headers</c>, <c>metadata</c>,
                 /// <c>sessionId</c>) override them in that order.
@@ -1992,14 +2308,14 @@ module AgentsPi =
                     abstract status: float option with get, set
                     abstract code: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIErrorCode with get, set
                     abstract logId: string option with get, set
-                    abstract responseHeaders: Record<string, string> option with get, set
+                    abstract responseHeaders: JS.Record<string, string> option with get, set
                     abstract responseBody: string option with get, set
                     abstract isRetryable: bool option with get, set
                     abstract data: obj option with get, set
                     abstract cause: obj option with get, set
                     abstract attempts: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIAttempt[] option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (message: string, model: string, url: string, requestBodyValues: obj, code: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIErrorCode, ?status: float, ?logId: string, ?responseHeaders: Record<string, string>, ?responseBody: string, ?isRetryable: bool, ?data: obj, ?cause: obj, ?attempts: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIAttempt[]) : Options = jsNative
+                    static member Create (message: string, model: string, url: string, requestBodyValues: obj, code: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIErrorCode, ?status: float, ?logId: string, ?responseHeaders: JS.Record<string, string>, ?responseBody: string, ?isRetryable: bool, ?data: obj, ?cause: obj, ?attempts: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIAttempt[]) : Options = jsNative
 
             module CloudflareAssistantImages =
                 module Diagnostics =
@@ -2017,6 +2333,18 @@ module AgentsPi =
                             abstract warnings: CompatWarning[] with get, set
                             [<ParamObject; Emit("$0")>]
                             static member Create (warnings: CompatWarning[]) : Details = jsNative
+
+            module ModelCost =
+                module Tiers =
+                    [<Interface>]
+                    type Item =
+                        abstract input: float with get, set
+                        abstract output: float with get, set
+                        abstract cacheRead: float with get, set
+                        abstract cacheWrite: float with get, set
+                        abstract inputTokensAbove: float with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (input: float, output: float, cacheRead: float, cacheWrite: float, inputTokensAbove: float) : Item = jsNative
 
             module PiImagesModelOptions =
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -2047,6 +2375,101 @@ module AgentsPi =
                         | N4 = 4
                         | N5 = 5
 
+            /// <summary>
+            /// Error thrown for every failed Cloudflare AI call, whether it came back as a
+            /// non-2xx <c>Response</c> or as a thrown Workers AI binding error. Framework
+            /// modules wrap it into their own error type at their boundary (the AI SDK
+            /// module into an <c>APICallError</c>, so <c>ai</c>'s retry loop honours
+            /// CloudflareAIError.isRetryable).
+            /// </summary>
+            /// <remarks>@experimental This surface is experimental and may change.</remarks>
+            type CloudflareAIErrorConstructor =
+                /// <summary>
+                /// Indicates whether the argument provided is a built-in Error instance or not.
+                /// </summary>
+                abstract isError: error: obj -> bool
+                /// <summary>
+                /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+                /// a string representing the location in the code at which
+                /// <c>Error.captureStackTrace()</c> was called.
+                /// <code lang="js">
+                /// const myObject = {};
+                /// Error.captureStackTrace(myObject);
+                /// myObject.stack;  // Similar to `new Error().stack`
+                /// </code>
+                /// <br /><br />
+                /// The first line of the trace will be prefixed with
+                /// <c>${myObject.name}: ${myObject.message}</c>.
+                /// <br /><br />
+                /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+                /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+                /// generated stack trace.
+                /// <br /><br />
+                /// The <c>constructorOpt</c> argument is useful for hiding implementation
+                /// details of error generation from the user. For instance:
+                /// <code lang="js">
+                /// function a() {
+                ///   b();
+                /// }
+                ///
+                /// function b() {
+                ///   c();
+                /// }
+                ///
+                /// function c() {
+                ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+                ///   const { stackTraceLimit } = Error;
+                ///   Error.stackTraceLimit = 0;
+                ///   const error = new Error();
+                ///   Error.stackTraceLimit = stackTraceLimit;
+                ///
+                ///   // Capture the stack trace above function b
+                ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+                ///   throw error;
+                /// }
+                ///
+                /// a();
+                /// </code>
+                /// </summary>
+                abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+                /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+                abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+                /// <summary>
+                /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+                /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+                /// <c>Error.captureStackTrace(obj)</c>).
+                /// <br /><br />
+                /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+                /// will affect any stack trace captured _after_ the value has been changed.
+                /// <br /><br />
+                /// If set to a non-number value, or set to a negative number, stack traces will
+                /// not capture any frames.
+                /// </summary>
+                abstract stackTraceLimit: float with get, set
+                /// <summary>
+                /// Error thrown for every failed Cloudflare AI call, whether it came back as a
+                /// non-2xx <c>Response</c> or as a thrown Workers AI binding error. Framework
+                /// modules wrap it into their own error type at their boundary (the AI SDK
+                /// module into an <c>APICallError</c>, so <c>ai</c>'s retry loop honours
+                /// CloudflareAIError.isRetryable).
+                /// </summary>
+                /// <remarks>@experimental This surface is experimental and may change.</remarks>
+                [<EmitConstructor>]
+                abstract Create: options: Models.PiAi.CloudflareAIError.Options -> FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIError
+
+        module StreamDeferred =
+            [<Interface>]
+            type Options =
+                inherit FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions
+                inherit FSharp.CloudEdge.Runtime.PiAi.ModelsRequestTransforms
+                [<ParamObject; Emit("$0")>]
+                static member Create (?wait: float, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: FSharp.CloudEdge.Runtime.PiAi.ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>)) : Options = jsNative
+
+        module StreamSimple =
+            type Options =
+                inherit FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions
+                inherit FSharp.CloudEdge.Runtime.PiAi.ModelsRequestTransforms
+
     module SkillResourceDescriptor =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Encoding =
@@ -2061,31 +2484,40 @@ module AgentsPi =
             | [<CompiledName("script")>] Script
 
 module Chord =
-    type JsonValue2 = U5<string, float, bool, obj[], JsonValue22> option
+    type JsonValue = U5<string, float, bool, obj[], JsonValue2> option
 
-    type JsonValue22 =
+    type JsonValue2 =
         [<EmitIndexer>]
-        abstract Item: string -> JsonValue2 with get, set
+        abstract Item: string -> JsonValue with get, set
 
     [<Interface>]
     type Context =
         abstract abortSignal: obj option
+        abstract telemetry: obj
         abstract value<'T>: key: ContextKey<'T> -> 'T option
         abstract toString: unit -> string
         [<ParamObject; Emit("$0")>]
-        static member Create (value: (ContextKey<'T> -> 'T option), toString: (unit -> string), ?abortSignal: obj) : Context = jsNative
+        static member Create (telemetry: obj, value: (ContextKey<'T> -> 'T option), toString: (unit -> string), ?abortSignal: obj) : Context = jsNative
 
     [<Interface>]
     type ContextKey<'T> =
-        abstract token: obj
+        abstract token: Fable.Core.TS.Es.Symbol
         /// <summary>
         /// Type-only marker that prevents keys with different value types from being interchangeable.
         /// </summary>
         abstract valueType: ('T -> 'T) option
         [<ParamObject; Emit("$0")>]
-        static member Create (token: obj, ?valueType: ('T -> 'T)) : ContextKey<'T> = jsNative
+        static member Create (token: Fable.Core.TS.Es.Symbol, ?valueType: ('T -> 'T)) : ContextKey<'T> = jsNative
 
-    type Op = U7<(string * JsonValue2), (string * Seg[]), (string * Seg[] * JsonValue2), (string * Seg[] * string), (string * Seg[] * float), (string * Seg[] * float[]), (string * Seg[] * float * float * JsonValue2[])>
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("0", CaseRules.None)>]
+    type Op =
+        | [<CompiledName("r"); Fickl.Core.InlineInterface>] R of (string * JsonValue)
+        | [<CompiledName("d"); Fickl.Core.InlineInterface>] D of (string * Seg[])
+        | [<CompiledName("s"); Fickl.Core.InlineInterface>] S of (string * Seg[] * JsonValue)
+        | [<CompiledName("a"); Fickl.Core.InlineInterface>] A of (string * Seg[] * string)
+        | [<CompiledName("t"); Fickl.Core.InlineInterface>] T of (string * Seg[] * float)
+        | [<CompiledName("m"); Fickl.Core.InlineInterface>] M of (string * Seg[] * float[])
+        | [<CompiledName("p"); Fickl.Core.InlineInterface>] P of (string * Seg[] * float * float * JsonValue[])
 
     type Seg = U2<string, float>
 
@@ -2160,6 +2592,7 @@ module PiAi =
 
     [<Interface>]
     type AssistantMessage =
+        /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
         abstract role: string with get, set
         abstract content: AssistantMessage.Content.Item[] with get, set
         abstract api: Api with get, set
@@ -2174,7 +2607,7 @@ module PiAi =
         /// <summary>
         /// Pi thinking level the agent loop requested for this response. Absent outside the agent loop and for legacy responses.
         /// </summary>
-        abstract thinkingLevel: ModelThinkingLevel option with get, set
+        abstract thinkingLevel: AssistantMessage.ThinkingLevel option with get, set
         abstract diagnostics: AssistantMessageDiagnostic[] option with get, set
         abstract usage: Usage with get, set
         abstract stopReason: StopReason with get, set
@@ -2196,8 +2629,30 @@ module PiAi =
         /// for deferred results fetched later.
         /// </summary>
         abstract durationMs: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (role: string, content: AssistantMessage.Content.Item[], api: Api, provider: string, model: string, usage: Usage, stopReason: StopReason, timestamp: float, ?responseModel: string, ?responseId: string, ?providerThinkingLevel: string, ?thinkingLevel: ModelThinkingLevel, ?diagnostics: AssistantMessageDiagnostic[], ?deferred: DeferredHandle, ?errorMessage: string, ?rawStopReason: string, ?endTurn: bool, ?durationMs: float) : AssistantMessage = jsNative
+        [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+        static member Create (content: AssistantMessage.Content.Item[], api: Api, provider: string, model: string, usage: Usage, stopReason: StopReason, timestamp: float, ?responseModel: string, ?responseId: string, ?providerThinkingLevel: string, ?thinkingLevel: AssistantMessage.ThinkingLevel, ?diagnostics: AssistantMessageDiagnostic[], ?deferred: DeferredHandle, ?errorMessage: string, ?rawStopReason: string, ?endTurn: bool, ?durationMs: float) : AssistantMessage = jsNative
+
+    module AssistantMessage =
+        /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
+        [<Literal>]
+        let role = "assistant"
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type ThinkingLevel =
+            | [<CompiledName("high")>] High
+            | [<CompiledName("low")>] Low
+            | [<CompiledName("max")>] Max
+            | [<CompiledName("medium")>] Medium
+            | [<CompiledName("minimal")>] Minimal
+            | [<CompiledName("off")>] Off
+            | [<CompiledName("xhigh")>] Xhigh
+
+        module Content =
+            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+            type Item =
+                | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of TextContent
+                | [<CompiledName("thinking"); Fickl.Core.InlineInterface>] Thinking of ThinkingContent
+                | [<CompiledName("toolCall"); Fickl.Core.InlineInterface>] ToolCall of ToolCall
 
     [<Interface>]
     type AssistantMessageDiagnostic =
@@ -2222,9 +2677,9 @@ module PiAi =
         /// <summary>
         /// Provider conversion data required to reconstruct the final assistant message.
         /// </summary>
-        abstract data: U5<string, float, bool, ToolCall.Arguments, JsonValue[]> option with get, set
+        abstract data: U5<string, float, bool, ToolCall.Arguments, JsonValue3[]> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, modelId: string, api: string, id: string, ?expiresAt: float, ?pollAfterMs: float, ?data: U5<string, float, bool, ToolCall.Arguments, JsonValue[]>) : DeferredHandle = jsNative
+        static member Create (provider: string, modelId: string, api: string, id: string, ?expiresAt: float, ?pollAfterMs: float, ?data: U5<string, float, bool, ToolCall.Arguments, JsonValue3[]>) : DeferredHandle = jsNative
 
     [<Interface>]
     type DiagnosticErrorInfo =
@@ -2237,52 +2692,37 @@ module PiAi =
 
     [<Interface>]
     type ImageContent =
+        /// <remarks>TypeScript type: <c>"image"</c></remarks>
         abstract ``type``: string with get, set
         abstract data: string with get, set
         abstract mimeType: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, data: string, mimeType: string) : ImageContent = jsNative
+        [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
+        static member Create (data: string, mimeType: string) : ImageContent = jsNative
 
-    type JsonValue = U5<string, float, bool, ToolCall.Arguments, obj[]> option
+    module ImageContent =
+        /// <remarks>TypeScript type: <c>"image"</c></remarks>
+        [<Literal>]
+        let ``type`` = "image"
 
-    type Message = U4<AssistantMessage, SystemMessage, UserMessage, Message2>
+    type JsonValue3 = U5<string, float, bool, ToolCall.Arguments, obj[]> option
 
-    [<Interface>]
-    type Message2 =
-        abstract role: string with get, set
-        abstract toolCallId: string with get, set
-        abstract toolName: string with get, set
-        abstract content: UserMessage.Content.Item[] with get, set
-        abstract details: U5<string, float, bool, ToolCall.Arguments, JsonValue[]> option with get, set
-        /// <summary>
-        /// Usage from the tool execution itself, if available. Not part of main LLM context accounting.
-        /// </summary>
-        abstract usage: Usage option with get, set
-        /// <summary>
-        /// Calls this tool made to other tools. Kept for the session record; not sent to the model.
-        /// </summary>
-        abstract nestedCalls: NestedToolCalls option with get, set
-        abstract isError: bool with get, set
-        /// <summary>
-        /// Unix timestamp in milliseconds when the result was created.
-        /// </summary>
-        abstract timestamp: float with get, set
-        /// <summary>
-        /// Milliseconds the tool's execution took, measured with a monotonic clock. Absent for legacy results.
-        /// </summary>
-        abstract durationMs: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (role: string, toolCallId: string, toolName: string, content: UserMessage.Content.Item[], isError: bool, timestamp: float, ?details: U5<string, float, bool, ToolCall.Arguments, JsonValue[]>, ?usage: Usage, ?nestedCalls: NestedToolCalls, ?durationMs: float) : Message2 = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ModelThinkingLevel =
-        | [<CompiledName("high")>] High
-        | [<CompiledName("low")>] Low
-        | [<CompiledName("max")>] Max
-        | [<CompiledName("medium")>] Medium
-        | [<CompiledName("minimal")>] Minimal
-        | [<CompiledName("off")>] Off
-        | [<CompiledName("xhigh")>] Xhigh
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
+    type Message =
+        | [<CompiledName("assistant"); Fickl.Core.InlineInterface>] Assistant of AssistantMessage
+        | [<CompiledName("system"); Fickl.Core.InlineInterface>] System of SystemMessage
+        | [<CompiledName("user"); Fickl.Core.InlineInterface>] User of UserMessage
+        /// <param name="toolCallId"></param>
+        /// <param name="toolName"></param>
+        /// <param name="content"></param>
+        /// <param name="details"></param>
+        /// <param name="usage">Usage from the tool execution itself, if available. Not part of main LLM context accounting.</param>
+        /// <param name="nestedCalls">Calls this tool made to other tools. Kept for the session record; not sent to the model.</param>
+        /// <param name="isError"></param>
+        /// <param name="timestamp">Unix timestamp in milliseconds when the result was created.</param>
+        /// <param name="durationMs">Milliseconds the tool's execution took, measured with a monotonic clock. Absent for legacy results.</param>
+        | [<CompiledName("toolResult")>] ToolResult of toolCallId: string * toolName: string * content: UserMessage.Content.Item[] * details: U5<string, float, bool, ToolCall.Arguments, JsonValue3[]> option * usage: Usage option * nestedCalls: NestedToolCalls option * isError: bool * timestamp: float * durationMs: float option
+        [<ParamObject; Emit("({ role: 'toolResult', ...$0 })")>]
+        static member CreateToolResult (toolCallId: string, toolName: string, content: UserMessage.Content.Item[], isError: bool, timestamp: float, ?details: U5<string, float, bool, ToolCall.Arguments, JsonValue3[]>, ?usage: Usage, ?nestedCalls: NestedToolCalls, ?durationMs: float) : Message = jsNative
 
     [<Interface>]
     type NestedToolCallRecord =
@@ -2318,18 +2758,9 @@ module PiAi =
         [<ParamObject; Emit("$0")>]
         static member Create (calls: NestedToolCallRecord[], complete: bool) : NestedToolCalls = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type StopReason =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("deferred")>] Deferred
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("length")>] Length
-        | [<CompiledName("pending")>] Pending
-        | [<CompiledName("stop")>] Stop
-        | [<CompiledName("toolUse")>] ToolUse
-
     [<Interface>]
     type SystemMessage =
+        /// <remarks>TypeScript type: <c>"system"</c></remarks>
         abstract role: string with get, set
         /// <summary>
         /// Instruction text. On the leading message this is the base prompt; later, additional instructions.
@@ -2341,7 +2772,7 @@ module PiAi =
         /// each section self-delimiting (a tag, a heading) so the model can relate an update to
         /// the original. Avoid integer-like names; JSON objects reorder those.
         /// </summary>
-        abstract sections: Record<string, string option> option with get, set
+        abstract sections: JS.Record<string, string option> option with get, set
         /// <summary>
         /// Complete definitions of tools that become available at this point.
         /// </summary>
@@ -2351,19 +2782,31 @@ module PiAi =
         /// </summary>
         abstract toolsRemoved: ToolReference[] option with get, set
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (role: string, content: U2<string, TextContent[]>, timestamp: float, ?sections: Record<string, string option>, ?toolsAdded: Tool<obj>[], ?toolsRemoved: ToolReference[]) : SystemMessage = jsNative
+        [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+        static member Create (content: U2<string, TextContent[]>, timestamp: float, ?sections: JS.Record<string, string option>, ?toolsAdded: Tool<obj>[], ?toolsRemoved: ToolReference[]) : SystemMessage = jsNative
+
+    module SystemMessage =
+        /// <remarks>TypeScript type: <c>"system"</c></remarks>
+        [<Literal>]
+        let role = "system"
 
     [<Interface>]
     type TextContent =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
         abstract ``type``: string with get, set
         abstract text: string with get, set
         abstract textSignature: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, text: string, ?textSignature: string) : TextContent = jsNative
+        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+        static member Create (text: string, ?textSignature: string) : TextContent = jsNative
+
+    module TextContent =
+        /// <remarks>TypeScript type: <c>"text"</c></remarks>
+        [<Literal>]
+        let ``type`` = "text"
 
     [<Interface>]
     type ThinkingContent =
+        /// <remarks>TypeScript type: <c>"thinking"</c></remarks>
         abstract ``type``: string with get, set
         abstract thinking: string with get, set
         abstract thinkingSignature: string option with get, set
@@ -2373,8 +2816,13 @@ module PiAi =
         /// to the API for multi-turn continuity.
         /// </summary>
         abstract redacted: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, thinking: string, ?thinkingSignature: string, ?redacted: bool) : ThinkingContent = jsNative
+        [<ParamObject; Emit("({ type: 'thinking', ...$0 })")>]
+        static member Create (thinking: string, ?thinkingSignature: string, ?redacted: bool) : ThinkingContent = jsNative
+
+    module ThinkingContent =
+        /// <remarks>TypeScript type: <c>"thinking"</c></remarks>
+        [<Literal>]
+        let ``type`` = "thinking"
 
     [<Interface>]
     type Tool<'TParameters> =
@@ -2387,6 +2835,7 @@ module PiAi =
 
     [<Interface>]
     type ToolCall =
+        /// <remarks>TypeScript type: <c>"toolCall"</c></remarks>
         abstract ``type``: string with get, set
         abstract id: string with get, set
         abstract name: string with get, set
@@ -2396,8 +2845,22 @@ module PiAi =
         /// OpenAI Responses namespace for calls to dynamically loaded or namespaced tools.
         /// </summary>
         abstract ``namespace``: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: string, name: string, arguments: ToolCall.Arguments, ?thoughtSignature: string, ?``namespace``: string) : ToolCall = jsNative
+        /// <summary>
+        /// Set when the model's complete arguments text was not a valid JSON object. <c>arguments</c> is then <c>{}</c>.
+        /// Describes the problem and includes the text the model sent; tool argument validation fails with it.
+        /// </summary>
+        abstract argumentsError: string option with get, set
+        [<ParamObject; Emit("({ type: 'toolCall', ...$0 })")>]
+        static member Create (id: string, name: string, arguments: ToolCall.Arguments, ?thoughtSignature: string, ?``namespace``: string, ?argumentsError: string) : ToolCall = jsNative
+
+    module ToolCall =
+        /// <remarks>TypeScript type: <c>"toolCall"</c></remarks>
+        [<Literal>]
+        let ``type`` = "toolCall"
+
+        type Arguments =
+            [<EmitIndexer>]
+            abstract Item: string -> JsonValue3 with get, set
 
     [<Interface>]
     type ToolReference =
@@ -2428,11 +2891,23 @@ module PiAi =
 
     [<Interface>]
     type UserMessage =
+        /// <remarks>TypeScript type: <c>"user"</c></remarks>
         abstract role: string with get, set
         abstract content: U2<string, UserMessage.Content.Item[]> with get, set
         abstract timestamp: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (role: string, content: U2<string, UserMessage.Content.Item[]>, timestamp: float) : UserMessage = jsNative
+        [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+        static member Create (content: U2<string, UserMessage.Content.Item[]>, timestamp: float) : UserMessage = jsNative
+
+    module UserMessage =
+        /// <remarks>TypeScript type: <c>"user"</c></remarks>
+        [<Literal>]
+        let role = "user"
+
+        module Content =
+            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+            type Item =
+                | [<CompiledName("image"); Fickl.Core.InlineInterface>] Image of ImageContent
+                | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of TextContent
 
     type AnyModel = U3<ClassifierModel<ClassifierApi>, ImageModel<ImageApi>, Model<Api>>
 
@@ -2464,11 +2939,17 @@ module PiAi =
 
     [<Interface>]
     type ApiKeyCredential =
+        /// <remarks>TypeScript type: <c>"api_key"</c></remarks>
         abstract ``type``: string with get, set
         abstract key: string option with get, set
-        abstract env: Record<string, string> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, ?key: string, ?env: Record<string, string>) : ApiKeyCredential = jsNative
+        abstract env: JS.Record<string, string> option with get, set
+        [<ParamObject; Emit("({ type: 'api_key', ...$0 })")>]
+        static member Create (?key: string, ?env: JS.Record<string, string>) : ApiKeyCredential = jsNative
+
+    module ApiKeyCredential =
+        /// <remarks>TypeScript type: <c>"api_key"</c></remarks>
+        [<Literal>]
+        let ``type`` = "api_key"
 
     [<Interface>]
     type AssistantImages =
@@ -2496,119 +2977,11 @@ module PiAi =
         | [<CompiledName("toolcall_start")>] ToolcallStart of contentIndex: float * partial: AssistantMessage
         | [<CompiledName("toolcall_delta")>] ToolcallDelta of contentIndex: float * delta: string * partial: AssistantMessage
         | [<CompiledName("toolcall_end")>] ToolcallEnd of contentIndex: float * toolCall: ToolCall * partial: AssistantMessage
-        | [<CompiledName("done")>] Done of reason: AssistantMessageEvent12.Reason * message: AssistantMessage
-        | [<CompiledName("error")>] Error of reason: AssistantMessageEvent13.Reason * error: AssistantMessage
+        | [<CompiledName("done")>] Done of reason: AssistantMessageEvent.Cases.Done.Reason * message: AssistantMessage
+        | [<CompiledName("error")>] Error of reason: AssistantMessageEvent.Cases.Error.Reason * error: AssistantMessage
 
-    [<Interface>]
-    type AssistantMessageEvent10 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract delta: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, delta: string, partial: AssistantMessage) : AssistantMessageEvent10 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent11 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract toolCall: ToolCall with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, toolCall: ToolCall, partial: AssistantMessage) : AssistantMessageEvent11 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent12 =
-        abstract ``type``: string with get, set
-        abstract reason: AssistantMessageEvent12.Reason with get, set
-        abstract message: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, reason: AssistantMessageEvent12.Reason, message: AssistantMessage) : AssistantMessageEvent12 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent13 =
-        abstract ``type``: string with get, set
-        abstract reason: AssistantMessageEvent13.Reason with get, set
-        abstract error: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, reason: AssistantMessageEvent13.Reason, error: AssistantMessage) : AssistantMessageEvent13 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent2 =
-        abstract ``type``: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, partial: AssistantMessage) : AssistantMessageEvent2 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent3 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, partial: AssistantMessage) : AssistantMessageEvent3 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent4 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract delta: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, delta: string, partial: AssistantMessage) : AssistantMessageEvent4 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent5 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract content: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, content: string, partial: AssistantMessage) : AssistantMessageEvent5 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent6 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, partial: AssistantMessage) : AssistantMessageEvent6 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent7 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract delta: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, delta: string, partial: AssistantMessage) : AssistantMessageEvent7 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent8 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract content: string with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, content: string, partial: AssistantMessage) : AssistantMessageEvent8 = jsNative
-
-    [<Interface>]
-    type AssistantMessageEvent9 =
-        abstract ``type``: string with get, set
-        abstract contentIndex: float with get, set
-        abstract partial: AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, partial: AssistantMessage) : AssistantMessageEvent9 = jsNative
-
-    [<Interface>]
     type AssistantMessageEventStream =
         inherit EventStream<AssistantMessageEvent, AssistantMessage>
-        abstract ``__#6@#private``: obj with get, set
-        abstract push: ``event``: AssistantMessageEvent -> unit
-        abstract ``end``: ?result: AssistantMessage -> unit
-        abstract result: unit -> JS.Promise<AssistantMessage>
-        [<ParamObject; Emit("$0")>]
-        static member Create (``__#6@#private``: obj, push: (AssistantMessageEvent -> unit), ``end``: (AssistantMessage option -> unit), queue: obj, waiting: obj, ``done``: bool, finalResultPromise: obj, resolveFinalResult: obj, isComplete: obj, extractResult: obj, result: (unit -> JS.Promise<AssistantMessage>)) : AssistantMessageEventStream = jsNative
 
     [<Interface>]
     type AuthCheck =
@@ -2633,39 +3006,12 @@ module PiAi =
         | [<CompiledName("auth_url")>] AuthUrl of url: string * instructions: string option
         | [<CompiledName("device_code")>] DeviceCode of userCode: string * verificationUri: string * intervalSeconds: float option * expiresInSeconds: float option
         | [<CompiledName("progress")>] Progress of message: string
-
-    [<Interface>]
-    type AuthEvent2 =
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        abstract links: AuthInfoLink[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string, ?links: AuthInfoLink[]) : AuthEvent2 = jsNative
-
-    [<Interface>]
-    type AuthEvent3 =
-        abstract ``type``: string with get, set
-        abstract url: string with get, set
-        abstract instructions: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, url: string, ?instructions: string) : AuthEvent3 = jsNative
-
-    [<Interface>]
-    type AuthEvent4 =
-        abstract ``type``: string with get, set
-        abstract userCode: string with get, set
-        abstract verificationUri: string with get, set
-        abstract intervalSeconds: float option with get, set
-        abstract expiresInSeconds: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, userCode: string, verificationUri: string, ?intervalSeconds: float, ?expiresInSeconds: float) : AuthEvent4 = jsNative
-
-    [<Interface>]
-    type AuthEvent5 =
-        abstract ``type``: string with get, set
-        abstract message: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: string) : AuthEvent5 = jsNative
+        [<ParamObject; Emit("({ type: 'info', ...$0 })")>]
+        static member CreateInfo (message: string, ?links: AuthInfoLink[]) : AuthEvent = jsNative
+        [<ParamObject; Emit("({ type: 'auth_url', ...$0 })")>]
+        static member CreateAuthUrl (url: string, ?instructions: string) : AuthEvent = jsNative
+        [<ParamObject; Emit("({ type: 'device_code', ...$0 })")>]
+        static member CreateDeviceCode (userCode: string, verificationUri: string, ?intervalSeconds: float, ?expiresInSeconds: float) : AuthEvent = jsNative
 
     [<Interface>]
     type AuthInfoLink =
@@ -2692,20 +3038,28 @@ module PiAi =
     type AuthPrompt =
         | [<CompiledName("text")>] Text of signal: obj option * message: string * placeholder: string option
         | [<CompiledName("secret")>] Secret of signal: obj option * message: string * placeholder: string option
-        | [<CompiledName("select")>] Select of signal: obj option * message: string * options: FSharp.CloudEdge.Runtime.AgentsPi.AuthPrompt4.Options.Item[]
+        | [<CompiledName("select")>] Select of signal: obj option * message: string * options: AuthPrompt.Cases.Select.Options.Item[]
         | [<CompiledName("manual_code")>] ManualCode of signal: obj option * message: string * placeholder: string option
+        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+        static member CreateText (message: string, ?signal: obj, ?placeholder: string) : AuthPrompt = jsNative
+        [<ParamObject; Emit("({ type: 'secret', ...$0 })")>]
+        static member CreateSecret (message: string, ?signal: obj, ?placeholder: string) : AuthPrompt = jsNative
+        [<ParamObject; Emit("({ type: 'select', ...$0 })")>]
+        static member CreateSelect (message: string, options: AuthPrompt.Cases.Select.Options.Item[], ?signal: obj) : AuthPrompt = jsNative
+        [<ParamObject; Emit("({ type: 'manual_code', ...$0 })")>]
+        static member CreateManualCode (message: string, ?signal: obj, ?placeholder: string) : AuthPrompt = jsNative
 
     [<Interface>]
     type AuthResolutionOverrides =
         abstract apiKey: string option with get, set
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         /// <summary>
         /// Require this much remaining OAuth-token validity; defaults to five minutes.
         /// </summary>
         abstract minOAuthValidityMs: float option with get, set
         abstract signal: obj option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?apiKey: string, ?env: Record<string, string>, ?minOAuthValidityMs: float, ?signal: obj) : AuthResolutionOverrides = jsNative
+        static member Create (?apiKey: string, ?env: JS.Record<string, string>, ?minOAuthValidityMs: float, ?signal: obj) : AuthResolutionOverrides = jsNative
 
     [<Interface>]
     type AuthResult =
@@ -2713,13 +3067,13 @@ module PiAi =
         /// <summary>
         /// Provider-scoped environment/config values resolved from credentials and ambient context.
         /// </summary>
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         /// <summary>
         /// Human-readable label for status UI: "ANTHROPIC_API_KEY", "OAuth", "~/.aws/credentials".
         /// </summary>
         abstract source: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (auth: ModelAuth, ?env: Record<string, string>, ?source: string) : AuthResult = jsNative
+        static member Create (auth: ModelAuth, ?env: JS.Record<string, string>, ?source: string) : AuthResult = jsNative
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type AuthType =
@@ -2737,59 +3091,84 @@ module PiAi =
         /// <summary>
         /// Provider input limits and cache-safe preprocessing metadata.
         /// </summary>
-        abstract inputLimits: ModelInputLimits option with get, set
+        abstract inputLimits: Model.InputLimits option with get, set
         abstract cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost with get, set
-        abstract headers: Record<string, string> option with get, set
+        abstract headers: JS.Record<string, string> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?inputLimits: ModelInputLimits, ?headers: Record<string, string>) : BaseModel<'TApi> = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CacheRetention =
-        | [<CompiledName("long")>] Long
-        | [<CompiledName("none")>] None
-        | [<CompiledName("short")>] Short
+        static member Create (id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?inputLimits: Model.InputLimits, ?headers: JS.Record<string, string>) : BaseModel<'TApi> = jsNative
 
     type CancelDeferred<'TApi> = delegate of model: Model<'TApi> * handle: DeferredHandle * options: ProviderRequestOptions<Model<Api>> option -> JS.Promise<unit>
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ClassifierAnswer =
-        | [<CompiledName("bool")>] Bool of probability: float
-        | [<CompiledName("choice")>] Choice of choice: string * probabilities: Record<string, float> * confidence: float
-        | [<CompiledName("score")>] Score of score: float * confidence: float
+        | [<CompiledName("bool"); Fickl.Core.InlineInterface>] Bool of ClassifierBoolAnswer
+        | [<CompiledName("choice"); Fickl.Core.InlineInterface>] Choice of ClassifierChoiceAnswer
+        | [<CompiledName("score"); Fickl.Core.InlineInterface>] Score of ClassifierScoreAnswer
 
     type ClassifierApi = string
 
     [<Interface>]
     type ClassifierBoolAnswer =
+        /// <remarks>TypeScript type: <c>"bool"</c></remarks>
         abstract ``type``: string with get, set
         abstract probability: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, probability: float) : ClassifierBoolAnswer = jsNative
+        [<ParamObject; Emit("({ type: 'bool', ...$0 })")>]
+        static member Create (probability: float) : ClassifierBoolAnswer = jsNative
+
+    module ClassifierBoolAnswer =
+        /// <remarks>TypeScript type: <c>"bool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "bool"
 
     [<Interface>]
     type ClassifierBoolQuestion =
+        /// <remarks>TypeScript type: <c>"bool"</c></remarks>
         abstract ``type``: string with get, set
         abstract instructions: string with get, set
         abstract criteria: ClassifierBoolQuestion.Criteria with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, instructions: string, criteria: ClassifierBoolQuestion.Criteria) : ClassifierBoolQuestion = jsNative
+        [<ParamObject; Emit("({ type: 'bool', ...$0 })")>]
+        static member Create (instructions: string, criteria: ClassifierBoolQuestion.Criteria) : ClassifierBoolQuestion = jsNative
+
+    module ClassifierBoolQuestion =
+        /// <remarks>TypeScript type: <c>"bool"</c></remarks>
+        [<Literal>]
+        let ``type`` = "bool"
+
+        [<Interface>]
+        type Criteria =
+            abstract ``true``: string with get, set
+            abstract ``false``: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (``true``: string, ``false``: string) : Criteria = jsNative
 
     [<Interface>]
     type ClassifierChoiceAnswer =
+        /// <remarks>TypeScript type: <c>"choice"</c></remarks>
         abstract ``type``: string with get, set
         abstract choice: string with get, set
-        abstract probabilities: Record<string, float> with get, set
+        abstract probabilities: JS.Record<string, float> with get, set
         abstract confidence: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, choice: string, probabilities: Record<string, float>, confidence: float) : ClassifierChoiceAnswer = jsNative
+        [<ParamObject; Emit("({ type: 'choice', ...$0 })")>]
+        static member Create (choice: string, probabilities: JS.Record<string, float>, confidence: float) : ClassifierChoiceAnswer = jsNative
+
+    module ClassifierChoiceAnswer =
+        /// <remarks>TypeScript type: <c>"choice"</c></remarks>
+        [<Literal>]
+        let ``type`` = "choice"
 
     [<Interface>]
     type ClassifierChoiceQuestion =
+        /// <remarks>TypeScript type: <c>"choice"</c></remarks>
         abstract ``type``: string with get, set
         abstract instructions: string with get, set
-        abstract criteria: Record<string, string> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, instructions: string, criteria: Record<string, string>) : ClassifierChoiceQuestion = jsNative
+        abstract criteria: JS.Record<string, string> with get, set
+        [<ParamObject; Emit("({ type: 'choice', ...$0 })")>]
+        static member Create (instructions: string, criteria: JS.Record<string, string>) : ClassifierChoiceQuestion = jsNative
+
+    module ClassifierChoiceQuestion =
+        /// <remarks>TypeScript type: <c>"choice"</c></remarks>
+        [<Literal>]
+        let ``type`` = "choice"
 
     [<Interface>]
     type ClassifierContext =
@@ -2799,17 +3178,27 @@ module PiAi =
         /// other models return an error result.
         /// </summary>
         abstract images: ImageContent[] option with get, set
-        abstract questions: Record<string, ClassifierQuestion> with get, set
+        abstract questions: JS.Record<string, ClassifierQuestion> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (state: ToolCall.Arguments, questions: Record<string, ClassifierQuestion>, ?images: ImageContent[]) : ClassifierContext = jsNative
+        static member Create (state: ToolCall.Arguments, questions: JS.Record<string, ClassifierQuestion>, ?images: ImageContent[]) : ClassifierContext = jsNative
 
     [<Interface>]
     type ClassifierModel<'TApi> =
         inherit BaseModel<'TApi>
+        /// <remarks>TypeScript type: <c>"classifier"</c></remarks>
         abstract ``type``: string with get, set
         abstract contextWindow: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contextWindow: float, id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?inputLimits: ModelInputLimits, ?headers: Record<string, string>) : ClassifierModel<'TApi> = jsNative
+        /// <summary>
+        /// Compatibility overrides for System One APIs. If not set, auto-detected from provider, baseUrl, and id.
+        /// </summary>
+        abstract compat: obj option with get, set
+        [<ParamObject; Emit("({ type: 'classifier', ...$0 })")>]
+        static member Create (contextWindow: float, id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?compat: obj, ?inputLimits: Model.InputLimits, ?headers: JS.Record<string, string>) : ClassifierModel<'TApi> = jsNative
+
+    module ClassifierModel =
+        /// <remarks>TypeScript type: <c>"classifier"</c></remarks>
+        [<Literal>]
+        let ``type`` = "classifier"
 
     [<Interface>]
     type ClassifierOptions =
@@ -2830,20 +3219,20 @@ module PiAi =
         /// </summary>
         abstract onResponse: ClassifierOptions.OnResponse option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?temperature: float, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: ClassifierOptions.OnPayload, ?onResponse: ClassifierOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ClassifierOptions = jsNative
+        static member Create (?temperature: float, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: ClassifierOptions.OnPayload, ?onResponse: ClassifierOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ClassifierOptions = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ClassifierQuestion =
-        | [<CompiledName("bool")>] Bool of instructions: string * criteria: ClassifierBoolQuestion.Criteria
-        | [<CompiledName("choice")>] Choice of instructions: string * criteria: Record<string, string>
-        | [<CompiledName("score")>] Score of instructions: string * criteria: string[]
+        | [<CompiledName("bool"); Fickl.Core.InlineInterface>] Bool of ClassifierBoolQuestion
+        | [<CompiledName("choice"); Fickl.Core.InlineInterface>] Choice of ClassifierChoiceQuestion
+        | [<CompiledName("score"); Fickl.Core.InlineInterface>] Score of ClassifierScoreQuestion
 
     [<Interface>]
     type ClassifierResult =
         abstract api: ClassifierApi with get, set
         abstract provider: string with get, set
         abstract model: string with get, set
-        abstract answers: Record<string, ClassifierAnswer> with get, set
+        abstract answers: JS.Record<string, ClassifierAnswer> with get, set
         /// <summary>
         /// Token usage and its cost at the model's catalog price, when the service reports token counts.
         /// </summary>
@@ -2852,31 +3241,71 @@ module PiAi =
         abstract errorMessage: string option with get, set
         abstract timestamp: float with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (api: ClassifierApi, provider: string, model: string, answers: Record<string, ClassifierAnswer>, stopReason: ClassifierStopReason, timestamp: float, ?usage: Usage, ?errorMessage: string) : ClassifierResult = jsNative
+        static member Create (api: ClassifierApi, provider: string, model: string, answers: JS.Record<string, ClassifierAnswer>, stopReason: ClassifierStopReason, timestamp: float, ?usage: Usage, ?errorMessage: string) : ClassifierResult = jsNative
 
     [<Interface>]
     type ClassifierScoreAnswer =
+        /// <remarks>TypeScript type: <c>"score"</c></remarks>
         abstract ``type``: string with get, set
         abstract score: float with get, set
         abstract confidence: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, score: float, confidence: float) : ClassifierScoreAnswer = jsNative
+        [<ParamObject; Emit("({ type: 'score', ...$0 })")>]
+        static member Create (score: float, confidence: float) : ClassifierScoreAnswer = jsNative
+
+    module ClassifierScoreAnswer =
+        /// <remarks>TypeScript type: <c>"score"</c></remarks>
+        [<Literal>]
+        let ``type`` = "score"
 
     [<Interface>]
     type ClassifierScoreQuestion =
+        /// <remarks>TypeScript type: <c>"score"</c></remarks>
         abstract ``type``: string with get, set
         abstract instructions: string with get, set
         abstract criteria: string[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, instructions: string, criteria: string[]) : ClassifierScoreQuestion = jsNative
+        [<ParamObject; Emit("({ type: 'score', ...$0 })")>]
+        static member Create (instructions: string, criteria: string[]) : ClassifierScoreQuestion = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ClassifierStopReason =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("stop")>] Stop
+    module ClassifierScoreQuestion =
+        /// <remarks>TypeScript type: <c>"score"</c></remarks>
+        [<Literal>]
+        let ``type`` = "score"
 
     type Classify = delegate of model: ClassifierModel<ClassifierApi> * context: ClassifierContext * options: ClassifierOptions option -> JS.Promise<ClassifierResult>
+
+    [<Interface>]
+    type ClientAttribution =
+        /// <summary>
+        /// App name: OpenRouter app title, NVIDIA invoke origin (first letter upper-cased), OpenCode client.
+        /// </summary>
+        abstract name: string with get, set
+        /// <summary>
+        /// App URL: OpenRouter <c>HTTP-Referer</c>, the app's identity in OpenRouter's rankings, grouped by origin.
+        /// </summary>
+        abstract url: string with get, set
+        /// <summary>
+        /// App categories, e.g. <c>["cli-agent"]</c>: OpenRouter <c>X-OpenRouter-Categories</c>, comma-separated.
+        /// </summary>
+        abstract categories: string[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (name: string, url: string, ?categories: string[]) : ClientAttribution = jsNative
+
+    [<Interface>]
+    type ClientIdentity =
+        /// <summary>
+        /// Default: <c>"detailed"</c>.
+        /// </summary>
+        abstract userAgent: UserAgentMode option with get, set
+        /// <summary>
+        /// Provider attribution headers. Absent or <c>null</c>: none; <c>null</c> also turns off attribution set by a merged identity.
+        /// </summary>
+        abstract attribution: ClientAttribution option with get, set
+        /// <summary>
+        /// Version in the detailed <c>User-Agent</c>. Default: the pi-ai version.
+        /// </summary>
+        abstract version: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?userAgent: UserAgentMode, ?attribution: ClientAttribution, ?version: string) : ClientIdentity = jsNative
 
     [<Interface>]
     type Context2 =
@@ -2888,8 +3317,8 @@ module PiAi =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Credential =
-        | [<CompiledName("api_key")>] ApiKey of key: string option * env: Record<string, string> option
-        | [<CompiledName("oauth")>] Oauth of refresh: string * access: string * expires: float
+        | [<CompiledName("api_key"); Fickl.Core.InlineInterface>] ApiKey of ApiKeyCredential
+        | [<CompiledName("oauth"); Fickl.Core.InlineInterface>] Oauth of OAuthCredential
 
     [<Interface>]
     type DeferredFetchOptions =
@@ -2909,22 +3338,15 @@ module PiAi =
         /// </summary>
         abstract onResponse: DeferredFetchOptions.OnResponse option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?wait: float, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?onResponse: DeferredFetchOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : DeferredFetchOptions = jsNative
+        static member Create (?wait: float, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?onResponse: DeferredFetchOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : DeferredFetchOptions = jsNative
 
-    [<Interface>]
     type EventStream<'T, 'R> =
-        abstract queue: obj with get, set
-        abstract waiting: obj with get, set
         abstract ``done``: bool with get, set
-        abstract finalResultPromise: obj with get, set
-        abstract resolveFinalResult: obj with get, set
-        abstract isComplete: obj with get, set
-        abstract extractResult: obj with get, set
         abstract push: ``event``: 'T -> unit
         abstract ``end``: ?result: 'R -> unit
         abstract result: unit -> JS.Promise<'R>
-        [<ParamObject; Emit("$0")>]
-        static member Create (queue: obj, waiting: obj, ``done``: bool, finalResultPromise: obj, resolveFinalResult: obj, isComplete: obj, extractResult: obj, push: ('T -> unit), ``end``: ('R option -> unit), result: (unit -> JS.Promise<'R>)) : EventStream<'T, 'R> = jsNative
+        [<Emit("$0[Symbol.asyncIterator]()")>]
+        abstract SymbolAsyncIterator: unit -> Fable.Core.TS.Es.AsyncIterator<'T, obj, obj>
 
     type FetchDeferred<'TApi> = delegate of model: Model<'TApi> * handle: DeferredHandle * options: DeferredFetchOptions option -> AssistantMessageEventStream
 
@@ -2939,13 +3361,19 @@ module PiAi =
     [<Interface>]
     type ImageModel<'TApi> =
         inherit BaseModel<'TApi>
+        /// <remarks>TypeScript type: <c>"image"</c></remarks>
         abstract ``type``: string with get, set
         /// <summary>
         /// Output modalities. Always includes <c>"image"</c>; <c>"text"</c> means the model can also return text blocks.
         /// </summary>
         abstract output: Model.Input.Item[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, output: Model.Input.Item[], id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?inputLimits: ModelInputLimits, ?headers: Record<string, string>) : ImageModel<'TApi> = jsNative
+        [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
+        static member Create (output: Model.Input.Item[], id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?inputLimits: Model.InputLimits, ?headers: JS.Record<string, string>) : ImageModel<'TApi> = jsNative
+
+    module ImageModel =
+        /// <remarks>TypeScript type: <c>"image"</c></remarks>
+        [<Literal>]
+        let ``type`` = "image"
 
     [<Interface>]
     type ImagesContext =
@@ -2955,8 +3383,8 @@ module PiAi =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ImagesInputContent =
-        | [<CompiledName("image")>] Image of data: string * mimeType: string
-        | [<CompiledName("text")>] Text of text: string * textSignature: string option
+        | [<CompiledName("image"); Fickl.Core.InlineInterface>] Image of ImageContent
+        | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of TextContent
 
     [<Interface>]
     type ImagesOptions =
@@ -2965,7 +3393,7 @@ module PiAi =
         /// Optional metadata to include in API requests.
         /// Providers extract the fields they understand and ignore the rest.
         /// </summary>
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         /// <summary>
         /// Optional callback for inspecting or replacing provider payloads before sending.
         /// Return undefined to keep the payload unchanged.
@@ -2976,18 +3404,12 @@ module PiAi =
         /// </summary>
         abstract onResponse: ImagesOptions.OnResponse option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?metadata: Record<string, obj>, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: ImagesOptions.OnPayload, ?onResponse: ImagesOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ImagesOptions = jsNative
+        static member Create (?metadata: JS.Record<string, obj>, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: ImagesOptions.OnPayload, ?onResponse: ImagesOptions.OnResponse, ?headers: JS.Record<string, string option>, ?identity: ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ImagesOptions = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type ImagesOutputContent =
-        | [<CompiledName("image")>] Image of data: string * mimeType: string
-        | [<CompiledName("text")>] Text of text: string * textSignature: string option
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ImagesStopReason =
-        | [<CompiledName("aborted")>] Aborted
-        | [<CompiledName("error")>] Error
-        | [<CompiledName("stop")>] Stop
+        | [<CompiledName("image"); Fickl.Core.InlineInterface>] Image of ImageContent
+        | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of TextContent
 
     [<Interface>]
     type LoginOptions =
@@ -3029,7 +3451,7 @@ module PiAi =
         /// <summary>
         /// Default sampling parameters for this model. See StreamOptions.samplingParams; per-request keys override these.
         /// </summary>
-        abstract samplingParams: Record<string, obj> option with get, set
+        abstract samplingParams: JS.Record<string, obj> option with get, set
         /// <summary>
         /// Sampling parameter overrides selected by the effective pi thinking level.
         /// </summary>
@@ -3039,73 +3461,15 @@ module PiAi =
         /// </summary>
         abstract compat: obj option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (reasoning: bool, contextWindow: float, maxTokens: float, id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?``type``: string, ?thinkingLevelMap: Model.ThinkingLevelMap, ?promptCache: Model.PromptCache, ?samplingParams: Record<string, obj>, ?samplingParamsByThinkingLevel: Model.SamplingParamsByThinkingLevel, ?compat: obj, ?inputLimits: ModelInputLimits, ?headers: Record<string, string>) : Model<'TApi> = jsNative
+        static member Create (reasoning: bool, contextWindow: float, maxTokens: float, id: string, name: string, api: 'TApi, provider: string, baseUrl: string, input: Model.Input.Item[], cost: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.ModelCost, ?``type``: string, ?thinkingLevelMap: Model.ThinkingLevelMap, ?promptCache: Model.PromptCache, ?samplingParams: JS.Record<string, obj>, ?samplingParamsByThinkingLevel: Model.SamplingParamsByThinkingLevel, ?compat: obj, ?inputLimits: Model.InputLimits, ?headers: JS.Record<string, string>) : Model<'TApi> = jsNative
 
     [<Interface>]
     type ModelAuth =
         abstract apiKey: string option with get, set
-        abstract headers: Record<string, string option> option with get, set
+        abstract headers: JS.Record<string, string option> option with get, set
         abstract baseUrl: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?apiKey: string, ?headers: Record<string, string option>, ?baseUrl: string) : ModelAuth = jsNative
-
-    [<Interface>]
-    type ModelCostRates =
-        abstract input: float with get, set
-        abstract output: float with get, set
-        abstract cacheRead: float with get, set
-        abstract cacheWrite: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (input: float, output: float, cacheRead: float, cacheWrite: float) : ModelCostRates = jsNative
-
-    [<Interface>]
-    type ModelCostTier =
-        inherit ModelCostRates
-        /// <summary>
-        /// Use this tier for requests whose total input usage exceeds this token count.
-        /// </summary>
-        abstract inputTokensAbove: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (inputTokensAbove: float, input: float, output: float, cacheRead: float, cacheWrite: float) : ModelCostTier = jsNative
-
-    [<Interface>]
-    type ModelImageInputLimits =
-        /// <summary>
-        /// Cache-safe resize profile applied before a new image enters conversation history.
-        /// </summary>
-        abstract resize: ModelImageResizeOptions option with get, set
-        /// <summary>
-        /// Maximum images accepted in one provider message.
-        /// </summary>
-        abstract maxPerMessage: float option with get, set
-        /// <summary>
-        /// Maximum images accepted across one provider request.
-        /// </summary>
-        abstract maxPerRequest: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?resize: ModelImageResizeOptions, ?maxPerMessage: float, ?maxPerRequest: float) : ModelImageInputLimits = jsNative
-
-    [<Interface>]
-    type ModelImageResizeOptions =
-        abstract maxWidth: float option with get, set
-        abstract maxHeight: float option with get, set
-        /// <summary>
-        /// Maximum base64-encoded payload size in bytes.
-        /// </summary>
-        abstract maxBytes: float option with get, set
-        abstract jpegQuality: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?maxWidth: float, ?maxHeight: float, ?maxBytes: float, ?jpegQuality: float) : ModelImageResizeOptions = jsNative
-
-    [<Interface>]
-    type ModelInputLimits =
-        /// <summary>
-        /// Maximum serialized provider request size in bytes.
-        /// </summary>
-        abstract maxRequestBytes: float option with get, set
-        abstract images: ModelImageInputLimits option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?maxRequestBytes: float, ?images: ModelImageInputLimits) : ModelInputLimits = jsNative
+        static member Create (?apiKey: string, ?headers: JS.Record<string, string option>, ?baseUrl: string) : ModelAuth = jsNative
 
     type Models =
         abstract getProviders: unit -> Provider<Api>[]
@@ -3184,21 +3548,21 @@ module PiAi =
         abstract logout: providerId: string * ?options: AuthOperationOptions -> JS.Promise<unit>
         abstract stream<'TApi>: model: Model<'TApi> * context: Context2 * ?options: obj -> AssistantMessageEventStream
         abstract complete<'TApi>: model: Model<'TApi> * context: Context2 * ?options: obj -> JS.Promise<AssistantMessage>
-        abstract streamSimple: model: Model<Api> * context: Context2 * ?options: Models.StreamSimple.Options -> AssistantMessageEventStream
-        abstract completeSimple: model: Model<Api> * context: Context2 * ?options: Models.StreamSimple.Options -> JS.Promise<AssistantMessage>
-        abstract streamDeferred: model: Model<Api> * handle: DeferredHandle * ?options: Models.StreamDeferred.Options -> AssistantMessageEventStream
-        abstract fetchDeferred: model: Model<Api> * handle: DeferredHandle * ?options: Models.StreamDeferred.Options -> JS.Promise<AssistantMessage>
-        abstract cancelDeferred: model: Model<Api> * handle: DeferredHandle * ?options: Models.CancelDeferred.Options -> JS.Promise<unit>
+        abstract streamSimple: model: Model<Api> * context: Context2 * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.StreamSimple.Options -> AssistantMessageEventStream
+        abstract completeSimple: model: Model<Api> * context: Context2 * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.StreamSimple.Options -> JS.Promise<AssistantMessage>
+        abstract streamDeferred: model: Model<Api> * handle: DeferredHandle * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.StreamDeferred.Options -> AssistantMessageEventStream
+        abstract fetchDeferred: model: Model<Api> * handle: DeferredHandle * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.StreamDeferred.Options -> JS.Promise<AssistantMessage>
+        abstract cancelDeferred: model: Model<Api> * handle: DeferredHandle * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.CancelDeferred.Options -> JS.Promise<unit>
         /// <summary>
         /// Generate images through the owning provider with auth resolved like
         /// <c>stream()</c>. Never rejects: unknown providers, unconfigured auth, and
         /// providers without <c>generateImages</c> return an error <c>AssistantImages</c>.
         /// </summary>
-        abstract generateImages: model: ImageModel<ImageApi> * context: ImagesContext * ?options: Models.GenerateImages.Options -> JS.Promise<AssistantImages>
+        abstract generateImages: model: ImageModel<ImageApi> * context: ImagesContext * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.GenerateImages.Options -> JS.Promise<AssistantImages>
         /// <summary>
         /// Classify structured state through the owning provider. Never rejects.
         /// </summary>
-        abstract classify: model: ClassifierModel<ClassifierApi> * context: ClassifierContext * ?options: Models.Classify.Options -> JS.Promise<ClassifierResult>
+        abstract classify: model: ClassifierModel<ClassifierApi> * context: ClassifierContext * ?options: FSharp.CloudEdge.Runtime.AgentsPi.Models.Classify.Options -> JS.Promise<ClassifierResult>
 
     [<Interface>]
     type ModelsPublication =
@@ -3231,18 +3595,18 @@ module PiAi =
     [<Interface>]
     type ModelsRefreshResult =
         abstract aborted: bool with get, set
-        abstract errors: JS.Map<string, exn> with get, set
+        abstract errors: Fable.Core.TS.Es.ReadonlyMap<string, exn> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (aborted: bool, errors: JS.Map<string, exn>) : ModelsRefreshResult = jsNative
+        static member Create (aborted: bool, errors: Fable.Core.TS.Es.ReadonlyMap<string, exn>) : ModelsRefreshResult = jsNative
 
     [<Interface>]
     type ModelsRequestTransforms =
         /// <summary>
         /// Transform fully assembled model/auth/request headers before provider dispatch.
         /// </summary>
-        abstract transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>) option with get, set
+        abstract transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>)) : ModelsRequestTransforms = jsNative
+        static member Create (?transformHeaders: (JS.Record<string, string option> -> U2<JS.Promise<JS.Record<string, string option>>, JS.Record<string, string option>>)) : ModelsRequestTransforms = jsNative
 
     [<Interface>]
     type ModelsStoreEntry =
@@ -3297,7 +3661,13 @@ module PiAi =
 
     type OAuthCredential =
         inherit OAuthCredentials
+        /// <remarks>TypeScript type: <c>"oauth"</c></remarks>
         abstract ``type``: string with get, set
+
+    module OAuthCredential =
+        /// <remarks>TypeScript type: <c>"oauth"</c></remarks>
+        [<Literal>]
+        let ``type`` = "oauth"
 
     type OAuthCredentials =
         abstract refresh: string with get, set
@@ -3311,7 +3681,7 @@ module PiAi =
         abstract id: string
         abstract name: string
         abstract baseUrl: string option
-        abstract headers: Record<string, string option> option
+        abstract headers: JS.Record<string, string option> option
         /// <summary>
         /// Required: at least one of <c>apiKey</c>/<c>oauth</c>. Every provider has auth
         /// semantics — even providers with only ambient credentials (env vars, AWS
@@ -3369,7 +3739,7 @@ module PiAi =
         /// </summary>
         abstract classify: Classify option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (id: string, name: string, auth: ProviderAuth, getModels: (unit -> Model<'TApi>[]), stream: Func<Model<'T>, Provider.Stream.Context, obj option, AssistantMessageEventStream>, streamSimple: Func<Model<'TApi>, Provider.Stream.Context, SimpleStreamOptions option, AssistantMessageEventStream>, ?baseUrl: string, ?headers: Record<string, string option>, ?getAllModels: (unit -> U3<ClassifierModel<ClassifierApi>, ImageModel<ImageApi>, Model<'TApi>>[]), ?refreshModels: (RefreshModelsContext -> JS.Promise<unit>), ?filterModels: FilterModels<'TApi>, ?filterAllModels: FilterAllModels<'TApi>, ?fetchDeferred: FetchDeferred<'TApi>, ?cancelDeferred: CancelDeferred<'TApi>, ?generateImages: GenerateImages, ?classify: Classify) : Provider<'TApi> = jsNative
+        static member Create (id: string, name: string, auth: ProviderAuth, getModels: (unit -> Model<'TApi>[]), stream: Func<Model<'T>, Provider.Stream.Context, obj option, AssistantMessageEventStream>, streamSimple: Func<Model<'TApi>, Provider.Stream.Context, SimpleStreamOptions option, AssistantMessageEventStream>, ?baseUrl: string, ?headers: JS.Record<string, string option>, ?getAllModels: (unit -> U3<ClassifierModel<ClassifierApi>, ImageModel<ImageApi>, Model<'TApi>>[]), ?refreshModels: (RefreshModelsContext -> JS.Promise<unit>), ?filterModels: FilterModels<'TApi>, ?filterAllModels: FilterAllModels<'TApi>, ?fetchDeferred: FetchDeferred<'TApi>, ?cancelDeferred: CancelDeferred<'TApi>, ?generateImages: GenerateImages, ?classify: Classify) : Provider<'TApi> = jsNative
 
     [<Interface>]
     type ProviderAuth =
@@ -3382,9 +3752,9 @@ module PiAi =
     type ProviderRequestOptions<'TModel> =
         abstract signal: obj option with get, set
         /// <summary>
-        /// Explicit parent context for telemetry produced by this logical request.
+        /// Explicit parent span for telemetry produced by this logical request.
         /// </summary>
-        abstract telemetryContext: obj option with get, set
+        abstract telemetry: obj option with get, set
         abstract apiKey: string option with get, set
         /// <summary>
         /// Optional fetch implementation for provider HTTP requests.
@@ -3397,7 +3767,7 @@ module PiAi =
         /// provider configuration such as regional settings, endpoint placeholders, and
         /// proxy variables.
         /// </summary>
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         /// <summary>
         /// Optional callback for inspecting or replacing provider payloads before sending.
         /// Return undefined to keep the payload unchanged.
@@ -3415,7 +3785,12 @@ module PiAi =
         /// <c>authorization</c>, <c>host</c>) are silently ignored to preserve SigV4 / bearer auth.
         /// A null value suppresses a provider/API default header with the same name.
         /// </summary>
-        abstract headers: Record<string, string option> option with get, set
+        abstract headers: JS.Record<string, string option> option with get, set
+        /// <summary>
+        /// How the request identifies the calling app: <c>User-Agent</c> and provider attribution headers.
+        /// Absent fields use pi-ai's defaults: a detailed <c>User-Agent</c> and no attribution.
+        /// </summary>
+        abstract identity: ClientIdentity option with get, set
         /// <summary>
         /// HTTP request timeout in milliseconds for providers/SDKs that support it.
         /// For example, OpenAI and Anthropic SDK clients default to 10 minutes.
@@ -3435,14 +3810,14 @@ module PiAi =
         /// </summary>
         abstract maxRetryDelayMs: float option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: ProviderRequestOptions.OnPayload<'TModel>, ?onResponse: ProviderRequestOptions.OnResponse<'TModel>, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ProviderRequestOptions<'TModel> = jsNative
+        static member Create (?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: ProviderRequestOptions.OnPayload<'TModel>, ?onResponse: ProviderRequestOptions.OnResponse<'TModel>, ?headers: JS.Record<string, string option>, ?identity: ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : ProviderRequestOptions<'TModel> = jsNative
 
     [<Interface>]
     type ProviderResponse =
         abstract status: float with get, set
-        abstract headers: Record<string, string> with get, set
+        abstract headers: JS.Record<string, string> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (status: float, headers: Record<string, string>) : ProviderResponse = jsNative
+        static member Create (status: float, headers: JS.Record<string, string>) : ProviderResponse = jsNative
 
     [<Interface>]
     type RefreshModelsContext =
@@ -3471,17 +3846,21 @@ module PiAi =
         /// Always present, including when the public refresh caller omits its optional signal.
         /// </summary>
         abstract signal: obj with get, set
+        /// <summary>
+        /// Base URL of the registered provider, including configuration overrides that wrappers apply
+        /// outside the provider receiving this context.
+        /// </summary>
+        abstract baseUrl: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (publish: (ModelsPublication -> JS.Promise<bool>), allowNetwork: bool, signal: obj, ?credential: Credential, ?stored: RefreshModelsContext.Stored, ?force: bool) : RefreshModelsContext = jsNative
+        static member Create (publish: (ModelsPublication -> JS.Promise<bool>), allowNetwork: bool, signal: obj, ?credential: Credential, ?stored: RefreshModelsContext.Stored, ?force: bool, ?baseUrl: string) : RefreshModelsContext = jsNative
 
-    [<Interface>]
     type SimpleStreamOptions =
         inherit StreamOptions
         /// <summary>
         /// Provider-neutral tool selection for simple requests. When omitted, adapters use provider-specific behavior.
         /// </summary>
         abstract toolChoice: ToolChoice option with get, set
-        abstract reasoning: ThinkingLevel option with get, set
+        abstract reasoning: SimpleStreamOptions.Reasoning option with get, set
         /// <summary>
         /// Ask a capable provider to return a durable handle and continue the request asynchronously.
         /// </summary>
@@ -3490,8 +3869,6 @@ module PiAi =
         /// Custom token budgets for thinking levels (token-based providers only)
         /// </summary>
         abstract thinkingBudgets: ThinkingBudgets option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?toolChoice: ToolChoice, ?reasoning: ThinkingLevel, ?deferred: U2<bool, SimpleStreamOptions.Deferred>, ?thinkingBudgets: ThinkingBudgets, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?onResponse: SimpleStreamOptions.OnResponse, ?onProviderStreamEvent: SimpleStreamOptions.OnProviderStreamEvent, ?temperature: float, ?samplingParams: Record<string, obj>, ?maxTokens: float, ?transport: Transport, ?cacheRetention: CacheRetention, ?sessionId: string, ?websocketConnectTimeoutMs: float, ?metadata: Record<string, obj>) : SimpleStreamOptions = jsNative
 
     [<Interface>]
     type StreamOptions =
@@ -3515,7 +3892,7 @@ module PiAi =
         /// <c>repetition_penalty</c>. Merged over <c>Model.samplingParams</c> per key. Only applied by
         /// OpenAI-compatible adapters (completions, responses, Azure responses); other APIs ignore it.
         /// </summary>
-        abstract samplingParams: Record<string, obj> option with get, set
+        abstract samplingParams: JS.Record<string, obj> option with get, set
         abstract maxTokens: float option with get, set
         /// <summary>
         /// Preferred transport for providers that support multiple transports.
@@ -3526,7 +3903,7 @@ module PiAi =
         /// Prompt cache retention preference. Providers map this to their supported values.
         /// Default: "short".
         /// </summary>
-        abstract cacheRetention: CacheRetention option with get, set
+        abstract cacheRetention: SimpleStreamOptions.CacheRetention option with get, set
         /// <summary>
         /// Optional session identifier for providers that support session-based caching.
         /// Providers can use this to enable prompt caching, request routing, or other
@@ -3544,14 +3921,14 @@ module PiAi =
         /// Providers extract the fields they understand and ignore the rest.
         /// For example, Anthropic uses <c>user_id</c> for abuse tracking and rate limiting.
         /// </summary>
-        abstract metadata: Record<string, obj> option with get, set
+        abstract metadata: JS.Record<string, obj> option with get, set
         /// <summary>
         /// Optional callback for inspecting or replacing provider payloads before sending.
         /// Return undefined to keep the payload unchanged.
         /// </summary>
         abstract onPayload: SimpleStreamOptions.OnPayload option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?onResponse: SimpleStreamOptions.OnResponse, ?onProviderStreamEvent: SimpleStreamOptions.OnProviderStreamEvent, ?temperature: float, ?samplingParams: Record<string, obj>, ?maxTokens: float, ?transport: Transport, ?cacheRetention: CacheRetention, ?sessionId: string, ?websocketConnectTimeoutMs: float, ?metadata: Record<string, obj>, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : StreamOptions = jsNative
+        static member Create (?onResponse: SimpleStreamOptions.OnResponse, ?onProviderStreamEvent: SimpleStreamOptions.OnProviderStreamEvent, ?temperature: float, ?samplingParams: JS.Record<string, obj>, ?maxTokens: float, ?transport: Transport, ?cacheRetention: SimpleStreamOptions.CacheRetention, ?sessionId: string, ?websocketConnectTimeoutMs: float, ?metadata: JS.Record<string, obj>, ?signal: obj, ?telemetry: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: JS.Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?headers: JS.Record<string, string option>, ?identity: ClientIdentity, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float) : StreamOptions = jsNative
 
     [<Interface>]
     type ThinkingBudgets =
@@ -3561,15 +3938,6 @@ module PiAi =
         abstract high: float option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?minimal: float, ?low: float, ?medium: float, ?high: float) : ThinkingBudgets = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ThinkingLevel =
-        | [<CompiledName("high")>] High
-        | [<CompiledName("low")>] Low
-        | [<CompiledName("max")>] Max
-        | [<CompiledName("medium")>] Medium
-        | [<CompiledName("minimal")>] Minimal
-        | [<CompiledName("xhigh")>] Xhigh
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type ToolChoice =
@@ -3582,6 +3950,36 @@ module PiAi =
         | [<CompiledName("sse")>] Sse
         | [<CompiledName("websocket")>] Websocket
         | [<CompiledName("websocket-cached")>] WebsocketCached
+
+    type UserAgentMode = U2<string, UserAgentMode2>
+
+    [<Interface>]
+    type UserAgentMode2 =
+        abstract custom: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (custom: string) : UserAgentMode2 = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type StopReason =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("deferred")>] Deferred
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("length")>] Length
+        | [<CompiledName("pending")>] Pending
+        | [<CompiledName("stop")>] Stop
+        | [<CompiledName("toolUse")>] ToolUse
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ImagesStopReason =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("stop")>] Stop
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ClassifierStopReason =
+        | [<CompiledName("aborted")>] Aborted
+        | [<CompiledName("error")>] Error
+        | [<CompiledName("stop")>] Stop
 
     module ApiKeyAuth =
         module Check =
@@ -3610,27 +4008,21 @@ module PiAi =
                 [<ParamObject; Emit("$0")>]
                 static member Create (ctx: AuthContext, signal: obj, ?credential: ApiKeyCredential) : Input = jsNative
 
-    module AssistantMessage =
-        module Content =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("text")>] Text of text: string * textSignature: string option
-                | [<CompiledName("thinking")>] Thinking of thinking: string * thinkingSignature: string option * redacted: bool option
-                | [<CompiledName("toolCall")>] ToolCall of id: string * name: string * arguments: ToolCall.Arguments * thoughtSignature: string option * ``namespace``: string option
+    module AssistantMessageEvent =
+        module Cases =
+            module Done =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Reason =
+                    | [<CompiledName("deferred")>] Deferred
+                    | [<CompiledName("length")>] Length
+                    | [<CompiledName("stop")>] Stop
+                    | [<CompiledName("toolUse")>] ToolUse
 
-    module AssistantMessageEvent12 =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Reason =
-            | [<CompiledName("deferred")>] Deferred
-            | [<CompiledName("length")>] Length
-            | [<CompiledName("stop")>] Stop
-            | [<CompiledName("toolUse")>] ToolUse
-
-    module AssistantMessageEvent13 =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Reason =
-            | [<CompiledName("aborted")>] Aborted
-            | [<CompiledName("error")>] Error
+            module Error =
+                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                type Reason =
+                    | [<CompiledName("aborted")>] Aborted
+                    | [<CompiledName("error")>] Error
 
     module AuthCheck =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -3638,13 +4030,17 @@ module PiAi =
             | [<CompiledName("api_key")>] ApiKey
             | [<CompiledName("oauth")>] Oauth
 
-    module ClassifierBoolQuestion =
-        [<Interface>]
-        type Criteria =
-            abstract ``true``: string with get, set
-            abstract ``false``: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``true``: string, ``false``: string) : Criteria = jsNative
+    module AuthPrompt =
+        module Cases =
+            module Select =
+                module Options =
+                    [<Interface>]
+                    type Item =
+                        abstract id: string with get, set
+                        abstract label: string with get, set
+                        abstract description: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: string, label: string, ?description: string) : Item = jsNative
 
     module ClassifierOptions =
         type OnPayload = delegate of payload: obj * model: ClassifierModel<ClassifierApi> -> obj
@@ -3661,6 +4057,13 @@ module PiAi =
 
     module Model =
         [<Interface>]
+        type InputLimits =
+            abstract maxRequestBytes: float option with get, set
+            abstract images: Model.InputLimits.Images option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?maxRequestBytes: float, ?images: Model.InputLimits.Images) : InputLimits = jsNative
+
+        [<Interface>]
         type PromptCache =
             abstract long: float option with get, set
             abstract short: float option with get, set
@@ -3669,15 +4072,15 @@ module PiAi =
 
         [<Interface>]
         type SamplingParamsByThinkingLevel =
-            abstract high: Record<string, obj> option with get, set
-            abstract low: Record<string, obj> option with get, set
-            abstract max: Record<string, obj> option with get, set
-            abstract medium: Record<string, obj> option with get, set
-            abstract minimal: Record<string, obj> option with get, set
-            abstract off: Record<string, obj> option with get, set
-            abstract xhigh: Record<string, obj> option with get, set
+            abstract high: JS.Record<string, obj> option with get, set
+            abstract low: JS.Record<string, obj> option with get, set
+            abstract max: JS.Record<string, obj> option with get, set
+            abstract medium: JS.Record<string, obj> option with get, set
+            abstract minimal: JS.Record<string, obj> option with get, set
+            abstract off: JS.Record<string, obj> option with get, set
+            abstract xhigh: JS.Record<string, obj> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?high: Record<string, obj>, ?low: Record<string, obj>, ?max: Record<string, obj>, ?medium: Record<string, obj>, ?minimal: Record<string, obj>, ?off: Record<string, obj>, ?xhigh: Record<string, obj>) : SamplingParamsByThinkingLevel = jsNative
+            static member Create (?high: JS.Record<string, obj>, ?low: JS.Record<string, obj>, ?max: JS.Record<string, obj>, ?medium: JS.Record<string, obj>, ?minimal: JS.Record<string, obj>, ?off: JS.Record<string, obj>, ?xhigh: JS.Record<string, obj>) : SamplingParamsByThinkingLevel = jsNative
 
         [<Interface>]
         type ThinkingLevelMap =
@@ -3697,135 +4100,24 @@ module PiAi =
                 | [<CompiledName("image")>] Image
                 | [<CompiledName("text")>] Text
 
-    module Models =
-        module CancelDeferred =
+        module InputLimits =
             [<Interface>]
-            type Options =
-                inherit ProviderRequestOptions<Model<Api>>
-                inherit ModelsRequestTransforms
-                /// <summary>
-                /// Optional callback for inspecting or replacing provider payloads before sending.
-                /// Return undefined to keep the payload unchanged.
-                /// </summary>
-                abstract onPayload: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.OnPayload option with get, set
-                /// <summary>
-                /// Optional callback invoked after an HTTP response is received.
-                /// </summary>
-                abstract onResponse: FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions.OnResponse option with get, set
+            type Images =
+                abstract resize: Model.InputLimits.Images.Resize option with get, set
+                abstract maxPerMessage: float option with get, set
+                abstract maxPerRequest: float option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.OnPayload, ?onResponse: FSharp.CloudEdge.Runtime.PiAi.DeferredFetchOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>)) : Options = jsNative
+                static member Create (?resize: Model.InputLimits.Images.Resize, ?maxPerMessage: float, ?maxPerRequest: float) : Images = jsNative
 
-        module Classify =
-            [<Interface>]
-            type Options =
-                inherit ClassifierOptions
-                inherit ModelsRequestTransforms
-                [<ParamObject; Emit("$0")>]
-                static member Create (?temperature: float, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: ClassifierOptions.OnPayload, ?onResponse: ClassifierOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>)) : Options = jsNative
-
-        module GenerateImages =
-            [<Interface>]
-            type Options =
-                inherit ImagesOptions
-                inherit ModelsRequestTransforms
-                [<ParamObject; Emit("$0")>]
-                static member Create (?metadata: Record<string, obj>, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: ImagesOptions.OnPayload, ?onResponse: ImagesOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>)) : Options = jsNative
-
-        module StreamDeferred =
-            [<Interface>]
-            type Options =
-                inherit DeferredFetchOptions
-                inherit ModelsRequestTransforms
-                [<ParamObject; Emit("$0")>]
-                static member Create (?wait: float, ?signal: obj, ?telemetryContext: obj, ?apiKey: string, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?env: Record<string, string>, ?onPayload: SimpleStreamOptions.OnPayload, ?onResponse: DeferredFetchOptions.OnResponse, ?headers: Record<string, string option>, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?transformHeaders: (Record<string, string option> -> U2<JS.Promise<Record<string, string option>>, Record<string, string option>>)) : Options = jsNative
-
-        module StreamSimple =
-            type Options =
-                inherit SimpleStreamOptions
-                inherit ModelsRequestTransforms
-
-        module PiAi =
-            /// <summary>
-            /// Error thrown for every failed Cloudflare AI call, whether it came back as a
-            /// non-2xx <c>Response</c> or as a thrown Workers AI binding error. Framework
-            /// modules wrap it into their own error type at their boundary (the AI SDK
-            /// module into an <c>APICallError</c>, so <c>ai</c>'s retry loop honours
-            /// CloudflareAIError.isRetryable).
-            /// </summary>
-            /// <remarks>@experimental This surface is experimental and may change.</remarks>
-            type CloudflareAIErrorConstructor =
-                /// <summary>
-                /// Indicates whether the argument provided is a built-in Error instance or not.
-                /// </summary>
-                abstract isError: error: obj -> bool
-                /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
-                abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
-                /// <summary>
-                /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
-                /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
-                /// <c>Error.captureStackTrace(obj)</c>).
-                /// <br /><br />
-                /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
-                /// will affect any stack trace captured _after_ the value has been changed.
-                /// <br /><br />
-                /// If set to a non-number value, or set to a negative number, stack traces will
-                /// not capture any frames.
-                /// </summary>
-                abstract stackTraceLimit: float with get, set
-                /// <summary>
-                /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
-                /// a string representing the location in the code at which
-                /// <c>Error.captureStackTrace()</c> was called.
-                /// <code lang="js">
-                /// const myObject = {};
-                /// Error.captureStackTrace(myObject);
-                /// myObject.stack;  // Similar to `new Error().stack`
-                /// </code>
-                /// <br /><br />
-                /// The first line of the trace will be prefixed with
-                /// <c>${myObject.name}: ${myObject.message}</c>.
-                /// <br /><br />
-                /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
-                /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
-                /// generated stack trace.
-                /// <br /><br />
-                /// The <c>constructorOpt</c> argument is useful for hiding implementation
-                /// details of error generation from the user. For instance:
-                /// <code lang="js">
-                /// function a() {
-                ///   b();
-                /// }
-                ///
-                /// function b() {
-                ///   c();
-                /// }
-                ///
-                /// function c() {
-                ///   // Create an error without stack trace to avoid calculating the stack trace twice.
-                ///   const { stackTraceLimit } = Error;
-                ///   Error.stackTraceLimit = 0;
-                ///   const error = new Error();
-                ///   Error.stackTraceLimit = stackTraceLimit;
-                ///
-                ///   // Capture the stack trace above function b
-                ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
-                ///   throw error;
-                /// }
-                ///
-                /// a();
-                /// </code>
-                /// </summary>
-                abstract captureStackTrace: targetObject: obj * ?constructorOpt: JS.Function -> unit
-                /// <summary>
-                /// Error thrown for every failed Cloudflare AI call, whether it came back as a
-                /// non-2xx <c>Response</c> or as a thrown Workers AI binding error. Framework
-                /// modules wrap it into their own error type at their boundary (the AI SDK
-                /// module into an <c>APICallError</c>, so <c>ai</c>'s retry loop honours
-                /// CloudflareAIError.isRetryable).
-                /// </summary>
-                /// <remarks>@experimental This surface is experimental and may change.</remarks>
-                [<EmitConstructor>]
-                abstract Create: options: FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIError.Options -> FSharp.CloudEdge.Runtime.AgentsPi.Models.PiAi.CloudflareAIError
+            module Images =
+                [<Interface>]
+                type Resize =
+                    abstract maxWidth: float option with get, set
+                    abstract maxHeight: float option with get, set
+                    abstract maxBytes: float option with get, set
+                    abstract jpegQuality: float option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?maxWidth: float, ?maxHeight: float, ?maxBytes: float, ?jpegQuality: float) : Resize = jsNative
 
     module NestedToolCallRecord =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -3871,6 +4163,12 @@ module PiAi =
             static member Create (models: AnyModel[], ?lastModified: float, ?checkedAt: float, ?etag: string) : Stored = jsNative
 
     module SimpleStreamOptions =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type CacheRetention =
+            | [<CompiledName("long")>] Long
+            | [<CompiledName("none")>] None
+            | [<CompiledName("short")>] Short
+
         [<Interface>]
         type Deferred =
             abstract window: SimpleStreamOptions.Deferred.Window option with get, set
@@ -3882,6 +4180,15 @@ module PiAi =
         type OnProviderStreamEvent = delegate of data: obj * model: Model<Api> -> JS.Promise<unit> option
 
         type OnResponse = delegate of response: ProviderResponse * model: Model<Api> -> JS.Promise<unit> option
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Reasoning =
+            | [<CompiledName("high")>] High
+            | [<CompiledName("low")>] Low
+            | [<CompiledName("max")>] Max
+            | [<CompiledName("medium")>] Medium
+            | [<CompiledName("minimal")>] Minimal
+            | [<CompiledName("xhigh")>] Xhigh
 
         module Deferred =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -4347,36 +4654,41 @@ module PiAi =
     module Tool =
         [<Interface>]
         type ConstrainedSampling =
+            /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
             abstract ``type``: string with get, set
             abstract strict: Tool.ConstrainedSampling.Strict with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, strict: Tool.ConstrainedSampling.Strict) : ConstrainedSampling = jsNative
-
-        [<Interface>]
-        type ConstrainedSampling2 =
-            abstract ``type``: string with get, set
-            abstract variants: Tool.ConstrainedSampling2.Variants with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, variants: Tool.ConstrainedSampling2.Variants) : ConstrainedSampling2 = jsNative
+            [<ParamObject; Emit("({ type: 'json_schema', ...$0 })")>]
+            static member Create (strict: Tool.ConstrainedSampling.Strict) : ConstrainedSampling = jsNative
 
         module ConstrainedSampling =
+            /// <remarks>TypeScript type: <c>"json_schema"</c></remarks>
+            [<Literal>]
+            let ``type`` = "json_schema"
+
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
             type Strict =
                 | [<CompiledName("prefer")>] Prefer
                 | [<CompiledName("require")>] Require
 
+        [<Interface>]
+        type ConstrainedSampling2 =
+            /// <remarks>TypeScript type: <c>"grammar"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract variants: Tool.ConstrainedSampling2.Variants with get, set
+            [<ParamObject; Emit("({ type: 'grammar', ...$0 })")>]
+            static member Create (variants: Tool.ConstrainedSampling2.Variants) : ConstrainedSampling2 = jsNative
+
         module ConstrainedSampling2 =
+            /// <remarks>TypeScript type: <c>"grammar"</c></remarks>
+            [<Literal>]
+            let ``type`` = "grammar"
+
             [<Interface>]
             type Variants =
                 abstract openai_lark: string option with get, set
                 abstract openai_regex: string option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (?openai_lark: string, ?openai_regex: string) : Variants = jsNative
-
-    module ToolCall =
-        type Arguments =
-            [<EmitIndexer>]
-            abstract Item: string -> JsonValue with get, set
 
     module Usage =
         [<Interface>]
@@ -4389,40 +4701,30 @@ module PiAi =
             [<ParamObject; Emit("$0")>]
             static member Create (input: float, output: float, cacheRead: float, cacheWrite: float, total: float) : Cost = jsNative
 
-    module UserMessage =
-        module Content =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("image")>] Image of data: string * mimeType: string
-                | [<CompiledName("text")>] Text of text: string * textSignature: string option
-
 module PiDurable =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("action", CaseRules.None)>]
     type ContextEdit =
+        /// <param name="target">Entry whose model messages are omitted or replaced.</param>
+        /// <param name="messages"></param>
         | [<CompiledName("omit")>] Omit of target: float * messages: unit option
+        /// <param name="target">Entry whose model messages are omitted or replaced.</param>
+        /// <param name="messages">Messages contributed instead of the target entry's model messages.</param>
         | [<CompiledName("replace")>] Replace of target: float * messages: FSharp.CloudEdge.Runtime.PiAi.Message[]
+        [<ParamObject; Emit("({ action: 'omit', ...$0 })")>]
+        static member CreateOmit (target: float, ?messages: unit) : ContextEdit = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
     type DocumentContent =
-        | [<CompiledName("base")>] Base of version: float * value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>
+        | [<CompiledName("base")>] Base of version: float * value: JsonObject
         | [<CompiledName("delta")>] Delta of version: float * ops: FSharp.CloudEdge.Runtime.Chord.Op[]
-
-    [<Interface>]
-    type DocumentContent2 =
-        abstract version: float
-        abstract kind: string
-        abstract ops: FSharp.CloudEdge.Runtime.Chord.Op[]
-        [<ParamObject; Emit("$0")>]
-        static member Create (version: float, kind: string, ops: FSharp.CloudEdge.Runtime.Chord.Op[]) : DocumentContent2 = jsNative
 
     type DocumentPoint = U2<string, float>
 
     type DocumentRecord = U4<FSharp.CloudEdge.Runtime.AgentsPi.DocumentRecord2, FSharp.CloudEdge.Runtime.AgentsPi.DocumentRecord3, FSharp.CloudEdge.Runtime.AgentsPi.DocumentRecord4, FSharp.CloudEdge.Runtime.AgentsPi.DocumentRecord5>
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type JoinPolicy =
-        | [<CompiledName("allSettled")>] AllSettled
-        | [<CompiledName("failFast")>] FailFast
+    type JsonObject =
+        [<EmitIndexer>]
+        abstract Item: string -> FSharp.CloudEdge.Runtime.Chord.JsonValue with get, set
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type ScanOrder =
@@ -4431,52 +4733,22 @@ module PiDurable =
 
     type SqliteStorage =
         inherit Storage
-        abstract db: obj
-        abstract nextId: obj with get, set
-        abstract closed: obj with get, set
-        abstract closing: obj with get, set
-        abstract admittedReads: obj with get, set
-        abstract readsDrained: obj with get, set
         abstract commit: writes: StorageWrite[] * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<float>
-        abstract conversation: id: float * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StorageWrite2.Value option>
-        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
+        abstract conversation: id: float * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StorageWrite.Cases.Conversation.Value option>
+        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
         abstract entry: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.Entry.Result.Item option>
         abstract entry: conversationId: float * id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.Entry.Result.Item2 option>
         abstract findLatestHeadMarker: conversationId: float * atOrBeforeEntryId: float option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.FindLatestHeadMarker.Result.Item option>
-        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
-        abstract readEntry: obj with get, set
-        abstract readLatestHeadMarker: obj with get, set
-        abstract readEntries: obj with get, set
-        /// <summary>
-        /// Oldest first: the fork chain's segments from the root conversation forward, each up to its fork point.
-        /// </summary>
-        abstract readEntriesAscending: obj with get, set
+        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
         abstract task: id: float * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StoredTask option>
-        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanTasks.Result.Item>
+        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanTasks.Result.Item>
         abstract submission: id: float * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SubmissionRecord option>
-        abstract scanSubmissions: query: SqliteStorage.ScanSubmissions.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanSubmissions.Result.Item>
+        abstract scanSubmissions: query: SqliteStorage.ScanSubmissions.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanSubmissions.Result.Item>
         abstract submissionByRequest: conversationId: float * requestId: string * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SubmissionRecord option>
         abstract findDocument: address: SqliteStorage.FindDocument.Address * at: DocumentPoint * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<DocumentRecord option>
         abstract document: id: float * at: DocumentPoint * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.Document.Result.Item option>
-        abstract scanDocuments: query: SqliteStorage.ScanDocuments.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanDocuments.Result.Item>
+        abstract scanDocuments: query: SqliteStorage.ScanDocuments.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanDocuments.Result.Item>
         abstract close: _context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
-        abstract closeDatabase: obj with get, set
-        /// <summary>
-        /// Run a read that issues several queries. Close waits for admitted reads, so their later queries never reach a
-        /// closed database. Single-query reads and transactions are already ordered before close by the database.
-        /// </summary>
-        abstract admitRead: obj with get, set
-        abstract readConversation: obj with get, set
-        abstract materializeDocument: obj with get, set
-        abstract candidateNextId: obj with get, set
-        abstract checkGlobalIds: obj with get, set
-        abstract prepareDocumentActions: obj with get, set
-        abstract checkDocumentActions: obj with get, set
-        abstract currentDocumentId: obj with get, set
-        abstract applyTableWrite: obj with get, set
-        abstract claimId: obj with get, set
-        abstract applyDocumentActions: obj with get, set
-        abstract assertOpen: obj with get, set
 
     type Storage =
         /// <summary>
@@ -4484,17 +4756,18 @@ module PiDurable =
         /// </summary>
         abstract commit: writes: StorageWrite[] * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<float>
         /// <summary>
-        /// Return a fresh branded candidate from the Session-global numeric ID namespace.
+        /// Return a fresh branded candidate from the Session-global numeric ID namespace, greater than every ID minted or stored
+        /// before, also across reopen: scans order by ID as creation order, and the Harness relies on it.
         /// </summary>
         abstract mintId<'I>: unit -> JS.Promise<'I>
         /// <summary>
         /// Look up one conversation by exact ID.
         /// </summary>
-        abstract conversation: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StorageWrite2.Value option>
+        abstract conversation: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StorageWrite.Cases.Conversation.Value option>
         /// <summary>
         /// Scan conversations in <c>query.order</c> (default ascending) by ID.
         /// </summary>
-        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
+        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
         /// <summary>
         /// Look up one global entry and the sequence of the commit that persisted it.
         /// Look up one entry only when it is visible through the requested conversation's ancestry.
@@ -4513,7 +4786,7 @@ module PiDurable =
         /// <summary>
         /// Scan the inclusive visible range in <c>query.order</c> (default descending), returning at most <c>limit</c> entries.
         /// </summary>
-        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
+        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
         /// <summary>
         /// Look up the latest complete record for one task.
         /// </summary>
@@ -4521,7 +4794,7 @@ module PiDurable =
         /// <summary>
         /// Scan task records matching every supplied filter in <c>query.order</c> (default ascending) by ID.
         /// </summary>
-        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Storage.ScanTasks.Result.Item>
+        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Storage.ScanTasks.Result.Item>
         /// <summary>
         /// Look up the latest complete record for one admitted submission.
         /// </summary>
@@ -4529,7 +4802,7 @@ module PiDurable =
         /// <summary>
         /// Scan submissions matching every supplied filter in <c>query.order</c> (default ascending) by ID.
         /// </summary>
-        abstract scanSubmissions: query: SqliteStorage.ScanSubmissions.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanSubmissions.Result.Item>
+        abstract scanSubmissions: query: SqliteStorage.ScanSubmissions.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanSubmissions.Result.Item>
         /// <summary>
         /// Find a submission by its conversation-scoped host deduplication key.
         /// </summary>
@@ -4545,7 +4818,7 @@ module PiDurable =
         /// <summary>
         /// Scan incarnations alive in one exact scope at the selected point.
         /// </summary>
-        abstract scanDocuments: query: SqliteStorage.ScanDocuments.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanDocuments.Result.Item>
+        abstract scanDocuments: query: SqliteStorage.ScanDocuments.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanDocuments.Result.Item>
         /// <summary>
         /// Release backend resources; all later operations must reject.
         /// </summary>
@@ -4553,80 +4826,124 @@ module PiDurable =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type StorageWrite =
-        | [<CompiledName("conversation")>] Conversation of value: StorageWrite2.Value
+        | [<CompiledName("conversation")>] Conversation of value: StorageWrite.Cases.Conversation.Value
         | [<CompiledName("entry")>] Entry of value: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item
         | [<CompiledName("task")>] Task of value: StoredTask
         | [<CompiledName("submission")>] Submission of value: SubmissionRecord
-        | [<CompiledName("document.create")>] DocumentCreate of record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4> * content: StorageWrite6.Content
-        | [<CompiledName("document.copy")>] DocumentCopy of record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4> * source: StorageWrite7.Source
+        | [<CompiledName("document.create")>] DocumentCreate of record: U4<StorageWrite.Cases.DocumentCreate.Record, StorageWrite.Cases.DocumentCreate.Record2, StorageWrite.Cases.DocumentCreate.Record3, StorageWrite.Cases.DocumentCreate.Record4> * content: StorageWrite.Cases.DocumentCreate.Content
+        | [<CompiledName("document.copy")>] DocumentCopy of record: U4<StorageWrite.Cases.DocumentCreate.Record, StorageWrite.Cases.DocumentCreate.Record2, StorageWrite.Cases.DocumentCreate.Record3, StorageWrite.Cases.DocumentCreate.Record4> * source: StorageWrite.Cases.DocumentCopy.Source
         | [<CompiledName("document.change")>] DocumentChange of id: float * content: DocumentContent
         | [<CompiledName("document.retire")>] DocumentRetire of id: float
 
-    [<Interface>]
-    type StorageWrite2 =
-        abstract ``type``: string
-        abstract value: StorageWrite2.Value
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, value: StorageWrite2.Value) : StorageWrite2 = jsNative
-
-    [<Interface>]
-    type StorageWrite3 =
-        abstract ``type``: string
-        abstract value: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, value: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item) : StorageWrite3 = jsNative
-
-    [<Interface>]
-    type StorageWrite4 =
-        abstract ``type``: string
-        abstract value: StoredTask
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, value: StoredTask) : StorageWrite4 = jsNative
-
-    [<Interface>]
-    type StorageWrite5 =
-        abstract ``type``: string
-        abstract value: SubmissionRecord
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, value: SubmissionRecord) : StorageWrite5 = jsNative
-
-    [<Interface>]
-    type StorageWrite6 =
-        abstract ``type``: string
-        abstract record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4>
-        abstract content: StorageWrite6.Content
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4>, content: StorageWrite6.Content) : StorageWrite6 = jsNative
-
-    [<Interface>]
-    type StorageWrite7 =
-        abstract ``type``: string
-        abstract record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4>
-        abstract source: StorageWrite7.Source
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, record: U4<StorageWrite6.Record, StorageWrite6.Record2, StorageWrite6.Record3, StorageWrite6.Record4>, source: StorageWrite7.Source) : StorageWrite7 = jsNative
-
-    [<Interface>]
-    type StorageWrite8 =
-        abstract ``type``: string
-        abstract id: float
-        abstract content: DocumentContent
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: float, content: DocumentContent) : StorageWrite8 = jsNative
-
-    [<Interface>]
-    type StorageWrite9 =
-        abstract ``type``: string
-        abstract id: float
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, id: float) : StorageWrite9 = jsNative
-
-    type StoredTask = U2<StorageWrite4.Value, StorageWrite4.Value2>
+    type StoredTask = U2<StorageWrite.Cases.Task.Value, StorageWrite.Cases.Task.Value2>
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type SubmissionRecord =
-        | [<CompiledName("input")>] Input of id: float * conversationId: float * requestId: string option
-        | [<CompiledName("write")>] Write of id: float * conversationId: float * requestId: string option * answer: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Admitted but not yet represented in the transcript.
+        /// TypeScript type: <c>"queued"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("input"); CaseTest("$0.status === 'queued'")>] Input of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: unit option * answer: unit option * reason: unit option * detail: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Added to the transcript and owned by an active run.
+        /// TypeScript type: <c>"placed"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("input"); CaseTest("$0.status === 'placed'")>] Input2 of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: float * answer: unit option * reason: unit option * detail: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Successfully answered user input.
+        /// TypeScript type: <c>"done"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("input"); CaseTest("$0.status === 'done'")>] Input3 of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: float * answer: float * reason: unit option * detail: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Terminal input that can no longer receive an answer.
+        /// TypeScript type: <c>"unanswered"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("input"); CaseTest("$0.status === 'unanswered'")>] Input4 of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: float option * answer: unit option * reason: string * detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Admitted but not yet appended to the transcript.
+        /// TypeScript type: <c>"queued"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("write"); CaseTest("$0.status === 'queued'")>] Write of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: unit option * answer: unit option * reason: unit option * detail: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Successfully appended passive entry.
+        /// TypeScript type: <c>"done"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("write"); CaseTest("$0.status === 'done'")>] Write2 of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: float * answer: unit option * reason: unit option * detail: unit option
+        /// <param name="trace">Adapter-owned context of the admission span; absent without propagation.</param>
+        /// <param name="id"></param>
+        /// <param name="conversationId"></param>
+        /// <param name="requestId">Host-provided deduplication key, scoped to the conversation.</param>
+        /// <param name="status">
+        /// Terminal passive write that could not be placed.
+        /// TypeScript type: <c>"unanswered"</c>
+        /// </param>
+        /// <param name="entry"></param>
+        /// <param name="answer"></param>
+        /// <param name="reason"></param>
+        /// <param name="detail"></param>
+        | [<CompiledName("write"); CaseTest("$0.status === 'unanswered'")>] Write3 of trace: JS.Record<string, string> option * id: float * conversationId: float * requestId: string option * status: string * entry: unit option * answer: unit option * reason: string * detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+        [<ParamObject; Emit("({ type: 'input', status: 'queued', ...$0 })")>]
+        static member CreateInput (id: float, conversationId: float, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'input', status: 'placed', ...$0 })")>]
+        static member CreateInput2 (id: float, conversationId: float, entry: float, ?trace: JS.Record<string, string>, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'input', status: 'done', ...$0 })")>]
+        static member CreateInput3 (id: float, conversationId: float, entry: float, answer: float, ?trace: JS.Record<string, string>, ?requestId: string, ?reason: unit, ?detail: unit) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'input', status: 'unanswered', ...$0 })")>]
+        static member CreateInput4 (id: float, conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'write', status: 'queued', ...$0 })")>]
+        static member CreateWrite (id: float, conversationId: float, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'write', status: 'done', ...$0 })")>]
+        static member CreateWrite2 (id: float, conversationId: float, entry: float, ?trace: JS.Record<string, string>, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : SubmissionRecord = jsNative
+        [<ParamObject; Emit("({ type: 'write', status: 'unanswered', ...$0 })")>]
+        static member CreateWrite3 (id: float, conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : SubmissionRecord = jsNative
 
     [<Interface>]
     type BinaryReader =
@@ -4648,51 +4965,30 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (info: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<BinaryReader.Info.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>), read: Func<float, float, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<U2<ExecutionEnv.ReadBinaryFile.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>>, scanLines: Func<BinaryReader.ScanLines.Options, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<U2<BinaryReader.ScanLines.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>>, close: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>)) : BinaryReader = jsNative
 
-    type CheckpointWhen<'T> = delegate of value: CheckpointWhen.Value<'T> * ops: FSharp.CloudEdge.Runtime.Chord.Op[] * info: CheckpointWhen.Info -> bool
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type BlockedReason =
+        | [<CompiledName("migration_failed")>] MigrationFailed
+        | [<CompiledName("missing_task")>] MissingTask
+        | [<CompiledName("restart_limit")>] RestartLimit
+        | [<CompiledName("task_too_old")>] TaskTooOld
+
+    type CheckpointWhen<'T> = delegate of value: CheckpointWhen.Value<'T> * ops: FSharp.CloudEdge.Runtime.Chord.Op[] * info: Extension.Sections.Item.Render.Input.Read.Snapshot.Token.Item.CheckpointWhen.Info -> bool
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type CommitChange =
-        | [<CompiledName("conversation")>] Conversation of value: StorageWrite2.Value
+        | [<CompiledName("conversation")>] Conversation of value: StorageWrite.Cases.Conversation.Value
         | [<CompiledName("entry")>] Entry of value: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item
         | [<CompiledName("task")>] Task of value: StoredTask
         | [<CompiledName("submission")>] Submission of value: SubmissionRecord
-        | [<CompiledName("document")>] Document of record: DocumentRecord * conversationId: float option * version: float option * value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * ops: FSharp.CloudEdge.Runtime.Chord.Op[]
-        | [<CompiledName("document.copy")>] DocumentCopy of record: DocumentRecord * conversationId: float * source: StorageWrite7.Source
-
-    [<Interface>]
-    type CommitChange2 =
-        abstract ``type``: string
-        abstract record: DocumentRecord
-        /// <summary>
-        /// Conversation owning the document; task documents derive it from their task record. Undefined only for Session documents.
-        /// </summary>
-        abstract conversationId: float option
-        /// <summary>
-        /// Definition version of <c>value</c>; absent when this commit retired the incarnation.
-        /// </summary>
-        abstract version: float option
-        /// <summary>
-        /// Exact adopted immutable revision, or <c>null</c> when this commit retired the incarnation.
-        /// </summary>
-        abstract value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
-        /// <summary>
-        /// Exact adopted operations for an ordinary update; empty for creation and retirement.
-        /// </summary>
-        abstract ops: FSharp.CloudEdge.Runtime.Chord.Op[]
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, record: DocumentRecord, ops: FSharp.CloudEdge.Runtime.Chord.Op[], ?conversationId: float, ?version: float, ?value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : CommitChange2 = jsNative
-
-    [<Interface>]
-    type CommitChange3 =
-        /// <summary>
-        /// Definition-free child initialization; consumers hydrate through state or watch acquisition.
-        /// </summary>
-        abstract ``type``: string
-        abstract record: DocumentRecord
-        abstract conversationId: float
-        abstract source: StorageWrite7.Source
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, record: DocumentRecord, conversationId: float, source: StorageWrite7.Source) : CommitChange3 = jsNative
+        /// <param name="record"></param>
+        /// <param name="conversationId">Conversation owning the document; task documents derive it from their task record. Undefined only for Session documents.</param>
+        /// <param name="version">Definition version of <c>value</c>; absent when this commit retired the incarnation.</param>
+        /// <param name="value">Exact adopted immutable revision, or <c>null</c> when this commit retired the incarnation.</param>
+        /// <param name="ops">Exact adopted operations for an ordinary update; empty for creation and retirement.</param>
+        | [<CompiledName("document")>] Document of record: DocumentRecord * conversationId: float option * version: float option * value: JsonObject option * ops: FSharp.CloudEdge.Runtime.Chord.Op[]
+        | [<CompiledName("document.copy")>] DocumentCopy of record: DocumentRecord * conversationId: float * source: StorageWrite.Cases.DocumentCopy.Source
+        [<ParamObject; Emit("(o => ({type: 'document', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+        static member CreateDocument (record: DocumentRecord, ops: FSharp.CloudEdge.Runtime.Chord.Op[], ?conversationId: float, ?version: float, ?value: JsonObject) : CommitChange = jsNative
 
     [<Interface>]
     type Conversation =
@@ -4706,8 +5002,10 @@ module PiDurable =
         /// </summary>
         abstract configure: change: Harness.Root.Options.Agent * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
         /// <summary>
-        /// Durably admit user input or a passive entry write. A busy conversation, or one with queued items, queues it in
-        /// <c>pi.inbox</c>; <c>whenBusy: "reject"</c> rejects with <c>ConversationBusy</c> instead and writes nothing.
+        /// Durably admit user input or a passive entry write. A busy conversation, or one with queued items, queues input and
+        /// writes that affect model context in <c>pi.inbox</c>; <c>whenBusy: "reject"</c> rejects input with <c>ConversationBusy</c> instead
+        /// and writes nothing. A write of only <c>kind</c> and <c>data</c> (no <c>model</c>, <c>head</c>, or <c>edits</c>) is appended at once,
+        /// even mid-run, as it changes nothing the model sees.
         /// </summary>
         abstract submit: submission: SubmissionDraft * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Submission>
         /// <summary>
@@ -4732,7 +5030,7 @@ module PiDurable =
         /// <summary>
         /// Fork-aware history of this conversation, newest first unless <c>query.order</c> is <c>ascending</c>.
         /// </summary>
-        abstract entries: query: Conversation.Entries.Query * limit: float * cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
+        abstract entries: query: Conversation.Entries.Query * limit: float * cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
         abstract fork: at: float * options: Conversation.Fork.Options * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Conversation>
         /// <summary>
         /// Withdraw queued inputs (queued writes stay), mark every live non-background task of the ordinary ownership scope,
@@ -4753,7 +5051,7 @@ module PiDurable =
         /// </summary>
         abstract watch: context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<Conversation.ViewState.Result.Item.Item>>
         [<ParamObject; Emit("$0")>]
-        static member Create (id: float, agent: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<ToolExecutionApi.Agent.Result.Item>), configure: Func<Harness.Root.Options.Agent, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<unit>>, submit: Func<SubmissionDraft, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<Submission>>, reset: Func<string option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<unit>>, compact: Func<string option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<float>>, commit: Func<(Tx -> U2<'T, JS.Promise<'T>>), FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<'T>>, context: Func<FSharp.CloudEdge.Runtime.Chord.Context, Conversation.Context.Options option, JS.Promise<TaskRuntime.Context.Result.Item>>, entries: Func<Conversation.Entries.Query, float, ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<SqliteStorage.ScanEntries.Result.Item>>, fork: Func<float, Conversation.Fork.Options, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<Conversation>>, abort: Func<FSharp.CloudEdge.Runtime.Chord.Context, ConversationHandle.Abort.Options option, JS.Promise<unit>>, waitForIdle: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>), viewState: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<Conversation.ViewState.Result.Item.Item>>), watch: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<Conversation.ViewState.Result.Item.Item>>)) : Conversation = jsNative
+        static member Create (id: float, agent: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<ToolExecutionApi.Agent.Result.Item>), configure: Func<Harness.Root.Options.Agent, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<unit>>, submit: Func<SubmissionDraft, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<Submission>>, reset: Func<string option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<unit>>, compact: Func<string option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<float>>, commit: Func<(Tx -> U2<'T, JS.Promise<'T>>), FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<'T>>, context: Func<FSharp.CloudEdge.Runtime.Chord.Context, Conversation.Context.Options option, JS.Promise<TaskRuntime.Context.Result.Item>>, entries: Func<Conversation.Entries.Query, float, JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<SqliteStorage.ScanEntries.Result.Item>>, fork: Func<float, Conversation.Fork.Options, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<Conversation>>, abort: Func<FSharp.CloudEdge.Runtime.Chord.Context, ConversationHandle.Abort.Options option, JS.Promise<unit>>, waitForIdle: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>), viewState: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<Conversation.ViewState.Result.Item.Item>>), watch: (FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<Conversation.ViewState.Result.Item.Item>>)) : Conversation = jsNative
 
     [<Interface>]
     type ConversationHandle =
@@ -4774,19 +5072,6 @@ module PiDurable =
     type ConversationOwnership =
         | [<CompiledName("ownerless")>] Ownerless
         | [<CompiledName("task")>] Task of taskId: float
-
-    [<Interface>]
-    type ConversationOwnership2 =
-        abstract kind: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string) : ConversationOwnership2 = jsNative
-
-    [<Interface>]
-    type ConversationOwnership3 =
-        abstract kind: string
-        abstract taskId: float
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, taskId: float) : ConversationOwnership3 = jsNative
 
     [<Interface>]
     type DirReader =
@@ -4813,9 +5098,9 @@ module PiDurable =
         static member Create (definition: 'D) : DocToken<'T, 'D> = jsNative
 
     type DocumentObserver =
-        abstract watchDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
-        abstract watchDoc<'T>: token: DocToken<'T, U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item2<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item3<'T>>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
-        abstract watchDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item4<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract watchDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract watchDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract watchDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
         abstract watchDoc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
         abstract watchDoc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<WatchHandle<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
 
@@ -4902,11 +5187,31 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (name: string, path: string, kind: FileKind, size: float, mtimeMs: float) : FileInfo = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type FileKind =
-        | [<CompiledName("directory")>] Directory
-        | [<CompiledName("file")>] File
-        | [<CompiledName("symlink")>] Symlink
+    [<Interface>]
+    type FileListEntry =
+        /// <summary>
+        /// Relative to the listed directory, with <c>/</c> separators on every system.
+        /// </summary>
+        abstract path: string with get, set
+        /// <summary>
+        /// A symbolic link is listed as such and not followed.
+        /// </summary>
+        abstract kind: FileKind with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (path: string, kind: FileKind) : FileListEntry = jsNative
+
+    [<Interface>]
+    type FileListing =
+        /// <summary>
+        /// Depth first, parents before their entries, siblings in byte order of their names.
+        /// </summary>
+        abstract entries: FileListEntry[] with get, set
+        /// <summary>
+        /// A bound in <c>ListFilesOptions</c> ended the listing early.
+        /// </summary>
+        abstract truncated: bool with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (entries: FileListEntry[], truncated: bool) : FileListing = jsNative
 
     type FileSystem =
         /// <summary>
@@ -4940,6 +5245,13 @@ module PiDurable =
         abstract renameFile: sourcePath: string * destinationPath: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<ExecutionEnv.WriteFile.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>
         abstract fileInfo: path: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<BinaryReader.Info.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>
         abstract listDir: path: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<ExecutionEnv.ListDir.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>
+        /// <summary>
+        /// Optional: the files, directories and symbolic links below a directory, at any depth, for indexes such as file
+        /// completion. Symbolic links are not followed; other kinds of files are not listed; entries that cannot be read are
+        /// skipped. See <c>ListFilesOptions</c> for hidden and ignored files and for the bounds. Fails with <c>not_supported</c> when
+        /// the environment cannot list right now (an older remote daemon), so callers fall back to their own walk.
+        /// </summary>
+        abstract listFiles: ListFiles option with get, set
         abstract openDirReader: path: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<ExecutionEnv.OpenDirReader.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>
         /// <summary>
         /// Report changes to files and directories, for hosts that load resources from the environment. When the returned
@@ -4979,12 +5291,19 @@ module PiDurable =
         /// </summary>
         abstract resume: unit -> unit
         /// <summary>
+        /// When this Session next needs a running process, from the scheduler's memory: <c>active</c> while some task can run now
+        /// or is running, <c>at</c> for the earliest sleep. Answers also while scheduling is paused. A host that wakes the
+        /// process itself, such as a Durable Object alarm, arms from it and calls <c>resume()</c> when woken; see
+        /// <c>HarnessOptions.onWake</c>.
+        /// </summary>
+        abstract wake: unit -> FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiHarnessContext.OnWake.Wake
+        /// <summary>
         /// Return the reserved root conversation, creating it with <c>agent</c> and <c>init</c> in one commit when absent.
         /// </summary>
         abstract root: context: FSharp.CloudEdge.Runtime.Chord.Context * ?options: Harness.Root.Options -> JS.Promise<Conversation>
         abstract conversation: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Conversation option>
         abstract createConversation: options: Conversation.Fork.Options * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Conversation>
-        abstract getTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<Harness.GetTask.Result.Item<'R>, Harness.GetTask.Result.Item2<'R>> option>
+        abstract getTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item2<'R>> option>
         /// <summary>
         /// Live tasks and unsettled submissions. Writes nothing and runs no task code.
         /// </summary>
@@ -4996,16 +5315,21 @@ module PiDurable =
         /// <summary>
         /// <c>not_found</c> for an unknown submission or one of another conversation than <c>conversationId</c>.
         /// </summary>
-        abstract abortSubmission: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context * ?conversationId: float -> JS.Promise<Harness.AbortSubmission.Result.Item>
+        abstract abortSubmission: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context * ?conversationId: float -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.AbortSubmission.Result.Item>
         /// <summary>
         /// Commit the abort mark, signal and join an active run invocation, and schedule the abort invocation. A task whose
         /// definition cannot take it settles as <c>orphaned</c> instead.
         /// </summary>
-        abstract abortTask: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<Harness.AbortTask.Result.Item>
+        abstract abortTask: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsPi.Harness.AbortTask.Result.Item>
+        /// <summary>
+        /// Run a task parked by <c>settings.restartLimit</c> again: clears its restart count and enables scheduling. Does nothing
+        /// for a task that is not parked; rejects for an unknown one.
+        /// </summary>
+        abstract retryTask: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
         /// <summary>
         /// Resolve with the terminal receipt; cancelling <c>context</c> cancels only this wait.
         /// </summary>
-        abstract waitForTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<Harness.WaitForTask.Result.Item<'R>, Harness.WaitForTask.Result.Item2<'R>>>
+        abstract waitForTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item2<'R>>>
         /// <summary>
         /// Resolve when the ordinary ownership scope of every ownerless conversation has no live non-background task.
         /// </summary>
@@ -5061,14 +5385,43 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (newlines: float, start: float, ``end``: float, firstLineEnd: float, lastLineStart: float, selectedBytes: float, firstLineBytes: float) : LineScan = jsNative
 
-    type Migrate<'T> = delegate of value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> * fromVersion: float -> 'T
+    type ListFiles = delegate of path: string * options: ListFilesOptions option * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<ListFiles.Result.Item, ExecutionEnv.AbsolutePath.Result.Item2>>
 
-    type Migrate15<'I, 'S> = delegate of input: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * fromVersion: float -> Migrate15.Result<'I, 'S>
+    [<Interface>]
+    type ListFilesOptions =
+        /// <summary>
+        /// Include names starting with <c>.</c> (on Windows also files with the hidden attribute); default true. Entries named
+        /// <c>.git</c> are never listed.
+        /// </summary>
+        abstract hidden: bool option with get, set
+        /// <summary>
+        /// Inside a git work tree, skip what git ignores: the <c>.gitignore</c> files of the directory, its subdirectories and its
+        /// parents, <c>.git/info/exclude</c>, and the global excludes file; default true. Unlike <c>git ls-files</c>, a tracked file that
+        /// matches an ignore rule is skipped too. Outside work trees, <c>.gitignore</c> files have no effect.
+        /// </summary>
+        abstract gitignore: bool option with get, set
+        /// <summary>
+        /// Names of entries to skip with everything below them, such as <c>node_modules</c>.
+        /// </summary>
+        abstract exclude: string[] option with get, set
+        /// <summary>
+        /// Most entries to list; default 50 000.
+        /// </summary>
+        abstract maxEntries: float option with get, set
+        /// <summary>
+        /// Most bytes of the listing: each entry's UTF-8 path plus two; default 4 MiB, at most 15.9 MiB.
+        /// </summary>
+        abstract maxBytes: float option with get, set
+        /// <summary>
+        /// Time after which the listing stops; default 10 000 ms.
+        /// </summary>
+        abstract timeoutMs: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?hidden: bool, ?gitignore: bool, ?exclude: string[], ?maxEntries: float, ?maxBytes: float, ?timeoutMs: float) : ListFilesOptions = jsNative
 
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type QueueMode =
-        | [<CompiledName("all")>] All
-        | [<CompiledName("one-at-a-time")>] OneAtATime
+    type Migrate<'T> = delegate of value: JsonObject * fromVersion: float -> 'T
+
+    type Migrate15<'I, 'S> = delegate of input: FSharp.CloudEdge.Runtime.Chord.JsonValue * checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue * fromVersion: float -> Migrate15.Result<'I, 'S>
 
     [<Interface>]
     type RegistrySnapshot<'Tool> =
@@ -5087,10 +5440,17 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (installed: (unit -> Extension<'Tool>[]), extension: (string -> Extension<'Tool> option), tools: (unit -> RegistrySnapshot.Tools.Result.Item<'Tool>[]), sections: (unit -> RegistrySnapshot.Sections.Result.Item<'Tool>[]), tasks: (unit -> Extension.Tasks.Item[]), task: (string -> Extension.Tasks.Item option)) : RegistrySnapshot<'Tool> = jsNative
 
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+    type ReportFrom =
+        | [<CompiledName("extension")>] Extension of extension: string option
+        | [<CompiledName("host")>] Host of callback: HostCallback
+        [<ParamObject; Emit("({ type: 'extension', ...$0 })")>]
+        static member CreateExtension (?extension: string) : ReportFrom = jsNative
+
     type Session =
         inherit DocumentObserver
         /// <summary>
-        /// Run one atomic transaction on the Session mutation line.
+        /// Run one atomic transaction on the Session mutation line. Inside the callback read only through <c>tx</c>: <c>snapshot()</c>, <c>documentState()</c>, <c>watchDoc()</c>, <c>getTask()</c>, and the other Session and runtime reads may queue on the line the callback holds, and then never resolve.
         /// </summary>
         abstract commit<'T>: change: (Tx -> U2<'T, JS.Promise<'T>>) * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<'T>
         /// <summary>
@@ -5098,25 +5458,36 @@ module PiDurable =
         /// </summary>
         abstract close: context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
         /// <summary>
-        /// Observe complete commits synchronously after adoption. The listener must not throw, block, or call Session APIs.
+        /// Settles once the Session has closed, Storage included: after <c>close()</c>, or after the first failed Storage call,
+        /// which closes the Session itself. A failed Session is reopened from Storage; nothing else is left to clean up.
+        /// </summary>
+        abstract closed: JS.Promise<SessionEnd>
+        /// <summary>
+        /// Observe complete commits synchronously after adoption. The listener must not block or call Session APIs.
         /// </summary>
         abstract subscribeCommits: listener: Harness.SubscribeCommits.Listener -> (unit -> unit)
         /// <summary>
-        /// Observe close synchronously when it begins. The listener must not throw, block, or call Session APIs.
+        /// Observe close synchronously when it begins, also when a failed Storage call closes the Session. The listener must
+        /// not block or call Session APIs.
         /// </summary>
         abstract subscribeClose: listener: (unit -> unit) -> (unit -> unit)
-        abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<CheckpointWhen.Value<'T> option>
-        abstract snapshot<'T>: token: DocToken<'T, U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item2<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item3<'T>>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-        abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item4<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-        abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+        abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+        abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+        abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+        abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<CheckpointWhen.Value<'T> option>
         abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-        abstract documentState<'T>: token: DocToken<'T, Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
-        abstract documentState<'T>: token: DocToken<'T, U2<Harness.DocumentState.Token.Item2<'T>, Harness.DocumentState.Token.Item3<'T>>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
-        abstract documentState<'T>: token: DocToken<'T, Harness.DocumentState.Token.Item4<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract documentState<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract documentState<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
+        abstract documentState<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
         abstract documentState<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
         abstract documentState<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.Chord.AttachedReplicatedState<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option> option>
-        abstract snapshotAsOf<'T>: token: DocToken<'T, Extension.Sections.Item.Render.Input.Read.SnapshotAsOf.Token.Item<'T>> * conversationId: float * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+        abstract snapshotAsOf<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item23<'T>> * conversationId: float * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
         abstract snapshotAsOf<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("reason", CaseRules.None)>]
+    type SessionEnd =
+        | [<CompiledName("closed")>] Closed
+        | [<CompiledName("failed")>] Failed of error: obj
 
     type SettledSubmissionRecord = obj
 
@@ -5138,7 +5509,7 @@ module PiDurable =
     [<Interface>]
     type ShellExecOptions =
         abstract cwd: string option with get, set
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         abstract inheritEnv: bool option with get, set
         abstract timeout: float option with get, set
         /// <summary>
@@ -5153,7 +5524,7 @@ module PiDurable =
         /// </summary>
         abstract window: ShellOutputWindow option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?cwd: string, ?env: Record<string, string>, ?inheritEnv: bool, ?timeout: float, ?onOutput: ShellExecOptions.OnOutput, ?spill: ShellSpillOptions, ?window: ShellOutputWindow) : ShellExecOptions = jsNative
+        static member Create (?cwd: string, ?env: JS.Record<string, string>, ?inheritEnv: bool, ?timeout: float, ?onOutput: ShellExecOptions.OnOutput, ?spill: ShellSpillOptions, ?window: ShellOutputWindow) : ShellExecOptions = jsNative
 
     [<Interface>]
     type ShellExecResult =
@@ -5238,28 +5609,23 @@ module PiDurable =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type SubmissionDraft =
-        | [<CompiledName("input")>] Input of requestId: string option * content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]> * whenBusy: ConversationHandle.Submit.Submission.WhenBusy option * entry: unit option
+        /// <param name="requestId"></param>
+        /// <param name="content"></param>
+        /// <param name="whenBusy"></param>
+        /// <param name="entry">Place the input as this entry; default <c>pi.user</c> without data. The kind must not start with <c>pi.</c>.</param>
+        | [<CompiledName("input")>] Input of requestId: string option * content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]> * whenBusy: ConversationHandle.Submit.Submission.WhenBusy option * entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions.Entry option
         | [<CompiledName("write")>] Write of requestId: string option * entry: Tx.AppendEntry.Value * content: unit option * whenBusy: unit option
+        [<ParamObject; Emit("({ type: 'input', ...$0 })")>]
+        static member CreateInput (content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, ?requestId: string, ?whenBusy: ConversationHandle.Submit.Submission.WhenBusy, ?entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions.Entry) : SubmissionDraft = jsNative
+        [<ParamObject; Emit("({ type: 'write', ...$0 })")>]
+        static member CreateWrite (entry: Tx.AppendEntry.Value, ?requestId: string, ?content: unit, ?whenBusy: unit) : SubmissionDraft = jsNative
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
     type SubmissionSettlement =
         | [<CompiledName("done")>] Done of answer: float
-        | [<CompiledName("unanswered")>] Unanswered of reason: string * detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-
-    [<Interface>]
-    type SubmissionSettlement2 =
-        abstract status: string
-        abstract answer: float
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, answer: float) : SubmissionSettlement2 = jsNative
-
-    [<Interface>]
-    type SubmissionSettlement3 =
-        abstract status: string
-        abstract reason: string
-        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, reason: string, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : SubmissionSettlement3 = jsNative
+        | [<CompiledName("unanswered")>] Unanswered of reason: string * detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+        [<ParamObject; Emit("({ status: 'unanswered', ...$0 })")>]
+        static member CreateUnanswered (reason: string, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : SubmissionSettlement = jsNative
 
     [<Interface>]
     type Task<'I, 'S, 'R, 'H> =
@@ -5267,7 +5633,7 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (definition: Task.Definition<'I, 'S, 'R, 'H>) : Task<'I, 'S, 'R, 'H> = jsNative
 
-    type TaskGraphState = U3<TaskGraphState2, TaskGraphState3, TaskGraphState4>
+    type TaskGraphState = U4<TaskGraphState2, TaskGraphState3, TaskGraphState4, TaskGraphState5>
 
     [<Interface>]
     type TaskGraphState2 =
@@ -5278,37 +5644,58 @@ module PiDurable =
 
     [<Interface>]
     type TaskGraphState3 =
+        /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
         abstract status: string
         abstract phase: string
         abstract on: float[]
         abstract policy: JoinPolicy
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, phase: string, on: float[], policy: JoinPolicy) : TaskGraphState3 = jsNative
+        [<ParamObject; Emit("({ status: 'waiting', ...$0 })")>]
+        static member Create (phase: string, on: float[], policy: JoinPolicy) : TaskGraphState3 = jsNative
+
+    module TaskGraphState3 =
+        /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
+        [<Literal>]
+        let status = "waiting"
 
     [<Interface>]
     type TaskGraphState4 =
+        /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
         abstract status: string
-        abstract outcome: TaskGraphState4.Outcome
-        [<ParamObject; Emit("$0")>]
-        static member Create (status: string, outcome: TaskGraphState4.Outcome) : TaskGraphState4 = jsNative
+        abstract phase: string
+        abstract until: float
+        [<ParamObject; Emit("({ status: 'sleeping', ...$0 })")>]
+        static member Create (phase: string, until: float) : TaskGraphState4 = jsNative
+
+    module TaskGraphState4 =
+        /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
+        [<Literal>]
+        let status = "sleeping"
+
+    [<Interface>]
+    type TaskGraphState5 =
+        /// <remarks>TypeScript type: <c>"completing"</c></remarks>
+        abstract status: string
+        abstract outcome: TaskGraphState5.Outcome
+        [<ParamObject; Emit("({ status: 'completing', ...$0 })")>]
+        static member Create (outcome: TaskGraphState5.Outcome) : TaskGraphState5 = jsNative
+
+    module TaskGraphState5 =
+        /// <remarks>TypeScript type: <c>"completing"</c></remarks>
+        [<Literal>]
+        let status = "completing"
+
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Outcome =
+            | [<CompiledName("aborted")>] Aborted
+            | [<CompiledName("completed")>] Completed
+            | [<CompiledName("failed")>] Failed
+            | [<CompiledName("faulted")>] Faulted
+            | [<CompiledName("orphaned")>] Orphaned
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
     type TaskOwnership =
         | [<CompiledName("conversation")>] Conversation
         | [<CompiledName("task")>] Task of taskId: float
-
-    [<Interface>]
-    type TaskOwnership2 =
-        abstract kind: string
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string) : TaskOwnership2 = jsNative
-
-    [<Interface>]
-    type TaskOwnership3 =
-        abstract kind: string
-        abstract taskId: float
-        [<ParamObject; Emit("$0")>]
-        static member Create (kind: string, taskId: float) : TaskOwnership3 = jsNative
 
     type TaskRuntime<'I, 'S, 'R, 'H> =
         inherit DocumentObserver
@@ -5323,7 +5710,7 @@ module PiDurable =
         /// <summary>
         /// Registry snapshot of the current phase; refreshed at every phase boundary.
         /// </summary>
-        abstract registry: RegistrySnapshot<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>
+        abstract registry: RegistrySnapshot<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>
         /// <summary>
         /// The task's conversation's agent, resolved at most once per phase, at first use, and fixed for the phase.
         /// </summary>
@@ -5332,6 +5719,9 @@ module PiDurable =
         /// <c>HarnessOptions.settings</c>, resolved at each access.
         /// </summary>
         abstract settings: TaskRuntime.Settings
+        /// <summary>
+        /// <c>HarnessOptions.models</c>, resolved at each access.
+        /// </summary>
         abstract models: FSharp.CloudEdge.Runtime.PiAi.Models
         /// <summary>
         /// Calls <c>HarnessOptions.env</c> for the task's conversation; rejects with its error.
@@ -5345,7 +5735,7 @@ module PiDurable =
         /// Commit on the Session line after rereading the task. Rejects when the task is terminal, the invocation ended, the
         /// Harness is closing, or, in a run invocation, the task carries an abort mark. A returned state replaces the task's
         /// state in the same commit; returning nothing leaves it unchanged. <c>tx.createTask()</c> defaults to the task's
-        /// conversation.
+        /// conversation. Inside the callback read only through <c>tx</c>: <c>snapshot()</c>, <c>documentState()</c>, <c>watchDoc()</c>, <c>getTask()</c>, and the other Session and runtime reads may queue on the line the callback holds, and then never resolve.
         /// </summary>
         abstract commit: change: TaskRuntime.Commit.Change<'R, 'I, 'S> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
         /// <summary>
@@ -5361,15 +5751,25 @@ module PiDurable =
         /// <summary>
         /// Committed task record.
         /// </summary>
-        abstract getTask<'T>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item2<'T>> option>
+        abstract getTask<'T>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item<'T>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item2<'T>> option>
         /// <summary>
         /// Resolve with the task's terminal receipt; rejects when the invocation ends.
         /// </summary>
-        abstract waitForTask<'T>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.WaitForTask.Result.Item<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.WaitForTask.Result.Item2<'T>>>
+        abstract waitForTask<'T>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item<'T>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item2<'T>>>
+        /// <summary>
+        /// Abort a task this task owns, as <c>Harness.abortTask()</c> does, and resolve once it is terminal. Rejects for a task
+        /// another owns; resolves at once for a terminal one.
+        /// </summary>
+        abstract abortOwned: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
+        /// <summary>
+        /// Live tasks this task owns directly, in ID order: also those an earlier invocation created, before a restart. Tasks
+        /// in conversations it owns are not included. Copies of the committed records.
+        /// </summary>
+        abstract ownedTasks: context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StoredTask[]>
         /// <summary>
         /// Outcomes of terminal tasks, in order; rejects when one is missing or not terminal. Used after a wait.
         /// </summary>
-        abstract outcomes: ids: float[] * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<TaskRuntime.Outcomes.Result.Item.Item[]>
+        abstract outcomes<'T>: ids: float[] * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'T>[]>
         /// <summary>
         /// Invocation-bound handle of an existing conversation, for example one this task owns; <c>undefined</c> when absent. Its
         /// operations and the submissions it returns reject after the invocation ends; admitted work stays durable.
@@ -5394,13 +5794,24 @@ module PiDurable =
         /// </summary>
         abstract now: unit -> float
         /// <summary>
-        /// Forward a non-fatal failure to <c>HarnessOptions.onReport</c>.
+        /// Call <c>callback</c> once after about <c>delayMs</c> on the Harness's timer (<c>HarnessOptions.setTimer</c>), for pacing work
+        /// inside a phase, such as throttled progress commits. Not durable: the invocation's end disarms it, and after its end
+        /// nothing is armed. Returns a function that disarms it. Wait for time between phases with <c>sleepUntil()</c>.
         /// </summary>
-        abstract report: error: obj -> unit
+        abstract setTimer: callback: (unit -> unit) * delayMs: float -> (unit -> unit)
         /// <summary>
-        /// Resolve once the Harness clock reaches <c>until</c>; rejects when the invocation or <c>context</c> is cancelled.
+        /// Forward a non-fatal failure to <c>HarnessOptions.onReport</c>, with this task in its info: a <c>task_error</c> about the
+        /// task's own code, or, with <c>from</c>, an <c>extension_error</c> about extension code it called, such as a section, or a
+        /// <c>host_error</c> about a host callback, such as the environment builder.
         /// </summary>
-        abstract sleep: until: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
+        abstract report: error: obj * ?from: ReportFrom -> unit
+        /// <summary>
+        /// Commit a sleep: the task holds no invocation until the Harness clock reaches <c>until</c>, then resumes at <c>checkpoint</c>.
+        /// Resolves once the sleep is stored, not when the time comes; the phase returns right after. Returning
+        /// <c>{ status: "sleeping", until, checkpoint }</c> from <c>commit()</c> is the same sleep, for one that must commit together
+        /// with other writes.
+        /// </summary>
+        abstract sleepUntil: until: float * checkpoint: 'S * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<unit>
 
     [<Interface>]
     type TextLine =
@@ -5425,13 +5836,13 @@ module PiDurable =
         /// <summary>
         /// The tool task's phase snapshot.
         /// </summary>
-        abstract registry: RegistrySnapshot<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>
+        abstract registry: RegistrySnapshot<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>
         /// <summary>
         /// The calling conversation's agent, as the tool task's phase resolved it.
         /// </summary>
         abstract agent: context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<ToolExecutionApi.Agent.Result.Item>
         /// <summary>
-        /// <c>HarnessOptions.models</c>: the catalog, credentials, and request transforms generation uses.
+        /// The current <c>HarnessOptions.models</c>, read at each access: the catalog, credentials, and request transforms.
         /// </summary>
         abstract models: FSharp.CloudEdge.Runtime.PiAi.Models
         /// <summary>
@@ -5439,7 +5850,11 @@ module PiDurable =
         /// </summary>
         abstract env: ExecutionEnv option
         /// <summary>
-        /// Append running output; it becomes the result content when the result omits <c>content</c>. <c>skipped</c> counts output
+        /// The Harness clock (<c>HarnessOptions.now</c>), for times a rerun after a restart compares against.
+        /// </summary>
+        abstract now: unit -> float
+        /// <summary>
+        /// Append running output; it becomes the result's <c>output</c> when the result omits it. <c>skipped</c> counts output
         /// omitted before the chunk, as reported by an environment given <c>outputWindow</c> (<c>ShellOutputInfo.skipped</c>).
         /// </summary>
         abstract output: chunk: obj * ?skipped: ShellOutputSkip -> unit
@@ -5449,6 +5864,11 @@ module PiDurable =
         /// transforms text must also replace this with <c>undefined</c>, so skipped text cannot bypass its transform.
         /// </summary>
         abstract outputWindow: ShellOutputWindow option
+        /// <summary>
+        /// The output retained so far, as the model will see it when the result omits <c>output</c>, and whether earlier output was
+        /// dropped; for a tool that also returns that text in its <c>structuredOutput</c>.
+        /// </summary>
+        abstract retainedOutput: unit -> ToolExecutionApi.RetainedOutput.Result
         /// <summary>
         /// Record a model-visible remark about this call.
         /// </summary>
@@ -5460,21 +5880,48 @@ module PiDurable =
         abstract commit<'T>: change: (Tx -> U2<'T, JS.Promise<'T>>) * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<'T>
         abstract memo<'T>: name: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<'T option>
         abstract memo<'T>: name: string * candidate: 'T * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<'T>
+        /// <summary>
+        /// Create a task in one commit. A child task of a tool that is not replay-safe defaults to <c>abandonOnRestart</c>: the
+        /// tool never resumes after a restart, so nothing awaits the child then.
+        /// </summary>
         abstract createTask<'I, 'S, 'R, 'H>: task: Task<'I, 'S, 'R, 'H> * input: 'I * options: ToolExecutionApi.CreateTask.Options * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<float>
-        abstract getTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item2<'R>> option>
-        abstract waitForTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.WaitForTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.PiDurable.Harness.WaitForTask.Result.Item2<'R>>>
+        abstract getTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.GetTask.Result.Item2<'R>> option>
+        abstract waitForTask<'R>: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<U2<FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item<'R>, FSharp.CloudEdge.Runtime.AgentsPi.Harness.WaitForTask.Result.Item2<'R>>>
         /// <summary>
         /// Invocation-bound handle of an existing conversation, such as one this tool created in <c>commit()</c>.
         /// </summary>
         abstract conversation: id: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<ConversationHandle option>
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ToolExecutionMode =
-        | [<CompiledName("parallel")>] Parallel
-        | [<CompiledName("sequential")>] Sequential
+        /// <summary>
+        /// Run tool <c>name</c> as a nested call of this one and wait for its result. The nested call is its own <c>pi.tool</c> task,
+        /// owned by this call: it resolves the tool among the conversation's tools, validates, runs the <c>ToolTask</c> hooks (which
+        /// see <c>call.parent</c>), applies output limits and the tool's replay policy, and reports progress in <c>pi.live.nestedTools</c>.
+        /// Its result returns here instead of entering the transcript. A call that is blocked, invalid, throws, is interrupted,
+        /// or is aborted returns an <c>isError</c> result.
+        /// <br /><br />
+        /// The nested call's key names it within this call; its call ID is <c>&lt;callId&gt;/&lt;key&gt;</c>. By default the key is the call's
+        /// position among this invocation's nested calls, <c>1</c>, <c>2</c>, ... An explicit <c>key</c> must be non-empty, without <c>/</c>, not
+        /// <c>__proto__</c>, and not a positive integer, so it never collides with a default one. A rerun of a replay-safe tool
+        /// that makes a call with a used key, by calling in the same order or by passing the same <c>key</c>, gets that nested call
+        /// back, finished or still running, instead of starting another. A nested call a crash interrupted before its result
+        /// committed follows its own replay policy, so this is not exactly-once execution. Reusing a key with another tool or
+        /// other arguments throws. A tool that is not replay-safe never reruns: after a restart, its unfinished nested calls
+        /// are abandoned (<c>TaskOptions.abandonOnRestart</c>) before they run again.
+        /// <br /><br />
+        /// <c>progress: false</c> commits no running output, details, or diagnostics to the nested call's slot, only its status;
+        /// the result still carries its details and diagnostics, and a schema-less tool's output as <c>structuredOutput</c>. An
+        /// interrupted or aborted call's result is built from its slot, so it then has none of them. Either way, programs never
+        /// get the partial output of an interrupted or aborted call.
+        /// <br /><br />
+        /// Nested calls run as soon as they are made, whatever their <c>executionMode</c>; the caller decides what runs at once by
+        /// what it awaits. Cancelling <c>context</c> stops only the wait; the nested call runs on. When this call settles, nested
+        /// calls it left running are aborted first. A nested result's <c>usage</c> is already counted under its tool; a result
+        /// that passes it on counts it again. Rejects, instead of returning a result, once <c>execute()</c> has returned, when this
+        /// call is aborted, or when the Harness closes.
+        /// </summary>
+        abstract executeTool: name: string * args: JsonObject * context: FSharp.CloudEdge.Runtime.Chord.Context * ?options: ToolExecutionApi.ExecuteTool.Options -> JS.Promise<ToolExecutionApi.ExecuteTool.Result.Item>
 
     type Tx =
-        abstract conversation: id: float -> JS.Promise<StorageWrite2.Value option>
+        abstract conversation: id: float -> JS.Promise<StorageWrite.Cases.Conversation.Value option>
         /// <summary>
         /// Undefined when the entry is absent or has another kind.
         /// </summary>
@@ -5484,13 +5931,13 @@ module PiDurable =
         /// </summary>
         abstract entry<'D>: token: Entry<'D> * id: float -> JS.Promise<obj option>
         abstract task: id: float -> JS.Promise<StoredTask option>
-        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * ?cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
-        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * ?cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
+        abstract scanConversations: query: SqliteStorage.ScanConversations.Query * limit: float * ?cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> -> JS.Promise<SqliteStorage.ScanConversations.Result.Item>
+        abstract scanEntries: query: SqliteStorage.ScanEntries.Query * limit: float * ?cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> -> JS.Promise<SqliteStorage.ScanEntries.Result.Item>
         /// <summary>
         /// Newest visible entry of the conversation that carries a <c>head</c>.
         /// </summary>
         abstract latestHeadMarker: conversationId: float -> JS.Promise<Tx.LatestHeadMarker.Result.Item option>
-        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * ?cursor: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> -> JS.Promise<Storage.ScanTasks.Result.Item>
+        abstract scanTasks: query: SqliteStorage.ScanTasks.Query * limit: float * ?cursor: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> -> JS.Promise<Storage.ScanTasks.Result.Item>
         /// <summary>
         /// Committed submission with a conversation-scoped request ID.
         /// </summary>
@@ -5498,11 +5945,11 @@ module PiDurable =
         /// <summary>
         /// Create a conversation with explicitly selected ownership.
         /// </summary>
-        abstract createConversation: options: Tx.CreateConversation.Options -> JS.Promise<StorageWrite2.Value>
+        abstract createConversation: options: Tx.CreateConversation.Options -> JS.Promise<StorageWrite.Cases.Conversation.Value>
         /// <summary>
         /// Create a history fork at one concrete visible entry with explicitly selected ownership.
         /// </summary>
-        abstract forkConversation: parentConversationId: float * at: float * options: Tx.ForkConversation.Options -> JS.Promise<StorageWrite2.Value>
+        abstract forkConversation: parentConversationId: float * at: float * options: Tx.ForkConversation.Options -> JS.Promise<StorageWrite.Cases.Conversation.Value>
         /// <summary>
         /// Returned records are Session-owned immutable values and may be shared with commit listeners.
         /// The token supplies <c>kind</c> and types <c>data</c>.
@@ -5530,14 +5977,14 @@ module PiDurable =
         /// <c>settleSubmission()</c>. Inbox boundaries place the submissions they select.
         /// </summary>
         abstract placeSubmission: id: float * entry: float -> unit
-        abstract doc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item<'T>> -> JS.Promise<obj>
-        abstract doc<'T>: token: DocToken<'T, U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item2<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item3<'T>>> * conversationId: float -> JS.Promise<obj>
-        abstract doc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item4<'T>> * taskId: float -> JS.Promise<obj>
+        abstract doc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> -> JS.Promise<obj>
+        abstract doc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float -> JS.Promise<obj>
+        abstract doc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float -> JS.Promise<obj>
         abstract doc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * seed: 'I -> JS.Promise<obj>
         abstract doc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * seed: 'I -> JS.Promise<obj>
-        abstract retireDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item<'T>> -> JS.Promise<unit>
-        abstract retireDoc<'T>: token: DocToken<'T, U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item2<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item3<'T>>> * conversationId: float -> JS.Promise<unit>
-        abstract retireDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item4<'T>> * taskId: float -> JS.Promise<unit>
+        abstract retireDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> -> JS.Promise<unit>
+        abstract retireDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float -> JS.Promise<unit>
+        abstract retireDoc<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float -> JS.Promise<unit>
         abstract retireDoc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string -> JS.Promise<unit>
         abstract retireDoc<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string -> JS.Promise<unit>
 
@@ -5561,7 +6008,7 @@ module PiDurable =
         [<ParamObject; Emit("$0")>]
         static member Create (error: FileError) : WatchChange4 = jsNative
 
-    type WatchEnd = U2<WatchEnd2, WatchEnd3>
+    type WatchEnd = U3<WatchEnd2, WatchEnd3, WatchEnd4>
 
     [<Interface>]
     type WatchEnd2 =
@@ -5571,10 +6018,29 @@ module PiDurable =
 
     [<Interface>]
     type WatchEnd3 =
+        /// <remarks>TypeScript type: <c>"listener_error"</c></remarks>
         abstract reason: string
         abstract error: exn
-        [<ParamObject; Emit("$0")>]
-        static member Create (reason: string, error: exn) : WatchEnd3 = jsNative
+        [<ParamObject; Emit("({ reason: 'listener_error', ...$0 })")>]
+        static member Create (error: exn) : WatchEnd3 = jsNative
+
+    module WatchEnd3 =
+        /// <remarks>TypeScript type: <c>"listener_error"</c></remarks>
+        [<Literal>]
+        let reason = "listener_error"
+
+    [<Interface>]
+    type WatchEnd4 =
+        /// <remarks>TypeScript type: <c>"session_failed"</c></remarks>
+        abstract reason: string
+        abstract error: obj
+        [<ParamObject; Emit("({ reason: 'session_failed', ...$0 })")>]
+        static member Create (error: obj) : WatchEnd4 = jsNative
+
+    module WatchEnd4 =
+        /// <remarks>TypeScript type: <c>"session_failed"</c></remarks>
+        [<Literal>]
+        let reason = "session_failed"
 
     [<Interface>]
     type WatchHandle<'T> =
@@ -5613,7 +6079,7 @@ module PiDurable =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type AgentEvent =
-        | [<CompiledName("snapshot")>] Snapshot of entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[] * run: AgentEventStream.Snapshot.Run option * generation: AgentEventStream.Snapshot.Generation option * tools: AgentEventStream.Snapshot.Tools.Item[] * compactions: AgentEventStream.Snapshot.Compactions.Item[] * inbox: AgentEventStream.Snapshot.Inbox.Item[] * agent: AgentEventStream.Snapshot.Agent * usage: Harness.Usage.Result.Item
+        | [<CompiledName("snapshot"); Fickl.Core.InlineInterface>] Snapshot of AgentEventStream.Snapshot
         | [<CompiledName("run_start")>] RunStart of inputs: float[]
         | [<CompiledName("run_end")>] RunEnd of inputs: float[]
         | [<CompiledName("turn_start")>] TurnStart
@@ -5621,9 +6087,6 @@ module PiDurable =
         | [<CompiledName("message_start")>] MessageStart of message: FSharp.CloudEdge.Runtime.PiAi.Message
         | [<CompiledName("message_update")>] MessageUpdate of usage: FSharp.CloudEdge.Runtime.PiAi.Usage * changes: MessageChange[]
         | [<CompiledName("message_end")>] MessageEnd of entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item
-        | [<CompiledName("tool_execution_start")>] ToolExecutionStart of toolCallId: string * toolName: string * args: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>
-        | [<CompiledName("tool_execution_update")>] ToolExecutionUpdate of toolCallId: string * toolName: string * output: U2<AgentEvent10.Output, AgentEvent10.Output2> option * details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option * diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[] option
-        | [<CompiledName("tool_execution_end")>] ToolExecutionEnd of toolCallId: string * toolName: string * entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item option
         | [<CompiledName("inbox_update")>] InboxUpdate of items: AgentEventStream.Snapshot.Inbox.Item[]
         | [<CompiledName("submission")>] Submission of record: SubmissionRecord
         | [<CompiledName("auto_retry_start")>] AutoRetryStart of attempt: float * at: float * errorMessage: string
@@ -5634,171 +6097,26 @@ module PiDurable =
         | [<CompiledName("usage_changed")>] UsageChanged of usage: Harness.Usage.Result.Item
         | [<CompiledName("task_failed")>] TaskFailed of taskId: float * kind: string * message: string
         | [<CompiledName("compaction_start")>] CompactionStart of taskId: float * reason: CompactionReason * blocking: bool
-        | [<CompiledName("compaction_end")>] CompactionEnd of taskId: float * reason: CompactionReason
-
-    [<Interface>]
-    type AgentEvent10 =
-        abstract ``type``: string with get, set
-        abstract toolCallId: string with get, set
-        abstract toolName: string with get, set
-        /// <summary>
-        /// A front trim and then an append of the retained window, or its replacement.
-        /// </summary>
-        abstract output: U2<AgentEvent10.Output, AgentEvent10.Output2> option with get, set
-        abstract details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option with get, set
-        abstract diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[] option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, toolName: string, ?output: U2<AgentEvent10.Output, AgentEvent10.Output2>, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[]) : AgentEvent10 = jsNative
-
-    [<Interface>]
-    type AgentEvent11 =
-        abstract ``type``: string with get, set
-        abstract toolCallId: string with get, set
-        abstract toolName: string with get, set
-        abstract entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, toolName: string, ?entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item) : AgentEvent11 = jsNative
-
-    [<Interface>]
-    type AgentEvent12 =
-        abstract ``type``: string with get, set
-        abstract items: AgentEventStream.Snapshot.Inbox.Item[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, items: AgentEventStream.Snapshot.Inbox.Item[]) : AgentEvent12 = jsNative
-
-    [<Interface>]
-    type AgentEvent13 =
-        abstract ``type``: string with get, set
-        abstract record: SubmissionRecord with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, record: SubmissionRecord) : AgentEvent13 = jsNative
-
-    [<Interface>]
-    type AgentEvent14 =
-        abstract ``type``: string with get, set
-        abstract attempt: float with get, set
-        abstract at: float with get, set
-        abstract errorMessage: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, attempt: float, at: float, errorMessage: string) : AgentEvent14 = jsNative
-
-    [<Interface>]
-    type AgentEvent15 =
-        abstract ``type``: string with get, set
-        abstract attempt: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, attempt: float) : AgentEvent15 = jsNative
-
-    [<Interface>]
-    type AgentEvent16 =
-        abstract ``type``: string with get, set
-        abstract pollAt: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, pollAt: float) : AgentEvent16 = jsNative
-
-    [<Interface>]
-    type AgentEvent17 =
-        abstract ``type``: string with get, set
-        abstract entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item) : AgentEvent17 = jsNative
-
-    [<Interface>]
-    type AgentEvent18 =
-        abstract ``type``: string with get, set
-        abstract agent: AgentEventStream.Snapshot.Agent with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, agent: AgentEventStream.Snapshot.Agent) : AgentEvent18 = jsNative
-
-    [<Interface>]
-    type AgentEvent19 =
-        abstract ``type``: string with get, set
-        abstract usage: Harness.Usage.Result.Item with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, usage: Harness.Usage.Result.Item) : AgentEvent19 = jsNative
-
-    [<Interface>]
-    type AgentEvent2 =
-        abstract ``type``: string with get, set
-        abstract inputs: float[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, inputs: float[]) : AgentEvent2 = jsNative
-
-    [<Interface>]
-    type AgentEvent20 =
-        abstract ``type``: string with get, set
-        abstract taskId: float with get, set
-        abstract kind: string with get, set
-        abstract message: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, taskId: float, kind: string, message: string) : AgentEvent20 = jsNative
-
-    [<Interface>]
-    type AgentEvent21 =
-        abstract ``type``: string with get, set
-        abstract taskId: float with get, set
-        abstract reason: CompactionReason with get, set
-        abstract blocking: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, taskId: float, reason: CompactionReason, blocking: bool) : AgentEvent21 = jsNative
-
-    [<Interface>]
-    type AgentEvent22 =
-        abstract ``type``: string with get, set
-        abstract taskId: float with get, set
-        abstract reason: CompactionReason with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, taskId: float, reason: CompactionReason) : AgentEvent22 = jsNative
-
-    [<Interface>]
-    type AgentEvent3 =
-        abstract ``type``: string with get, set
-        abstract inputs: float[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, inputs: float[]) : AgentEvent3 = jsNative
-
-    [<Interface>]
-    type AgentEvent4 =
-        abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string) : AgentEvent4 = jsNative
-
-    [<Interface>]
-    type AgentEvent5 =
-        abstract ``type``: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string) : AgentEvent5 = jsNative
-
-    [<Interface>]
-    type AgentEvent6 =
-        abstract ``type``: string with get, set
-        abstract message: FSharp.CloudEdge.Runtime.PiAi.Message with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: FSharp.CloudEdge.Runtime.PiAi.Message) : AgentEvent6 = jsNative
-
-    [<Interface>]
-    type AgentEvent7 =
-        abstract ``type``: string with get, set
-        abstract usage: FSharp.CloudEdge.Runtime.PiAi.Usage with get, set
-        abstract changes: MessageChange[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, usage: FSharp.CloudEdge.Runtime.PiAi.Usage, changes: MessageChange[]) : AgentEvent7 = jsNative
-
-    [<Interface>]
-    type AgentEvent8 =
-        abstract ``type``: string with get, set
-        abstract entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item) : AgentEvent8 = jsNative
-
-    [<Interface>]
-    type AgentEvent9 =
-        abstract ``type``: string with get, set
-        abstract toolCallId: string with get, set
-        abstract toolName: string with get, set
-        abstract args: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, toolCallId: string, toolName: string, args: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : AgentEvent9 = jsNative
+        | [<CompiledName("compaction_end")>] CompactionEnd of taskId: float * reason: CompactionReason * error: string option
+        | [<CompiledName("tool_execution_start")>] ToolExecutionStart of args: JsonObject * toolCallId: string * toolName: string * taskId: float option * parentToolCallId: string option * parentTaskId: float option
+        /// <param name="output">A front trim and then an append of the retained window, or its replacement.</param>
+        /// <param name="details"></param>
+        /// <param name="diagnostics"></param>
+        /// <param name="toolCallId"></param>
+        /// <param name="toolName"></param>
+        /// <param name="taskId"></param>
+        /// <param name="parentToolCallId"></param>
+        /// <param name="parentTaskId"></param>
+        | [<CompiledName("tool_execution_update")>] ToolExecutionUpdate of output: U2<AgentEvent.Cases.ToolExecutionUpdate.Output, AgentEvent.Cases.ToolExecutionUpdate.Output2> option * details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option * diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[] option * toolCallId: string * toolName: string * taskId: float option * parentToolCallId: string option * parentTaskId: float option
+        | [<CompiledName("tool_execution_end")>] ToolExecutionEnd of entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item option * result: ToolExecutionApi.ExecuteTool.Result.Item option * toolCallId: string * toolName: string * taskId: float option * parentToolCallId: string option * parentTaskId: float option
+        [<ParamObject; Emit("({ type: 'compaction_end', ...$0 })")>]
+        static member CreateCompactionEnd (taskId: float, reason: CompactionReason, ?error: string) : AgentEvent = jsNative
+        [<ParamObject; Emit("({ type: 'tool_execution_start', ...$0 })")>]
+        static member CreateToolExecutionStart (args: JsonObject, toolCallId: string, toolName: string, ?taskId: float, ?parentToolCallId: string, ?parentTaskId: float) : AgentEvent = jsNative
+        [<ParamObject; Emit("({ type: 'tool_execution_update', ...$0 })")>]
+        static member CreateToolExecutionUpdate (toolCallId: string, toolName: string, ?output: U2<AgentEvent.Cases.ToolExecutionUpdate.Output, AgentEvent.Cases.ToolExecutionUpdate.Output2>, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?taskId: float, ?parentToolCallId: string, ?parentTaskId: float) : AgentEvent = jsNative
+        [<ParamObject; Emit("({ type: 'tool_execution_end', ...$0 })")>]
+        static member CreateToolExecutionEnd (toolCallId: string, toolName: string, ?entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item, ?result: ToolExecutionApi.ExecuteTool.Result.Item, ?taskId: float, ?parentToolCallId: string, ?parentTaskId: float) : AgentEvent = jsNative
 
     [<Interface>]
     type AgentEventStream =
@@ -5811,12 +6129,6 @@ module PiDurable =
         abstract closed: JS.Promise<WatchEnd>
         [<ParamObject; Emit("$0")>]
         static member Create (snapshot: AgentEventStream.Snapshot, start: (AgentEventStream.Start.Listener -> unit), stop: (unit -> JS.Promise<WatchEnd>), closed: JS.Promise<WatchEnd>) : AgentEventStream = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type CompactionReason =
-        | [<CompiledName("manual")>] Manual
-        | [<CompiledName("overflow")>] Overflow
-        | [<CompiledName("threshold")>] Threshold
 
     type MessageChange = U5<MessageChange2, MessageChange3, MessageChange4, MessageChange5, MessageChange6>
 
@@ -5838,45 +6150,109 @@ module PiDurable =
 
     [<Interface>]
     type MessageChange4 =
+        /// <remarks>TypeScript type: <c>"toolcall_delta"</c></remarks>
         abstract ``type``: string with get, set
         abstract contentIndex: float with get, set
         abstract path: FSharp.CloudEdge.Runtime.Chord.Seg[] with get, set
         abstract delta: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, path: FSharp.CloudEdge.Runtime.Chord.Seg[], delta: string) : MessageChange4 = jsNative
+        [<ParamObject; Emit("({ type: 'toolcall_delta', ...$0 })")>]
+        static member Create (contentIndex: float, path: FSharp.CloudEdge.Runtime.Chord.Seg[], delta: string) : MessageChange4 = jsNative
+
+    module MessageChange4 =
+        /// <remarks>TypeScript type: <c>"toolcall_delta"</c></remarks>
+        [<Literal>]
+        let ``type`` = "toolcall_delta"
 
     [<Interface>]
     type MessageChange5 =
+        /// <remarks>TypeScript type: <c>"block"</c></remarks>
         abstract ``type``: string with get, set
         abstract contentIndex: float with get, set
         abstract block: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.Content.Item with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, contentIndex: float, block: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.Content.Item) : MessageChange5 = jsNative
+        [<ParamObject; Emit("({ type: 'block', ...$0 })")>]
+        static member Create (contentIndex: float, block: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.Content.Item) : MessageChange5 = jsNative
+
+    module MessageChange5 =
+        /// <remarks>TypeScript type: <c>"block"</c></remarks>
+        [<Literal>]
+        let ``type`` = "block"
 
     [<Interface>]
     type MessageChange6 =
+        /// <remarks>TypeScript type: <c>"message"</c></remarks>
         abstract ``type``: string with get, set
         abstract message: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``type``: string, message: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage) : MessageChange6 = jsNative
+        [<ParamObject; Emit("({ type: 'message', ...$0 })")>]
+        static member Create (message: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage) : MessageChange6 = jsNative
 
-    module AgentEvent10 =
-        [<Interface>]
-        type Output =
-            abstract trimStart: float option with get, set
-            abstract append: string option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?trimStart: float, ?append: string) : Output = jsNative
+    module MessageChange6 =
+        /// <remarks>TypeScript type: <c>"message"</c></remarks>
+        [<Literal>]
+        let ``type`` = "message"
 
-        [<Interface>]
-        type Output2 =
-            abstract set: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (set: string) : Output2 = jsNative
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type FileKind =
+        | [<CompiledName("directory")>] Directory
+        | [<CompiledName("file")>] File
+        | [<CompiledName("symlink")>] Symlink
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ToolExecutionMode =
+        | [<CompiledName("parallel")>] Parallel
+        | [<CompiledName("sequential")>] Sequential
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type QueueMode =
+        | [<CompiledName("all")>] All
+        | [<CompiledName("one-at-a-time")>] OneAtATime
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type CompactionReason =
+        | [<CompiledName("manual")>] Manual
+        | [<CompiledName("overflow")>] Overflow
+        | [<CompiledName("threshold")>] Threshold
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type AfterFailedRun =
+        | [<CompiledName("continue")>] Continue
+        | [<CompiledName("keep")>] Keep
+        | [<CompiledName("withdraw")>] Withdraw
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type HostCallback =
+        | [<CompiledName("env")>] Env
+        | [<CompiledName("models")>] Models
+        | [<CompiledName("now")>] Now
+        | [<CompiledName("onWake")>] OnWake
+        | [<CompiledName("registry")>] Registry
+        | [<CompiledName("setTimer")>] SetTimer
+        | [<CompiledName("settings")>] Settings
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type JoinPolicy =
+        | [<CompiledName("allSettled")>] AllSettled
+        | [<CompiledName("failFast")>] FailFast
+
+    module AgentEvent =
+        module Cases =
+            module ToolExecutionUpdate =
+                [<Interface>]
+                type Output =
+                    abstract trimStart: float option with get, set
+                    abstract append: string option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?trimStart: float, ?append: string) : Output = jsNative
+
+                [<Interface>]
+                type Output2 =
+                    abstract set: string with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (set: string) : Output2 = jsNative
 
     module AgentEventStream =
         [<Interface>]
         type Snapshot =
+            /// <remarks>TypeScript type: <c>"snapshot"</c></remarks>
             abstract ``type``: string with get, set
             abstract entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[] with get, set
             abstract run: AgentEventStream.Snapshot.Run option with get, set
@@ -5886,31 +6262,53 @@ module PiDurable =
             abstract generation: AgentEventStream.Snapshot.Generation option with get, set
             abstract tools: AgentEventStream.Snapshot.Tools.Item[] with get, set
             /// <summary>
+            /// <c>pi.live.nestedTools</c>: nested calls of running tool calls.
+            /// </summary>
+            abstract nestedTools: AgentEventStream.Snapshot.NestedTools.Item[] with get, set
+            /// <summary>
             /// <c>pi.live.compactions</c>: live compactions with their attempt and retry backoff.
             /// </summary>
             abstract compactions: AgentEventStream.Snapshot.Compactions.Item[] with get, set
+            /// <summary>
+            /// <c>pi.live.compactionFailure</c>: the newest compaction failure since a compaction last produced a summary.
+            /// </summary>
+            abstract compactionFailure: AgentEventStream.Snapshot.CompactionFailure option with get, set
             abstract inbox: AgentEventStream.Snapshot.Inbox.Item[] with get, set
             /// <summary>
             /// <c>pi.agent</c>; <c>{}</c> when absent.
             /// </summary>
             abstract agent: AgentEventStream.Snapshot.Agent with get, set
             abstract usage: Harness.Usage.Result.Item with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (``type``: string, entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], tools: AgentEventStream.Snapshot.Tools.Item[], compactions: AgentEventStream.Snapshot.Compactions.Item[], inbox: AgentEventStream.Snapshot.Inbox.Item[], agent: AgentEventStream.Snapshot.Agent, usage: Harness.Usage.Result.Item, ?run: AgentEventStream.Snapshot.Run, ?generation: AgentEventStream.Snapshot.Generation) : Snapshot = jsNative
+            [<ParamObject; Emit("({ type: 'snapshot', ...$0 })")>]
+            static member Create (entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], tools: AgentEventStream.Snapshot.Tools.Item[], nestedTools: AgentEventStream.Snapshot.NestedTools.Item[], compactions: AgentEventStream.Snapshot.Compactions.Item[], inbox: AgentEventStream.Snapshot.Inbox.Item[], agent: AgentEventStream.Snapshot.Agent, usage: Harness.Usage.Result.Item, ?run: AgentEventStream.Snapshot.Run, ?generation: AgentEventStream.Snapshot.Generation, ?compactionFailure: AgentEventStream.Snapshot.CompactionFailure) : Snapshot = jsNative
 
         module Snapshot =
+            /// <remarks>TypeScript type: <c>"snapshot"</c></remarks>
+            [<Literal>]
+            let ``type`` = "snapshot"
+
             [<Interface>]
             type Agent =
                 abstract model: Harness.Root.Options.Agent.Model option with get, set
-                abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel option with get, set
+                abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel option with get, set
                 /// <summary>
                 /// An array selects exactly these extensions, in order. An object edits the host default selection.
                 /// </summary>
                 abstract extensions: U2<string[], AgentEventStream.Snapshot.Agent.Extensions> option with get, set
                 /// <summary>
-                /// Filters the selected extensions' tools. An array offers exactly these, in order.
+                /// Filters the selected extensions' tools: the enabled tools. An array enables exactly these, in order.
                 /// </summary>
                 abstract tools: U2<string[], FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream.Snapshot.Agent.Tools> option with get, set
+                /// <summary>
+                /// Filters the enabled tools the model may call (<c>callers</c> includes <c>model</c>): the tools offered to it. Never widens:
+                /// other tools can still call the ones it leaves out.
+                /// - Unset: every such tool except deferred ones.
+                /// - An array: exactly these, in order, deferred ones too.
+                /// - An object: every such tool except deferred ones and those in <c>remove</c>, in registry order, followed by the
+                ///   deferred tools in <c>add</c> that are not in <c>remove</c>, in <c>add</c> order. Names of tools that are not deferred or not
+                ///   registered have no effect in <c>add</c>.
+                /// </summary>
+                abstract modelTools: U2<string[], AgentEventStream.Snapshot.Agent.ModelTools> option with get, set
                 /// <summary>
                 /// Rendered after every extension section, as the section <c>instructions</c>.
                 /// </summary>
@@ -5920,7 +6318,18 @@ module PiDurable =
                 /// </summary>
                 abstract cwd: string option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?model: Harness.Root.Options.Agent.Model, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, ?extensions: U2<string[], AgentEventStream.Snapshot.Agent.Extensions>, ?tools: U2<string[], FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream.Snapshot.Agent.Tools>, ?instructions: string, ?cwd: string) : Agent = jsNative
+                static member Create (?model: Harness.Root.Options.Agent.Model, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, ?extensions: U2<string[], AgentEventStream.Snapshot.Agent.Extensions>, ?tools: U2<string[], FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream.Snapshot.Agent.Tools>, ?modelTools: U2<string[], AgentEventStream.Snapshot.Agent.ModelTools>, ?instructions: string, ?cwd: string) : Agent = jsNative
+
+            [<Interface>]
+            type CompactionFailure =
+                abstract taskId: float with get, set
+                abstract reason: CompactionReason with get, set
+                /// <summary>
+                /// The failed or faulted outcome's error message, or why the scheduler orphaned the task.
+                /// </summary>
+                abstract error: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (taskId: float, reason: CompactionReason, error: string) : CompactionFailure = jsNative
 
             [<Interface>]
             type Generation =
@@ -5944,6 +6353,13 @@ module PiDurable =
                     abstract remove: string[] option with get, set
                     [<ParamObject; Emit("$0")>]
                     static member Create (?add: string[], ?remove: string[]) : Extensions = jsNative
+
+                [<Interface>]
+                type ModelTools =
+                    abstract remove: string[] option with get, set
+                    abstract add: string[] option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?remove: string[], ?add: string[]) : ModelTools = jsNative
 
                 [<Interface>]
                 type Tools =
@@ -6005,39 +6421,74 @@ module PiDurable =
                         | [<CompiledName("steer")>] Steer
                         | [<CompiledName("write")>] Write
 
+            module NestedTools =
+                [<Interface>]
+                type Item =
+                    inherit AgentEventStream.Snapshot.Tools.Item.Base
+                    abstract parentCallId: string with get, set
+                    abstract parentTaskId: float with get, set
+                    abstract taskId: float with get, set
+                    /// <summary>
+                    /// What the call was made with, replaced by the arguments it runs with, after repair, <c>beforeTool</c>, and coercion,
+                    /// once it starts executing. A model-issued call's arguments are in its assistant entry instead.
+                    /// </summary>
+                    abstract arguments: JsonObject with get, set
+                    /// <summary>
+                    /// Once done: how the call ended, for a status line. The result itself is in the caller's <c>NestedCallDoc</c>.
+                    /// </summary>
+                    abstract summary: AgentEventStream.Snapshot.NestedTools.Item.Summary option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (callId: string, name: string, status: AgentEventStream.Snapshot.Tools.Item.Status, parentCallId: string, parentTaskId: float, taskId: float, arguments: JsonObject, ?output: string, ?droppedBytes: float, ?droppedLines: float, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?summary: AgentEventStream.Snapshot.NestedTools.Item.Summary) : Item = jsNative
+
+                module Item =
+                    [<Interface>]
+                    type Summary =
+                        abstract isError: bool with get, set
+                        abstract durationMs: float option with get, set
+                        abstract usage: FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item option with get, set
+                        abstract error: string option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (isError: bool, ?durationMs: float, ?usage: FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item, ?error: string) : Summary = jsNative
+
             module Tools =
                 [<Interface>]
                 type Item =
-                    abstract callId: string with get, set
-                    abstract name: string with get, set
+                    inherit AgentEventStream.Snapshot.Tools.Item.Base
                     /// <summary>
                     /// Absent for a call not started yet (sequential round) and for a call its request did not offer, which starts <c>done</c>
                     /// with the <c>entry</c> generation wrote.
                     /// </summary>
                     abstract taskId: float option with get, set
-                    abstract status: AgentEventStream.Snapshot.Tools.Item.Status with get, set
-                    /// <summary>
-                    /// Retained running output and what the bounds dropped.
-                    /// </summary>
-                    abstract output: string option with get, set
-                    abstract droppedBytes: float option with get, set
-                    abstract droppedLines: float option with get, set
-                    /// <summary>
-                    /// Last <c>details()</c> value.
-                    /// </summary>
-                    abstract details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option with get, set
-                    /// <summary>
-                    /// Diagnostics recorded through <c>api.diagnostic()</c>.
-                    /// </summary>
-                    abstract diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[] option with get, set
                     /// <summary>
                     /// Result entry once done; absent when the tool task faulted or was orphaned.
                     /// </summary>
                     abstract entry: float option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (callId: string, name: string, status: AgentEventStream.Snapshot.Tools.Item.Status, ?taskId: float, ?output: string, ?droppedBytes: float, ?droppedLines: float, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?entry: float) : Item = jsNative
+                    static member Create (callId: string, name: string, status: AgentEventStream.Snapshot.Tools.Item.Status, ?output: string, ?droppedBytes: float, ?droppedLines: float, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?taskId: float, ?entry: float) : Item = jsNative
 
                 module Item =
+                    [<Interface>]
+                    type Base =
+                        abstract callId: string with get, set
+                        abstract name: string with get, set
+                        abstract status: FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream.Snapshot.Tools.Item.Status with get, set
+                        /// <summary>
+                        /// Retained running output and what the bounds dropped.
+                        /// </summary>
+                        abstract output: string option with get, set
+                        abstract droppedBytes: float option with get, set
+                        abstract droppedLines: float option with get, set
+                        /// <summary>
+                        /// Last <c>details()</c> value.
+                        /// </summary>
+                        abstract details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option with get, set
+                        /// <summary>
+                        /// Diagnostics recorded through <c>api.diagnostic()</c>.
+                        /// </summary>
+                        abstract diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[] option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (callId: string, name: string, status: FSharp.CloudEdge.Runtime.PiDurable.AgentEventStream.Snapshot.Tools.Item.Status, ?output: string, ?droppedBytes: float, ?droppedLines: float, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[]) : Base = jsNative
+
                     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                     type Status =
                         | [<CompiledName("done")>] Done
@@ -6074,15 +6525,6 @@ module PiDurable =
                     static member Create (ok: bool, value: LineScan) : Item = jsNative
 
     module CheckpointWhen =
-        [<Interface>]
-        type Info =
-            /// <summary>
-            /// Deltas already stored after the newest base, excluding the change being evaluated.
-            /// </summary>
-            abstract deltasSinceBase: float
-            [<ParamObject; Emit("$0")>]
-            static member Create (deltasSinceBase: float) : Info = jsNative
-
         type Value<'T> =
             [<EmitIndexer>]
             abstract Item: string -> obj
@@ -6130,7 +6572,7 @@ module PiDurable =
                 module Item =
                     [<Interface>]
                     type Item =
-                        abstract conversation: StorageWrite2.Value
+                        abstract conversation: StorageWrite.Cases.Conversation.Value
                         /// <summary>
                         /// Raw active entries, as <c>ContextView.entries</c>: the head marker, then the non-head entries from its head.
                         /// </summary>
@@ -6138,9 +6580,9 @@ module PiDurable =
                         /// <summary>
                         /// Built-in conversation documents keyed by kind; absent documents are absent.
                         /// </summary>
-                        abstract docs: ReadonlyRecord<string, Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>
+                        abstract docs: JS.ReadonlyRecord<string, JsonObject>
                         [<ParamObject; Emit("$0")>]
-                        static member Create (conversation: StorageWrite2.Value, entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], docs: ReadonlyRecord<string, Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>) : Item = jsNative
+                        static member Create (conversation: StorageWrite.Cases.Conversation.Value, entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], docs: JS.ReadonlyRecord<string, JsonObject>) : Item = jsNative
 
     module ConversationHandle =
         module Abort =
@@ -6159,14 +6601,22 @@ module PiDurable =
             [<Interface>]
             type Submission =
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
                 abstract ``type``: string
                 abstract content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>
                 abstract whenBusy: ConversationHandle.Submit.Submission.WhenBusy option
-                abstract entry: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (``type``: string, content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, ?requestId: string, ?whenBusy: ConversationHandle.Submit.Submission.WhenBusy, ?entry: unit) : Submission = jsNative
+                /// <summary>
+                /// Place the input as this entry; default <c>pi.user</c> without data. The kind must not start with <c>pi.</c>.
+                /// </summary>
+                abstract entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions.Entry option
+                [<ParamObject; Emit("({ type: 'input', ...$0 })")>]
+                static member Create (content: U2<string, FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[]>, ?requestId: string, ?whenBusy: ConversationHandle.Submit.Submission.WhenBusy, ?entry: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiSubmitOptions.Entry) : Submission = jsNative
 
             module Submission =
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
+                [<Literal>]
+                let ``type`` = "input"
+
                 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
                 type WhenBusy =
                     | [<CompiledName("followUp")>] FollowUp
@@ -6377,24 +6827,32 @@ module PiDurable =
                         /// <summary>
                         /// Sections already in effect after replaying the active transcript.
                         /// </summary>
-                        abstract shown: ReadonlyRecord<string, string>
+                        abstract shown: JS.ReadonlyRecord<string, string>
                         /// <summary>
                         /// Committed document reads.
                         /// </summary>
                         abstract read: Extension.Sections.Item.Render.Input.Read
                         [<ParamObject; Emit("$0")>]
-                        static member Create (conversationId: float, agent: Extension.Sections.Item.Render.Input.Agent<'Tool>, shown: ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input<'Tool> = jsNative
+                        static member Create (conversationId: float, agent: Extension.Sections.Item.Render.Input.Agent<'Tool>, shown: JS.ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input<'Tool> = jsNative
 
                     module Input =
                         [<Interface>]
                         type Agent<'Tool> =
                             abstract model: Harness.Root.Options.Agent.Model option
-                            abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel
+                            abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel
                             abstract extensions: Extension<'Tool>[]
                             /// <summary>
-                            /// The tools a request offers, in order.
+                            /// The tools a request offers, in order: enabled, callable by the model, and selected by <c>modelTools</c>.
                             /// </summary>
                             abstract tools: 'Tool[]
+                            /// <summary>
+                            /// The tools nested calls (<c>executeTool()</c>) resolve among, in order: enabled and callable by tools.
+                            /// </summary>
+                            abstract callable: 'Tool[]
+                            /// <summary>
+                            /// Enabled deferred tools the model may call and is not offered yet, in registry order: what <c>tool_search</c> loads.
+                            /// </summary>
+                            abstract deferred: 'Tool[]
                             /// <summary>
                             /// Extension sections, then <c>instructions</c> when set.
                             /// </summary>
@@ -6402,64 +6860,70 @@ module PiDurable =
                             abstract instructions: string option
                             abstract cwd: string option
                             [<ParamObject; Emit("$0")>]
-                            static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, extensions: Extension<'Tool>[], tools: 'Tool[], sections: FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item<'Tool>[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Agent<'Tool> = jsNative
+                            static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, extensions: Extension<'Tool>[], tools: 'Tool[], callable: 'Tool[], deferred: 'Tool[], sections: FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item<'Tool>[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Agent<'Tool> = jsNative
 
                         type Read =
-                            abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<CheckpointWhen.Value<'T> option>
-                            abstract snapshot<'T>: token: DocToken<'T, U2<FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item2<'T>, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item3<'T>>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-                            abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Harness.DocumentState.Token.Item4<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-                            abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+                            abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item<'T>> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+                            abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item2<'T>> * conversationId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+                            abstract snapshot<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item3<'T>> * taskId: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+                            abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<CheckpointWhen.Value<'T> option>
                             abstract snapshot<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
-                            abstract snapshotAsOf<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.PiDurable.Extension.Sections.Item.Render.Input.Read.SnapshotAsOf.Token.Item<'T>> * conversationId: float * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
+                            abstract snapshotAsOf<'T>: token: DocToken<'T, FSharp.CloudEdge.Runtime.AgentsPi.Harness.DocumentState.Token.Item23<'T>> * conversationId: float * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
                             abstract snapshotAsOf<'T, 'I>: token: DocFamilyToken<'T, 'I, obj> * conversationId: float * key: string * at: float * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen.Value<'T> option>
 
                         module Read =
-                            module SnapshotAsOf =
+                            module Snapshot =
                                 module Token =
-                                    [<Interface>]
-                                    type Item<'T> =
-                                        /// <summary>
-                                        /// Stable persisted kind; part of the public protocol.
-                                        /// </summary>
-                                        abstract kind: string
-                                        /// <summary>
-                                        /// Positive integer version of the stored value shape.
-                                        /// </summary>
-                                        abstract version: float
-                                        abstract initial: unit -> 'T
-                                        abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                                        /// <summary>
-                                        /// Return true to store this ordinary change as a complete base instead of a delta.
-                                        /// </summary>
-                                        abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                                        abstract scope: string
-                                        abstract history: string
-                                        abstract fork: StorageWrite6.Record4.Fork
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (kind: string, version: float, initial: (unit -> 'T), scope: string, history: string, fork: StorageWrite6.Record4.Fork, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item<'T> = jsNative
+                                    module Item =
+                                        module CheckpointWhen =
+                                            [<Interface>]
+                                            type Info =
+                                                /// <summary>
+                                                /// Deltas already stored after the newest base, excluding the change being evaluated.
+                                                /// </summary>
+                                                abstract deltasSinceBase: float
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (deltasSinceBase: float) : Info = jsNative
 
-                                    [<Interface>]
-                                    type Item2<'I, 'T> =
-                                        /// <summary>
-                                        /// Stable persisted kind; part of the public protocol.
-                                        /// </summary>
-                                        abstract kind: string
-                                        /// <summary>
-                                        /// Positive integer version of the stored value shape.
-                                        /// </summary>
-                                        abstract version: float
-                                        abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                                        /// <summary>
-                                        /// Return true to store this ordinary change as a complete base instead of a delta.
-                                        /// </summary>
-                                        abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                                        abstract scope: string
-                                        abstract history: string
-                                        abstract fork: StorageWrite6.Record4.Fork
-                                        abstract family: bool
-                                        abstract initial: seed: 'I -> 'T
-                                        [<ParamObject; Emit("$0")>]
-                                        static member Create (kind: string, version: float, scope: string, history: string, fork: StorageWrite6.Record4.Fork, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item2<'I, 'T> = jsNative
+                                    module Item2 =
+                                        module Cases =
+                                            module Latest =
+                                                [<Interface>]
+                                                type Base2 =
+                                                    /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                                                    abstract scope: string
+                                                    /// <remarks>TypeScript type: <c>"latest"</c></remarks>
+                                                    abstract history: string
+                                                    abstract fork: StorageWrite.Cases.DocumentCreate.Record3.Fork
+                                                    [<ParamObject; Emit("({ scope: 'conversation', history: 'latest', ...$0 })")>]
+                                                    static member Create (fork: StorageWrite.Cases.DocumentCreate.Record3.Fork) : Base2 = jsNative
+
+                                                module Base2 =
+                                                    /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                                                    [<Literal>]
+                                                    let scope = "conversation"
+                                                    /// <remarks>TypeScript type: <c>"latest"</c></remarks>
+                                                    [<Literal>]
+                                                    let history = "latest"
+
+                                            module Rewindable =
+                                                [<Interface>]
+                                                type Base =
+                                                    /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                                                    abstract scope: string
+                                                    /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
+                                                    abstract history: string
+                                                    abstract fork: StorageWrite.Cases.DocumentCreate.Record4.Fork
+                                                    [<ParamObject; Emit("({ scope: 'conversation', history: 'rewindable', ...$0 })")>]
+                                                    static member Create (fork: StorageWrite.Cases.DocumentCreate.Record4.Fork) : Base = jsNative
+
+                                                module Base =
+                                                    /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                                                    [<Literal>]
+                                                    let scope = "conversation"
+                                                    /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
+                                                    [<Literal>]
+                                                    let history = "rewindable"
 
         module Tasks =
             [<Interface>]
@@ -6474,12 +6938,12 @@ module PiDurable =
                     abstract name: string
                     abstract version: float
                     abstract initial: obj
-                    abstract phases: ReadonlyRecord<string, obj>
+                    abstract phases: JS.ReadonlyRecord<string, obj>
                     abstract abort: obj
                     abstract migrate: obj option
                     abstract hooks: obj option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (name: string, version: float, initial: obj, phases: ReadonlyRecord<string, obj>, abort: obj, ?migrate: obj, ?hooks: obj) : Definition = jsNative
+                    static member Create (name: string, version: float, initial: obj, phases: JS.ReadonlyRecord<string, obj>, abort: obj, ?migrate: obj, ?hooks: obj) : Definition = jsNative
 
         module Wraps =
             [<Interface>]
@@ -6503,319 +6967,6 @@ module PiDurable =
             | [<CompiledName("polling")>] Polling
 
     module Harness =
-        module AbortSubmission =
-            module Result =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("aborted")>] Aborted
-                    | [<CompiledName("already_placed")>] AlreadyPlaced
-                    | [<CompiledName("not_found")>] NotFound
-                    | [<CompiledName("settled")>] Settled
-
-        module AbortTask =
-            module Result =
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Item =
-                    | [<CompiledName("marked")>] Marked
-                    | [<CompiledName("terminal")>] Terminal
-
-        module DocumentState =
-            module Token =
-                [<Interface>]
-                type Item<'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract initial: unit -> 'T
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, initial: (unit -> 'T), scope: string, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item<'T> = jsNative
-
-                [<Interface>]
-                type Item2<'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract initial: unit -> 'T
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: string
-                    abstract fork: StorageWrite6.Record3.Fork
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, initial: (unit -> 'T), scope: string, history: string, fork: StorageWrite6.Record3.Fork, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item2<'T> = jsNative
-
-                [<Interface>]
-                type Item3<'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract initial: unit -> 'T
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: string
-                    abstract fork: StorageWrite6.Record4.Fork
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, initial: (unit -> 'T), scope: string, history: string, fork: StorageWrite6.Record4.Fork, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item3<'T> = jsNative
-
-                [<Interface>]
-                type Item4<'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract initial: unit -> 'T
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, initial: (unit -> 'T), scope: string, ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item4<'T> = jsNative
-
-                [<Interface>]
-                type Item5<'I, 'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: unit option
-                    abstract fork: unit option
-                    abstract family: bool
-                    abstract initial: seed: 'I -> 'T
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, scope: string, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, ?history: unit, ?fork: unit) : Item5<'I, 'T> = jsNative
-
-                [<Interface>]
-                type Item6<'I, 'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: string
-                    abstract fork: StorageWrite6.Record3.Fork
-                    abstract family: bool
-                    abstract initial: seed: 'I -> 'T
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, scope: string, history: string, fork: StorageWrite6.Record3.Fork, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item6<'I, 'T> = jsNative
-
-                [<Interface>]
-                type Item7<'I, 'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: string
-                    abstract fork: StorageWrite6.Record4.Fork
-                    abstract family: bool
-                    abstract initial: seed: 'I -> 'T
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, scope: string, history: string, fork: StorageWrite6.Record4.Fork, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>) : Item7<'I, 'T> = jsNative
-
-                [<Interface>]
-                type Item8<'I, 'T> =
-                    /// <summary>
-                    /// Stable persisted kind; part of the public protocol.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Positive integer version of the stored value shape.
-                    /// </summary>
-                    abstract version: float
-                    abstract migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T> option with get, set
-                    /// <summary>
-                    /// Return true to store this ordinary change as a complete base instead of a delta.
-                    /// </summary>
-                    abstract checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T> option with get, set
-                    abstract scope: string
-                    abstract history: unit option
-                    abstract fork: unit option
-                    abstract family: bool
-                    abstract initial: seed: 'I -> 'T
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (kind: string, version: float, scope: string, family: bool, initial: ('I -> 'T), ?migrate: FSharp.CloudEdge.Runtime.PiDurable.Migrate<'T>, ?checkpointWhen: FSharp.CloudEdge.Runtime.PiDurable.CheckpointWhen<'T>, ?history: unit, ?fork: unit) : Item8<'I, 'T> = jsNative
-
-        module GetTask =
-            module Result =
-                [<Interface>]
-                type Item<'R> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
-                    abstract state: StorageWrite4.Value.State
-                    /// <summary>
-                    /// Small first-writer-wins values retained while the task can run.
-                    /// </summary>
-                    abstract memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: StorageWrite4.Value.State, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item<'R> = jsNative
-
-                [<Interface>]
-                type Item2<'R> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
-                    abstract state: Harness.GetTask.Result.Item2.State
-                    abstract memos: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: Harness.GetTask.Result.Item2.State, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: unit) : Item2<'R> = jsNative
-
-                module Item2 =
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type State =
-                        | [<CompiledName("completing")>] Completing of checkpoint: unit option * outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item
-                        | [<CompiledName("terminal")>] Terminal of checkpoint: unit option * outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item
-
-                    [<Interface>]
-                    type State2<'R> =
-                        /// <summary>
-                        /// Outcome decided; becomes terminal once no ordinary owned work below is live. Runs no more code.
-                        /// </summary>
-                        abstract status: string
-                        abstract checkpoint: unit option
-                        abstract outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (status: string, outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item, ?checkpoint: unit) : State2<'R> = jsNative
-
-                    [<Interface>]
-                    type State3<'R> =
-                        /// <summary>
-                        /// Permanently settled durable result receipt.
-                        /// </summary>
-                        abstract status: string
-                        abstract checkpoint: unit option
-                        abstract outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (status: string, outcome: FSharp.CloudEdge.Runtime.PiDurable.TaskRuntime.Outcomes.Result.Item.Item, ?checkpoint: unit) : State3<'R> = jsNative
-
         module Inspect =
             module Result =
                 [<Interface>]
@@ -6850,49 +7001,21 @@ module PiDurable =
                                 | [<CompiledName("running")>] Running
                                 | [<CompiledName("ready")>] Ready of migrates: bool
                                 | [<CompiledName("waiting")>] Waiting of on: float[]
+                                | [<CompiledName("sleeping")>] Sleeping of until: float
                                 | [<CompiledName("completing")>] Completing
-                                | [<CompiledName("blocked")>] Blocked of reason: Harness.Inspect.Result.Item.Tasks.Item.State6.Reason * error: obj option
+                                | [<CompiledName("blocked")>] Blocked of reason: Harness.Inspect.Result.Item.Tasks.Item.State.Cases.Blocked.Reason * error: obj option
+                                [<ParamObject; Emit("({ kind: 'blocked', ...$0 })")>]
+                                static member CreateBlocked (reason: Harness.Inspect.Result.Item.Tasks.Item.State.Cases.Blocked.Reason, ?error: obj) : State = jsNative
 
-                            [<Interface>]
-                            type State2 =
-                                abstract kind: string
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (kind: string) : State2 = jsNative
-
-                            [<Interface>]
-                            type State3 =
-                                abstract kind: string
-                                abstract migrates: bool
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (kind: string, migrates: bool) : State3 = jsNative
-
-                            [<Interface>]
-                            type State4 =
-                                abstract kind: string
-                                abstract on: float[]
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (kind: string, on: float[]) : State4 = jsNative
-
-                            [<Interface>]
-                            type State5 =
-                                abstract kind: string
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (kind: string) : State5 = jsNative
-
-                            [<Interface>]
-                            type State6 =
-                                abstract kind: string
-                                abstract reason: Harness.Inspect.Result.Item.Tasks.Item.State6.Reason
-                                abstract error: obj option
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (kind: string, reason: Harness.Inspect.Result.Item.Tasks.Item.State6.Reason, ?error: obj) : State6 = jsNative
-
-                            module State6 =
-                                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                                type Reason =
-                                    | [<CompiledName("migration_failed")>] MigrationFailed
-                                    | [<CompiledName("missing_task")>] MissingTask
-                                    | [<CompiledName("task_too_old")>] TaskTooOld
+                            module State =
+                                module Cases =
+                                    module Blocked =
+                                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                                        type Reason =
+                                            | [<CompiledName("migration_failed")>] MigrationFailed
+                                            | [<CompiledName("missing_task")>] MissingTask
+                                            | [<CompiledName("restart_limit")>] RestartLimit
+                                            | [<CompiledName("task_too_old")>] TaskTooOld
 
         module Root =
             [<Interface>]
@@ -6906,23 +7029,27 @@ module PiDurable =
                 [<Interface>]
                 type Agent =
                     abstract model: Harness.Root.Options.Agent.Model option
-                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel option
-                    abstract extensions: U2<Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[], Harness.Root.Options.Agent.Extensions> option
-                    abstract tools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[], Harness.Root.Options.Agent.Tools> option
+                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel option
+                    abstract extensions: U2<Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[], Harness.Root.Options.Agent.Extensions> option
+                    abstract tools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], Harness.Root.Options.Agent.Tools> option
+                    /// <summary>
+                    /// Replaces the stored filter as a whole; tools loaded with <c>control.addTools</c> are in its <c>add</c>.
+                    /// </summary>
+                    abstract modelTools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], Harness.Root.Options.Agent.ModelTools> option
                     abstract instructions: string option
                     abstract cwd: string option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?model: Harness.Root.Options.Agent.Model, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, ?extensions: U2<Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[], Harness.Root.Options.Agent.Extensions>, ?tools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[], Harness.Root.Options.Agent.Tools>, ?instructions: string, ?cwd: string) : Agent = jsNative
+                    static member Create (?model: Harness.Root.Options.Agent.Model, ?thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, ?extensions: U2<Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[], Harness.Root.Options.Agent.Extensions>, ?tools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], Harness.Root.Options.Agent.Tools>, ?modelTools: U2<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], Harness.Root.Options.Agent.ModelTools>, ?instructions: string, ?cwd: string) : Agent = jsNative
 
                 type Init = delegate of tx: Tx * conversationId: float -> JS.Promise<unit> option
 
                 module Agent =
                     [<Interface>]
                     type Extensions =
-                        abstract add: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[] option
-                        abstract remove: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[] option
+                        abstract add: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[] option
+                        abstract remove: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[] option
                         [<ParamObject; Emit("$0")>]
-                        static member Create (?add: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[], ?remove: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[]) : Extensions = jsNative
+                        static member Create (?add: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[], ?remove: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[]) : Extensions = jsNative
 
                     [<Interface>]
                     type Model =
@@ -6932,10 +7059,17 @@ module PiDurable =
                         static member Create (provider: string, modelId: string) : Model = jsNative
 
                     [<Interface>]
-                    type Tools =
-                        abstract remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[]
+                    type ModelTools =
+                        abstract remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[] option
+                        abstract add: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[] option
                         [<ParamObject; Emit("$0")>]
-                        static member Create (remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[]) : Tools = jsNative
+                        static member Create (?remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], ?add: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]) : ModelTools = jsNative
+
+                    [<Interface>]
+                    type Tools =
+                        abstract remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (remove: Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]) : Tools = jsNative
 
                     module Extensions =
                         module Item =
@@ -6956,10 +7090,26 @@ module PiDurable =
                                 /// still validated against <c>parameters</c>.
                                 /// </summary>
                                 abstract prepareArguments: (obj -> obj) option with get, set
+                                /// <summary>
+                                /// Schema of <c>structuredOutput</c>, which programs that call the tool receive. Omitted: they receive the result's bounded
+                                /// output, success or error, as <c>NestedToolExecutionResult.structuredOutput</c> describes.
+                                /// </summary>
+                                abstract structuredOutputSchema: obj option
+                                /// <summary>
+                                /// Who may call the tool: the model, other tools through <c>executeTool()</c>, or both (default). A code mode tool is
+                                /// <c>["model"]</c>, so scripts cannot start scripts; tools behind code mode, such as MCP tools, can be <c>["tools"]</c>, so the
+                                /// model is never offered them.
+                                /// </summary>
+                                abstract callers: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item.Callers.Item[] option
+                                /// <summary>
+                                /// Not offered to the model until loaded: the model gets the tool only when <c>modelTools</c> names it, in its array or its
+                                /// <c>add</c>, which <c>control.addTools</c> (from a tool such as <c>tool_search</c>) writes. Other tools can call it any time.
+                                /// </summary>
+                                abstract deferred: bool option
                                 abstract outputLimits: Harness.Root.Options.Agent.Extensions.Item.Item.OutputLimits option
                                 abstract execute: args: obj * api: ToolExecutionApi<'TDetails> * context: FSharp.CloudEdge.Runtime.Chord.Context -> JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item<'TDetails>>
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (name: string, description: string, parameters: 'TParameters, execute: Func<obj, ToolExecutionApi<'TDetails>, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item<'TDetails>>>, ?constrainedSampling: U3<bool, FSharp.CloudEdge.Runtime.PiAi.Tool.ConstrainedSampling, FSharp.CloudEdge.Runtime.PiAi.Tool.ConstrainedSampling2>, ?replay: Harness.Root.Options.Agent.Extensions.Item.Item.Replay, ?executionMode: ToolExecutionMode, ?prepareArguments: (obj -> obj), ?outputLimits: Harness.Root.Options.Agent.Extensions.Item.Item.OutputLimits) : Item<'TParameters, 'TDetails> = jsNative
+                                static member Create (name: string, description: string, parameters: 'TParameters, execute: Func<obj, ToolExecutionApi<'TDetails>, FSharp.CloudEdge.Runtime.Chord.Context, JS.Promise<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item<'TDetails>>>, ?constrainedSampling: U3<bool, FSharp.CloudEdge.Runtime.PiAi.Tool.ConstrainedSampling, FSharp.CloudEdge.Runtime.PiAi.Tool.ConstrainedSampling2>, ?replay: Harness.Root.Options.Agent.Extensions.Item.Item.Replay, ?executionMode: ToolExecutionMode, ?prepareArguments: (obj -> obj), ?structuredOutputSchema: obj, ?callers: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item.Callers.Item[], ?deferred: bool, ?outputLimits: Harness.Root.Options.Agent.Extensions.Item.Item.OutputLimits) : Item<'TParameters, 'TDetails> = jsNative
 
                             module Item =
                                 [<Interface>]
@@ -6975,14 +7125,25 @@ module PiDurable =
                                     | [<CompiledName("safe")>] Safe
                                     | [<CompiledName("unsafe")>] Unsafe
 
+                                module Callers =
+                                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                                    type Item =
+                                        | [<CompiledName("model")>] Model
+                                        | [<CompiledName("tools")>] Tools
+
                                 module Execute =
                                     module Result =
                                         [<Interface>]
                                         type Item<'TDetails> =
                                             /// <summary>
-                                            /// Omitted: the retained <c>output()</c> text becomes the content.
+                                            /// For the model. Omitted: the retained <c>output()</c> text.
                                             /// </summary>
-                                            abstract content: FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[] option
+                                            abstract output: FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[] option
+                                            /// <summary>
+                                            /// For programs. Required unless <c>isError</c> when the tool declares <c>structuredOutputSchema</c>, and validated against it;
+                                            /// not allowed without one, where programs get the output itself (<c>NestedToolExecutionResult.structuredOutput</c>).
+                                            /// </summary>
+                                            abstract structuredOutput: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
                                             abstract isError: bool option
                                             /// <summary>
                                             /// Omitted: the last <c>details()</c> value becomes the details.
@@ -6998,12 +7159,15 @@ module PiDurable =
                                             abstract usage: FSharp.CloudEdge.Runtime.PiAi.Usage option
                                             abstract control: Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item.Control option
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (?content: FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[], ?isError: bool, ?details: 'TDetails, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?usage: FSharp.CloudEdge.Runtime.PiAi.Usage, ?control: Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item.Control) : Item<'TDetails> = jsNative
+                                            static member Create (?output: FSharp.CloudEdge.Runtime.PiAi.UserMessage.Content.Item[], ?structuredOutput: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?isError: bool, ?details: 'TDetails, ?diagnostics: ToolExecutionApi.Diagnostic.Diagnostic[], ?usage: FSharp.CloudEdge.Runtime.PiAi.Usage, ?control: Harness.Root.Options.Agent.Extensions.Item.Item.Execute.Result.Item.Control) : Item<'TDetails> = jsNative
 
                                         module Item =
                                             [<Interface>]
                                             type Control =
                                                 abstract addTools: string[] option
+                                                /// <summary>
+                                                /// End the run without another model request when every result of the round sets it to <c>true</c>; <c>false</c> is a no-op.
+                                                /// </summary>
                                                 abstract terminate: bool option
                                                 abstract handoff: string option
                                                 [<ParamObject; Emit("$0")>]
@@ -7034,9 +7198,9 @@ module PiDurable =
                         /// <summary>
                         /// Every live task, keyed by its decimal ID.
                         /// </summary>
-                        abstract tasks: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.TaskGraph.Result.Item.Item.Tasks.Item>
+                        abstract tasks: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.TaskGraph.Result.Item.Item.Tasks.Item>
                         [<ParamObject; Emit("$0")>]
-                        static member Create (tasks: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.TaskGraph.Result.Item.Item.Tasks.Item>) : Item = jsNative
+                        static member Create (tasks: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.TaskGraph.Result.Item.Item.Tasks.Item>) : Item = jsNative
 
                     module Item =
                         module Tasks =
@@ -7053,11 +7217,16 @@ module PiDurable =
                                 abstract abortRequested: bool
                                 abstract state: TaskGraphState
                                 /// <summary>
+                                /// Why it cannot run here, when it cannot: no registered definition takes it (<c>missing_task</c>, <c>task_too_old</c>,
+                                /// <c>migration_failed</c>), or the restart limit parked it (<c>restart_limit</c>). Follows registry changes.
+                                /// </summary>
+                                abstract blocked: BlockedReason option
+                                /// <summary>
                                 /// Conversations this task owns, in ID order.
                                 /// </summary>
                                 abstract conversations: float[]
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (id: float, kind: string, conversationId: float, background: bool, abortRequested: bool, state: TaskGraphState, conversations: float[], ?owner: float) : Item = jsNative
+                                static member Create (id: float, kind: string, conversationId: float, background: bool, abortRequested: bool, state: TaskGraphState, conversations: float[], ?owner: float, ?blocked: BlockedReason) : Item = jsNative
 
         module Usage =
             module Result =
@@ -7066,13 +7235,13 @@ module PiDurable =
                     /// <summary>
                     /// Assistant entries and summarization attempts, keyed <c>provider/modelId</c>.
                     /// </summary>
-                    abstract models: Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item> with get, set
+                    abstract models: JS.Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item> with get, set
                     /// <summary>
                     /// Tool results, keyed by tool name; their usage has no model identity.
                     /// </summary>
-                    abstract tools: Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item> with get, set
+                    abstract tools: JS.Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (models: Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item>, tools: Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item>) : Item = jsNative
+                    static member Create (models: JS.Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item>, tools: JS.Record<string, FSharp.CloudEdge.Runtime.PiDurable.Harness.Usage.Result.Item.Models.Item>) : Item = jsNative
 
                 module Item =
                     module Models =
@@ -7108,125 +7277,14 @@ module PiDurable =
                                 [<ParamObject; Emit("$0")>]
                                 static member Create (input: float, output: float, cacheRead: float, cacheWrite: float, total: float) : Cost = jsNative
 
-        module WaitForTask =
-            module Result =
-                [<Interface>]
-                type Item<'R> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
-                    abstract state: U3<StorageWrite4.Value.State2, StorageWrite4.Value.State3, StorageWrite4.Value.State4>
-                    /// <summary>
-                    /// Small first-writer-wins values retained while the task can run.
-                    /// </summary>
-                    abstract memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: U3<StorageWrite4.Value.State2, StorageWrite4.Value.State3, StorageWrite4.Value.State4>, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item<'R> = jsNative
-
-                [<Interface>]
-                type Item2<'R> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
-                    abstract state: obj
-                    abstract memos: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: obj, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: unit) : Item2<'R> = jsNative
-
-                module Item2 =
-                    module State =
-                        [<Interface>]
-                        type Outcome2<'R> =
-                            abstract status: string
-                            abstract result: 'R
-                            abstract error: unit option
-                            abstract reason: unit option
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (status: string, result: 'R, ?error: unit, ?reason: unit) : Outcome2<'R> = jsNative
-
-                        [<Interface>]
-                        type Outcome3<'R> =
-                            abstract status: string
-                            abstract error: StorageWrite4.Value2.State2.Outcome3.Error
-                            abstract result: 'R option
-                            abstract reason: unit option
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (status: string, error: StorageWrite4.Value2.State2.Outcome3.Error, ?result: 'R, ?reason: unit) : Outcome3<'R> = jsNative
-
-                        [<Interface>]
-                        type Outcome4<'R> =
-                            abstract status: string
-                            abstract reason: string option
-                            abstract result: 'R option
-                            abstract error: unit option
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (status: string, ?reason: string, ?result: 'R, ?error: unit) : Outcome4<'R> = jsNative
+    module ListFiles =
+        module Result =
+            [<Interface>]
+            type Item =
+                abstract ok: bool with get, set
+                abstract value: FileListing with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (ok: bool, value: FileListing) : Item = jsNative
 
     module MessageChange2 =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -7287,24 +7345,32 @@ module PiDurable =
                                 /// <summary>
                                 /// Sections already in effect after replaying the active transcript.
                                 /// </summary>
-                                abstract shown: ReadonlyRecord<string, string>
+                                abstract shown: JS.ReadonlyRecord<string, string>
                                 /// <summary>
                                 /// Committed document reads.
                                 /// </summary>
                                 abstract read: Extension.Sections.Item.Render.Input.Read
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (conversationId: float, agent: RegistrySnapshot.Sections.Result.Item.Section.Render.Input.Agent<'Tool>, shown: ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input<'Tool> = jsNative
+                                static member Create (conversationId: float, agent: RegistrySnapshot.Sections.Result.Item.Section.Render.Input.Agent<'Tool>, shown: JS.ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input<'Tool> = jsNative
 
                             module Input =
                                 [<Interface>]
                                 type Agent<'Tool> =
                                     abstract model: Harness.Root.Options.Agent.Model option
-                                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel
+                                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel
                                     abstract extensions: Extension<'Tool>[]
                                     /// <summary>
-                                    /// The tools a request offers, in order.
+                                    /// The tools a request offers, in order: enabled, callable by the model, and selected by <c>modelTools</c>.
                                     /// </summary>
                                     abstract tools: 'Tool[]
+                                    /// <summary>
+                                    /// The tools nested calls (<c>executeTool()</c>) resolve among, in order: enabled and callable by tools.
+                                    /// </summary>
+                                    abstract callable: 'Tool[]
+                                    /// <summary>
+                                    /// Enabled deferred tools the model may call and is not offered yet, in registry order: what <c>tool_search</c> loads.
+                                    /// </summary>
+                                    abstract deferred: 'Tool[]
                                     /// <summary>
                                     /// Extension sections, then <c>instructions</c> when set.
                                     /// </summary>
@@ -7312,7 +7378,7 @@ module PiDurable =
                                     abstract instructions: string option
                                     abstract cwd: string option
                                     [<ParamObject; Emit("$0")>]
-                                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, extensions: Extension<'Tool>[], tools: 'Tool[], sections: FSharp.CloudEdge.Runtime.PiDurable.RegistrySnapshot.Sections.Result.Item.Section<'Tool>[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Agent<'Tool> = jsNative
+                                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, extensions: Extension<'Tool>[], tools: 'Tool[], callable: 'Tool[], deferred: 'Tool[], sections: FSharp.CloudEdge.Runtime.PiDurable.RegistrySnapshot.Sections.Result.Item.Section<'Tool>[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Agent<'Tool> = jsNative
 
         module Tools =
             module Result =
@@ -7339,13 +7405,13 @@ module PiDurable =
                 type Item =
                     abstract record: DocumentRecord
                     abstract version: float
-                    abstract value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>
+                    abstract value: JsonObject
                     /// <summary>
                     /// Deltas replayed after the selected base to materialize <c>value</c>.
                     /// </summary>
                     abstract deltasSinceBase: float
                     [<ParamObject; Emit("$0")>]
-                    static member Create (record: DocumentRecord, version: float, value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>, deltasSinceBase: float) : Item = jsNative
+                    static member Create (record: DocumentRecord, version: float, value: JsonObject, deltasSinceBase: float) : Item = jsNative
 
         module Entry =
             module Result =
@@ -7392,7 +7458,7 @@ module PiDurable =
                     /// </summary>
                     abstract head: float
                     [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
+                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
 
         module ScanConversations =
             [<Interface>]
@@ -7409,10 +7475,10 @@ module PiDurable =
             module Result =
                 [<Interface>]
                 type Item =
-                    abstract items: StorageWrite2.Value[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract items: StorageWrite.Cases.Conversation.Value[]
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: StorageWrite2.Value[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: StorageWrite.Cases.Conversation.Value[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
         module ScanDocuments =
             [<Interface>]
@@ -7427,9 +7493,9 @@ module PiDurable =
                 [<Interface>]
                 type Item =
                     abstract items: DocumentRecord[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: DocumentRecord[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: DocumentRecord[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
         module ScanEntries =
             [<Interface>]
@@ -7454,9 +7520,9 @@ module PiDurable =
                 [<Interface>]
                 type Item =
                     abstract items: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
         module ScanSubmissions =
             [<Interface>]
@@ -7482,9 +7548,9 @@ module PiDurable =
                 [<Interface>]
                 type Item =
                     abstract items: SubmissionRecord[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: SubmissionRecord[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: SubmissionRecord[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
         module ScanTasks =
             [<Interface>]
@@ -7507,6 +7573,7 @@ module PiDurable =
                     | [<CompiledName("completing")>] Completing
                     | [<CompiledName("pending")>] Pending
                     | [<CompiledName("running")>] Running
+                    | [<CompiledName("sleeping")>] Sleeping
                     | [<CompiledName("terminal")>] Terminal
                     | [<CompiledName("waiting")>] Waiting
 
@@ -7514,9 +7581,9 @@ module PiDurable =
                 [<Interface>]
                 type Item =
                     abstract items: StoredTask[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: StoredTask[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: StoredTask[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
     module Storage =
         module Entry =
@@ -7545,421 +7612,472 @@ module PiDurable =
                     /// </summary>
                     abstract head: float
                     [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
+                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
 
         module ScanTasks =
             module Result =
                 [<Interface>]
                 type Item =
                     abstract items: StoredTask[]
-                    abstract next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (items: StoredTask[], ?next: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Item = jsNative
+                    static member Create (items: StoredTask[], ?next: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Item = jsNative
 
-    module StorageWrite2 =
-        [<Interface>]
-        type Value =
-            abstract id: float
-            /// <summary>
-            /// Fork source and inclusive parent entry through which history is inherited.
-            /// </summary>
-            abstract parent: StorageWrite2.Value.Parent option
-            /// <summary>
-            /// Creator edge used for attribution, subtree abort, and subtree idle waits.
-            /// </summary>
-            abstract owner: StorageWrite2.Value.Owner option
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, ?parent: StorageWrite2.Value.Parent, ?owner: StorageWrite2.Value.Owner) : Value = jsNative
-
-        module Value =
-            [<Interface>]
-            type Owner =
-                abstract conversationId: float
-                abstract taskId: float
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, taskId: float) : Owner = jsNative
-
-            [<Interface>]
-            type Parent =
-                abstract conversationId: float
-                abstract at: float
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, at: float) : Parent = jsNative
-
-    module StorageWrite4 =
-        [<Interface>]
-        type Value =
-            abstract id: float
-            abstract conversationId: float
-            /// <summary>
-            /// Registered task definition name.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Definition version used to migrate live input and checkpoints.
-            /// </summary>
-            abstract version: float
-            /// <summary>
-            /// Original task input retained while the task is live or terminal.
-            /// </summary>
-            abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-            /// <summary>
-            /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-            /// </summary>
-            abstract owner: float option
-            /// <summary>
-            /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-            /// </summary>
-            abstract background: bool
-            /// <summary>
-            /// Durable abort mark checked before run-mode progress is committed.
-            /// </summary>
-            abstract abortRequested: bool
-            /// <summary>
-            /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-            /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-            /// versions.
-            /// </summary>
-            abstract startedAt: float option
-            /// <summary>
-            /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-            /// </summary>
-            abstract endedAt: float option
-            abstract state: StorageWrite4.Value.State
-            /// <summary>
-            /// Small first-writer-wins values retained while the task can run.
-            /// </summary>
-            abstract memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: StorageWrite4.Value.State, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Value = jsNative
-
-        [<Interface>]
-        type Value2 =
-            abstract id: float
-            abstract conversationId: float
-            /// <summary>
-            /// Registered task definition name.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Definition version used to migrate live input and checkpoints.
-            /// </summary>
-            abstract version: float
-            /// <summary>
-            /// Original task input retained while the task is live or terminal.
-            /// </summary>
-            abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-            /// <summary>
-            /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-            /// </summary>
-            abstract owner: float option
-            /// <summary>
-            /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-            /// </summary>
-            abstract background: bool
-            /// <summary>
-            /// Durable abort mark checked before run-mode progress is committed.
-            /// </summary>
-            abstract abortRequested: bool
-            /// <summary>
-            /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-            /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-            /// versions.
-            /// </summary>
-            abstract startedAt: float option
-            /// <summary>
-            /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-            /// </summary>
-            abstract endedAt: float option
-            abstract state: StorageWrite4.Value2.State
-            abstract memos: unit option
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue2, background: bool, abortRequested: bool, state: StorageWrite4.Value2.State, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: unit) : Value2 = jsNative
-
-        module Value =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-            type State =
-                | [<CompiledName("pending")>] Pending of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * outcome: unit option
-                | [<CompiledName("running")>] Running of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * outcome: unit option
-                | [<CompiledName("waiting")>] Waiting of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * on: float[] * policy: JoinPolicy * outcome: unit option
-
-            [<Interface>]
-            type State2 =
-                /// <summary>
-                /// Eligible for scheduling.
-                /// </summary>
-                abstract status: string
-                /// <summary>
-                /// Complete durable state from which execution resumes.
-                /// </summary>
-                abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                abstract outcome: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (status: string, checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2, ?outcome: unit) : State2 = jsNative
-
-            [<Interface>]
-            type State3 =
-                /// <summary>
-                /// Reserved by one in-memory task invocation.
-                /// </summary>
-                abstract status: string
-                /// <summary>
-                /// Complete durable state from which execution resumes.
-                /// </summary>
-                abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                abstract outcome: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (status: string, checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2, ?outcome: unit) : State3 = jsNative
-
-            [<Interface>]
-            type State4 =
-                /// <summary>
-                /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
-                /// </summary>
-                abstract status: string
-                abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                abstract on: float[]
-                abstract policy: JoinPolicy
-                abstract outcome: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (status: string, checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue2, on: float[], policy: JoinPolicy, ?outcome: unit) : State4 = jsNative
-
-        module Value2 =
-            [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-            type State =
-                | [<CompiledName("completing")>] Completing of checkpoint: unit option * outcome: StorageWrite4.Value2.State2.Outcome
-                | [<CompiledName("terminal")>] Terminal of checkpoint: unit option * outcome: StorageWrite4.Value2.State2.Outcome
-
-            [<Interface>]
-            type State2 =
-                /// <summary>
-                /// Outcome decided; becomes terminal once no ordinary owned work below is live. Runs no more code.
-                /// </summary>
-                abstract status: string
-                abstract checkpoint: unit option
-                abstract outcome: StorageWrite4.Value2.State2.Outcome
-                [<ParamObject; Emit("$0")>]
-                static member Create (status: string, outcome: StorageWrite4.Value2.State2.Outcome, ?checkpoint: unit) : State2 = jsNative
-
-            [<Interface>]
-            type State3 =
-                /// <summary>
-                /// Permanently settled durable result receipt.
-                /// </summary>
-                abstract status: string
-                abstract checkpoint: unit option
-                abstract outcome: StorageWrite4.Value2.State2.Outcome
-                [<ParamObject; Emit("$0")>]
-                static member Create (status: string, outcome: StorageWrite4.Value2.State2.Outcome, ?checkpoint: unit) : State3 = jsNative
-
-            module State2 =
-                [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                type Outcome =
-                    | [<CompiledName("completed")>] Completed of result: FSharp.CloudEdge.Runtime.Chord.JsonValue2 * error: unit option * reason: unit option
-                    | [<CompiledName("failed")>] Failed of error: StorageWrite4.Value2.State2.Outcome3.Error * result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option * reason: unit option
-                    | [<CompiledName("aborted")>] Aborted of reason: string option * result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option * error: unit option
-                    | [<CompiledName("orphaned")>] Orphaned of reason: string * result: unit option * error: unit option
-                    | [<CompiledName("faulted")>] Faulted of error: StorageWrite4.Value2.State2.Outcome3.Error * result: unit option * reason: unit option
-
+    module StorageWrite =
+        module Cases =
+            module Conversation =
                 [<Interface>]
-                type Outcome2 =
-                    abstract status: string
-                    abstract result: FSharp.CloudEdge.Runtime.Chord.JsonValue2
-                    abstract error: unit option
-                    abstract reason: unit option
+                type Value =
+                    abstract id: float
+                    /// <summary>
+                    /// Fork source and inclusive parent entry through which history is inherited.
+                    /// </summary>
+                    abstract parent: StorageWrite.Cases.Conversation.Value.Parent option
+                    /// <summary>
+                    /// Creator edge used for attribution, subtree abort, and subtree idle waits.
+                    /// </summary>
+                    abstract owner: StorageWrite.Cases.Conversation.Value.Owner option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (status: string, result: FSharp.CloudEdge.Runtime.Chord.JsonValue2, ?error: unit, ?reason: unit) : Outcome2 = jsNative
+                    static member Create (id: float, ?parent: StorageWrite.Cases.Conversation.Value.Parent, ?owner: StorageWrite.Cases.Conversation.Value.Owner) : Value = jsNative
 
-                [<Interface>]
-                type Outcome3 =
-                    abstract status: string
-                    abstract error: StorageWrite4.Value2.State2.Outcome3.Error
-                    abstract result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-                    abstract reason: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (status: string, error: StorageWrite4.Value2.State2.Outcome3.Error, ?result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?reason: unit) : Outcome3 = jsNative
-
-                [<Interface>]
-                type Outcome4 =
-                    abstract status: string
-                    abstract reason: string option
-                    abstract result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-                    abstract error: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (status: string, ?reason: string, ?result: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?error: unit) : Outcome4 = jsNative
-
-                [<Interface>]
-                type Outcome5 =
-                    abstract status: string
-                    abstract reason: string
-                    abstract result: unit option
-                    abstract error: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (status: string, reason: string, ?result: unit, ?error: unit) : Outcome5 = jsNative
-
-                [<Interface>]
-                type Outcome6 =
-                    abstract status: string
-                    abstract error: StorageWrite4.Value2.State2.Outcome3.Error
-                    abstract result: unit option
-                    abstract reason: unit option
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (status: string, error: StorageWrite4.Value2.State2.Outcome3.Error, ?result: unit, ?reason: unit) : Outcome6 = jsNative
-
-                module Outcome3 =
+                module Value =
                     [<Interface>]
-                    type Error =
-                        abstract message: string
-                        /// <summary>
-                        /// Optional structured diagnostic data for inspection or recovery.
-                        /// </summary>
-                        abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
+                    type Owner =
+                        abstract conversationId: float
+                        abstract taskId: float
                         [<ParamObject; Emit("$0")>]
-                        static member Create (message: string, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : Error = jsNative
+                        static member Create (conversationId: float, taskId: float) : Owner = jsNative
 
-    module StorageWrite6 =
-        [<Interface>]
-        type Content =
-            abstract version: float
-            abstract kind: string
-            abstract value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>
-            [<ParamObject; Emit("$0")>]
-            static member Create (version: float, kind: string, value: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Content = jsNative
+                    [<Interface>]
+                    type Parent =
+                        abstract conversationId: float
+                        abstract at: float
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (conversationId: float, at: float) : Parent = jsNative
 
-        [<Interface>]
-        type Record =
-            /// <summary>
-            /// Unique incarnation ID; never reused when the same logical document is recreated.
-            /// </summary>
-            abstract id: float
-            /// <summary>
-            /// Stable document definition kind.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Family member key; absent for singleton documents.
-            /// </summary>
-            abstract key: string option
-            abstract scope: StorageWrite6.Record.Scope
-            abstract history: unit option
-            abstract fork: unit option
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, kind: string, scope: StorageWrite6.Record.Scope, ?key: string, ?history: unit, ?fork: unit) : Record = jsNative
+            module DocumentCopy =
+                [<Interface>]
+                type Source =
+                    abstract id: float
+                    abstract at: DocumentPoint
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: float, at: DocumentPoint) : Source = jsNative
 
-        [<Interface>]
-        type Record2 =
-            /// <summary>
-            /// Unique incarnation ID; never reused when the same logical document is recreated.
-            /// </summary>
-            abstract id: float
-            /// <summary>
-            /// Stable document definition kind.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Family member key; absent for singleton documents.
-            /// </summary>
-            abstract key: string option
-            abstract scope: StorageWrite6.Record2.Scope
-            abstract history: unit option
-            abstract fork: unit option
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, kind: string, scope: StorageWrite6.Record2.Scope, ?key: string, ?history: unit, ?fork: unit) : Record2 = jsNative
+            module DocumentCreate =
+                [<Interface>]
+                type Content =
+                    abstract version: float
+                    /// <remarks>TypeScript type: <c>"base"</c></remarks>
+                    abstract kind: string
+                    abstract value: JsonObject
+                    [<ParamObject; Emit("({ kind: 'base', ...$0 })")>]
+                    static member Create (version: float, value: JsonObject) : Content = jsNative
 
-        [<Interface>]
-        type Record3 =
-            /// <summary>
-            /// Unique incarnation ID; never reused when the same logical document is recreated.
-            /// </summary>
-            abstract id: float
-            /// <summary>
-            /// Stable document definition kind.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Family member key; absent for singleton documents.
-            /// </summary>
-            abstract key: string option
-            abstract scope: StorageWrite6.Record3.Scope
-            /// <summary>
-            /// Retain only current state.
-            /// </summary>
-            abstract history: string
-            /// <summary>
-            /// Initialize a fork from current source state or the definition's initial value.
-            /// </summary>
-            abstract fork: StorageWrite6.Record3.Fork
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, kind: string, scope: StorageWrite6.Record3.Scope, history: string, fork: StorageWrite6.Record3.Fork, ?key: string) : Record3 = jsNative
+                module Content =
+                    /// <remarks>TypeScript type: <c>"base"</c></remarks>
+                    [<Literal>]
+                    let kind = "base"
 
-        [<Interface>]
-        type Record4 =
-            /// <summary>
-            /// Unique incarnation ID; never reused when the same logical document is recreated.
-            /// </summary>
-            abstract id: float
-            /// <summary>
-            /// Stable document definition kind.
-            /// </summary>
-            abstract kind: string
-            /// <summary>
-            /// Family member key; absent for singleton documents.
-            /// </summary>
-            abstract key: string option
-            abstract scope: StorageWrite6.Record3.Scope
-            /// <summary>
-            /// Retain history needed for as-of reads.
-            /// </summary>
-            abstract history: string
-            /// <summary>
-            /// Initialize a fork at its cutoff, from current state, or from the initial value.
-            /// </summary>
-            abstract fork: StorageWrite6.Record4.Fork
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, kind: string, scope: StorageWrite6.Record3.Scope, history: string, fork: StorageWrite6.Record4.Fork, ?key: string) : Record4 = jsNative
+                [<Interface>]
+                type Record =
+                    /// <summary>
+                    /// Unique incarnation ID; never reused when the same logical document is recreated.
+                    /// </summary>
+                    abstract id: float
+                    /// <summary>
+                    /// Stable document definition kind.
+                    /// </summary>
+                    abstract kind: string
+                    /// <summary>
+                    /// Family member key; absent for singleton documents.
+                    /// </summary>
+                    abstract key: string option
+                    abstract scope: StorageWrite.Cases.DocumentCreate.Record.Scope
+                    abstract history: unit option
+                    abstract fork: unit option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: float, kind: string, scope: StorageWrite.Cases.DocumentCreate.Record.Scope, ?key: string, ?history: unit, ?fork: unit) : Record = jsNative
 
-        module Record =
-            [<Interface>]
-            type Scope =
-                abstract kind: string
-                [<ParamObject; Emit("$0")>]
-                static member Create (kind: string) : Scope = jsNative
+                [<Interface>]
+                type Record2 =
+                    /// <summary>
+                    /// Unique incarnation ID; never reused when the same logical document is recreated.
+                    /// </summary>
+                    abstract id: float
+                    /// <summary>
+                    /// Stable document definition kind.
+                    /// </summary>
+                    abstract kind: string
+                    /// <summary>
+                    /// Family member key; absent for singleton documents.
+                    /// </summary>
+                    abstract key: string option
+                    abstract scope: StorageWrite.Cases.DocumentCreate.Record2.Scope
+                    abstract history: unit option
+                    abstract fork: unit option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: float, kind: string, scope: StorageWrite.Cases.DocumentCreate.Record2.Scope, ?key: string, ?history: unit, ?fork: unit) : Record2 = jsNative
 
-        module Record2 =
-            [<Interface>]
-            type Scope =
-                abstract kind: string
-                abstract taskId: float
-                [<ParamObject; Emit("$0")>]
-                static member Create (kind: string, taskId: float) : Scope = jsNative
+                [<Interface>]
+                type Record3 =
+                    /// <summary>
+                    /// Unique incarnation ID; never reused when the same logical document is recreated.
+                    /// </summary>
+                    abstract id: float
+                    /// <summary>
+                    /// Stable document definition kind.
+                    /// </summary>
+                    abstract kind: string
+                    /// <summary>
+                    /// Family member key; absent for singleton documents.
+                    /// </summary>
+                    abstract key: string option
+                    abstract scope: StorageWrite.Cases.DocumentCreate.Record3.Scope
+                    /// <summary>
+                    /// Retain only current state.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"latest"</c></remarks>
+                    abstract history: string
+                    /// <summary>
+                    /// Initialize a fork from current source state or the definition's initial value.
+                    /// </summary>
+                    abstract fork: StorageWrite.Cases.DocumentCreate.Record3.Fork
+                    [<ParamObject; Emit("({ history: 'latest', ...$0 })")>]
+                    static member Create (id: float, kind: string, scope: StorageWrite.Cases.DocumentCreate.Record3.Scope, fork: StorageWrite.Cases.DocumentCreate.Record3.Fork, ?key: string) : Record3 = jsNative
 
-        module Record3 =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Fork =
-                | [<CompiledName("current")>] Current
-                | [<CompiledName("initial")>] Initial
+                module Record3 =
+                    /// <summary>
+                    /// Retain only current state.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"latest"</c></remarks>
+                    [<Literal>]
+                    let history = "latest"
 
-            [<Interface>]
-            type Scope =
-                abstract kind: string
-                abstract conversationId: float
-                [<ParamObject; Emit("$0")>]
-                static member Create (kind: string, conversationId: float) : Scope = jsNative
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Fork =
+                        | [<CompiledName("current")>] Current
+                        | [<CompiledName("initial")>] Initial
 
-        module Record4 =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Fork =
-                | [<CompiledName("asOf")>] AsOf
-                | [<CompiledName("current")>] Current
-                | [<CompiledName("initial")>] Initial
+                    [<Interface>]
+                    type Scope =
+                        /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                        abstract kind: string
+                        abstract conversationId: float
+                        [<ParamObject; Emit("({ kind: 'conversation', ...$0 })")>]
+                        static member Create (conversationId: float) : Scope = jsNative
 
-    module StorageWrite7 =
-        [<Interface>]
-        type Source =
-            abstract id: float
-            abstract at: DocumentPoint
-            [<ParamObject; Emit("$0")>]
-            static member Create (id: float, at: DocumentPoint) : Source = jsNative
+                    module Scope =
+                        /// <remarks>TypeScript type: <c>"conversation"</c></remarks>
+                        [<Literal>]
+                        let kind = "conversation"
+
+                [<Interface>]
+                type Record4 =
+                    /// <summary>
+                    /// Unique incarnation ID; never reused when the same logical document is recreated.
+                    /// </summary>
+                    abstract id: float
+                    /// <summary>
+                    /// Stable document definition kind.
+                    /// </summary>
+                    abstract kind: string
+                    /// <summary>
+                    /// Family member key; absent for singleton documents.
+                    /// </summary>
+                    abstract key: string option
+                    abstract scope: StorageWrite.Cases.DocumentCreate.Record3.Scope
+                    /// <summary>
+                    /// Retain history needed for as-of reads.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
+                    abstract history: string
+                    /// <summary>
+                    /// Initialize a fork at its cutoff, from current state, or from the initial value.
+                    /// </summary>
+                    abstract fork: StorageWrite.Cases.DocumentCreate.Record4.Fork
+                    [<ParamObject; Emit("({ history: 'rewindable', ...$0 })")>]
+                    static member Create (id: float, kind: string, scope: StorageWrite.Cases.DocumentCreate.Record3.Scope, fork: StorageWrite.Cases.DocumentCreate.Record4.Fork, ?key: string) : Record4 = jsNative
+
+                module Record4 =
+                    /// <summary>
+                    /// Retain history needed for as-of reads.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"rewindable"</c></remarks>
+                    [<Literal>]
+                    let history = "rewindable"
+
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Fork =
+                        | [<CompiledName("asOf")>] AsOf
+                        | [<CompiledName("current")>] Current
+                        | [<CompiledName("initial")>] Initial
+
+                module Record =
+                    [<Interface>]
+                    type Scope =
+                        /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                        abstract kind: string
+                        [<Emit("({ kind: 'session' })")>]
+                        static member Create () : Scope = jsNative
+
+                    module Scope =
+                        /// <remarks>TypeScript type: <c>"session"</c></remarks>
+                        [<Literal>]
+                        let kind = "session"
+
+                module Record2 =
+                    [<Interface>]
+                    type Scope =
+                        /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                        abstract kind: string
+                        abstract taskId: float
+                        [<ParamObject; Emit("({ kind: 'task', ...$0 })")>]
+                        static member Create (taskId: float) : Scope = jsNative
+
+                    module Scope =
+                        /// <remarks>TypeScript type: <c>"task"</c></remarks>
+                        [<Literal>]
+                        let kind = "task"
+
+            module Task =
+                [<Interface>]
+                type Value =
+                    inherit StorageWrite.Cases.Task.Value.Base
+                    abstract state: StorageWrite.Cases.Task.Value.State
+                    /// <summary>
+                    /// Small first-writer-wins values retained while the task can run.
+                    /// </summary>
+                    abstract memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: StorageWrite.Cases.Task.Value.State, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Value = jsNative
+
+                [<Interface>]
+                type Value2 =
+                    inherit StorageWrite.Cases.Task.Value.Base
+                    abstract state: StorageWrite.Cases.Task.Value2.State
+                    abstract memos: unit option
+                    [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, state: StorageWrite.Cases.Task.Value2.State, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: unit) : Value2 = jsNative
+
+                module Value =
+                    [<Interface>]
+                    type Base =
+                        /// <summary>
+                        /// Adapter-owned context that created this task; phase invocations extract it as their parent.
+                        /// </summary>
+                        abstract trace: JS.Record<string, string> option
+                        /// <summary>
+                        /// Immutable creation-time links for the task's first invocation.
+                        /// </summary>
+                        abstract links: JS.Record<string, string>[] option
+                        abstract id: float
+                        abstract conversationId: float
+                        /// <summary>
+                        /// Registered task definition name.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Definition version used to migrate live input and checkpoints.
+                        /// </summary>
+                        abstract version: float
+                        /// <summary>
+                        /// Original task input retained while the task is live or terminal.
+                        /// </summary>
+                        abstract input: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        /// <summary>
+                        /// Owning task of a child task; absent for a task its conversation owns. Immutable.
+                        /// </summary>
+                        abstract owner: float option
+                        /// <summary>
+                        /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
+                        /// </summary>
+                        abstract background: bool
+                        /// <summary>
+                        /// Durable abort mark checked before run-mode progress is committed.
+                        /// </summary>
+                        abstract abortRequested: bool
+                        /// <summary>
+                        /// Why the mark was set when not by an abort request: <c>restart</c> for a task abandoned after a restart
+                        /// (<c>TaskOptions.abandonOnRestart</c>) or below one. Such a task waits for its definition instead of becoming <c>orphaned</c>.
+                        /// A later abort request clears it.
+                        /// </summary>
+                        abstract abortReason: string option
+                        /// <summary>
+                        /// Set from <c>TaskOptions.abandonOnRestart</c>. Immutable.
+                        /// </summary>
+                        abstract abandonOnRestart: bool option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
+                        /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
+                        /// versions.
+                        /// </summary>
+                        abstract startedAt: float option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
+                        /// </summary>
+                        abstract endedAt: float option
+                        /// <summary>
+                        /// How many times in a row a crash, eviction, or reset cut the task off while it ran, without the task changing its
+                        /// state since; open counts them, and a close does not. At <c>HarnessSettings.restartLimit</c> the task is parked as blocked
+                        /// until <c>Harness.retryTask()</c>.
+                        /// </summary>
+                        abstract restarts: float option
+                        [<ParamObject; Emit("(o => ({...o, \"input\": o[\"input\"] ?? null}))($0)")>]
+                        static member Create (id: float, conversationId: float, kind: string, version: float, input: FSharp.CloudEdge.Runtime.Chord.JsonValue, background: bool, abortRequested: bool, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float) : Base = jsNative
+
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type State =
+                        /// <param name="checkpoint">Complete durable state from which execution resumes.</param>
+                        /// <param name="outcome"></param>
+                        | [<CompiledName("pending")>] Pending of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue * outcome: unit option
+                        /// <param name="checkpoint">Complete durable state from which execution resumes.</param>
+                        /// <param name="outcome"></param>
+                        | [<CompiledName("running")>] Running of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue * outcome: unit option
+                        | [<CompiledName("waiting")>] Waiting of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue * on: float[] * policy: JoinPolicy * outcome: unit option
+                        | [<CompiledName("sleeping")>] Sleeping of checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue * until: float * outcome: unit option
+                        [<ParamObject; Emit("(o => ({status: 'pending', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member CreatePending (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, ?outcome: unit) : State = jsNative
+                        [<ParamObject; Emit("(o => ({status: 'running', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member CreateRunning (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, ?outcome: unit) : State = jsNative
+                        [<ParamObject; Emit("(o => ({status: 'waiting', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member CreateWaiting (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, on: float[], policy: JoinPolicy, ?outcome: unit) : State = jsNative
+                        [<ParamObject; Emit("(o => ({status: 'sleeping', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member CreateSleeping (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, until: float, ?outcome: unit) : State = jsNative
+
+                    [<Interface>]
+                    type State2 =
+                        /// <summary>
+                        /// Eligible for scheduling.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"pending"</c></remarks>
+                        abstract status: string
+                        /// <summary>
+                        /// Complete durable state from which execution resumes.
+                        /// </summary>
+                        abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        abstract outcome: unit option
+                        [<ParamObject; Emit("(o => ({status: 'pending', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member Create (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, ?outcome: unit) : State2 = jsNative
+
+                    module State2 =
+                        /// <summary>
+                        /// Eligible for scheduling.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"pending"</c></remarks>
+                        [<Literal>]
+                        let status = "pending"
+
+                    [<Interface>]
+                    type State3 =
+                        /// <summary>
+                        /// Reserved by one in-memory task invocation.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"running"</c></remarks>
+                        abstract status: string
+                        /// <summary>
+                        /// Complete durable state from which execution resumes.
+                        /// </summary>
+                        abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        abstract outcome: unit option
+                        [<ParamObject; Emit("(o => ({status: 'running', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member Create (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, ?outcome: unit) : State3 = jsNative
+
+                    module State3 =
+                        /// <summary>
+                        /// Reserved by one in-memory task invocation.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"running"</c></remarks>
+                        [<Literal>]
+                        let status = "running"
+
+                    [<Interface>]
+                    type State4 =
+                        /// <summary>
+                        /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
+                        abstract status: string
+                        abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        abstract on: float[]
+                        abstract policy: JoinPolicy
+                        abstract outcome: unit option
+                        [<ParamObject; Emit("(o => ({status: 'waiting', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member Create (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, on: float[], policy: JoinPolicy, ?outcome: unit) : State4 = jsNative
+
+                    module State4 =
+                        /// <summary>
+                        /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
+                        [<Literal>]
+                        let status = "waiting"
+
+                    [<Interface>]
+                    type State5 =
+                        /// <summary>
+                        /// Parked without an invocation until the Harness clock reaches <c>until</c>, in milliseconds on the
+                        /// <c>HarnessOptions.now</c> clock; then resumes at <c>checkpoint</c>. An abort mark does not wait for it.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
+                        abstract status: string
+                        abstract checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue
+                        abstract until: float
+                        abstract outcome: unit option
+                        [<ParamObject; Emit("(o => ({status: 'sleeping', ...o, \"checkpoint\": o[\"checkpoint\"] ?? null}))($0)")>]
+                        static member Create (checkpoint: FSharp.CloudEdge.Runtime.Chord.JsonValue, until: float, ?outcome: unit) : State5 = jsNative
+
+                    module State5 =
+                        /// <summary>
+                        /// Parked without an invocation until the Harness clock reaches <c>until</c>, in milliseconds on the
+                        /// <c>HarnessOptions.now</c> clock; then resumes at <c>checkpoint</c>. An abort mark does not wait for it.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
+                        [<Literal>]
+                        let status = "sleeping"
+
+                module Value2 =
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type State =
+                        | [<CompiledName("completing")>] Completing of checkpoint: unit option * outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<FSharp.CloudEdge.Runtime.Chord.JsonValue>
+                        | [<CompiledName("terminal")>] Terminal of checkpoint: unit option * outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<FSharp.CloudEdge.Runtime.Chord.JsonValue>
+                        [<ParamObject; Emit("({ status: 'completing', ...$0 })")>]
+                        static member CreateCompleting (outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<FSharp.CloudEdge.Runtime.Chord.JsonValue>, ?checkpoint: unit) : State = jsNative
+                        [<ParamObject; Emit("({ status: 'terminal', ...$0 })")>]
+                        static member CreateTerminal (outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<FSharp.CloudEdge.Runtime.Chord.JsonValue>, ?checkpoint: unit) : State = jsNative
+
+                    module State =
+                        module Cases =
+                            module Completing =
+                                [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                                type Outcome<'R> =
+                                    | [<CompiledName("completed")>] Completed of result: 'R * error: unit option * reason: unit option
+                                    | [<CompiledName("failed")>] Failed of error: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome.Cases.Failed.Error * result: 'R option * reason: unit option
+                                    | [<CompiledName("aborted")>] Aborted of reason: string option * result: 'R option * error: unit option
+                                    | [<CompiledName("orphaned")>] Orphaned of reason: string * result: unit option * error: unit option
+                                    | [<CompiledName("faulted")>] Faulted of error: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome.Cases.Failed.Error * result: unit option * reason: unit option
+                                    [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
+                                    static member CreateCompleted (result: 'R, ?error: unit, ?reason: unit) : Outcome<'R> = jsNative
+                                    [<ParamObject; Emit("({ status: 'failed', ...$0 })")>]
+                                    static member CreateFailed (error: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome.Cases.Failed.Error, ?result: 'R, ?reason: unit) : Outcome<'R> = jsNative
+                                    [<ParamObject; Emit("({ status: 'aborted', ...$0 })")>]
+                                    static member CreateAborted (?reason: string, ?result: 'R, ?error: unit) : Outcome<'R> = jsNative
+                                    [<ParamObject; Emit("({ status: 'orphaned', ...$0 })")>]
+                                    static member CreateOrphaned (reason: string, ?result: unit, ?error: unit) : Outcome<'R> = jsNative
+                                    [<ParamObject; Emit("({ status: 'faulted', ...$0 })")>]
+                                    static member CreateFaulted (error: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome.Cases.Failed.Error, ?result: unit, ?reason: unit) : Outcome<'R> = jsNative
+
+                                module Outcome =
+                                    module Cases =
+                                        module Failed =
+                                            [<Interface>]
+                                            type Error =
+                                                abstract message: string
+                                                /// <summary>
+                                                /// Optional structured diagnostic data for inspection or recovery.
+                                                /// </summary>
+                                                abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                                                [<ParamObject; Emit("$0")>]
+                                                static member Create (message: string, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Error = jsNative
 
     module Submission =
         module Abort =
@@ -7969,6 +8087,24 @@ module PiDurable =
                     | [<CompiledName("aborted")>] Aborted
                     | [<CompiledName("already_placed")>] AlreadyPlaced
                     | [<CompiledName("settled")>] Settled
+
+    module SubmissionRecord =
+        module Cases =
+            module Input =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// Adapter-owned context of the admission span; absent without propagation.
+                    /// </summary>
+                    abstract trace: JS.Record<string, string> option
+                    abstract id: float
+                    abstract conversationId: float
+                    /// <summary>
+                    /// Host-provided deduplication key, scoped to the conversation.
+                    /// </summary>
+                    abstract requestId: string option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: float, conversationId: float, ?trace: JS.Record<string, string>, ?requestId: string) : Base = jsNative
 
     module Task =
         [<Interface>]
@@ -8005,107 +8141,111 @@ module PiDurable =
             module Abort =
                 [<Interface>]
                 type Task<'R, 'I, 'S> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: 'I
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
+                    inherit Task.Definition.Abort.Task.Base<'I, 'R>
                     abstract state: obj
                     /// <summary>
                     /// Small first-writer-wins values retained while the task can run.
                     /// </summary>
-                    abstract memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, state: obj, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Task<'R, 'I, 'S> = jsNative
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, state: obj, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Task<'R, 'I, 'S> = jsNative
 
                 [<Interface>]
                 type Task2<'R, 'I, 'S> =
-                    abstract id: float
-                    abstract conversationId: float
-                    /// <summary>
-                    /// Registered task definition name.
-                    /// </summary>
-                    abstract kind: string
-                    /// <summary>
-                    /// Definition version used to migrate live input and checkpoints.
-                    /// </summary>
-                    abstract version: float
-                    /// <summary>
-                    /// Original task input retained while the task is live or terminal.
-                    /// </summary>
-                    abstract input: 'I
-                    /// <summary>
-                    /// Owning task of a child task; absent for a task its conversation owns. Immutable.
-                    /// </summary>
-                    abstract owner: float option
-                    /// <summary>
-                    /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
-                    /// </summary>
-                    abstract background: bool
-                    /// <summary>
-                    /// Durable abort mark checked before run-mode progress is committed.
-                    /// </summary>
-                    abstract abortRequested: bool
-                    /// <summary>
-                    /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
-                    /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
-                    /// versions.
-                    /// </summary>
-                    abstract startedAt: float option
-                    /// <summary>
-                    /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
-                    /// </summary>
-                    abstract endedAt: float option
+                    inherit Task.Definition.Abort.Task.Base<'I, 'R>
                     abstract state: Task.Definition.Abort.Task.State<'S>
                     abstract memos: unit option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, state: Task.Definition.Abort.Task.State<'S>, ?owner: float, ?startedAt: float, ?endedAt: float, ?memos: unit) : Task2<'R, 'I, 'S> = jsNative
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, state: Task.Definition.Abort.Task.State<'S>, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: unit) : Task2<'R, 'I, 'S> = jsNative
 
                 module Task =
+                    [<Interface>]
+                    type Base<'I, 'R> =
+                        /// <summary>
+                        /// Adapter-owned context that created this task; phase invocations extract it as their parent.
+                        /// </summary>
+                        abstract trace: JS.Record<string, string> option
+                        /// <summary>
+                        /// Immutable creation-time links for the task's first invocation.
+                        /// </summary>
+                        abstract links: JS.Record<string, string>[] option
+                        abstract id: float
+                        abstract conversationId: float
+                        /// <summary>
+                        /// Registered task definition name.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Definition version used to migrate live input and checkpoints.
+                        /// </summary>
+                        abstract version: float
+                        /// <summary>
+                        /// Original task input retained while the task is live or terminal.
+                        /// </summary>
+                        abstract input: 'I
+                        /// <summary>
+                        /// Owning task of a child task; absent for a task its conversation owns. Immutable.
+                        /// </summary>
+                        abstract owner: float option
+                        /// <summary>
+                        /// Whether this conversation-owned task is excluded from ordinary idle waits, conversation aborts, and cascades.
+                        /// </summary>
+                        abstract background: bool
+                        /// <summary>
+                        /// Durable abort mark checked before run-mode progress is committed.
+                        /// </summary>
+                        abstract abortRequested: bool
+                        /// <summary>
+                        /// Why the mark was set when not by an abort request: <c>restart</c> for a task abandoned after a restart
+                        /// (<c>TaskOptions.abandonOnRestart</c>) or below one. Such a task waits for its definition instead of becoming <c>orphaned</c>.
+                        /// A later abort request clears it.
+                        /// </summary>
+                        abstract abortReason: string option
+                        /// <summary>
+                        /// Set from <c>TaskOptions.abandonOnRestart</c>. Immutable.
+                        /// </summary>
+                        abstract abandonOnRestart: bool option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the first change to <c>running</c>, stamped by the Session. Kept through waits and recovery,
+                        /// so the span to <c>endedAt</c> includes them. Absent before the task first runs, and on records written by earlier
+                        /// versions.
+                        /// </summary>
+                        abstract startedAt: float option
+                        /// <summary>
+                        /// Wall-clock milliseconds of the change to <c>terminal</c>, stamped by the Session; absent while live.
+                        /// </summary>
+                        abstract endedAt: float option
+                        /// <summary>
+                        /// How many times in a row a crash, eviction, or reset cut the task off while it ran, without the task changing its
+                        /// state since; open counts them, and a close does not. At <c>HarnessSettings.restartLimit</c> the task is parked as blocked
+                        /// until <c>Harness.retryTask()</c>.
+                        /// </summary>
+                        abstract restarts: float option
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float) : Base<'I, 'R> = jsNative
+
                     [<Interface>]
                     type State<'S> =
                         /// <summary>
                         /// Reserved by one in-memory task invocation.
                         /// </summary>
+                        /// <remarks>TypeScript type: <c>"running"</c></remarks>
                         abstract status: string
                         /// <summary>
                         /// Complete durable state from which execution resumes.
                         /// </summary>
                         abstract checkpoint: 'S
                         abstract outcome: unit option
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (status: string, checkpoint: 'S, ?outcome: unit) : State<'S> = jsNative
+                        [<ParamObject; Emit("({ status: 'running', ...$0 })")>]
+                        static member Create (checkpoint: 'S, ?outcome: unit) : State<'S> = jsNative
+
+                    module State =
+                        /// <summary>
+                        /// Reserved by one in-memory task invocation.
+                        /// </summary>
+                        /// <remarks>TypeScript type: <c>"running"</c></remarks>
+                        [<Literal>]
+                        let status = "running"
 
     module TaskGraphState2 =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -8113,44 +8253,49 @@ module PiDurable =
             | [<CompiledName("pending")>] Pending
             | [<CompiledName("running")>] Running
 
-    module TaskGraphState4 =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Outcome =
-            | [<CompiledName("aborted")>] Aborted
-            | [<CompiledName("completed")>] Completed
-            | [<CompiledName("failed")>] Failed
-            | [<CompiledName("faulted")>] Faulted
-            | [<CompiledName("orphaned")>] Orphaned
-
     module TaskRuntime =
         [<Interface>]
         type Settings =
             /// <summary>
             /// Absent: every installed extension, in install order.
             /// </summary>
-            abstract extensions: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[] option
+            abstract extensions: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[] option
             abstract stream: TaskRuntime.Settings.Stream
             abstract retry: TaskRuntime.Settings.Retry
+            /// <summary>
+            /// Harness-wide policy over the defaults; per-model overrides apply where the model is known.
+            /// </summary>
             abstract compaction: TaskRuntime.Settings.Compaction
             abstract progress: TaskRuntime.Settings.Progress
             abstract toolExecution: ToolExecutionMode
             abstract steeringMode: QueueMode
             abstract followUpMode: QueueMode
             abstract contextRetentionMs: float
+            abstract documentRetentionMs: float
+            abstract afterFailedRun: AfterFailedRun
+            abstract restartLimit: float
             [<ParamObject; Emit("$0")>]
-            static member Create (stream: TaskRuntime.Settings.Stream, retry: TaskRuntime.Settings.Retry, compaction: TaskRuntime.Settings.Compaction, progress: TaskRuntime.Settings.Progress, toolExecution: ToolExecutionMode, steeringMode: QueueMode, followUpMode: QueueMode, contextRetentionMs: float, ?extensions: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[]) : Settings = jsNative
+            static member Create (stream: TaskRuntime.Settings.Stream, retry: TaskRuntime.Settings.Retry, compaction: TaskRuntime.Settings.Compaction, progress: TaskRuntime.Settings.Progress, toolExecution: ToolExecutionMode, steeringMode: QueueMode, followUpMode: QueueMode, contextRetentionMs: float, documentRetentionMs: float, afterFailedRun: AfterFailedRun, restartLimit: float, ?extensions: Extension<Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[]) : Settings = jsNative
 
         module Agent =
             module Result =
                 [<Interface>]
                 type Item =
                     abstract model: Harness.Root.Options.Agent.Model option
-                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel
-                    abstract extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[]
+                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel
+                    abstract extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[]
                     /// <summary>
-                    /// The tools a request offers, in order.
+                    /// The tools a request offers, in order: enabled, callable by the model, and selected by <c>modelTools</c>.
                     /// </summary>
-                    abstract tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[]
+                    abstract tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
+                    /// <summary>
+                    /// The tools nested calls (<c>executeTool()</c>) resolve among, in order: enabled and callable by tools.
+                    /// </summary>
+                    abstract callable: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
+                    /// <summary>
+                    /// Enabled deferred tools the model may call and is not offered yet, in registry order: what <c>tool_search</c> loads.
+                    /// </summary>
+                    abstract deferred: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
                     /// <summary>
                     /// Extension sections, then <c>instructions</c> when set.
                     /// </summary>
@@ -8158,25 +8303,104 @@ module PiDurable =
                     abstract instructions: string option
                     abstract cwd: string option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[], tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[], sections: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item.Sections.Item[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Item = jsNative
+                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[], tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], callable: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], deferred: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], sections: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item.Sections.Item[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Item = jsNative
 
         module Commit =
-            type Change<'R, 'I, 'S> = delegate of tx: Tx * current: U2<FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task<'R, 'I, 'S>, FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task2<'R, 'I, 'S>> -> U4<JS.Promise<U3<FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task.State<'S>, TaskRuntime.Commit.Change.Result.Item<'S>, FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item2.State3<'R>> option>, FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task.State<'S>, TaskRuntime.Commit.Change.Result.Item<'S>, FSharp.CloudEdge.Runtime.PiDurable.Harness.GetTask.Result.Item2.State3<'R>> option
+            type Change<'R, 'I, 'S> = delegate of tx: Tx * current: U2<TaskRuntime.Commit.Change.Current<'R, 'I, 'S>, FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task2<'R, 'I, 'S>> -> U5<JS.Promise<TaskRuntime.Commit.Change.Result.Item<'S, 'R> option>, FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task.State<'S>, TaskRuntime.Commit.Change.Result<'S>, TaskRuntime.Commit.Change.Result2<'S>, TaskRuntime.Commit.Change.Result3<'R>> option
 
             module Change =
+                [<Interface>]
+                type Current<'R, 'I, 'S> =
+                    inherit FSharp.CloudEdge.Runtime.PiDurable.Task.Definition.Abort.Task.Base<'I, 'R>
+                    abstract state: obj
+                    /// <summary>
+                    /// Small first-writer-wins values retained while the task can run.
+                    /// </summary>
+                    abstract memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue> option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: float, conversationId: float, kind: string, version: float, input: 'I, background: bool, abortRequested: bool, state: obj, ?trace: JS.Record<string, string>, ?links: JS.Record<string, string>[], ?owner: float, ?abortReason: string, ?abandonOnRestart: bool, ?startedAt: float, ?endedAt: float, ?restarts: float, ?memos: JS.ReadonlyRecord<string, FSharp.CloudEdge.Runtime.Chord.JsonValue>) : Current<'R, 'I, 'S> = jsNative
+
+                [<Interface>]
+                type Result<'S> =
+                    /// <summary>
+                    /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
+                    abstract status: string
+                    abstract checkpoint: 'S
+                    abstract on: float[]
+                    abstract policy: JoinPolicy
+                    abstract outcome: unit option
+                    [<ParamObject; Emit("({ status: 'waiting', ...$0 })")>]
+                    static member Create (checkpoint: 'S, on: float[], policy: JoinPolicy, ?outcome: unit) : Result<'S> = jsNative
+
                 module Result =
-                    [<Interface>]
-                    type Item<'S> =
-                        /// <summary>
-                        /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
-                        /// </summary>
-                        abstract status: string
-                        abstract checkpoint: 'S
-                        abstract on: float[]
-                        abstract policy: JoinPolicy
-                        abstract outcome: unit option
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (status: string, checkpoint: 'S, on: float[], policy: JoinPolicy, ?outcome: unit) : Item<'S> = jsNative
+                    /// <summary>
+                    /// Parked without an invocation until every task in <c>on</c> is terminal; then resumes at <c>checkpoint</c>.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"waiting"</c></remarks>
+                    [<Literal>]
+                    let status = "waiting"
+
+                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
+                    type Item<'S, 'R> =
+                        /// <param name="checkpoint">Complete durable state from which execution resumes.</param>
+                        /// <param name="outcome"></param>
+                        | [<CompiledName("running")>] Running of checkpoint: 'S * outcome: unit option
+                        | [<CompiledName("waiting")>] Waiting of checkpoint: 'S * on: float[] * policy: JoinPolicy * outcome: unit option
+                        | [<CompiledName("sleeping")>] Sleeping of checkpoint: 'S * until: float * outcome: unit option
+                        | [<CompiledName("terminal")>] Terminal of checkpoint: unit option * outcome: obj
+                        [<ParamObject; Emit("({ status: 'running', ...$0 })")>]
+                        static member CreateRunning (checkpoint: 'S, ?outcome: unit) : Item<'S, 'R> = jsNative
+                        [<ParamObject; Emit("({ status: 'waiting', ...$0 })")>]
+                        static member CreateWaiting (checkpoint: 'S, on: float[], policy: JoinPolicy, ?outcome: unit) : Item<'S, 'R> = jsNative
+                        [<ParamObject; Emit("({ status: 'sleeping', ...$0 })")>]
+                        static member CreateSleeping (checkpoint: 'S, until: float, ?outcome: unit) : Item<'S, 'R> = jsNative
+                        [<ParamObject; Emit("({ status: 'terminal', ...$0 })")>]
+                        static member CreateTerminal (outcome: obj, ?checkpoint: unit) : Item<'S, 'R> = jsNative
+
+                [<Interface>]
+                type Result2<'S> =
+                    /// <summary>
+                    /// Parked without an invocation until the Harness clock reaches <c>until</c>, in milliseconds on the
+                    /// <c>HarnessOptions.now</c> clock; then resumes at <c>checkpoint</c>. An abort mark does not wait for it.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
+                    abstract status: string
+                    abstract checkpoint: 'S
+                    abstract until: float
+                    abstract outcome: unit option
+                    [<ParamObject; Emit("({ status: 'sleeping', ...$0 })")>]
+                    static member Create (checkpoint: 'S, until: float, ?outcome: unit) : Result2<'S> = jsNative
+
+                module Result2 =
+                    /// <summary>
+                    /// Parked without an invocation until the Harness clock reaches <c>until</c>, in milliseconds on the
+                    /// <c>HarnessOptions.now</c> clock; then resumes at <c>checkpoint</c>. An abort mark does not wait for it.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"sleeping"</c></remarks>
+                    [<Literal>]
+                    let status = "sleeping"
+
+                [<Interface>]
+                type Result3<'R> =
+                    /// <summary>
+                    /// Permanently settled durable result receipt.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"terminal"</c></remarks>
+                    abstract status: string
+                    abstract checkpoint: unit option
+                    abstract outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>
+                    [<ParamObject; Emit("({ status: 'terminal', ...$0 })")>]
+                    static member Create (outcome: StorageWrite.Cases.Task.Value2.State.Cases.Completing.Outcome<'R>, ?checkpoint: unit) : Result3<'R> = jsNative
+
+                module Result3 =
+                    /// <summary>
+                    /// Permanently settled durable result receipt.
+                    /// </summary>
+                    /// <remarks>TypeScript type: <c>"terminal"</c></remarks>
+                    [<Literal>]
+                    let status = "terminal"
 
         module Context =
             [<Interface>]
@@ -8207,60 +8431,13 @@ module PiDurable =
                     [<ParamObject; Emit("$0")>]
                     static member Create (entries: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item[], contributions: FSharp.CloudEdge.Runtime.PiAi.Message[][], messages: FSharp.CloudEdge.Runtime.PiAi.Message[], ?head: FSharp.CloudEdge.Runtime.AgentsPi.Harness.Pi.PiPromptResponse.Messages.Item) : Item = jsNative
 
-        module GetTask =
-            module Result =
-                module Item2 =
-                    module State2 =
-                        [<Interface>]
-                        type Outcome3 =
-                            abstract status: string
-                            abstract error: StorageWrite4.Value2.State2.Outcome3.Error
-                            abstract result: obj option
-                            abstract reason: unit option
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (status: string, error: StorageWrite4.Value2.State2.Outcome3.Error, ?result: obj, ?reason: unit) : Outcome3 = jsNative
-
-                        [<Interface>]
-                        type Outcome4 =
-                            abstract status: string
-                            abstract reason: string option
-                            abstract result: obj option
-                            abstract error: unit option
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (status: string, ?reason: string, ?result: obj, ?error: unit) : Outcome4 = jsNative
-
-        module Outcomes =
-            module Result =
-                module Item =
-                    [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
-                    type Item =
-                        | [<CompiledName("completed")>] Completed of result: obj * error: unit option * reason: unit option
-                        | [<CompiledName("failed")>] Failed of error: StorageWrite4.Value2.State2.Outcome3.Error * result: obj option * reason: unit option
-                        | [<CompiledName("aborted")>] Aborted of reason: string option * result: obj option * error: unit option
-                        | [<CompiledName("orphaned")>] Orphaned of reason: string * result: unit option * error: unit option
-                        | [<CompiledName("faulted")>] Faulted of error: StorageWrite4.Value2.State2.Outcome3.Error * result: unit option * reason: unit option
-
         module Settings =
             [<Interface>]
             type Compaction =
-                /// <summary>
-                /// Threshold and overflow compaction.
-                /// </summary>
-                abstract enabled: bool with get, set
-                /// <summary>
-                /// Room kept free for the answer: generation blocks to compact above <c>contextWindow - reserveTokens</c>.
-                /// </summary>
-                abstract reserveTokens: float with get, set
-                /// <summary>
-                /// Approximate size of the recent context a summary keeps verbatim.
-                /// </summary>
-                abstract keepRecentTokens: float with get, set
-                /// <summary>
-                /// Background compaction starts <c>backgroundTokens</c> below the blocking threshold; <c>0</c> disables it.
-                /// </summary>
-                abstract backgroundTokens: float with get, set
+                inherit TaskRuntime.Settings.Compaction.Base
+                inherit TaskRuntime.Settings.Compaction.Base2
                 [<ParamObject; Emit("$0")>]
-                static member Create (enabled: bool, reserveTokens: float, keepRecentTokens: float, backgroundTokens: float) : Compaction = jsNative
+                static member Create (enabled: bool, reserveTokens: float, keepRecentTokens: float, backgroundTokens: float, ?modelOverrides: JS.ReadonlyRecord<string, TaskRuntime.Settings.Compaction.ModelOverrides.Item>) : Compaction = jsNative
 
             [<Interface>]
             type Progress =
@@ -8293,12 +8470,62 @@ module PiDurable =
                 /// </summary>
                 abstract maxRetries: float option with get, set
                 abstract maxRetryDelayMs: float option with get, set
-                abstract headers: Record<string, string> option with get, set
-                abstract metadata: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2> option with get, set
-                abstract cacheRetention: FSharp.CloudEdge.Runtime.PiAi.CacheRetention option with get, set
+                abstract headers: JS.Record<string, string> option with get, set
+                abstract metadata: JsonObject option with get, set
+                abstract cacheRetention: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.CacheRetention option with get, set
                 abstract deferred: U2<bool, TaskRuntime.Settings.Stream.Deferred> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?transport: FSharp.CloudEdge.Runtime.PiAi.Transport, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?headers: Record<string, string>, ?metadata: Record<string, FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?cacheRetention: FSharp.CloudEdge.Runtime.PiAi.CacheRetention, ?deferred: U2<bool, TaskRuntime.Settings.Stream.Deferred>) : Stream = jsNative
+                static member Create (?transport: FSharp.CloudEdge.Runtime.PiAi.Transport, ?timeoutMs: float, ?maxRetries: float, ?maxRetryDelayMs: float, ?headers: JS.Record<string, string>, ?metadata: JsonObject, ?cacheRetention: FSharp.CloudEdge.Runtime.PiAi.SimpleStreamOptions.CacheRetention, ?deferred: U2<bool, TaskRuntime.Settings.Stream.Deferred>) : Stream = jsNative
+
+            module Compaction =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// Threshold and overflow compaction.
+                    /// </summary>
+                    abstract enabled: bool with get, set
+                    /// <summary>
+                    /// Room kept free for the answer: generation blocks to compact above <c>contextWindow - reserveTokens</c>.
+                    /// </summary>
+                    abstract reserveTokens: float with get, set
+                    /// <summary>
+                    /// Approximate size of the recent context a summary keeps verbatim.
+                    /// </summary>
+                    abstract keepRecentTokens: float with get, set
+                    /// <summary>
+                    /// Background compaction starts <c>backgroundTokens</c> below the blocking threshold; <c>0</c> disables it.
+                    /// </summary>
+                    abstract backgroundTokens: float with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (enabled: bool, reserveTokens: float, keepRecentTokens: float, backgroundTokens: float) : Base = jsNative
+
+                [<Interface>]
+                type Base2 =
+                    abstract modelOverrides: JS.ReadonlyRecord<string, TaskRuntime.Settings.Compaction.ModelOverrides.Item> option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?modelOverrides: JS.ReadonlyRecord<string, TaskRuntime.Settings.Compaction.ModelOverrides.Item>) : Base2 = jsNative
+
+                module ModelOverrides =
+                    [<Interface>]
+                    type Item =
+                        /// <summary>
+                        /// Threshold and overflow compaction.
+                        /// </summary>
+                        abstract enabled: bool option with get, set
+                        /// <summary>
+                        /// Room kept free for the answer: generation blocks to compact above <c>contextWindow - reserveTokens</c>.
+                        /// </summary>
+                        abstract reserveTokens: float option with get, set
+                        /// <summary>
+                        /// Approximate size of the recent context a summary keeps verbatim.
+                        /// </summary>
+                        abstract keepRecentTokens: float option with get, set
+                        /// <summary>
+                        /// Background compaction starts <c>backgroundTokens</c> below the blocking threshold; <c>0</c> disables it.
+                        /// </summary>
+                        abstract backgroundTokens: float option with get, set
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (?enabled: bool, ?reserveTokens: float, ?keepRecentTokens: float, ?backgroundTokens: float) : Item = jsNative
 
             module Stream =
                 [<Interface>]
@@ -8323,12 +8550,20 @@ module PiDurable =
                 [<Interface>]
                 type Item =
                     abstract model: Harness.Root.Options.Agent.Model option
-                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel
-                    abstract extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[]
+                    abstract thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel
+                    abstract extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[]
                     /// <summary>
-                    /// The tools a request offers, in order.
+                    /// The tools a request offers, in order: enabled, callable by the model, and selected by <c>modelTools</c>.
                     /// </summary>
-                    abstract tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[]
+                    abstract tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
+                    /// <summary>
+                    /// The tools nested calls (<c>executeTool()</c>) resolve among, in order: enabled and callable by tools.
+                    /// </summary>
+                    abstract callable: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
+                    /// <summary>
+                    /// Enabled deferred tools the model may call and is not offered yet, in registry order: what <c>tool_search</c> loads.
+                    /// </summary>
+                    abstract deferred: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[]
                     /// <summary>
                     /// Extension sections, then <c>instructions</c> when set.
                     /// </summary>
@@ -8336,7 +8571,7 @@ module PiDurable =
                     abstract instructions: string option
                     abstract cwd: string option
                     [<ParamObject; Emit("$0")>]
-                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.ModelThinkingLevel, extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>>[], tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue2>[], sections: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item.Sections.Item[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Item = jsNative
+                    static member Create (thinkingLevel: FSharp.CloudEdge.Runtime.PiAi.AssistantMessage.ThinkingLevel, extensions: Extension<FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>>[], tools: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], callable: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], deferred: FSharp.CloudEdge.Runtime.PiDurable.Harness.Root.Options.Agent.Extensions.Item.Item<obj, FSharp.CloudEdge.Runtime.Chord.JsonValue>[], sections: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item.Sections.Item[], ?model: Harness.Root.Options.Agent.Model, ?instructions: string, ?cwd: string) : Item = jsNative
 
                 module Item =
                     module Sections =
@@ -8367,17 +8602,25 @@ module PiDurable =
                                     /// <summary>
                                     /// Sections already in effect after replaying the active transcript.
                                     /// </summary>
-                                    abstract shown: ReadonlyRecord<string, string>
+                                    abstract shown: JS.ReadonlyRecord<string, string>
                                     /// <summary>
                                     /// Committed document reads.
                                     /// </summary>
                                     abstract read: Extension.Sections.Item.Render.Input.Read
                                     [<ParamObject; Emit("$0")>]
-                                    static member Create (conversationId: float, agent: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item, shown: ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input = jsNative
+                                    static member Create (conversationId: float, agent: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Agent.Result.Item, shown: JS.ReadonlyRecord<string, string>, read: Extension.Sections.Item.Render.Input.Read, ?env: ExecutionEnv) : Input = jsNative
 
         module CreateTask =
             [<Interface>]
             type Options =
+                /// <summary>
+                /// Omitted: inherit the creator's carrier. "root": start at the adapter root without a stored carrier.
+                /// </summary>
+                abstract trace: U2<string, JS.Record<string, string>> option
+                /// <summary>
+                /// Immutable creation-time links, attached to the spans of this task's first invocation.
+                /// </summary>
+                abstract links: JS.Record<string, string>[] option
                 /// <summary>
                 /// Required: a task always names its owner (spec §5.5).
                 /// </summary>
@@ -8386,8 +8629,14 @@ module PiDurable =
                 /// Conversation-owned tasks only: excluded from ordinary idle waits, conversation aborts, and cascades.
                 /// </summary>
                 abstract background: bool option
+                /// <summary>
+                /// Its creator awaits it only in memory and does not resume after a restart, so it is pointless once the Harness that
+                /// created it is gone. When scheduling starts in a later Harness, the task, if still live, is abort-marked with reason
+                /// <c>restart</c>, and the mark cascades to its ordinary owned work, before any of it runs again.
+                /// </summary>
+                abstract abandonOnRestart: bool option
                 [<ParamObject; Emit("$0")>]
-                static member Create (ownership: TaskOwnership, ?background: bool) : Options = jsNative
+                static member Create (ownership: TaskOwnership, ?trace: U2<string, JS.Record<string, string>>, ?links: JS.Record<string, string>[], ?background: bool, ?abandonOnRestart: bool) : Options = jsNative
 
         module Diagnostic =
             [<Interface>]
@@ -8405,32 +8654,98 @@ module PiDurable =
                     | [<CompiledName("info")>] Info
                     | [<CompiledName("warn")>] Warn
 
+        module ExecuteTool =
+            [<Interface>]
+            type Options =
+                abstract key: string option
+                abstract progress: bool option
+                [<ParamObject; Emit("$0")>]
+                static member Create (?key: string, ?progress: bool) : Options = jsNative
+
+            module Result =
+                [<Interface>]
+                type Item =
+                    /// <summary>
+                    /// The nested call's tool task.
+                    /// </summary>
+                    abstract taskId: float
+                    /// <summary>
+                    /// The tool's value for programs. A tool with <c>structuredOutputSchema</c>: its validated <c>structuredOutput</c>, also on an
+                    /// error result that has one; absent otherwise, and an error's text is then in an error diagnostic. A tool without:
+                    /// its bounded output, success or error, as a string for one text item, an <c>ImageContent</c> for one image, <c>""</c> for
+                    /// none, and the content list otherwise. Absent on an error result the Harness wrote itself (unavailable, invalid,
+                    /// blocked, interrupted, aborted); <c>diagnostics</c> say what went wrong.
+                    /// </summary>
+                    abstract structuredOutput: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract isError: bool
+                    abstract details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    abstract diagnostics: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Diagnostic.Diagnostic[]
+                    abstract usage: FSharp.CloudEdge.Runtime.PiAi.Usage option
+                    /// <summary>
+                    /// Execution time of the attempt that produced the result; absent when it never executed.
+                    /// </summary>
+                    abstract durationMs: float option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (taskId: float, isError: bool, diagnostics: FSharp.CloudEdge.Runtime.PiDurable.ToolExecutionApi.Diagnostic.Diagnostic[], ?structuredOutput: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?details: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?usage: FSharp.CloudEdge.Runtime.PiAi.Usage, ?durationMs: float) : Item = jsNative
+
+        module RetainedOutput =
+            [<Interface>]
+            type Result =
+                abstract text: string
+                abstract truncated: bool
+                [<ParamObject; Emit("$0")>]
+                static member Create (text: string, truncated: bool) : Result = jsNative
+
     module Tx =
         module AppendEntry =
             [<Interface>]
             type Value =
-                /// <summary>
-                /// Application-defined entry discriminator.
-                /// </summary>
-                abstract kind: string
-                /// <summary>
-                /// Messages contributed to model context; absent for display or bookkeeping entries.
-                /// </summary>
-                abstract model: FSharp.CloudEdge.Runtime.PiAi.Message[] option
-                /// <summary>
-                /// JSON payload consumed by views, extensions, or bookkeeping logic.
-                /// </summary>
-                abstract data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-                /// <summary>
-                /// Context-only overrides of earlier visible entries.
-                /// </summary>
-                abstract edits: ContextEdit[] option
+                inherit Tx.AppendEntry.Value.Base
                 /// <summary>
                 /// <c>"self"</c> starts active context at the newly assigned entry ID.
                 /// </summary>
                 abstract head: U2<string, float> option
                 [<ParamObject; Emit("$0")>]
-                static member Create (kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?edits: ContextEdit[], ?head: U2<string, float>) : Value = jsNative
+                static member Create (kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?edits: ContextEdit[], ?head: U2<string, float>) : Value = jsNative
+
+            module Value =
+                [<Interface>]
+                type Base =
+                    /// <summary>
+                    /// Application-defined entry discriminator.
+                    /// </summary>
+                    abstract kind: string
+                    /// <summary>
+                    /// Messages contributed to model context; absent for display or bookkeeping entries.
+                    /// </summary>
+                    abstract model: FSharp.CloudEdge.Runtime.PiAi.Message[] option
+                    /// <summary>
+                    /// JSON payload consumed by views, extensions, or bookkeeping logic.
+                    /// </summary>
+                    abstract data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                    /// <summary>
+                    /// Context-only overrides of earlier visible entries.
+                    /// </summary>
+                    abstract edits: ContextEdit[] option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?edits: ContextEdit[]) : Base = jsNative
+
+                [<Interface>]
+                type Base2 =
+                    /// <summary>
+                    /// Messages contributed to model context; absent for display or bookkeeping entries.
+                    /// </summary>
+                    abstract model: FSharp.CloudEdge.Runtime.PiAi.Message[] option
+                    /// <summary>
+                    /// Context-only overrides of earlier visible entries.
+                    /// </summary>
+                    abstract edits: ContextEdit[] option
+                    /// <summary>
+                    /// <c>"self"</c> starts active context at the newly assigned entry ID.
+                    /// </summary>
+                    abstract head: U2<string, float> option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?edits: ContextEdit[], ?head: U2<string, float>) : Base2 = jsNative
 
         module CreateConversation =
             [<Interface>]
@@ -8442,145 +8757,277 @@ module PiDurable =
         module CreateSubmission =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
             type Create =
-                | [<CompiledName("input")>] Input of conversationId: float * requestId: string option
-                | [<CompiledName("write")>] Write of conversationId: float * requestId: string option * answer: unit option
+                | [<CompiledName("input"); CaseTest("$0.status === 'queued'"); Fickl.Core.InlineInterface>] Input of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create2
+                | [<CompiledName("input"); CaseTest("$0.status === 'placed'"); Fickl.Core.InlineInterface>] Input2 of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create3
+                | [<CompiledName("input"); CaseTest("$0.status === 'done'"); Fickl.Core.InlineInterface>] Input3 of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create4
+                | [<CompiledName("input"); CaseTest("$0.status === 'unanswered'"); Fickl.Core.InlineInterface>] Input4 of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create5
+                | [<CompiledName("write"); CaseTest("$0.status === 'queued'"); Fickl.Core.InlineInterface>] Write of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create6
+                | [<CompiledName("write"); CaseTest("$0.status === 'done'"); Fickl.Core.InlineInterface>] Write2 of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create7
+                | [<CompiledName("write"); CaseTest("$0.status === 'unanswered'"); Fickl.Core.InlineInterface>] Write3 of FSharp.CloudEdge.Runtime.PiDurable.Tx.CreateSubmission.Create8
 
             [<Interface>]
             type Create2 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Admitted but not yet represented in the transcript.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"queued"</c></remarks>
                 abstract status: string
                 abstract entry: unit option
                 abstract answer: unit option
                 abstract reason: unit option
                 abstract detail: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : Create2 = jsNative
+                [<ParamObject; Emit("({ type: 'input', status: 'queued', ...$0 })")>]
+                static member Create (conversationId: float, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : Create2 = jsNative
+
+            module Create2 =
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
+                [<Literal>]
+                let ``type`` = "input"
+                /// <summary>
+                /// Admitted but not yet represented in the transcript.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"queued"</c></remarks>
+                [<Literal>]
+                let status = "queued"
 
             [<Interface>]
             type Create3 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Added to the transcript and owned by an active run.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"placed"</c></remarks>
                 abstract status: string
                 abstract entry: float
                 abstract answer: unit option
                 abstract reason: unit option
                 abstract detail: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, entry: float, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : Create3 = jsNative
+                [<ParamObject; Emit("({ type: 'input', status: 'placed', ...$0 })")>]
+                static member Create (conversationId: float, entry: float, ?trace: JS.Record<string, string>, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : Create3 = jsNative
+
+            module Create3 =
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
+                [<Literal>]
+                let ``type`` = "input"
+                /// <summary>
+                /// Added to the transcript and owned by an active run.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"placed"</c></remarks>
+                [<Literal>]
+                let status = "placed"
 
             [<Interface>]
             type Create4 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Successfully answered user input.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"done"</c></remarks>
                 abstract status: string
                 abstract entry: float
                 abstract answer: float
                 abstract reason: unit option
                 abstract detail: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, entry: float, answer: float, ?requestId: string, ?reason: unit, ?detail: unit) : Create4 = jsNative
+                [<ParamObject; Emit("({ type: 'input', status: 'done', ...$0 })")>]
+                static member Create (conversationId: float, entry: float, answer: float, ?trace: JS.Record<string, string>, ?requestId: string, ?reason: unit, ?detail: unit) : Create4 = jsNative
+
+            module Create4 =
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
+                [<Literal>]
+                let ``type`` = "input"
+                /// <summary>
+                /// Successfully answered user input.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"done"</c></remarks>
+                [<Literal>]
+                let status = "done"
 
             [<Interface>]
             type Create5 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Terminal input that can no longer receive an answer.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
                 abstract status: string
                 abstract entry: float option
                 abstract answer: unit option
                 abstract reason: string
-                abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : Create5 = jsNative
+                abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                [<ParamObject; Emit("({ type: 'input', status: 'unanswered', ...$0 })")>]
+                static member Create (conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: float, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Create5 = jsNative
+
+            module Create5 =
+                /// <remarks>TypeScript type: <c>"input"</c></remarks>
+                [<Literal>]
+                let ``type`` = "input"
+                /// <summary>
+                /// Terminal input that can no longer receive an answer.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
+                [<Literal>]
+                let status = "unanswered"
 
             [<Interface>]
             type Create6 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Admitted but not yet appended to the transcript.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"queued"</c></remarks>
                 abstract status: string
                 abstract entry: unit option
                 abstract answer: unit option
                 abstract reason: unit option
                 abstract detail: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : Create6 = jsNative
+                [<ParamObject; Emit("({ type: 'write', status: 'queued', ...$0 })")>]
+                static member Create (conversationId: float, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?reason: unit, ?detail: unit) : Create6 = jsNative
+
+            module Create6 =
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
+                [<Literal>]
+                let ``type`` = "write"
+                /// <summary>
+                /// Admitted but not yet appended to the transcript.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"queued"</c></remarks>
+                [<Literal>]
+                let status = "queued"
 
             [<Interface>]
             type Create7 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Successfully appended passive entry.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"done"</c></remarks>
                 abstract status: string
                 abstract entry: float
                 abstract answer: unit option
                 abstract reason: unit option
                 abstract detail: unit option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, entry: float, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : Create7 = jsNative
+                [<ParamObject; Emit("({ type: 'write', status: 'done', ...$0 })")>]
+                static member Create (conversationId: float, entry: float, ?trace: JS.Record<string, string>, ?requestId: string, ?answer: unit, ?reason: unit, ?detail: unit) : Create7 = jsNative
+
+            module Create7 =
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
+                [<Literal>]
+                let ``type`` = "write"
+                /// <summary>
+                /// Successfully appended passive entry.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"done"</c></remarks>
+                [<Literal>]
+                let status = "done"
 
             [<Interface>]
             type Create8 =
+                /// <summary>
+                /// Adapter-owned context of the admission span; absent without propagation.
+                /// </summary>
+                abstract trace: JS.Record<string, string> option
                 abstract conversationId: float
                 /// <summary>
                 /// Host-provided deduplication key, scoped to the conversation.
                 /// </summary>
                 abstract requestId: string option
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
                 abstract ``type``: string
                 /// <summary>
                 /// Terminal passive write that could not be placed.
                 /// </summary>
+                /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
                 abstract status: string
                 abstract entry: unit option
                 abstract answer: unit option
                 abstract reason: string
-                abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22> option
-                [<ParamObject; Emit("$0")>]
-                static member Create (conversationId: float, ``type``: string, status: string, reason: string, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>) : Create8 = jsNative
+                abstract detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2> option
+                [<ParamObject; Emit("({ type: 'write', status: 'unanswered', ...$0 })")>]
+                static member Create (conversationId: float, reason: string, ?trace: JS.Record<string, string>, ?requestId: string, ?entry: unit, ?answer: unit, ?detail: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>) : Create8 = jsNative
+
+            module Create8 =
+                /// <remarks>TypeScript type: <c>"write"</c></remarks>
+                [<Literal>]
+                let ``type`` = "write"
+                /// <summary>
+                /// Terminal passive write that could not be placed.
+                /// </summary>
+                /// <remarks>TypeScript type: <c>"unanswered"</c></remarks>
+                [<Literal>]
+                let status = "unanswered"
 
         module CreateTask =
             [<Interface>]
             type Options =
+                /// <summary>
+                /// Omitted: inherit the creator's carrier. "root": start at the adapter root without a stored carrier.
+                /// </summary>
+                abstract trace: U2<string, JS.Record<string, string>> option
+                /// <summary>
+                /// Immutable creation-time links, attached to the spans of this task's first invocation.
+                /// </summary>
+                abstract links: JS.Record<string, string>[] option
                 /// <summary>
                 /// Required: a task always names its owner (spec §5.5).
                 /// </summary>
@@ -8594,8 +9041,44 @@ module PiDurable =
                 /// Conversation-owned tasks only: excluded from ordinary idle waits, conversation aborts, and cascades.
                 /// </summary>
                 abstract background: bool option
+                /// <summary>
+                /// Its creator awaits it only in memory and does not resume after a restart, so it is pointless once the Harness that
+                /// created it is gone. When scheduling starts in a later Harness, the task, if still live, is abort-marked with reason
+                /// <c>restart</c>, and the mark cascades to its ordinary owned work, before any of it runs again.
+                /// </summary>
+                abstract abandonOnRestart: bool option
                 [<ParamObject; Emit("$0")>]
-                static member Create (ownership: TaskOwnership, ?conversationId: float, ?background: bool) : Options = jsNative
+                static member Create (ownership: TaskOwnership, ?trace: U2<string, JS.Record<string, string>>, ?links: JS.Record<string, string>[], ?conversationId: float, ?background: bool, ?abandonOnRestart: bool) : Options = jsNative
+
+        module Entry =
+            module Result =
+                module Item =
+                    [<Interface>]
+                    type Base =
+                        abstract id: float
+                        abstract conversationId: float
+                        /// <summary>
+                        /// Application-defined entry discriminator.
+                        /// </summary>
+                        abstract kind: string
+                        /// <summary>
+                        /// Messages contributed to model context; absent for display or bookkeeping entries.
+                        /// </summary>
+                        abstract model: FSharp.CloudEdge.Runtime.PiAi.Message[] option
+                        /// <summary>
+                        /// First entry in the active context selected by this entry.
+                        /// </summary>
+                        abstract head: float option
+                        /// <summary>
+                        /// Context-only overrides of earlier visible entries.
+                        /// </summary>
+                        abstract edits: ContextEdit[] option
+                        /// <summary>
+                        /// Task that appended this entry, when it was produced by durable work.
+                        /// </summary>
+                        abstract byTaskId: float option
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (id: float, conversationId: float, kind: string, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?head: float, ?edits: ContextEdit[], ?byTaskId: float) : Base = jsNative
 
         module ForkConversation =
             [<Interface>]
@@ -8614,7 +9097,7 @@ module PiDurable =
                     /// </summary>
                     abstract head: float
                     [<ParamObject; Emit("$0")>]
-                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue2[], FSharp.CloudEdge.Runtime.Chord.JsonValue22>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
+                    static member Create (id: float, conversationId: float, kind: string, head: float, ?model: FSharp.CloudEdge.Runtime.PiAi.Message[], ?data: U5<string, float, bool, FSharp.CloudEdge.Runtime.Chord.JsonValue[], FSharp.CloudEdge.Runtime.Chord.JsonValue2>, ?edits: ContextEdit[], ?byTaskId: float) : Item = jsNative
 
     module WatchEnd2 =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]

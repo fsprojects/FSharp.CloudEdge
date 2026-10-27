@@ -23,9 +23,7 @@
         "./mcp",
         "./observability",
         "./skills",
-        "./workflows",
-        "./experimental/memory/session",
-        "./experimental/memory/utils"
+        "./workflows"
       ]
     },
     {
@@ -143,15 +141,7 @@
     {
       "partition": "sandbox",
       "publicInputs": [
-        ".",
-        "./opencode"
-      ]
-    },
-    {
-      "partition": "sandbox--bridge",
-      "publicInputs": [
-        "./bridge",
-        "./openai"
+        "."
       ]
     },
     {
@@ -263,8 +253,7 @@
         "./tools/execute",
         "./tools/extensions",
         "./tools/fetch",
-        "./tools/sandbox",
-        "./tools/workspace"
+        "./tools/sandbox"
       ]
     },
     {
@@ -316,7 +305,6 @@
         "realtimekitui",
         "realtimekituiaddons--camera-host-control",
         "realtimekitvirtualbackground",
-        "sandbox--xterm",
         "streamangular",
         "streamreact",
         "think--react"
@@ -456,7 +444,7 @@
     {
       "id": "zod-v4",
       "package": "zod",
-      "version": "4.5.4",
+      "version": "4.6.7",
       "profile": "agents",
       "dependencies": [],
       "outputDirectory": "src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4",
@@ -501,6 +489,9 @@
       "dependencies": [],
       "outputDirectory": "src/Support/AI/FSharp.CloudEdge.Support.AI.V7",
       "files": [
+        "groups/FSharp.CloudEdge.Support.AI.JsonSchema.fs",
+        "groups/FSharp.CloudEdge.Support.AI.Provider.fs",
+        "groups/FSharp.CloudEdge.Support.AI.ProviderUtils.fs",
         "FSharp.CloudEdge.Support.AI.V7.fs"
       ],
       "generator": {
@@ -514,7 +505,7 @@
     {
       "id": "agents-pi",
       "package": "agents",
-      "version": "0.27.0",
+      "version": "0.30.1",
       "profile": "agents-pi",
       "dependencies": [],
       "outputDirectory": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi",
@@ -596,7 +587,30 @@
             "typeName": "Input",
             "functionName": "prompt"
           }
-        ]
+        ],
+        "project": "generators/xantham/Xantham.CloudEdge.fsproj",
+        "xanthamRevision": "93c666f1f50934b9c28398c6eba4abcc4b6ba8c6"
+      }
+    },
+    {
+      "id": "hono-v4-13-2",
+      "package": "hono",
+      "version": "4.13.2",
+      "profile": "chanfana",
+      "dependencies": [],
+      "outputDirectory": "src/Support/Http/FSharp.CloudEdge.Support.Hono.V4",
+      "files": [
+        "FSharp.CloudEdge.Support.Hono.V4.fs"
+      ],
+      "generator": {
+        "declarationCatalog": true,
+        "module": "FSharp.CloudEdge.Support.Hono.V4",
+        "namespace": "FSharp.CloudEdge.Support.Hono",
+        "runtime": "hono",
+        "publicInputs": {
+          ".": "dist/types/index.d.ts",
+          "./types": "dist/types/types.d.ts"
+        }
       }
     }
   ],
@@ -707,11 +721,6 @@
       "workers",
       "containers"
     ],
-    "sandbox--bridge": [
-      "workers",
-      "containers",
-      "zod-v4"
-    ],
     "actors": [
       "workers"
     ],
@@ -725,7 +734,8 @@
       "workers"
     ],
     "chanfana": [
-      "workers"
+      "workers",
+      "hono-v4-13-2"
     ],
     "capnweb": [
       "workers"
@@ -768,6 +778,9 @@
     ],
     "pagesplugincloudflareaccess": [
       "workers"
+    ],
+    "hono-v4-13-2": [
+      "workers"
     ]
   },
   "inferenceProfiles": {
@@ -790,7 +803,8 @@
         "@cloudflare/codemode": "ship",
         "@cloudflare/shell": "ship",
         "@cloudflare/containers": "ship",
-        "@types/json-schema": "ship"
+        "@types/json-schema": "ship",
+        "hono": "ship"
       }
     }
   },
@@ -800,16 +814,33 @@
       "inferenceProfile": "workers-node"
     },
     "agents": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "groups/FSharp.CloudEdge.Runtime.Zod.fs",
+        "FSharp.CloudEdge.Runtime.Agents.fs"
+      ]
     },
     "agents--ai-chat-agent": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Zod.fs",
+        "FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fs"
+      ]
     },
     "agents-mcp-client": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Zod.fs",
+        "FSharp.CloudEdge.Runtime.AgentsMcpClient.fs"
+      ]
     },
     "aichat": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Agents.fs",
+        "FSharp.CloudEdge.Runtime.AIChat.fs"
+      ]
     },
     "codemode": {
       "inferenceProfile": "workers-node"
@@ -818,22 +849,34 @@
       "inferenceProfile": "workers-node"
     },
     "shell--git": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Codemode.fs",
+        "FSharp.CloudEdge.Runtime.ShellGit.fs"
+      ]
     },
     "voice": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Agents.fs",
+        "FSharp.CloudEdge.Runtime.Voice.fs"
+      ]
     },
     "computer": {
       "inferenceProfile": "workers-node"
     },
     "computer--artifacts": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "FSharp.CloudEdge.Runtime.ComputerArtifacts.fs"
+      ]
     },
     "sandbox": {
-      "inferenceProfile": "workers-node"
-    },
-    "sandbox--bridge": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.Sandbox.fs"
+      ]
     },
     "containers": {
       "inferenceProfile": "workers-node"
@@ -859,19 +902,35 @@
       "inferenceProfile": "workers-node"
     },
     "chanfana": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "groups/FSharp.CloudEdge.Runtime.Zod.fs",
+        "FSharp.CloudEdge.Runtime.Chanfana.fs"
+      ]
     },
     "capnweb": {
       "inferenceProfile": "workers-node"
     },
     "aigatewayprovider": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "FSharp.CloudEdge.Runtime.AIGatewayProvider.fs"
+      ]
     },
     "workersaiprovider": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.WorkersAIProvider.fs"
+      ]
     },
     "aisearchprovider": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs",
+        "FSharp.CloudEdge.Runtime.AISearchProvider.fs"
+      ]
     },
     "aiutils": {
       "inferenceProfile": "workers-node",
@@ -881,7 +940,12 @@
       ]
     },
     "think": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Runtime.Agents.fs",
+        "groups/FSharp.CloudEdge.Runtime.Ai.fs",
+        "FSharp.CloudEdge.Runtime.Think.fs"
+      ]
     },
     "flagship": {
       "inferenceProfile": "workers-node",
@@ -904,7 +968,11 @@
       "inferenceProfile": "workers-node"
     },
     "ai-openai-compatible-v4": {
-      "inferenceProfile": "workers-node"
+      "inferenceProfile": "workers-node",
+      "files": [
+        "groups/FSharp.CloudEdge.Support.AI.V4.WorkersTypes.fs",
+        "FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fs"
+      ]
     },
     "json-schema-v7": {
       "inferenceProfile": "workers-node"
@@ -916,6 +984,9 @@
       "inferenceProfile": "workers-node"
     },
     "ai-v7": {
+      "inferenceProfile": "workers-node"
+    },
+    "hono-v4-13-2": {
       "inferenceProfile": "workers-node"
     }
   }

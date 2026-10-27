@@ -12,58 +12,19 @@ open Fable.Core.TS.Dom
 
 /// <summary>@cloudflare/voice/errors</summary>
 module Errors =
-    [<Interface>]
-    type VoiceProviderErrorOptions =
-        abstract code: U2<string, float> option with get, set
-        abstract status: float option with get, set
-        abstract closeCode: float option with get, set
-        abstract closeReason: string option with get, set
-        abstract wasClean: bool option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?code: U2<string, float>, ?status: float, ?closeCode: float, ?closeReason: string, ?wasClean: bool) : VoiceProviderErrorOptions = jsNative
+    type VoiceProviderErrorOptions = obj
 
     /// <summary>
     /// Error raised at a voice provider boundary. Only known, content-free provider
     /// metadata belongs here. Provider response bodies and raw events must stay out.
     /// </summary>
-    [<Interface>]
-    type VoiceProviderError =
-        abstract code: U2<string, float> option
-        abstract status: float option
-        abstract closeCode: float option
-        abstract closeReason: string option
-        abstract wasClean: bool option
-        abstract name: string with get, set
-        abstract message: string with get, set
-        abstract stack: string option with get, set
-        abstract cause: obj option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (name: string, message: string, ?code: U2<string, float>, ?status: float, ?closeCode: float, ?closeReason: string, ?wasClean: bool, ?stack: string, ?cause: obj) : VoiceProviderError = jsNative
-        /// <summary>
-        /// Indicates whether the argument provided is a built-in Error instance or not.
-        /// </summary>
-        [<Import("VoiceProviderError.isError", "@cloudflare/voice/errors")>]
-        static member isError (error: obj) : bool = jsNative
+    type VoiceProviderError = obj
 
-    [<Interface>]
-    type VoiceErrorLogOptions =
-        abstract ``component``: string with get, set
-        abstract stage: string with get, set
-        abstract message: string with get, set
-        abstract error: exn with get, set
-        abstract connectionId: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (``component``: string, stage: string, message: string, error: exn, ?connectionId: string) : VoiceErrorLogOptions = jsNative
+    type VoiceErrorLogOptions = obj
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
-        /// <summary>
-        /// Error raised at a voice provider boundary. Only known, content-free provider
-        /// metadata belongs here. Provider response bodies and raw events must stay out.
-        /// </summary>
-        [<Import("VoiceProviderError", "@cloudflare/voice/errors"); EmitConstructor>]
-        static member VoiceProviderError (message: string, ?options: FSharp.CloudEdge.Runtime.VoiceErrors.Errors.VoiceProviderErrorOptions) : FSharp.CloudEdge.Runtime.VoiceErrors.Errors.VoiceProviderError = jsNative
         /// <summary>
         /// Convert a value caught from an external boundary without inspecting it.
         /// </summary>
@@ -79,19 +40,3 @@ module Errors =
         /// </summary>
         [<Import("logVoiceError", "@cloudflare/voice/errors")>]
         static member logVoiceError (options: FSharp.CloudEdge.Runtime.VoiceErrors.Errors.VoiceErrorLogOptions) : unit = jsNative
-
-    /// <summary>
-    /// Error raised at a voice provider boundary. Only known, content-free provider
-    /// metadata belongs here. Provider response bodies and raw events must stay out.
-    /// </summary>
-    type VoiceProviderErrorConstructor =
-        /// <summary>
-        /// Indicates whether the argument provided is a built-in Error instance or not.
-        /// </summary>
-        abstract isError: error: obj -> bool
-        /// <summary>
-        /// Error raised at a voice provider boundary. Only known, content-free provider
-        /// metadata belongs here. Provider response bodies and raw events must stay out.
-        /// </summary>
-        [<EmitConstructor>]
-        abstract Create: message: string * ?options: FSharp.CloudEdge.Runtime.VoiceErrors.Errors.VoiceProviderErrorOptions -> FSharp.CloudEdge.Runtime.VoiceErrors.Errors.VoiceProviderError

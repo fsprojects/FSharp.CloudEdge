@@ -9,7 +9,13 @@ import os
 import re
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import resource
+import sys
+try:
+    import resource
+except ImportError:
+    if sys.platform != "win32":
+        raise
+    resource = None  # Windows has no resource.RUSAGE_CHILDREN telemetry.
 import subprocess
 import time
 import urllib.request
@@ -346,7 +352,7 @@ def command(args, cwd, run, name):
         completed = subprocess.run(args, cwd=cwd, stdout=log, stderr=subprocess.STDOUT)
     metrics = {"command": [str(a) for a in args], "exitCode": completed.returncode,
                "elapsedSeconds": time.monotonic() - start,
-               "processTreeMaxRssKiB": resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss}
+               "processTreeMaxRssKiB": resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss if resource is not None else None}
     # ru_maxrss is the maximum child-process peak observed in this runner so far.
     write_json(run / f"{name}-metrics.json", metrics)
     if completed.returncode:
@@ -457,7 +463,7 @@ def main(argv=None):
             receipt = stage_grouped_projects(output, groups, stage)
             write_json(run / "output-ownership.json", receipt)
             command(["dotnet", "build", str(stage / "Hawaii.Bindings.slnx"), "--configuration", "Release", "--nologo", "-m:1"], ROOT, run, "compile")
-            command(["python3", str(HERE / "tests/check_grouped_clients.py"), "--bindings-root", str(stage), "--run-directory", str(run / "http-smoke")], ROOT, run, "http-smoke")
+            command([sys.executable, str(HERE / "tests/check_grouped_clients.py"), "--bindings-root", str(stage), "--run-directory", str(run / "http-smoke")], ROOT, run, "http-smoke")
             if resolve_hawaii_tool(pins["hawaii"])["fingerprint"] != provenance["hawaiiTool"]:
                 raise RuntimeError("Packaged Hawaii tool changed during validation; output was not installed")
             if {name: digest((ROOT / name).read_bytes()) for name in pins["pipelineInputs"]} != pipeline_sources:

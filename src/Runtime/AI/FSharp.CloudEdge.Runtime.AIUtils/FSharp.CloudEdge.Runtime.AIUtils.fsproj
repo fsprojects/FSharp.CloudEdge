@@ -6,11 +6,14 @@
     <OtherFlags>$(OtherFlags) --maxerrors:20</OtherFlags>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs" />
     <Compile Include="FSharp.CloudEdge.Runtime.AIUtils.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
-    <PackageReference Include="Xantham.Fable.Core" Version="0.2.0" />
-    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.4.0-beta.1" />
+    <PackageReference Include="Fable.Core" Version="5.6.0" />
+    <PackageReference Include="Xantham.Fable.Core" Version="0.1.0-local.fe28828289d3639c2781" />
+    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.1.0-local.c5f37aa7659b87bf02fc" />
+    <ProjectReference Include="../../Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
+    <ProjectReference Include="../../../Support/Schema/FSharp.CloudEdge.Support.JsonSchema/FSharp.CloudEdge.Support.JsonSchema.fsproj" />
   </ItemGroup>
 </Project>

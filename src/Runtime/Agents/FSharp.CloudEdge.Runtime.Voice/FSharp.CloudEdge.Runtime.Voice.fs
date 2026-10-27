@@ -10,1073 +10,9 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceStatus =
-    | [<CompiledName("idle")>] Idle
-    | [<CompiledName("listening")>] Listening
-    | [<CompiledName("speaking")>] Speaking
-    | [<CompiledName("thinking")>] Thinking
-
-/// <summary>
-/// Server-side diagnostic configuration shared by both voice mixins.
-/// </summary>
-[<Interface>]
-type VoiceDiagnosticsOptions =
-    /// <summary>
-    /// Forward safe server diagnostics and enable browser console logging.
-    /// </summary>
-    abstract browserConsole: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?browserConsole: bool) : VoiceDiagnosticsOptions = jsNative
-
-/// <summary>
-/// A bounded diagnostic record forwarded by the voice protocol.
-/// Event names and metadata are intentionally open and are not stable API.
-/// </summary>
-[<Interface>]
-type VoiceDiagnosticEvent =
-    abstract ``event``: string with get, set
-    abstract timestamp: float with get, set
-    abstract data: JS.Record<string, obj> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``event``: string, timestamp: float, ?data: JS.Record<string, obj>) : VoiceDiagnosticEvent = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceTurnSource =
-    | [<CompiledName("speech")>] Speech
-    | [<CompiledName("text")>] Text
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceTurnOutcome =
-    | [<CompiledName("aborted")>] Aborted
-    | [<CompiledName("completed")>] Completed
-    | [<CompiledName("content_filtered")>] ContentFiltered
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("model_error")>] ModelError
-    | [<CompiledName("no_output")>] NoOutput
-    | [<CompiledName("output_limit")>] OutputLimit
-    | [<CompiledName("skipped")>] Skipped
-    | [<CompiledName("tts_error")>] TtsError
-
-/// <summary>
-/// Stable, content-free summary of one allocated voice turn.
-/// <br /><br />
-/// <c>turnId</c>, <c>source</c>, and <c>outcome</c> are dimensions used to correlate and
-/// interpret the measurements; every other field is a duration. Optional
-/// timings are omitted when their lifecycle landmark was not reached. Timings
-/// use one server clock, overlap, and are not additive. Browser playback timing
-/// is excluded because browser and Worker clocks are independent.
-/// </summary>
-[<Interface>]
-type VoiceTurnMetrics =
-    /// <summary>
-    /// SDK-assigned correlation ID for this turn.
-    /// </summary>
-    abstract turnId: string with get, set
-    /// <summary>
-    /// Whether the turn originated from finalized speech or a text message.
-    /// </summary>
-    abstract source: VoiceTurnSource with get, set
-    /// <summary>
-    /// Terminal result, emitted exactly once for the allocated turn.
-    /// </summary>
-    abstract outcome: VoiceTurnOutcome with get, set
-    /// <summary>
-    /// Turn allocation to terminal summary, in milliseconds.
-    /// </summary>
-    abstract turnTotalMs: float with get, set
-    /// <summary>
-    /// Provider speech start to the first interim transcript.
-    /// </summary>
-    abstract speechStartToFirstInterimMs: float option with get, set
-    /// <summary>
-    /// Provider speech start to the finalized transcript.
-    /// </summary>
-    abstract speechStartToFinalMs: float option with get, set
-    /// <summary>
-    /// Time spent in the server's <c>afterTranscribe</c> hook.
-    /// </summary>
-    abstract afterTranscribeMs: float option with get, set
-    /// <summary>
-    /// Model invocation to the first non-whitespace text delta.
-    /// </summary>
-    abstract modelToFirstTextMs: float option with get, set
-    /// <summary>
-    /// Cumulative duration of reasoning blocks exposed by the model stream.
-    /// </summary>
-    abstract exposedReasoningMs: float option with get, set
-    /// <summary>
-    /// Model invocation through normalized stream consumption.
-    /// </summary>
-    abstract modelStreamConsumptionMs: float option with get, set
-    /// <summary>
-    /// Finalized input through the first server audio send.
-    /// </summary>
-    abstract finalInputToFirstAudioMs: float option with get, set
-    /// <summary>
-    /// First TTS provider invocation through the first server audio send.
-    /// </summary>
-    abstract ttsToFirstAudioMs: float option with get, set
-    /// <summary>
-    /// First TTS provider invocation through completion of all sentence work.
-    /// </summary>
-    abstract ttsWallMs: float option with get, set
-    /// <summary>
-    /// Cumulative overlapping TTS sentence hook and provider work.
-    /// </summary>
-    abstract ttsWorkMs: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (turnId: string, source: VoiceTurnSource, outcome: VoiceTurnOutcome, turnTotalMs: float, ?speechStartToFirstInterimMs: float, ?speechStartToFinalMs: float, ?afterTranscribeMs: float, ?modelToFirstTextMs: float, ?exposedReasoningMs: float, ?modelStreamConsumptionMs: float, ?finalInputToFirstAudioMs: float, ?ttsToFirstAudioMs: float, ?ttsWallMs: float, ?ttsWorkMs: float) : VoiceTurnMetrics = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceAudioFormat =
-    | [<CompiledName("mp3")>] Mp3
-    | [<CompiledName("opus")>] Opus
-    | [<CompiledName("pcm16")>] Pcm16
-    | [<CompiledName("wav")>] Wav
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceRole =
-    | [<CompiledName("assistant")>] Assistant
-    | [<CompiledName("user")>] User
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceErrorCode =
-    | [<CompiledName("stt_connection_lost")>] SttConnectionLost
-    | [<CompiledName("stt_startup_failed")>] SttStartupFailed
-
-/// <summary>
-/// Stable pipeline stage associated with a structured voice error.
-/// </summary>
-type VoiceErrorStage = string
-
-/// <summary>
-/// Client-safe error detail. <c>message</c> remains for string-event compatibility.
-/// </summary>
-[<Interface>]
-type VoiceError =
-    abstract message: string with get, set
-    abstract code: VoiceErrorCode option with get, set
-    abstract stage: string option with get, set
-    abstract retryable: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (message: string, ?code: VoiceErrorCode, ?stage: string, ?retryable: bool) : VoiceError = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceCompletionOutcomeCode =
-    | [<CompiledName("content_filtered")>] ContentFiltered
-    | [<CompiledName("model_error")>] ModelError
-    | [<CompiledName("no_output")>] NoOutput
-    | [<CompiledName("output_limit")>] OutputLimit
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type VoiceModelFinishReason =
-    | [<CompiledName("content-filter")>] ContentFilter
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("length")>] Length
-    | [<CompiledName("other")>] Other
-    | [<CompiledName("stop")>] Stop
-    | [<CompiledName("tool-calls")>] ToolCalls
-
-/// <summary>
-/// Bounded completion metadata exposed by the voice protocol.
-/// </summary>
-[<Interface>]
-type VoiceCompletionOutcome =
-    abstract code: VoiceCompletionOutcomeCode with get, set
-    /// <remarks>TypeScript type: <c>"llm"</c></remarks>
-    abstract stage: string with get, set
-    abstract finishReason: VoiceModelFinishReason option with get, set
-    abstract partialOutput: bool with get, set
-    [<ParamObject; Emit("({ stage: 'llm', ...$0 })")>]
-    static member Create (code: VoiceCompletionOutcomeCode, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceCompletionOutcome = jsNative
-
-module VoiceCompletionOutcome =
-    /// <remarks>TypeScript type: <c>"llm"</c></remarks>
-    [<Literal>]
-    let stage = "llm"
-
-[<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-type VoiceClientMessage =
-    | [<CompiledName("hello")>] Hello of protocol_version: float option
-    | [<CompiledName("start_call")>] StartCall of preferred_format: VoiceAudioFormat option
-    | [<CompiledName("end_call")>] EndCall
-    | [<CompiledName("start_of_speech")>] StartOfSpeech
-    | [<CompiledName("end_of_speech")>] EndOfSpeech
-    | [<CompiledName("interrupt")>] Interrupt
-    | [<CompiledName("text_message")>] TextMessage of text: string
-
-[<Interface>]
-type VoiceClientMessage2 =
-    /// <remarks>TypeScript type: <c>"hello"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract protocol_version: float option with get, set
-    [<ParamObject; Emit("({ type: 'hello', ...$0 })")>]
-    static member Create (?protocol_version: float) : VoiceClientMessage2 = jsNative
-
-module VoiceClientMessage2 =
-    /// <remarks>TypeScript type: <c>"hello"</c></remarks>
-    [<Literal>]
-    let ``type`` = "hello"
-
-[<Interface>]
-type VoiceClientMessage3 =
-    /// <remarks>TypeScript type: <c>"start_call"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract preferred_format: VoiceAudioFormat option with get, set
-    [<ParamObject; Emit("({ type: 'start_call', ...$0 })")>]
-    static member Create (?preferred_format: VoiceAudioFormat) : VoiceClientMessage3 = jsNative
-
-module VoiceClientMessage3 =
-    /// <remarks>TypeScript type: <c>"start_call"</c></remarks>
-    [<Literal>]
-    let ``type`` = "start_call"
-
-[<Interface>]
-type VoiceClientMessage4 =
-    /// <remarks>TypeScript type: <c>"end_call"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'end_call' })")>]
-    static member Create () : VoiceClientMessage4 = jsNative
-
-module VoiceClientMessage4 =
-    /// <remarks>TypeScript type: <c>"end_call"</c></remarks>
-    [<Literal>]
-    let ``type`` = "end_call"
-
-[<Interface>]
-type VoiceClientMessage5 =
-    /// <remarks>TypeScript type: <c>"start_of_speech"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'start_of_speech' })")>]
-    static member Create () : VoiceClientMessage5 = jsNative
-
-module VoiceClientMessage5 =
-    /// <remarks>TypeScript type: <c>"start_of_speech"</c></remarks>
-    [<Literal>]
-    let ``type`` = "start_of_speech"
-
-[<Interface>]
-type VoiceClientMessage6 =
-    /// <remarks>TypeScript type: <c>"end_of_speech"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'end_of_speech' })")>]
-    static member Create () : VoiceClientMessage6 = jsNative
-
-module VoiceClientMessage6 =
-    /// <remarks>TypeScript type: <c>"end_of_speech"</c></remarks>
-    [<Literal>]
-    let ``type`` = "end_of_speech"
-
-[<Interface>]
-type VoiceClientMessage7 =
-    /// <remarks>TypeScript type: <c>"interrupt"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'interrupt' })")>]
-    static member Create () : VoiceClientMessage7 = jsNative
-
-module VoiceClientMessage7 =
-    /// <remarks>TypeScript type: <c>"interrupt"</c></remarks>
-    [<Literal>]
-    let ``type`` = "interrupt"
-
-[<Interface>]
-type VoiceClientMessage8 =
-    /// <remarks>TypeScript type: <c>"text_message"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract text: string with get, set
-    [<ParamObject; Emit("({ type: 'text_message', ...$0 })")>]
-    static member Create (text: string) : VoiceClientMessage8 = jsNative
-
-module VoiceClientMessage8 =
-    /// <remarks>TypeScript type: <c>"text_message"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text_message"
-
-type VoiceServerMessage = U14<VoiceServerMessage2, VoiceServerMessage3, VoiceServerMessage4, VoiceServerMessage5, VoiceServerMessage6, VoiceServerMessage7, VoiceServerMessage8, VoiceServerMessage9, VoiceServerMessage10, VoiceServerMessage11, VoiceServerMessage12, VoiceServerMessage13, VoiceServerMessage14, VoiceServerMessage15>
-
-[<Interface>]
-type VoiceServerMessage10 =
-    /// <remarks>TypeScript type: <c>"playback_interrupt"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'playback_interrupt' })")>]
-    static member Create () : VoiceServerMessage10 = jsNative
-
-module VoiceServerMessage10 =
-    /// <remarks>TypeScript type: <c>"playback_interrupt"</c></remarks>
-    [<Literal>]
-    let ``type`` = "playback_interrupt"
-
-[<Interface>]
-type VoiceServerMessage11 =
-    /// <remarks>TypeScript type: <c>"metrics"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract llm_ms: float with get, set
-    abstract tts_ms: float with get, set
-    abstract first_audio_ms: float with get, set
-    abstract total_ms: float with get, set
-    [<ParamObject; Emit("({ type: 'metrics', ...$0 })")>]
-    static member Create (llm_ms: float, tts_ms: float, first_audio_ms: float, total_ms: float) : VoiceServerMessage11 = jsNative
-
-module VoiceServerMessage11 =
-    /// <remarks>TypeScript type: <c>"metrics"</c></remarks>
-    [<Literal>]
-    let ``type`` = "metrics"
-
-[<Interface>]
-type VoiceServerMessage12 =
-    inherit VoiceDiagnosticEvent
-    /// <remarks>TypeScript type: <c>"diagnostic"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'diagnostic', ...$0 })")>]
-    static member Create (``event``: string, timestamp: float, ?data: JS.Record<string, obj>) : VoiceServerMessage12 = jsNative
-
-module VoiceServerMessage12 =
-    /// <remarks>TypeScript type: <c>"diagnostic"</c></remarks>
-    [<Literal>]
-    let ``type`` = "diagnostic"
-
-[<Interface>]
-type VoiceServerMessage13 =
-    inherit VoiceTurnMetrics
-    /// <remarks>TypeScript type: <c>"turn_metrics"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'turn_metrics', ...$0 })")>]
-    static member Create (turnId: string, source: VoiceTurnSource, outcome: VoiceTurnOutcome, turnTotalMs: float, ?speechStartToFirstInterimMs: float, ?speechStartToFinalMs: float, ?afterTranscribeMs: float, ?modelToFirstTextMs: float, ?exposedReasoningMs: float, ?modelStreamConsumptionMs: float, ?finalInputToFirstAudioMs: float, ?ttsToFirstAudioMs: float, ?ttsWallMs: float, ?ttsWorkMs: float) : VoiceServerMessage13 = jsNative
-
-module VoiceServerMessage13 =
-    /// <remarks>TypeScript type: <c>"turn_metrics"</c></remarks>
-    [<Literal>]
-    let ``type`` = "turn_metrics"
-
-[<Interface>]
-type VoiceServerMessage14 =
-    inherit VoiceCompletionOutcome
-    /// <remarks>TypeScript type: <c>"completion_outcome"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'completion_outcome', stage: 'llm', ...$0 })")>]
-    static member Create (code: VoiceCompletionOutcomeCode, partialOutput: bool, ?finishReason: VoiceModelFinishReason) : VoiceServerMessage14 = jsNative
-
-module VoiceServerMessage14 =
-    /// <remarks>TypeScript type: <c>"completion_outcome"</c></remarks>
-    [<Literal>]
-    let ``type`` = "completion_outcome"
-
-[<Interface>]
-type VoiceServerMessage15 =
-    inherit VoiceError
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (message: string, ?code: VoiceErrorCode, ?stage: string, ?retryable: bool) : VoiceServerMessage15 = jsNative
-
-module VoiceServerMessage15 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type VoiceServerMessage2 =
-    /// <remarks>TypeScript type: <c>"welcome"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract protocol_version: float with get, set
-    abstract diagnostics: VoiceServerMessage2.Diagnostics option with get, set
-    [<ParamObject; Emit("({ type: 'welcome', ...$0 })")>]
-    static member Create (protocol_version: float, ?diagnostics: VoiceServerMessage2.Diagnostics) : VoiceServerMessage2 = jsNative
-
-module VoiceServerMessage2 =
-    /// <remarks>TypeScript type: <c>"welcome"</c></remarks>
-    [<Literal>]
-    let ``type`` = "welcome"
-
-    [<Interface>]
-    type Diagnostics =
-        abstract browser_console: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (browser_console: bool) : Diagnostics = jsNative
-
-[<Interface>]
-type VoiceServerMessage3 =
-    /// <remarks>TypeScript type: <c>"status"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract status: VoiceStatus with get, set
-    [<ParamObject; Emit("({ type: 'status', ...$0 })")>]
-    static member Create (status: VoiceStatus) : VoiceServerMessage3 = jsNative
-
-module VoiceServerMessage3 =
-    /// <remarks>TypeScript type: <c>"status"</c></remarks>
-    [<Literal>]
-    let ``type`` = "status"
-
-[<Interface>]
-type VoiceServerMessage4 =
-    /// <remarks>TypeScript type: <c>"audio_config"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract format: VoiceAudioFormat with get, set
-    abstract sampleRate: float option with get, set
-    [<ParamObject; Emit("({ type: 'audio_config', ...$0 })")>]
-    static member Create (format: VoiceAudioFormat, ?sampleRate: float) : VoiceServerMessage4 = jsNative
-
-module VoiceServerMessage4 =
-    /// <remarks>TypeScript type: <c>"audio_config"</c></remarks>
-    [<Literal>]
-    let ``type`` = "audio_config"
-
-[<Interface>]
-type VoiceServerMessage5 =
-    /// <remarks>TypeScript type: <c>"transcript"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract role: VoiceRole with get, set
-    abstract text: string with get, set
-    [<ParamObject; Emit("({ type: 'transcript', ...$0 })")>]
-    static member Create (role: VoiceRole, text: string) : VoiceServerMessage5 = jsNative
-
-module VoiceServerMessage5 =
-    /// <remarks>TypeScript type: <c>"transcript"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript"
-
-[<Interface>]
-type VoiceServerMessage6 =
-    /// <remarks>TypeScript type: <c>"transcript_start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract role: VoiceRole with get, set
-    [<ParamObject; Emit("({ type: 'transcript_start', ...$0 })")>]
-    static member Create (role: VoiceRole) : VoiceServerMessage6 = jsNative
-
-module VoiceServerMessage6 =
-    /// <remarks>TypeScript type: <c>"transcript_start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript_start"
-
-[<Interface>]
-type VoiceServerMessage7 =
-    /// <remarks>TypeScript type: <c>"transcript_delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract text: string with get, set
-    [<ParamObject; Emit("({ type: 'transcript_delta', ...$0 })")>]
-    static member Create (text: string) : VoiceServerMessage7 = jsNative
-
-module VoiceServerMessage7 =
-    /// <remarks>TypeScript type: <c>"transcript_delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript_delta"
-
-[<Interface>]
-type VoiceServerMessage8 =
-    /// <remarks>TypeScript type: <c>"transcript_end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract text: string with get, set
-    [<ParamObject; Emit("({ type: 'transcript_end', ...$0 })")>]
-    static member Create (text: string) : VoiceServerMessage8 = jsNative
-
-module VoiceServerMessage8 =
-    /// <remarks>TypeScript type: <c>"transcript_end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript_end"
-
-[<Interface>]
-type VoiceServerMessage9 =
-    /// <remarks>TypeScript type: <c>"transcript_interim"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract text: string with get, set
-    [<ParamObject; Emit("({ type: 'transcript_interim', ...$0 })")>]
-    static member Create (text: string) : VoiceServerMessage9 = jsNative
-
-module VoiceServerMessage9 =
-    /// <remarks>TypeScript type: <c>"transcript_interim"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript_interim"
-
-/// <summary>
-/// Compact compatibility summary for successful, non-empty speech turns.
-/// These overlapping latency landmarks and work totals are not additive.
-/// Use <c>VoiceTurnMetrics</c> for stable detailed timing and terminal summaries of
-/// unsuccessful, aborted, skipped, or text turns.
-/// </summary>
-[<Interface>]
-type VoicePipelineMetrics =
-    /// <summary>
-    /// Time from immediately before <c>onTurn()</c> until normalized model-stream
-    /// consumption completes. This can include tool work and consumer waits while
-    /// consuming the stream. It is not time to first text.
-    /// </summary>
-    abstract llm_ms: float with get, set
-    /// <summary>
-    /// Cumulative per-sentence work from immediately before <c>beforeSynthesize</c>
-    /// until that sentence's synthesis and hook work settles. Sentence work can
-    /// overlap both other sentences and model consumption, so this value can
-    /// exceed wall time and overlaps the other metrics.
-    /// </summary>
-    abstract tts_ms: float with get, set
-    /// <summary>
-    /// Time from turn-pipeline start, before <c>afterTranscribe</c>, to the first server
-    /// audio send. Includes post-STT hooks, model work, and TTS, but excludes STT
-    /// and browser playback. <c>0</c> means the server sent no audio.
-    /// </summary>
-    abstract first_audio_ms: float with get, set
-    /// <summary>
-    /// Time from the same turn-pipeline start until model consumption and TTS
-    /// draining complete. Measured before final context, persistence, and status
-    /// work. Excludes STT and browser playback.
-    /// </summary>
-    abstract total_ms: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (llm_ms: float, tts_ms: float, first_audio_ms: float, total_ms: float) : VoicePipelineMetrics = jsNative
-
-[<Interface>]
-type TranscriptMessage =
-    abstract role: VoiceRole with get, set
-    abstract text: string with get, set
-    abstract timestamp: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (role: VoiceRole, text: string, timestamp: float) : TranscriptMessage = jsNative
-
-[<Interface>]
-type TTSProvider =
-    abstract synthesize: text: string * ?signal: obj -> JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>
-    [<ParamObject; Emit("$0")>]
-    static member Create (synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>) : TTSProvider = jsNative
-
-[<Interface>]
-type StreamingTTSProvider =
-    abstract synthesizeStream: text: string * ?signal: obj -> Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>
-    [<ParamObject; Emit("$0")>]
-    static member Create (synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : StreamingTTSProvider = jsNative
-
-/// <summary>
-/// Continuous speech-to-text provider.
-/// <br /><br />
-/// Creates a per-call session that receives audio continuously from
-/// <c>start_call</c> to <c>end_call</c>. The model handles turn detection
-/// internally — there is no client-side speech boundary signaling
-/// required for STT.
-/// <br /><br />
-/// The session fires <c>onUtterance</c> when the model detects a complete
-/// utterance (e.g. Flux <c>EndOfTurn</c>, Nova 3 <c>speech_final</c> +
-/// endpointing). The voice pipeline maps this to <c>onTurn</c> (withVoice)
-/// or <c>onTranscript</c> (withVoiceInput).
-/// </summary>
-[<Interface>]
-type Transcriber =
-    /// <summary>
-    /// Create a new transcription session for one call.
-    /// </summary>
-    abstract createSession: ?options: TranscriberSessionOptions -> TranscriberSession
-    [<ParamObject; Emit("$0")>]
-    static member Create (createSession: (TranscriberSessionOptions option -> TranscriberSession)) : Transcriber = jsNative
-
-[<Interface>]
-type TranscriberSessionOptions =
-    /// <summary>
-    /// Language code (e.g. "en").
-    /// </summary>
-    abstract language: string option with get, set
-    /// <summary>
-    /// Called when the provider produces an interim (unstable) transcript.
-    /// This text may change as more audio arrives.
-    /// </summary>
-    abstract onInterim: (string -> unit) option with get, set
-    /// <summary>
-    /// Called when the model detects the start of user speech.
-    /// <br /><br />
-    /// Providers can use this for low-latency barge-in before a final
-    /// utterance is available. The transcript may be omitted or unstable.
-    /// </summary>
-    abstract onSpeechStart: (string option -> unit) option with get, set
-    /// <summary>
-    /// Called when the model detects a complete utterance.
-    /// The transcript is the stable text for this turn.
-    /// <br /><br />
-    /// For Flux: fires on <c>EndOfTurn</c>.
-    /// For Nova 3: fires on <c>Results</c> with <c>speech_final: true</c>.
-    /// </summary>
-    abstract onUtterance: (string -> unit) option with get, set
-    /// <summary>
-    /// Called when the session can no longer transcribe because its provider
-    /// connection failed or closed unexpectedly. Providers must not call this
-    /// for teardown initiated by TranscriberSession.close.
-    /// </summary>
-    abstract onFatalError: (exn -> unit) option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?language: string, ?onInterim: (string -> unit), ?onSpeechStart: (string option -> unit), ?onUtterance: (string -> unit), ?onFatalError: (exn -> unit)) : TranscriberSessionOptions = jsNative
-
-/// <summary>
-/// A per-call transcription session. Lives for the entire call duration.
-/// <br /><br />
-/// Unlike per-utterance sessions, this session is never finished or
-/// aborted mid-call. It receives all audio continuously and the model
-/// handles speech boundary detection. On interrupt, the LLM+TTS
-/// pipeline is aborted but the transcriber session stays alive.
-/// </summary>
-[<Interface>]
-type TranscriberSession =
-    /// <summary>
-    /// Feed raw PCM audio (16kHz mono 16-bit LE).
-    /// Fire-and-forget — the session buffers internally as needed.
-    /// </summary>
-    abstract feed: chunk: Fable.Core.TS.Es.ArrayBuffer -> unit
-    /// <summary>
-    /// Resolves when the session is ready to accept audio and emit transcripts.
-    /// Optional so existing custom transcribers can start synchronously.
-    /// </summary>
-    abstract waitUntilReady: (unit -> JS.Promise<unit>) option with get, set
-    /// <summary>
-    /// Optional. Provide the agent's most recent spoken reply (the text sent to
-    /// TTS) as conversational context for the next user turn.
-    /// <br /><br />
-    /// The pipeline calls this after the agent finishes speaking each reply and
-    /// greeting. Providers that support context carryover (e.g. AssemblyAI's
-    /// <c>agent_context</c>) use it to better recognize short or contextual answers
-    /// ("yes", "7pm", an email spelled aloud). Providers that don't support it
-    /// simply omit this method — it is a no-op for them.
-    /// </summary>
-    abstract updateAgentContext: (string -> unit) option with get, set
-    /// <summary>
-    /// Close the session and release resources.
-    /// Called at end_call or disconnect — not on interrupt.
-    /// </summary>
-    abstract close: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (feed: (Fable.Core.TS.Es.ArrayBuffer -> unit), close: (unit -> unit), ?waitUntilReady: (unit -> JS.Promise<unit>), ?updateAgentContext: (string -> unit)) : TranscriberSession = jsNative
-
-/// <summary>
-/// Pluggable audio input source for VoiceClient.
-/// <br /><br />
-/// When provided via <c>VoiceClientOptions.audioInput</c>, VoiceClient delegates
-/// mic capture to this object instead of using its built-in AudioWorklet.
-/// The audio input is responsible for capturing audio and routing it to the
-/// server (however it chooses — WebRTC, SFU, direct binary, etc.).
-/// <br /><br />
-/// It must call <c>onAudioLevel</c> with RMS values so VoiceClient can run
-/// silence detection, interrupt detection, and update the audio level UI.
-/// </summary>
-/// <example>
-/// <code>
-/// ```typescript
-/// class SFUAudioInput implements VoiceAudioInput {
-///   onAudioLevel: ((rms: number) =&gt; void) | null = null;
-///   async start() {
-///     // Set up WebRTC peer connection, SFU session, etc.
-///     // In a monitoring loop, call this.onAudioLevel?.(rms)
-///   }
-///   stop() {
-///     // Tear down WebRTC
-///   }
-/// }
-/// </code>
-/// <code>
-/// </code>
-/// </example>
-[<Interface>]
-type VoiceAudioInput =
-    /// <summary>
-    /// Start capturing audio. Called by VoiceClient on startCall().
-    /// </summary>
-    abstract start: unit -> JS.Promise<unit>
-    /// <summary>
-    /// Stop capturing audio. Called by VoiceClient on endCall() or disconnect().
-    /// </summary>
-    abstract stop: unit -> unit
-    /// <summary>
-    /// Set by VoiceClient before start(). The audio input must call this
-    /// with RMS audio level values on each frame so VoiceClient can run
-    /// silence detection, interrupt detection, and update the UI.
-    /// </summary>
-    abstract onAudioLevel: (float -> unit) option with get, set
-    /// <summary>
-    /// Set by VoiceClient before start(). If the audio input provides
-    /// raw PCM audio (16kHz mono 16-bit LE), call this callback and
-    /// VoiceClient will forward the data to the server via its transport.
-    /// <br /><br />
-    /// This is needed when audio reaches the server through the same
-    /// WebSocket as protocol messages (e.g. SFU in local dev where the
-    /// SFU adapter can't connect back to localhost).
-    /// <br /><br />
-    /// If the audio input routes audio to the server through an external
-    /// path (e.g. SFU WebSocket adapter in production), this can be left
-    /// unused — the audio will arrive on a separate connection.
-    /// </summary>
-    abstract onAudioData: (Fable.Core.TS.Es.ArrayBuffer -> unit) option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (start: (unit -> JS.Promise<unit>), stop: (unit -> unit), ?onAudioLevel: (float -> unit), ?onAudioData: (Fable.Core.TS.Es.ArrayBuffer -> unit)) : VoiceAudioInput = jsNative
-
-/// <summary>
-/// Details a transport can provide when its connection closes.
-/// </summary>
-[<Interface>]
-type VoiceTransportCloseInfo =
-    abstract code: float option with get, set
-    abstract reason: string option with get, set
-    abstract wasClean: bool option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?code: float, ?reason: string, ?wasClean: bool) : VoiceTransportCloseInfo = jsNative
-
-/// <summary>
-/// Abstraction over the data channel between client and server.
-/// The default implementation wraps PartySocket (WebSocket).
-/// Implement this interface to use WebRTC, SFU, or other transports.
-/// </summary>
-[<Interface>]
-type VoiceTransport =
-    /// <summary>
-    /// Send a JSON-serializable message to the server.
-    /// </summary>
-    abstract sendJSON: data: JS.Record<string, obj> -> unit
-    /// <summary>
-    /// Send raw binary audio to the server.
-    /// </summary>
-    abstract sendBinary: data: Fable.Core.TS.Es.ArrayBuffer -> unit
-    /// <summary>
-    /// Open the connection.
-    /// </summary>
-    abstract connect: unit -> unit
-    /// <summary>
-    /// Close the connection and release resources.
-    /// </summary>
-    abstract disconnect: unit -> unit
-    /// <summary>
-    /// Whether the transport is currently connected and ready to send.
-    /// </summary>
-    abstract connected: bool
-    abstract onopen: (unit -> unit) option with get, set
-    abstract onclose: (VoiceTransportCloseInfo option -> unit) option with get, set
-    abstract onerror: (obj option -> unit) option with get, set
-    /// <summary>
-    /// Called when a JSON string message arrives from the server.
-    /// </summary>
-    abstract onmessage: (obj -> unit) option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (sendJSON: (JS.Record<string, obj> -> unit), sendBinary: (Fable.Core.TS.Es.ArrayBuffer -> unit), connect: (unit -> unit), disconnect: (unit -> unit), connected: bool, ?onopen: (unit -> unit), ?onclose: (VoiceTransportCloseInfo option -> unit), ?onerror: (obj option -> unit), ?onmessage: (obj -> unit)) : VoiceTransport = jsNative
-
-[<Interface>]
-type TextReadableStream =
-    abstract getReader: unit -> TextReadableStream.GetReader.Result
-    [<ParamObject; Emit("$0")>]
-    static member Create (getReader: (unit -> TextReadableStream.GetReader.Result)) : TextReadableStream = jsNative
-
-/// <summary>
-/// Union of every source type that iterateText accepts.
-/// </summary>
-type TextSource = U3<string, Fable.Core.TS.Es.AsyncIterable<obj, obj, obj>, TextReadableStream>
-
-/// <summary>
-/// Sentence chunker — accumulates streaming text and yields complete sentences.
-/// <br /><br />
-/// Isolated and testable: no dependencies on the voice pipeline, Agent, or AI APIs.
-/// Feed it tokens via <c>add()</c>, get back sentences via the return value.
-/// Call <c>flush()</c> at end-of-stream to get any remaining text.
-/// <br /><br />
-/// Current implementation: splits on sentence-ending punctuation (. ! ?) followed
-/// by a space or end-of-input. This is intentionally simple — optimize later with
-/// better heuristics (abbreviations, decimal numbers, quoted speech, etc.).
-/// </summary>
-[<Interface>]
-type SentenceChunker =
-    abstract ``__#1@#private``: obj with get, set
-    /// <summary>
-    /// Add a chunk of text (e.g. a streamed LLM token).
-    /// Returns an array of complete sentences extracted from the buffer.
-    /// May return 0, 1, or multiple sentences depending on the input.
-    /// </summary>
-    abstract add: text: string -> string[]
-    /// <summary>
-    /// Flush any remaining text in the buffer as a final sentence.
-    /// Call this when the LLM stream ends.
-    /// Returns the remaining text (trimmed), or an empty array if nothing is left.
-    /// </summary>
-    abstract flush: unit -> string[]
-    /// <summary>
-    /// Reset the chunker, discarding any buffered text.
-    /// </summary>
-    abstract reset: unit -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#1@#private``: obj, add: (string -> string[]), flush: (unit -> string[]), reset: (unit -> unit)) : SentenceChunker = jsNative
-
-/// <summary>
-/// Configuration options for the voice input mixin.
-/// </summary>
-[<Interface>]
-type VoiceInputOptions =
-    /// <summary>
-    /// Optional diagnostic output. Diagnostic event names and metadata are not stable API.
-    /// </summary>
-    abstract diagnostics: VoiceDiagnosticsOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?diagnostics: VoiceDiagnosticsOptions) : VoiceInputOptions = jsNative
-
-[<Interface>]
-type SFUConfig =
-    abstract appId: string with get, set
-    abstract apiToken: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (appId: string, apiToken: string) : SFUConfig = jsNative
-
-[<Interface>]
-type WorkersAITTSOptions =
-    /// <summary>
-    /// TTS model name.
-    /// </summary>
-    /// <defaultValue>"@cf/deepgram/aura-1"</defaultValue>
-    abstract model: string option with get, set
-    /// <summary>
-    /// TTS speaker voice.
-    /// </summary>
-    /// <defaultValue>"asteria"</defaultValue>
-    abstract speaker: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?model: string, ?speaker: string) : WorkersAITTSOptions = jsNative
-
-[<Interface>]
-type AiLike =
-    abstract run: model: string * input: JS.Record<string, obj> * ?options: JS.Record<string, obj> -> JS.Promise<obj>
-    [<ParamObject; Emit("$0")>]
-    static member Create (run: Func<string, JS.Record<string, obj>, JS.Record<string, obj> option, JS.Promise<obj>>) : AiLike = jsNative
-
-/// <summary>
-/// Workers AI text-to-speech provider.
-/// </summary>
-/// <example>
-/// <code>
-/// ```ts
-/// class MyAgent extends VoiceAgent&lt;Env&gt; {
-///   tts = new WorkersAITTS(this.env.AI);
-/// }
-/// </code>
-/// <code>
-/// </code>
-/// </example>
-[<Interface>]
-type WorkersAITTS =
-    inherit TTSProvider
-    abstract ``__#2@#private``: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#2@#private``: obj, synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>) : WorkersAITTS = jsNative
-
-[<Interface>]
-type WorkersAIFluxSTTOptions =
-    /// <summary>
-    /// End-of-turn confidence threshold (0.5-0.9).
-    /// </summary>
-    /// <defaultValue>0.7</defaultValue>
-    abstract eotThreshold: float option with get, set
-    /// <summary>
-    /// Eager end-of-turn threshold (0.3-0.9). When set, enables
-    /// EagerEndOfTurn and TurnResumed events for speculative processing.
-    /// </summary>
-    abstract eagerEotThreshold: float option with get, set
-    /// <summary>
-    /// EOT timeout in milliseconds.
-    /// </summary>
-    /// <defaultValue>5000</defaultValue>
-    abstract eotTimeoutMs: float option with get, set
-    /// <summary>
-    /// Keyterms to boost recognition of specialized terminology.
-    /// </summary>
-    abstract keyterms: string[] option with get, set
-    /// <summary>
-    /// Sample rate in Hz.
-    /// </summary>
-    /// <defaultValue>16000</defaultValue>
-    abstract sampleRate: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?eotThreshold: float, ?eagerEotThreshold: float, ?eotTimeoutMs: float, ?keyterms: string[], ?sampleRate: float) : WorkersAIFluxSTTOptions = jsNative
-
-/// <summary>
-/// Workers AI continuous speech-to-text provider using the Flux model.
-/// <br /><br />
-/// Flux is a conversational STT model with built-in end-of-turn detection.
-/// A single session is created per call and receives all audio continuously.
-/// The model detects speech boundaries and fires <c>onUtterance</c> when a
-/// turn is complete — no client-side silence detection needed for STT.
-/// <br /><br />
-/// Recommended for <c>withVoice</c> (conversational voice agents).
-/// </summary>
-/// <example>
-/// <code>
-/// ```ts
-/// import { Agent } from "agents";
-/// import { withVoice, WorkersAIFluxSTT, WorkersAITTS } from "@cloudflare/voice";
-///
-/// const VoiceAgent = withVoice(Agent);
-///
-/// class MyAgent extends VoiceAgent&lt;Env&gt; {
-///   transcriber = new WorkersAIFluxSTT(this.env.AI);
-///   tts = new WorkersAITTS(this.env.AI);
-///
-///   async onTurn(transcript, context) { ... }
-/// }
-/// </code>
-/// <code>
-/// </code>
-/// </example>
-[<Interface>]
-type WorkersAIFluxSTT =
-    inherit Transcriber
-    abstract ``__#3@#private``: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#3@#private``: obj, createSession: (TranscriberSessionOptions option -> TranscriberSession)) : WorkersAIFluxSTT = jsNative
-
-[<Interface>]
-type WorkersAINova3STTOptions =
-    /// <summary>
-    /// Language code.
-    /// </summary>
-    /// <defaultValue>"en"</defaultValue>
-    abstract language: string option with get, set
-    /// <summary>
-    /// Endpointing silence duration in ms.
-    /// </summary>
-    /// <defaultValue>300</defaultValue>
-    abstract endpointingMs: float option with get, set
-    /// <summary>
-    /// Utterance end detection timeout in ms.
-    /// </summary>
-    /// <defaultValue>1000</defaultValue>
-    abstract utteranceEndMs: float option with get, set
-    /// <summary>
-    /// Enable smart formatting (numbers, dates, etc.).
-    /// </summary>
-    /// <defaultValue>true</defaultValue>
-    abstract smartFormat: bool option with get, set
-    /// <summary>
-    /// Enable punctuation.
-    /// </summary>
-    /// <defaultValue>true</defaultValue>
-    abstract punctuate: bool option with get, set
-    /// <summary>
-    /// Keyterms to boost recognition of specialized terminology.
-    /// </summary>
-    abstract keyterms: string[] option with get, set
-    /// <summary>
-    /// Sample rate in Hz.
-    /// </summary>
-    /// <defaultValue>16000</defaultValue>
-    abstract sampleRate: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?language: string, ?endpointingMs: float, ?utteranceEndMs: float, ?smartFormat: bool, ?punctuate: bool, ?keyterms: string[], ?sampleRate: float) : WorkersAINova3STTOptions = jsNative
-
-/// <summary>
-/// Workers AI continuous speech-to-text provider using Nova 3.
-/// <br /><br />
-/// Nova 3 is a high-accuracy STT model with streaming WebSocket support.
-/// A single session is created per call and receives all audio continuously.
-/// Server-side VAD events and endpointing handle speech boundary detection.
-/// <br /><br />
-/// Recommended for <c>withVoiceInput</c> (dictation / voice input UIs).
-/// </summary>
-/// <example>
-/// <code>
-/// ```ts
-/// import { Agent } from "agents";
-/// import { withVoiceInput, WorkersAINova3STT } from "@cloudflare/voice";
-///
-/// const InputAgent = withVoiceInput(Agent);
-///
-/// class MyAgent extends InputAgent&lt;Env&gt; {
-///   transcriber = new WorkersAINova3STT(this.env.AI);
-///
-///   onTranscript(text, connection) { ... }
-/// }
-/// </code>
-/// <code>
-/// </code>
-/// </example>
-[<Interface>]
-type WorkersAINova3STT =
-    inherit Transcriber
-    abstract ``__#4@#private``: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#4@#private``: obj, createSession: (TranscriberSessionOptions option -> TranscriberSession)) : WorkersAINova3STT = jsNative
-
-/// <summary>
-/// Context passed to the <c>onTurn()</c> hook.
-/// </summary>
-[<Interface>]
-type VoiceTurnContext =
-    abstract connection: VoiceTurnContext.Connection<obj> with get, set
-    /// <summary>
-    /// Completed conversation history before the current transcript.
-    /// </summary>
-    abstract messages: VoiceTurnContext.Messages.Item[] with get, set
-    abstract signal: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (connection: VoiceTurnContext.Connection<obj>, messages: VoiceTurnContext.Messages.Item[], signal: obj) : VoiceTurnContext = jsNative
-
-/// <summary>
-/// Configuration options for the voice mixin. Passed to <c>withVoice()</c>.
-/// </summary>
-[<Interface>]
-type VoiceAgentOptions =
-    /// <summary>
-    /// Max conversation history messages loaded for context.
-    /// </summary>
-    /// <defaultValue>20</defaultValue>
-    abstract historyLimit: float option with get, set
-    /// <summary>
-    /// Audio format used for binary audio payloads sent to the client.
-    /// </summary>
-    /// <defaultValue>"mp3"</defaultValue>
-    abstract audioFormat: VoiceAudioFormat option with get, set
-    /// <summary>
-    /// Sample rate (Hz) of raw PCM audio payloads sent to the client.
-    /// Declared in the <c>audio_config</c> message so the client can play <c>pcm16</c>
-    /// at the provider's native rate (e.g. 24000 for Gemini TTS).
-    /// Encoded formats (mp3/wav/opus) carry their own rate and ignore this.
-    /// </summary>
-    /// <defaultValue>16000</defaultValue>
-    abstract sampleRate: float option with get, set
-    /// <summary>
-    /// Max conversation messages to keep in SQLite. Oldest are pruned.
-    /// </summary>
-    /// <defaultValue>1000</defaultValue>
-    abstract maxMessageCount: float option with get, set
-    /// <summary>
-    /// Optional diagnostic output. Diagnostic event names and metadata are not stable API.
-    /// </summary>
-    abstract diagnostics: VoiceDiagnosticsOptions option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (?historyLimit: float, ?audioFormat: VoiceAudioFormat, ?sampleRate: float, ?maxMessageCount: float, ?diagnostics: VoiceDiagnosticsOptions) : VoiceAgentOptions = jsNative
-
-/// <summary>
-/// Public surface of the voice mixin, used as an explicit return type to satisfy TS6 declaration emit.
-/// </summary>
-[<Interface>]
-type VoiceAgentMixinMembers =
-    abstract transcriber: Transcriber option with get, set
-    abstract tts: VoiceAgentMixinMembers.Tts option with get, set
-    abstract onTurn: transcript: string * context: VoiceTurnContext -> JS.Promise<TextSource>
-    abstract createTranscriber: connection: VoiceTurnContext.Connection<obj> -> Transcriber option
-    abstract beforeCallStart: connection: VoiceTurnContext.Connection<obj> -> U2<bool, JS.Promise<bool>>
-    abstract onCallStart: connection: VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option
-    abstract onCallEnd: connection: VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option
-    abstract onInterrupt: connection: VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option
-    abstract afterTranscribe: transcript: string * connection: VoiceTurnContext.Connection<obj> -> U2<string, JS.Promise<string option>> option
-    abstract beforeSynthesize: text: string * connection: VoiceTurnContext.Connection<obj> -> U2<string, JS.Promise<string option>> option
-    abstract afterSynthesize: audio: Fable.Core.TS.Es.ArrayBuffer option * text: string * connection: VoiceTurnContext.Connection<obj> -> U2<Fable.Core.TS.Es.ArrayBuffer, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>> option
-    abstract saveMessage: role: VoiceAgentMixinMembers.SaveMessage.Role * text: string -> unit
-    abstract getConversationHistory: ?limit: float -> VoiceAgentMixinMembers.GetConversationHistory.Result.Item[]
-    abstract forceEndCall: connection: VoiceTurnContext.Connection<obj> -> unit
-    abstract speak: connection: VoiceTurnContext.Connection<obj> * text: string -> JS.Promise<unit>
-    abstract speakAll: text: string -> JS.Promise<unit>
-    [<ParamObject; Emit("$0")>]
-    static member Create (onTurn: Func<string, VoiceTurnContext, JS.Promise<TextSource>>, createTranscriber: (VoiceTurnContext.Connection<obj> -> Transcriber option), beforeCallStart: (VoiceTurnContext.Connection<obj> -> U2<bool, JS.Promise<bool>>), onCallStart: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onCallEnd: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), onInterrupt: (VoiceTurnContext.Connection<obj> -> JS.Promise<unit> option), afterTranscribe: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, beforeSynthesize: Func<string, VoiceTurnContext.Connection<obj>, U2<string, JS.Promise<string option>> option>, afterSynthesize: Func<Fable.Core.TS.Es.ArrayBuffer option, string, VoiceTurnContext.Connection<obj>, U2<Fable.Core.TS.Es.ArrayBuffer, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>> option>, saveMessage: Action<VoiceAgentMixinMembers.SaveMessage.Role, string>, getConversationHistory: (float option -> VoiceAgentMixinMembers.GetConversationHistory.Result.Item[]), forceEndCall: (VoiceTurnContext.Connection<obj> -> unit), speak: Func<VoiceTurnContext.Connection<obj>, string, JS.Promise<unit>>, speakAll: (string -> JS.Promise<unit>), ?transcriber: Transcriber, ?tts: VoiceAgentMixinMembers.Tts) : VoiceAgentMixinMembers = jsNative
-
-type VoiceAgentMixinMembersConstructor =
-    [<EmitConstructor>]
-    abstract Create: [<ParamArray>] args: obj[] -> VoiceAgentMixinMembers
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
-    /// <summary>
-    /// Current voice protocol version.
-    /// Bump this when making backwards-incompatible wire protocol changes.
-    /// The server sends this in the initial <c>welcome</c> message so clients
-    /// can detect version mismatches.
-    /// </summary>
-    [<Import("VOICE_PROTOCOL_VERSION", "@cloudflare/voice")>]
-    static member VOICE_PROTOCOL_VERSION: float = jsNative
     /// <summary>
     /// Turn any TextSource into a lazy async generator of string chunks.
     /// <br /><br />
@@ -1088,7 +24,7 @@ type Exports =
     /// - <c>AsyncIterable&lt;string&gt;</c> → re-yields each chunk.
     /// </summary>
     [<Import("iterateText", "@cloudflare/voice")>]
-    static member iterateText (source: TextSource) : Fable.Core.TS.Es.AsyncGenerator<string, obj, obj> = jsNative
+    static member iterateText (source: FSharp.CloudEdge.Runtime.Agents.TextSource) : Fable.Core.TS.Es.AsyncGenerator<string, obj, obj> = jsNative
     /// <summary>
     /// Sentence chunker — accumulates streaming text and yields complete sentences.
     /// <br /><br />
@@ -1101,7 +37,15 @@ type Exports =
     /// better heuristics (abbreviations, decimal numbers, quoted speech, etc.).
     /// </summary>
     [<Import("SentenceChunker", "@cloudflare/voice"); EmitConstructor>]
-    static member SentenceChunker () : SentenceChunker = jsNative
+    static member SentenceChunker () : FSharp.CloudEdge.Runtime.Agents.SentenceChunker = jsNative
+    /// <summary>
+    /// Current voice protocol version.
+    /// Bump this when making backwards-incompatible wire protocol changes.
+    /// The server sends this in the initial <c>welcome</c> message so clients
+    /// can detect version mismatches.
+    /// </summary>
+    [<Import("VOICE_PROTOCOL_VERSION", "@cloudflare/voice")>]
+    static member VOICE_PROTOCOL_VERSION: float = jsNative
     /// <summary>
     /// Voice-to-text input mixin. Adds STT-only voice input to an Agent class.
     /// <br /><br />
@@ -1114,8 +58,8 @@ type Exports =
     /// <example>
     /// <code>
     /// ```typescript
-    /// import { Agent } from "agents";
-    /// import { withVoiceInput, WorkersAINova3STT } from "@cloudflare/voice";
+    /// import { Agent } from "../index";
+    /// import { withVoiceInput, WorkersAINova3STT } from "agents/voice";
     ///
     /// const InputAgent = withVoiceInput(Agent);
     ///
@@ -1131,122 +75,7 @@ type Exports =
     /// </code>
     /// </example>
     [<Import("withVoiceInput", "@cloudflare/voice")>]
-    static member withVoiceInput<'TBase> (Base: 'TBase, ?voiceInputOptions: VoiceInputOptions) : obj = jsNative
-    /// <summary>
-    /// Pure utility functions for the Cloudflare Realtime SFU integration.
-    /// <br /><br />
-    /// Extracted from sfu.ts for testability. These handle:
-    /// - Protobuf varint encoding/decoding
-    /// - SFU WebSocket adapter protobuf packet encoding/decoding
-    /// - Audio format conversion (48kHz stereo ↔ 16kHz mono)
-    /// </summary>
-    [<Import("decodeVarint", "@cloudflare/voice")>]
-    static member decodeVarint (buf: obj, offset: float) : DecodeVarint.Result = jsNative
-    [<Import("encodeVarint", "@cloudflare/voice")>]
-    static member encodeVarint (value: float) : obj = jsNative
-    /// <summary>
-    /// Extract the PCM payload from a protobuf Packet message.
-    /// </summary>
-    [<Import("extractPayloadFromProtobuf", "@cloudflare/voice")>]
-    static member extractPayloadFromProtobuf (data: Fable.Core.TS.Es.ArrayBuffer) : obj option = jsNative
-    /// <summary>
-    /// Encode PCM payload into a protobuf Packet message (for ingest/buffer mode — just payload).
-    /// </summary>
-    [<Import("encodePayloadToProtobuf", "@cloudflare/voice")>]
-    static member encodePayloadToProtobuf (payload: obj) : Fable.Core.TS.Es.ArrayBuffer = jsNative
-    /// <summary>
-    /// Downsample 48kHz stereo interleaved PCM to 16kHz mono PCM (both 16-bit LE).
-    /// </summary>
-    [<Import("downsample48kStereoTo16kMono", "@cloudflare/voice")>]
-    static member downsample48kStereoTo16kMono (stereo48k: obj) : Fable.Core.TS.Es.ArrayBuffer = jsNative
-    /// <summary>
-    /// Upsample 16kHz mono PCM to 48kHz stereo interleaved PCM (both 16-bit LE).
-    /// </summary>
-    [<Import("upsample16kMonoTo48kStereo", "@cloudflare/voice")>]
-    static member upsample16kMonoTo48kStereo (mono16k: Fable.Core.TS.Es.ArrayBuffer) : obj = jsNative
-    [<Import("sfuFetch", "@cloudflare/voice")>]
-    static member sfuFetch (config: SFUConfig, path: string, body: obj) : JS.Promise<obj> = jsNative
-    [<Import("createSFUSession", "@cloudflare/voice")>]
-    static member createSFUSession (config: SFUConfig) : JS.Promise<CreateSFUSession.Result.Item> = jsNative
-    [<Import("addSFUTracks", "@cloudflare/voice")>]
-    static member addSFUTracks (config: SFUConfig, sessionId: string, body: obj) : JS.Promise<obj> = jsNative
-    [<Import("renegotiateSFUSession", "@cloudflare/voice")>]
-    static member renegotiateSFUSession (config: SFUConfig, sessionId: string, sdp: string) : JS.Promise<obj> = jsNative
-    [<Import("createSFUWebSocketAdapter", "@cloudflare/voice")>]
-    static member createSFUWebSocketAdapter (config: SFUConfig, tracks: obj[]) : JS.Promise<obj> = jsNative
-    /// <summary>
-    /// Workers AI text-to-speech provider.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// ```ts
-    /// class MyAgent extends VoiceAgent&lt;Env&gt; {
-    ///   tts = new WorkersAITTS(this.env.AI);
-    /// }
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    [<Import("WorkersAITTS", "@cloudflare/voice"); EmitConstructor>]
-    static member WorkersAITTS (ai: AiLike, ?options: WorkersAITTSOptions) : WorkersAITTS = jsNative
-    /// <summary>
-    /// Workers AI continuous speech-to-text provider using the Flux model.
-    /// <br /><br />
-    /// Flux is a conversational STT model with built-in end-of-turn detection.
-    /// A single session is created per call and receives all audio continuously.
-    /// The model detects speech boundaries and fires <c>onUtterance</c> when a
-    /// turn is complete — no client-side silence detection needed for STT.
-    /// <br /><br />
-    /// Recommended for <c>withVoice</c> (conversational voice agents).
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// ```ts
-    /// import { Agent } from "agents";
-    /// import { withVoice, WorkersAIFluxSTT, WorkersAITTS } from "@cloudflare/voice";
-    ///
-    /// const VoiceAgent = withVoice(Agent);
-    ///
-    /// class MyAgent extends VoiceAgent&lt;Env&gt; {
-    ///   transcriber = new WorkersAIFluxSTT(this.env.AI);
-    ///   tts = new WorkersAITTS(this.env.AI);
-    ///
-    ///   async onTurn(transcript, context) { ... }
-    /// }
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    [<Import("WorkersAIFluxSTT", "@cloudflare/voice"); EmitConstructor>]
-    static member WorkersAIFluxSTT (ai: AiLike, ?options: WorkersAIFluxSTTOptions) : WorkersAIFluxSTT = jsNative
-    /// <summary>
-    /// Workers AI continuous speech-to-text provider using Nova 3.
-    /// <br /><br />
-    /// Nova 3 is a high-accuracy STT model with streaming WebSocket support.
-    /// A single session is created per call and receives all audio continuously.
-    /// Server-side VAD events and endpointing handle speech boundary detection.
-    /// <br /><br />
-    /// Recommended for <c>withVoiceInput</c> (dictation / voice input UIs).
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// ```ts
-    /// import { Agent } from "agents";
-    /// import { withVoiceInput, WorkersAINova3STT } from "@cloudflare/voice";
-    ///
-    /// const InputAgent = withVoiceInput(Agent);
-    ///
-    /// class MyAgent extends InputAgent&lt;Env&gt; {
-    ///   transcriber = new WorkersAINova3STT(this.env.AI);
-    ///
-    ///   onTranscript(text, connection) { ... }
-    /// }
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    [<Import("WorkersAINova3STT", "@cloudflare/voice"); EmitConstructor>]
-    static member WorkersAINova3STT (ai: AiLike, ?options: WorkersAINova3STTOptions) : WorkersAINova3STT = jsNative
+    static member withVoiceInput<'TBase> (Base: 'TBase, ?voiceInputOptions: FSharp.CloudEdge.Runtime.Agents.VoiceInputOptions) : JS.Intersect<'TBase, FSharp.CloudEdge.Runtime.Agents.VoiceInputMixinMembersConstructor> = jsNative
     /// <summary>
     /// Voice pipeline mixin. Adds the full voice pipeline to an Agent class.
     /// <br /><br />
@@ -1259,8 +88,8 @@ type Exports =
     /// <example>
     /// <code>
     /// ```typescript
-    /// import { Agent } from "agents";
-    /// import { withVoice, WorkersAIFluxSTT, WorkersAITTS } from "@cloudflare/voice";
+    /// import { Agent } from "../index";
+    /// import { withVoice, WorkersAIFluxSTT, WorkersAITTS } from "agents/voice";
     ///
     /// const VoiceAgent = withVoice(Agent);
     ///
@@ -1277,229 +106,119 @@ type Exports =
     /// </code>
     /// </example>
     [<Import("withVoice", "@cloudflare/voice")>]
-    static member withVoice<'TBase> (Base: 'TBase, ?voiceOptions: VoiceAgentOptions) : obj = jsNative
-
-module CreateSFUSession =
-    module Result =
-        [<Interface>]
-        type Item =
-            abstract sessionId: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (sessionId: string) : Item = jsNative
-
-module DecodeVarint =
-    [<Interface>]
-    type Result =
-        abstract value: float with get, set
-        abstract bytesRead: float with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (value: float, bytesRead: float) : Result = jsNative
-
-module TextReadableStream =
-    module GetReader =
-        [<Interface>]
-        type Result =
-            abstract read: unit -> JS.Promise<U2<TextReadableStream.GetReader.Result.Read.Result.Item, TextReadableStream.GetReader.Result.Read.Result.Item2>>
-            [<ParamObject; Emit("$0")>]
-            static member Create (read: (unit -> JS.Promise<U2<TextReadableStream.GetReader.Result.Read.Result.Item, TextReadableStream.GetReader.Result.Read.Result.Item2>>)) : Result = jsNative
-
-        module Result =
-            module Read =
-                module Result =
-                    [<Interface>]
-                    type Item =
-                        abstract ``done``: bool with get, set
-                        abstract value: obj with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``done``: bool, value: obj) : Item = jsNative
-
-                    [<Interface>]
-                    type Item2 =
-                        abstract ``done``: bool with get, set
-                        abstract value: unit option with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (``done``: bool, ?value: unit) : Item2 = jsNative
-
-module VoiceAgentMixinMembers =
-    [<Interface>]
-    type Tts =
-        inherit TTSProvider
-        inherit VoiceAgentMixinMembers.Tts.Base
-        [<ParamObject; Emit("$0")>]
-        static member Create (synthesize: Func<string, obj option, JS.Promise<Fable.Core.TS.Es.ArrayBuffer option>>, ?synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : Tts = jsNative
-
-    module GetConversationHistory =
-        module Result =
-            [<Interface>]
-            type Item =
-                abstract role: VoiceRole with get, set
-                abstract content: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (role: VoiceRole, content: string) : Item = jsNative
-
-    module SaveMessage =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Role =
-            | [<CompiledName("assistant")>] Assistant
-            | [<CompiledName("user")>] User
-
-    module Tts =
-        [<Interface>]
-        type Base =
-            abstract synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?synthesizeStream: Func<string, obj option, Fable.Core.TS.Es.AsyncGenerator<Fable.Core.TS.Es.ArrayBuffer, obj, obj>>) : Base = jsNative
-
-module VoiceTurnContext =
-    [<Interface>]
-    type Connection<'TState> =
-        abstract accept: ?options: obj -> unit
-        /// <summary>
-        /// The <b><c>WebSocket.send()</c></b> method enqueues the specified data to be transmitted to the server over the WebSocket connection, increasing the value of bufferedAmount by the number of bytes needed to contain the data. If the data can't be sent (for example, because it needs to be buffered but the buffer is full), the socket is closed automatically. The browser will throw an exception if you call send() when the connection is in the CONNECTING state. If you call send() when the connection is in the CLOSING or CLOSED states, the browser will silently discard the data.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/send">MDN Reference</a>
-        /// </summary>
-        abstract send: message: U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit
-        /// <summary>
-        /// The <b><c>WebSocket.close()</c></b> method closes the WebSocket connection or connection attempt, if any. If the connection is already CLOSED, this method does nothing.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/close">MDN Reference</a>
-        /// </summary>
-        abstract close: ?code: float * ?reason: string -> unit
-        abstract serializeAttachment: attachment: obj -> unit
-        abstract deserializeAttachment: unit -> obj
-        /// <summary>
-        /// The <b><c>WebSocket.readyState</c></b> read-only property returns the current state of the WebSocket connection.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/readyState">MDN Reference</a>
-        /// </summary>
-        abstract readyState: float with get, set
-        /// <summary>
-        /// The <b><c>WebSocket.url</c></b> read-only property returns the absolute URL of the WebSocket as resolved by the constructor.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/url">MDN Reference</a>
-        /// </summary>
-        abstract url: string option with get, set
-        /// <summary>
-        /// The <b><c>WebSocket.protocol</c></b> read-only property returns the name of the sub-protocol the server selected; this will be one of the strings specified in the protocols parameter when creating the WebSocket object, or the empty string if no connection is established.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/protocol">MDN Reference</a>
-        /// </summary>
-        abstract protocol: string option with get, set
-        /// <summary>
-        /// The <b><c>WebSocket.extensions</c></b> read-only property returns the extensions selected by the server. This is currently only the empty string or a list of extensions as negotiated by the connection.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/extensions">MDN Reference</a>
-        /// </summary>
-        abstract extensions: string option with get, set
-        /// <summary>
-        /// The <b><c>WebSocket.binaryType</c></b> property controls the type of binary data being received over the WebSocket connection.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/WebSocket/binaryType">MDN Reference</a>
-        /// </summary>
-        abstract binaryType: VoiceTurnContext.Connection.BinaryType with get, set
-        /// <summary>
-        /// The <b><c>addEventListener()</c></b> method of the EventTarget interface sets up a function that will be called whenever the specified event is delivered to the target.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener">MDN Reference</a>
-        /// </summary>
-        abstract addEventListener<'Type>: ``type``: 'Type * handler: obj * ?options: obj -> unit
-        /// <summary>
-        /// The <b><c>removeEventListener()</c></b> method of the EventTarget interface removes an event listener previously registered with EventTarget.addEventListener() from the target. The event listener to be removed is identified using a combination of the event type, the event listener function itself, and various optional options that may affect the matching process; see Matching event listeners for removal.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/removeEventListener">MDN Reference</a>
-        /// </summary>
-        abstract removeEventListener<'Type>: ``type``: 'Type * handler: obj * ?options: obj -> unit
-        /// <summary>
-        /// The <b><c>dispatchEvent()</c></b> method of the EventTarget sends an Event to the object, (synchronously) invoking the affected event listeners in the appropriate order. The normal event processing rules (including the capturing and optional bubbling phase) also apply to events dispatched manually with dispatchEvent().
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/docs/Web/API/EventTarget/dispatchEvent">MDN Reference</a>
-        /// </summary>
-        abstract dispatchEvent: ``event``: obj -> bool
-        /// <summary>
-        /// Connection identifier
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The URL of the original WebSocket upgrade request.
-        /// Persisted in the WebSocket attachment so it survives hibernation.
-        /// </summary>
-        abstract uri: string option with get, set
-        /// <summary>
-        /// Arbitrary state associated with this connection.
-        /// Read-only — use Connection.setState to update.
-        /// <br /><br />
-        /// This property is configurable, meaning it can be redefined via
-        /// <c>Object.defineProperty</c> by downstream consumers (e.g. the Cloudflare
-        /// Agents SDK) to namespace or wrap internal state storage.
-        /// </summary>
-        abstract state: obj option with get, set
-        /// <summary>
-        /// Update the state associated with this connection.
-        /// <br /><br />
-        /// Accepts either a new state value or an updater function that receives
-        /// the previous state and returns the next state.
-        /// <br /><br />
-        /// This property is configurable, meaning it can be redefined via
-        /// <c>Object.defineProperty</c> by downstream consumers that provide their own
-        /// state projection.
-        /// </summary>
-        abstract setState: ?state: obj -> obj option
-        /// <summary>
-        /// Tags returned by the owning Durable Object's <c>getConnectionTags</c> callback.
-        /// Always includes the connection id as the first tag.
-        /// </summary>
-        abstract tags: string[] with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (accept: (obj option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: VoiceTurnContext.Connection.BinaryType, addEventListener: Action<'Type, obj, obj option>, removeEventListener: Action<'Type, obj, obj option>, dispatchEvent: (obj -> bool), id: string, setState: (obj option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
-
-    module Connection =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type BinaryType =
-            | [<CompiledName("arraybuffer")>] Arraybuffer
-            | [<CompiledName("blob")>] Blob
-
-    module Messages =
-        [<Interface>]
-        type Item =
-            abstract role: VoiceRole with get, set
-            abstract content: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (role: VoiceRole, content: string) : Item = jsNative
-
-module WithVoiceInput =
-    type ResultConstructor =
-        [<EmitConstructor>]
-        abstract Create: [<ParamArray>] args: obj[] -> obj
-
-[<Erase>]
-type U14<'t1, 't2, 't3, 't4, 't5, 't6, 't7, 't8, 't9, 't10, 't11, 't12, 't13, 't14> =
-    | Case1 of 't1
-    | Case2 of 't2
-    | Case3 of 't3
-    | Case4 of 't4
-    | Case5 of 't5
-    | Case6 of 't6
-    | Case7 of 't7
-    | Case8 of 't8
-    | Case9 of 't9
-    | Case10 of 't10
-    | Case11 of 't11
-    | Case12 of 't12
-    | Case13 of 't13
-    | Case14 of 't14
-
-    static member op_ErasedCast(x: 't1) = Case1 x
-    static member op_ErasedCast(x: 't2) = Case2 x
-    static member op_ErasedCast(x: 't3) = Case3 x
-    static member op_ErasedCast(x: 't4) = Case4 x
-    static member op_ErasedCast(x: 't5) = Case5 x
-    static member op_ErasedCast(x: 't6) = Case6 x
-    static member op_ErasedCast(x: 't7) = Case7 x
-    static member op_ErasedCast(x: 't8) = Case8 x
-    static member op_ErasedCast(x: 't9) = Case9 x
-    static member op_ErasedCast(x: 't10) = Case10 x
-    static member op_ErasedCast(x: 't11) = Case11 x
-    static member op_ErasedCast(x: 't12) = Case12 x
-    static member op_ErasedCast(x: 't13) = Case13 x
-    static member op_ErasedCast(x: 't14) = Case14 x
+    static member withVoice<'TBase> (Base: 'TBase, ?voiceOptions: FSharp.CloudEdge.Runtime.Agents.VoiceAgentOptions) : JS.Intersect<'TBase, FSharp.CloudEdge.Runtime.Agents.VoiceAgentMixinMembersConstructor> = jsNative
+    /// <summary>
+    /// Pure utility functions for the Cloudflare Realtime SFU integration.
+    /// <br /><br />
+    /// Extracted from sfu.ts for testability. These handle:
+    /// - Protobuf varint encoding/decoding
+    /// - SFU WebSocket adapter protobuf packet encoding/decoding
+    /// - Audio format conversion (48kHz stereo ↔ 16kHz mono)
+    /// </summary>
+    [<Import("decodeVarint", "@cloudflare/voice")>]
+    static member decodeVarint (buf: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, offset: float) : FSharp.CloudEdge.Runtime.Agents.DecodeVarint.Result = jsNative
+    [<Import("encodeVarint", "@cloudflare/voice")>]
+    static member encodeVarint (value: float) : Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> = jsNative
+    /// <summary>
+    /// Extract the PCM payload from a protobuf Packet message.
+    /// </summary>
+    [<Import("extractPayloadFromProtobuf", "@cloudflare/voice")>]
+    static member extractPayloadFromProtobuf (data: Fable.Core.TS.Es.ArrayBuffer) : Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option = jsNative
+    /// <summary>
+    /// Encode PCM payload into a protobuf Packet message (for ingest/buffer mode — just payload).
+    /// </summary>
+    [<Import("encodePayloadToProtobuf", "@cloudflare/voice")>]
+    static member encodePayloadToProtobuf (payload: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>) : Fable.Core.TS.Es.ArrayBuffer = jsNative
+    /// <summary>
+    /// Downsample 48kHz stereo interleaved PCM to 16kHz mono PCM (both 16-bit LE).
+    /// </summary>
+    [<Import("downsample48kStereoTo16kMono", "@cloudflare/voice")>]
+    static member downsample48kStereoTo16kMono (stereo48k: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>) : Fable.Core.TS.Es.ArrayBuffer = jsNative
+    /// <summary>
+    /// Upsample 16kHz mono PCM to 48kHz stereo interleaved PCM (both 16-bit LE).
+    /// </summary>
+    [<Import("upsample16kMonoTo48kStereo", "@cloudflare/voice")>]
+    static member upsample16kMonoTo48kStereo (mono16k: Fable.Core.TS.Es.ArrayBuffer) : Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> = jsNative
+    [<Import("sfuFetch", "@cloudflare/voice")>]
+    static member sfuFetch (config: FSharp.CloudEdge.Runtime.Agents.SFUConfig, path: string, body: obj) : JS.Promise<obj> = jsNative
+    [<Import("createSFUSession", "@cloudflare/voice")>]
+    static member createSFUSession (config: FSharp.CloudEdge.Runtime.Agents.SFUConfig) : JS.Promise<FSharp.CloudEdge.Runtime.Agents.CreateSFUSession.Result.Item> = jsNative
+    [<Import("addSFUTracks", "@cloudflare/voice")>]
+    static member addSFUTracks (config: FSharp.CloudEdge.Runtime.Agents.SFUConfig, sessionId: string, body: obj) : JS.Promise<obj> = jsNative
+    [<Import("renegotiateSFUSession", "@cloudflare/voice")>]
+    static member renegotiateSFUSession (config: FSharp.CloudEdge.Runtime.Agents.SFUConfig, sessionId: string, sdp: string) : JS.Promise<obj> = jsNative
+    [<Import("createSFUWebSocketAdapter", "@cloudflare/voice")>]
+    static member createSFUWebSocketAdapter (config: FSharp.CloudEdge.Runtime.Agents.SFUConfig, tracks: obj[]) : JS.Promise<obj> = jsNative
+    /// <summary>
+    /// Workers AI text-to-speech provider.
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// ```ts
+    /// class MyAgent extends VoiceAgent&lt;Env&gt; {
+    ///   tts = new WorkersAITTS(this.env.AI);
+    /// }
+    /// </code>
+    /// <code>
+    /// </code>
+    /// </example>
+    [<Import("WorkersAITTS", "@cloudflare/voice"); EmitConstructor>]
+    static member WorkersAITTS (ai: FSharp.CloudEdge.Runtime.Agents.AiLike, ?options: FSharp.CloudEdge.Runtime.Agents.WorkersAITTSOptions) : FSharp.CloudEdge.Runtime.Agents.WorkersAITTS = jsNative
+    /// <summary>
+    /// Workers AI continuous speech-to-text provider using the Flux model.
+    /// <br /><br />
+    /// Flux is a conversational STT model with built-in end-of-turn detection.
+    /// A single session is created per call and receives all audio continuously.
+    /// The model detects speech boundaries and fires <c>onUtterance</c> when a
+    /// turn is complete — no client-side silence detection needed for STT.
+    /// <br /><br />
+    /// Recommended for <c>withVoice</c> (conversational voice agents).
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// ```ts
+    /// import { Agent } from "agents";
+    /// import { withVoice, WorkersAIFluxSTT, WorkersAITTS } from "agents/voice";
+    ///
+    /// const VoiceAgent = withVoice(Agent);
+    ///
+    /// class MyAgent extends VoiceAgent&lt;Env&gt; {
+    ///   transcriber = new WorkersAIFluxSTT(this.env.AI);
+    ///   tts = new WorkersAITTS(this.env.AI);
+    ///
+    ///   async onTurn(transcript, context) { ... }
+    /// }
+    /// </code>
+    /// <code>
+    /// </code>
+    /// </example>
+    [<Import("WorkersAIFluxSTT", "@cloudflare/voice"); EmitConstructor>]
+    static member WorkersAIFluxSTT (ai: FSharp.CloudEdge.Runtime.Agents.AiLike, ?options: FSharp.CloudEdge.Runtime.Agents.WorkersAIFluxSTTOptions) : FSharp.CloudEdge.Runtime.Agents.WorkersAIFluxSTT = jsNative
+    /// <summary>
+    /// Workers AI continuous speech-to-text provider using Nova 3.
+    /// <br /><br />
+    /// Nova 3 is a high-accuracy STT model with streaming WebSocket support.
+    /// A single session is created per call and receives all audio continuously.
+    /// Server-side VAD events and endpointing handle speech boundary detection.
+    /// <br /><br />
+    /// Recommended for <c>withVoiceInput</c> (dictation / voice input UIs).
+    /// </summary>
+    /// <example>
+    /// <code>
+    /// ```ts
+    /// import { Agent } from "agents";
+    /// import { withVoiceInput, WorkersAINova3STT } from "agents/voice";
+    ///
+    /// const InputAgent = withVoiceInput(Agent);
+    ///
+    /// class MyAgent extends InputAgent&lt;Env&gt; {
+    ///   transcriber = new WorkersAINova3STT(this.env.AI);
+    ///
+    ///   onTranscript(text, connection) { ... }
+    /// }
+    /// </code>
+    /// <code>
+    /// </code>
+    /// </example>
+    [<Import("WorkersAINova3STT", "@cloudflare/voice"); EmitConstructor>]
+    static member WorkersAINova3STT (ai: FSharp.CloudEdge.Runtime.Agents.AiLike, ?options: FSharp.CloudEdge.Runtime.Agents.WorkersAINova3STTOptions) : FSharp.CloudEdge.Runtime.Agents.WorkersAINova3STT = jsNative

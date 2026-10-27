@@ -10,44 +10,39 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
+[<Fickl.Core.CallableInterface>]
+type Map =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'V>: callback: (Map.Callback.Value -> 'V) -> Map.Result<'V>
 
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
+[<Fickl.Core.CallableInterface>]
+type Map2 =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'V>: callback: (Map2.Callback.Value -> 'V) -> Map2.Result<'V>
+
+[<Fickl.Core.CallableInterface>]
+type Map3 =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'V>: callback: (Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> Map3.Result<'V>
 
 type MapValuePlaceholder<'T> =
     interface end
 
 [<Erase>]
-type RpcCompatible<'T> = private RpcCompatible__ of obj
+type RpcCompatible<'T> = private Phantom_RpcCompatible__ of obj option
 
 type RpcCompatible2 =
     inherit StubBase<RpcTargetBranded>
     abstract __RPC_TARGET_BRAND: unit
-    abstract map<'V>: callback: (RpcCompatible2.Map.Callback.Value -> 'V) -> RpcCompatible2.Map.Result<'V>
-    abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
+    abstract map<'V>: callback: (Map.Callback.Value -> 'V) -> Map.Result<'V>
     abstract dup: unit -> RpcCompatible2
 
 type RpcCompatible3 =
     inherit StubBase<(unit[] -> obj)>
-    abstract map<'V>: callback: (RpcCompatible3.Map.Callback.Value -> 'V) -> RpcCompatible3.Map.Result<'V>
-    abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
+    abstract map<'V>: callback: (Map2.Callback.Value -> 'V) -> Map2.Result<'V>
     abstract dup: unit -> RpcCompatible3
     [<Emit("$0($1...)")>]
-    abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> RpcCompatible3.Map.Callback.Value.Dup.Result.Result
+    abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> Map2.Callback.Value.Dup.Result.Result
 
 [<Interface>]
 type RpcTargetBranded =
@@ -56,11 +51,10 @@ type RpcTargetBranded =
     static member Create () : RpcTargetBranded = jsNative
 
 type StubBase<'T> =
+    inherit FSharp.CloudEdge.Runtime.Workers.Disposable
     abstract __RPC_STUB_BRAND: 'T with get, set
     abstract dup: unit -> StubBase<'T>
     abstract onRpcBroken: callback: (obj -> unit) -> unit
-    [<Emit("$0[Symbol.dispose]()")>]
-    abstract SymbolDispose: unit -> unit
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type EncodingLevel =
@@ -194,14 +188,10 @@ type RpcSessionOptions =
 /// Generic WebSocket transport. Default <c>T = string</c> is backward-compatible and satisfies
 /// <c>RpcTransport</c>. Use <c>T = ArrayBuffer</c> as a building block for binary transports.
 /// </summary>
-[<Interface>]
 type WebSocketTransport<'T> =
-    abstract ``__#1@#private``: obj with get, set
     abstract send: message: 'T -> unit
     abstract receive: unit -> JS.Promise<'T>
     abstract abort: reason: obj -> unit
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#1@#private``: obj, send: ('T -> unit), receive: (unit -> JS.Promise<'T>), abort: (obj -> unit)) : WebSocketTransport<'T> = jsNative
 
 /// <summary>
 /// Represents a reference to a remote object, on which methods may be remotely invoked via RPC.
@@ -214,7 +204,7 @@ type WebSocketTransport<'T> =
 /// actually know, until that point, what methods exist.
 /// </summary>
 [<Erase>]
-type RpcStub<'T> = private RpcStub__ of obj
+type RpcStub<'T> = private Phantom_RpcStub__ of obj
 
 type RpcStubConstructor =
     [<EmitConstructor>]
@@ -248,7 +238,7 @@ type RpcStubConstructor =
 /// with a <c>dup()</c> if you also intend to keep the stub.
 /// </summary>
 [<Erase>]
-type RpcPromise<'T> = private RpcPromise__ of obj
+type RpcPromise<'T> = private Phantom_RpcPromise__ of obj
 
 type RpcPromiseConstructor =
     [<EmitConstructor>]
@@ -291,6 +281,44 @@ type RpcTargetConstructor =
     [<EmitConstructor>]
     abstract Create: unit -> RpcTarget
 
+[<Fickl.Core.CallableInterface>]
+type NewWebSocketRpcSession =
+    /// <summary>
+    /// Start a WebSocket session given either an already-open WebSocket or a URL.
+    /// </summary>
+    /// <param name="webSocket">
+    /// Either the <c>wss://</c> URL to connect to, or an already-open WebSocket object to
+    /// use.
+    /// </param>
+    /// <param name="localMain">
+    /// The main RPC interface to expose to the peer. Returns a stub for the main
+    /// interface exposed from the peer.
+    /// </param>
+    [<Emit("$0($1...)")>]
+    abstract Invoke: webSocket: U2<string, FSharp.CloudEdge.Runtime.Workers.WebSocket> * ?localMain: obj * ?options: RpcSessionOptions -> obj
+
+[<Fickl.Core.CallableInterface>]
+type NewHttpBatchRpcSession =
+    /// <summary>
+    /// Initiate an HTTP batch session from the client side.
+    /// <br /><br />
+    /// The parameters to this method have exactly the same signature as <c>fetch()</c>, but the return
+    /// value is an RpcStub. You can customize anything about the request except for the method
+    /// (it will always be set to POST) and the body (which the RPC system will fill in).
+    /// </summary>
+    [<Emit("$0($1...)")>]
+    abstract Invoke: urlOrRequest: U2<string, FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>> * ?options: RpcSessionOptions -> obj
+
+[<Fickl.Core.CallableInterface>]
+type NewMessagePortRpcSession =
+    /// <summary>
+    /// Initiate an RPC session over a MessagePort, which is particularly useful for communicating
+    /// between an iframe and its parent frame in a browser context. Each side should call this function
+    /// on its own end of the MessageChannel.
+    /// </summary>
+    [<Emit("$0($1...)")>]
+    abstract Invoke: port: FSharp.CloudEdge.Runtime.Workers.MessagePort * ?localMain: obj * ?options: RpcSessionOptions -> obj
+
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -314,13 +342,13 @@ type Exports =
     /// with the given <c>localMain</c>.
     /// </summary>
     [<Import("newWorkersWebSocketRpcResponse", "capnweb")>]
-    static member newWorkersWebSocketRpcResponse (request: obj, ?localMain: obj, ?options: RpcSessionOptions) : obj = jsNative
+    static member newWorkersWebSocketRpcResponse (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?localMain: obj, ?options: RpcSessionOptions) : FSharp.CloudEdge.Runtime.Workers.Response = jsNative
     /// <summary>
     /// Generic WebSocket transport. Default <c>T = string</c> is backward-compatible and satisfies
     /// <c>RpcTransport</c>. Use <c>T = ArrayBuffer</c> as a building block for binary transports.
     /// </summary>
     [<Import("WebSocketTransport", "capnweb"); EmitConstructor>]
-    static member WebSocketTransport<'T> (webSocket: obj) : WebSocketTransport<'T> = jsNative
+    static member WebSocketTransport<'T> (webSocket: FSharp.CloudEdge.Runtime.Workers.WebSocket) : WebSocketTransport<'T> = jsNative
     /// <summary>
     /// Implements the server end of an HTTP batch session, using standard Fetch API types to represent
     /// HTTP requests and responses.
@@ -333,7 +361,7 @@ type Exports =
     /// headers, so you can modify them using e.g. <c>response.headers.set("Foo", "bar")</c>.
     /// </returns>
     [<Import("newHttpBatchRpcResponse", "capnweb")>]
-    static member newHttpBatchRpcResponse (request: obj, localMain: obj, ?options: RpcSessionOptions) : JS.Promise<obj> = jsNative
+    static member newHttpBatchRpcResponse (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, localMain: obj, ?options: RpcSessionOptions) : JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response> = jsNative
     /// <summary>
     /// Implements the server end of an HTTP batch session using traditional Node.js HTTP APIs.
     /// </summary>
@@ -413,7 +441,7 @@ type Exports =
     /// interface exposed from the peer.
     /// </param>
     [<Import("newWebSocketRpcSession", "capnweb")>]
-    static member newWebSocketRpcSession (webSocket: obj, ?localMain: obj, ?options: RpcSessionOptions) : obj = jsNative
+    static member newWebSocketRpcSession: NewWebSocketRpcSession = jsNative
     /// <summary>
     /// Initiate an HTTP batch session from the client side.
     /// <br /><br />
@@ -422,14 +450,14 @@ type Exports =
     /// (it will always be set to POST) and the body (which the RPC system will fill in).
     /// </summary>
     [<Import("newHttpBatchRpcSession", "capnweb")>]
-    static member newHttpBatchRpcSession (urlOrRequest: obj, ?options: RpcSessionOptions) : obj = jsNative
+    static member newHttpBatchRpcSession: NewHttpBatchRpcSession = jsNative
     /// <summary>
     /// Initiate an RPC session over a MessagePort, which is particularly useful for communicating
     /// between an iframe and its parent frame in a browser context. Each side should call this function
     /// on its own end of the MessageChannel.
     /// </summary>
     [<Import("newMessagePortRpcSession", "capnweb")>]
-    static member newMessagePortRpcSession (port: obj, ?localMain: obj, ?options: RpcSessionOptions) : obj = jsNative
+    static member newMessagePortRpcSession: NewMessagePortRpcSession = jsNative
     /// <summary>
     /// Implements unified handling of HTTP-batch and WebSocket responses for the Cloudflare Workers
     /// Runtime.
@@ -442,990 +470,238 @@ type Exports =
     /// be safe.
     /// </summary>
     [<Import("newWorkersRpcResponse", "capnweb")>]
-    static member newWorkersRpcResponse (request: obj, localMain: obj, ?options: RpcSessionOptions) : JS.Promise<obj> = jsNative
+    static member newWorkersRpcResponse (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, localMain: obj, ?options: RpcSessionOptions) : JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response> = jsNative
 
-module NodeHttpBatchRpcResponse =
-    [<Interface>]
-    type Options =
-        inherit RpcSessionOptions
-        abstract headers: obj option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?onSendError: (exn -> exn option), ?limits: RpcSessionOptions.Limits, ?headers: obj) : Options = jsNative
-
-module RpcCompatible =
-    type Item<'HostMetadata> =
+module Map =
+    type Result<'V> =
+        inherit StubBase<'V[]>
         /// <summary>
-        /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
+        /// Attaches callbacks for the resolution and/or rejection of the Promise.
         /// </summary>
-        /// <example><c>395747</c></example>
-        abstract asn: float option with get, set
+        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
         /// <summary>
-        /// The organization which owns the ASN of the incoming request.
+        /// Attaches a callback for only the rejection of the Promise.
         /// </summary>
-        /// <example><c>"Google Cloud"</c></example>
-        abstract asOrganization: string option with get, set
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
         /// <summary>
-        /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
+        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+        /// resolved value cannot be modified from the callback.
         /// </summary>
-        /// <example><c>"gzip, deflate, br"</c></example>
-        abstract clientAcceptEncoding: string option with get, set
-        /// <summary>
-        /// The number of milliseconds it took for the request to reach your worker.
-        /// </summary>
-        /// <example><c>22</c></example>
-        abstract clientTcpRtt: float option with get, set
-        /// <summary>
-        /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-        /// airport code of the data center that the request hit.
-        /// </summary>
-        /// <example><c>"DFW"</c></example>
-        abstract colo: string with get, set
-        /// <summary>
-        /// Represents the upstream's response to a
-        /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-        /// from cloudflare.
-        /// <br /><br />
-        /// For workers with no upstream, this will always be <c>1</c>.
-        /// </summary>
-        /// <example><c>3</c></example>
-        abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-        /// <summary>
-        /// The HTTP Protocol the request used.
-        /// </summary>
-        /// <example><c>"HTTP/2"</c></example>
-        abstract httpProtocol: string with get, set
-        /// <summary>
-        /// The browser-requested prioritization information in the request object.
-        /// <br /><br />
-        /// If no information was set, defaults to the empty string <c>""</c>
-        /// </summary>
-        /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-        /// <defaultValue>""</defaultValue>
-        abstract requestPriority: string with get, set
-        /// <summary>
-        /// The TLS version of the connection to Cloudflare.
-        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-        /// </summary>
-        /// <example><c>"TLSv1.3"</c></example>
-        abstract tlsVersion: string with get, set
-        /// <summary>
-        /// The cipher for the connection to Cloudflare.
-        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-        /// </summary>
-        /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-        abstract tlsCipher: string with get, set
-        /// <summary>
-        /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-        /// <br /><br />
-        /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-        /// </summary>
-        abstract tlsExportedAuthenticator: obj option with get, set
-        /// <summary>
-        /// Results of Cloudflare's Bot Management analysis
-        /// </summary>
-        abstract botManagement: RpcCompatible.Item.BotManagement with get, set
-        /// <summary>
-        /// Duplicate of <c>botManagement.score</c>.
-        /// </summary>
-        /// <remarks>@deprecated</remarks>
-        abstract clientTrustScore: float with get, set
-        /// <summary>
-        /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-        /// <br /><br />
-        /// This field is only present if you have Cloudflare for SaaS enabled on your account
-        /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-        /// </summary>
-        abstract hostMetadata: 'HostMetadata option with get, set
-        /// <summary>
-        /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-        /// <br /><br />
-        /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-        /// <br /><br />
-        /// If Cloudflare is unable to determine where the request originated this property is omitted.
-        /// <br /><br />
-        /// The country code <c>"T1"</c> is used for requests originating on TOR.
-        /// </summary>
-        /// <example><c>"GB"</c></example>
-        abstract country: RpcCompatible.Item.Country option with get, set
-        /// <summary>
-        /// If present, this property indicates that the request originated in the EU
-        /// </summary>
-        /// <example><c>"1"</c></example>
-        abstract isEUCountry: string option with get, set
-        /// <summary>
-        /// A two-letter code indicating the continent the request originated from.
-        /// </summary>
-        /// <example><c>"AN"</c></example>
-        abstract continent: ContinentCode option with get, set
-        /// <summary>
-        /// The city the request originated from
-        /// </summary>
-        /// <example><c>"Austin"</c></example>
-        abstract city: string option with get, set
-        /// <summary>
-        /// Postal code of the incoming request
-        /// </summary>
-        /// <example><c>"78701"</c></example>
-        abstract postalCode: string option with get, set
-        /// <summary>
-        /// Latitude of the incoming request
-        /// </summary>
-        /// <example><c>"30.27130"</c></example>
-        abstract latitude: string option with get, set
-        /// <summary>
-        /// Longitude of the incoming request
-        /// </summary>
-        /// <example><c>"-97.74260"</c></example>
-        abstract longitude: string option with get, set
-        /// <summary>
-        /// Timezone of the incoming request
-        /// </summary>
-        /// <example><c>"America/Chicago"</c></example>
-        abstract timezone: string option with get, set
-        /// <summary>
-        /// If known, the ISO 3166-2 name for the first level region associated with
-        /// the IP address of the incoming request
-        /// </summary>
-        /// <example><c>"Texas"</c></example>
-        abstract region: string option with get, set
-        /// <summary>
-        /// If known, the ISO 3166-2 code for the first-level region associated with
-        /// the IP address of the incoming request
-        /// </summary>
-        /// <example><c>"TX"</c></example>
-        abstract regionCode: string option with get, set
-        /// <summary>
-        /// Metro code (DMA) of the incoming request
-        /// </summary>
-        /// <example><c>"635"</c></example>
-        abstract metroCode: string option with get, set
-        /// <summary>
-        /// Information about the client certificate presented to Cloudflare.
-        /// <br /><br />
-        /// This is populated when the incoming request is served over TLS using
-        /// either Cloudflare Access or API Shield (mTLS)
-        /// and the presented SSL certificate has a valid
-        /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-        /// (i.e., not <c>null</c> or <c>""</c>).
-        /// <br /><br />
-        /// Otherwise, a set of placeholder values are used.
-        /// <br /><br />
-        /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-        /// the object is populated (i.e. the above conditions were met).
-        /// </summary>
-        abstract tlsClientAuth: obj with get, set
+        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result<'V2>
+        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result<'V>
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
         [<EmitIndexer>]
-        abstract Item: string -> obj with get, set
+        abstract Item: float -> obj with get, set
 
-    module Item =
-        [<Interface>]
-        type BotManagement =
-            /// <summary>
-            /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-            /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-            /// </summary>
-            /// <example><c>54</c></example>
-            abstract score: float with get, set
-            /// <summary>
-            /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-            /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-            /// </summary>
-            abstract verifiedBot: bool with get, set
-            /// <summary>
-            /// A boolean value that is true if the request originates from a
-            /// Cloudflare-verified proxy service.
-            /// </summary>
-            abstract corporateProxy: bool with get, set
-            /// <summary>
-            /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-            /// </summary>
-            abstract staticResource: bool with get, set
-            /// <summary>
-            /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-            /// </summary>
-            abstract detectionIds: float[] with get, set
-            /// <summary>
-            /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-            /// across different destination IPs, Ports, and X509 certificates.
-            /// </summary>
-            abstract ja3Hash: string with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
+    module Callback =
+        type Value =
+            inherit Map.Callback.Value.Base
+            inherit MapValuePlaceholder<RpcTargetBranded>
 
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Country =
-            | AD
-            | AE
-            | AF
-            | AG
-            | AI
-            | AL
-            | AM
-            | AO
-            | AQ
-            | AR
-            | AS
-            | AT
-            | AU
-            | AW
-            | AX
-            | AZ
-            | BA
-            | BB
-            | BD
-            | BE
-            | BF
-            | BG
-            | BH
-            | BI
-            | BJ
-            | BL
-            | BM
-            | BN
-            | BO
-            | BQ
-            | BR
-            | BS
-            | BT
-            | BV
-            | BW
-            | BY
-            | BZ
-            | CA
-            | CC
-            | CD
-            | CF
-            | CG
-            | CH
-            | CI
-            | CK
-            | CL
-            | CM
-            | CN
-            | CO
-            | CR
-            | CU
-            | CV
-            | CW
-            | CX
-            | CY
-            | CZ
-            | DE
-            | DJ
-            | DK
-            | DM
-            | DO
-            | DZ
-            | EC
-            | EE
-            | EG
-            | EH
-            | ER
-            | ES
-            | ET
-            | FI
-            | FJ
-            | FK
-            | FM
-            | FO
-            | FR
-            | GA
-            | GB
-            | GD
-            | GE
-            | GF
-            | GG
-            | GH
-            | GI
-            | GL
-            | GM
-            | GN
-            | GP
-            | GQ
-            | GR
-            | GS
-            | GT
-            | GU
-            | GW
-            | GY
-            | HK
-            | HM
-            | HN
-            | HR
-            | HT
-            | HU
-            | ID
-            | IE
-            | IL
-            | IM
-            | IN
-            | IO
-            | IQ
-            | IR
-            | IS
-            | IT
-            | JE
-            | JM
-            | JO
-            | JP
-            | KE
-            | KG
-            | KH
-            | KI
-            | KM
-            | KN
-            | KP
-            | KR
-            | KW
-            | KY
-            | KZ
-            | LA
-            | LB
-            | LC
-            | LI
-            | LK
-            | LR
-            | LS
-            | LT
-            | LU
-            | LV
-            | LY
-            | MA
-            | MC
-            | MD
-            | ME
-            | MF
-            | MG
-            | MH
-            | MK
-            | ML
-            | MM
-            | MN
-            | MO
-            | MP
-            | MQ
-            | MR
-            | MS
-            | MT
-            | MU
-            | MV
-            | MW
-            | MX
-            | MY
-            | MZ
-            | NA
-            | NC
-            | NE
-            | NF
-            | NG
-            | NI
-            | NL
-            | NO
-            | NP
-            | NR
-            | NU
-            | NZ
-            | OM
-            | PA
-            | PE
-            | PF
-            | PG
-            | PH
-            | PK
-            | PL
-            | PM
-            | PN
-            | PR
-            | PS
-            | PT
-            | PW
-            | PY
-            | QA
-            | RE
-            | RO
-            | RS
-            | RU
-            | RW
-            | SA
-            | SB
-            | SC
-            | SD
-            | SE
-            | SG
-            | SH
-            | SI
-            | SJ
-            | SK
-            | SL
-            | SM
-            | SN
-            | SO
-            | SR
-            | SS
-            | ST
-            | SV
-            | SX
-            | SY
-            | SZ
-            | T1
-            | TC
-            | TD
-            | TF
-            | TG
-            | TH
-            | TJ
-            | TK
-            | TL
-            | TM
-            | TN
-            | TO
-            | TR
-            | TT
-            | TV
-            | TW
-            | TZ
-            | UA
-            | UG
-            | UM
-            | US
-            | UY
-            | UZ
-            | VA
-            | VC
-            | VE
-            | VG
-            | VI
-            | VN
-            | VU
-            | WF
-            | WS
-            | YE
-            | YT
-            | ZA
-            | ZM
-            | ZW
+        module Value =
+            type Base =
+                abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
+                abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Callback.Value.Dup.Result) with get, set
+                abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                abstract map: Map with get, set
+                abstract __RPC_TARGET_BRAND: unit
+                [<Emit("$0[Symbol.dispose]")>]
+                abstract SymbolDispose: (unit -> unit) with get
+                [<Emit("$0[Symbol.dispose] = $1")>]
+                abstract SymbolDispose: (unit -> unit) with set
 
-module RpcCompatible2 =
-    module Map =
-        type Result<'V> =
-            inherit StubBase<'V[]>
-            /// <summary>
-            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-            /// </summary>
-            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-            /// <summary>
-            /// Attaches a callback for only the rejection of the Promise.
-            /// </summary>
-            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-            /// <returns>A Promise for the completion of the callback.</returns>
-            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-            /// <summary>
-            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-            /// resolved value cannot be modified from the callback.
-            /// </summary>
-            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-            /// <returns>A Promise for the completion of the callback.</returns>
-            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result<'V>
-            abstract __RPC_STUB_BRAND: 'V[] with get, set
-            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<'V>
-            [<Emit("$0[Symbol.toStringTag]")>]
-            abstract SymbolToStringTag: string
-            [<EmitIndexer>]
-            abstract Item: float -> obj with get, set
-
-        module Callback =
-            type Value =
-                inherit RpcCompatible2.Map.Callback.Value.Base
-                inherit MapValuePlaceholder<RpcTargetBranded>
-
-            module Value =
-                type Base =
-                    abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
-                    abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result) with get, set
-                    abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                    abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<obj>) with get, set
-                    abstract __RPC_TARGET_BRAND: unit
-                    [<Emit("$0[Symbol.dispose]")>]
-                    abstract SymbolDispose: (unit -> unit) with get
-                    [<Emit("$0[Symbol.dispose] = $1")>]
-                    abstract SymbolDispose: (unit -> unit) with set
-
-                module Dup =
-                    type Result =
-                        inherit StubBase<RpcTargetBranded>
-                        /// <summary>
-                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                        /// </summary>
-                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (RpcCompatible2 -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                        /// <summary>
-                        /// Attaches a callback for only the rejection of the Promise.
-                        /// </summary>
-                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                        /// <returns>A Promise for the completion of the callback.</returns>
-                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, RpcCompatible2>>
-                        /// <summary>
-                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                        /// resolved value cannot be modified from the callback.
-                        /// </summary>
-                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                        /// <returns>A Promise for the completion of the callback.</returns>
-                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<RpcCompatible2>
-                        abstract __RPC_TARGET_BRAND: unit
-                        abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result<'V>
-                        abstract __RPC_STUB_BRAND: RpcTargetBranded with get, set
-                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Callback.Value.Dup.Result
-                        [<Emit("$0[Symbol.toStringTag]")>]
-                        abstract SymbolToStringTag: string
-
-        module Result =
-            module Map =
-                type Result<'V> =
-                    inherit StubBase<'V[]>
+            module Dup =
+                type Result =
+                    inherit StubBase<RpcTargetBranded>
                     /// <summary>
                     /// Attaches callbacks for the resolution and/or rejection of the Promise.
                     /// </summary>
                     /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                     /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                     /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (RpcCompatible2 -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
                     /// <summary>
                     /// Attaches a callback for only the rejection of the Promise.
                     /// </summary>
                     /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                     /// <returns>A Promise for the completion of the callback.</returns>
-                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, RpcCompatible2>>
                     /// <summary>
                     /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                     /// resolved value cannot be modified from the callback.
                     /// </summary>
                     /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                     /// <returns>A Promise for the completion of the callback.</returns>
-                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result<'V>
-                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result<'V>
+                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<RpcCompatible2>
+                    abstract __RPC_TARGET_BRAND: unit
+                    abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result<'V>
+                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Callback.Value.Dup.Result
                     [<Emit("$0[Symbol.toStringTag]")>]
                     abstract SymbolToStringTag: string
-                    [<EmitIndexer>]
-                    abstract Item: float -> obj with get, set
 
-                module Result =
-                    module Map =
-                        type Result<'V> =
-                            inherit StubBase<'V[]>
-                            /// <summary>
-                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                            /// <summary>
-                            /// Attaches a callback for only the rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                            /// <summary>
-                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                            /// resolved value cannot be modified from the callback.
-                            /// </summary>
-                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result<'V>
-                            [<Emit("$0[Symbol.toStringTag]")>]
-                            abstract SymbolToStringTag: string
-                            [<EmitIndexer>]
-                            abstract Item: float -> obj with get, set
+    module Result =
+        module Map =
+            type Result<'V> =
+                inherit StubBase<'V[]>
+                /// <summary>
+                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                /// </summary>
+                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                /// <summary>
+                /// Attaches a callback for only the rejection of the Promise.
+                /// </summary>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                /// <summary>
+                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                /// resolved value cannot be modified from the callback.
+                /// </summary>
+                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result<'V2>
+                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result<'V>
+                [<Emit("$0[Symbol.toStringTag]")>]
+                abstract SymbolToStringTag: string
+                [<EmitIndexer>]
+                abstract Item: float -> obj with get, set
 
-                        module Result =
-                            module Map =
-                                type Result<'V> =
-                                    inherit StubBase<'V[]>
-                                    /// <summary>
-                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                    /// <summary>
-                                    /// Attaches a callback for only the rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                    /// <summary>
-                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                    /// resolved value cannot be modified from the callback.
-                                    /// </summary>
-                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                    abstract SymbolToStringTag: string
-                                    [<EmitIndexer>]
-                                    abstract Item: float -> obj with get, set
-
-                                module Result =
-                                    module Map =
-                                        type Result<'V> =
-                                            inherit StubBase<'V[]>
-                                            /// <summary>
-                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                            /// <summary>
-                                            /// Attaches a callback for only the rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                            /// <summary>
-                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                            /// resolved value cannot be modified from the callback.
-                                            /// </summary>
-                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                            abstract SymbolToStringTag: string
-                                            [<EmitIndexer>]
-                                            abstract Item: float -> obj with get, set
-
-                                        module Result =
-                                            module Map =
-                                                type Result<'V> =
-                                                    inherit StubBase<'V[]>
-                                                    /// <summary>
-                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                    /// <summary>
-                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                    /// <summary>
-                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                    /// resolved value cannot be modified from the callback.
-                                                    /// </summary>
-                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                    abstract SymbolToStringTag: string
-                                                    [<EmitIndexer>]
-                                                    abstract Item: float -> obj with get, set
-
-                                                module Result =
-                                                    module Map =
-                                                        type Result<'V> =
-                                                            inherit StubBase<'V[]>
-                                                            /// <summary>
-                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                            /// <summary>
-                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                            /// <summary>
-                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                            /// resolved value cannot be modified from the callback.
-                                                            /// </summary>
-                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                            abstract SymbolToStringTag: string
-                                                            [<EmitIndexer>]
-                                                            abstract Item: float -> obj with get, set
-
-                                                        module Result =
-                                                            module Map =
-                                                                type Result<'V> =
-                                                                    inherit StubBase<'V[]>
-                                                                    /// <summary>
-                                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                    /// resolved value cannot be modified from the callback.
-                                                                    /// </summary>
-                                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                                    abstract SymbolToStringTag: string
-                                                                    [<EmitIndexer>]
-                                                                    abstract Item: float -> obj with get, set
-
-                                                                module Result =
-                                                                    module Map =
-                                                                        type Result<'V> =
-                                                                            inherit StubBase<'V[]>
-                                                                            /// <summary>
-                                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                            abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
-                                                                            /// <summary>
-                                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract catch: ?onrejected: obj -> obj
-                                                                            /// <summary>
-                                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                            /// resolved value cannot be modified from the callback.
-                                                                            /// </summary>
-                                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract ``finally``: ?onfinally: obj -> obj
-                                                                            abstract map: callback: obj -> obj
-                                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible2.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                                            abstract SymbolToStringTag: string
-                                                                            [<EmitIndexer>]
-                                                                            abstract Item: float -> obj with get, set
-
-module RpcCompatible3 =
-    module Map =
-        type Result<'V> =
-            inherit StubBase<'V[]>
-            /// <summary>
-            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-            /// </summary>
-            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-            /// <summary>
-            /// Attaches a callback for only the rejection of the Promise.
-            /// </summary>
-            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-            /// <returns>A Promise for the completion of the callback.</returns>
-            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-            /// <summary>
-            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-            /// resolved value cannot be modified from the callback.
-            /// </summary>
-            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-            /// <returns>A Promise for the completion of the callback.</returns>
-            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result<'V>
-            abstract __RPC_STUB_BRAND: 'V[] with get, set
-            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<'V>
-            [<Emit("$0[Symbol.toStringTag]")>]
-            abstract SymbolToStringTag: string
-            [<EmitIndexer>]
-            abstract Item: float -> obj with get, set
-
-        module Callback =
-            type Value =
-                inherit RpcCompatible3.Map.Callback.Value.Base
-                inherit MapValuePlaceholder<(unit[] -> obj)>
-                [<Emit("$0($1...)")>]
-                abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-
-            module Value =
-                type Base =
-                    abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
-                    abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result) with get, set
-                    abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                    abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<obj>) with get, set
-                    [<Emit("$0[Symbol.dispose]")>]
-                    abstract SymbolDispose: (unit -> unit) with get
-                    [<Emit("$0[Symbol.dispose] = $1")>]
-                    abstract SymbolDispose: (unit -> unit) with set
-
-                module Dup =
-                    type Result =
-                        inherit StubBase<(unit[] -> obj)>
+            module Result =
+                module Map =
+                    type Result<'V> =
+                        inherit StubBase<'V[]>
                         /// <summary>
                         /// Attaches callbacks for the resolution and/or rejection of the Promise.
                         /// </summary>
                         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (RpcCompatible3 -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
                         /// <summary>
                         /// Attaches a callback for only the rejection of the Promise.
                         /// </summary>
                         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                         /// <returns>A Promise for the completion of the callback.</returns>
-                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, RpcCompatible3>>
+                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
                         /// <summary>
                         /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                         /// resolved value cannot be modified from the callback.
                         /// </summary>
                         /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                         /// <returns>A Promise for the completion of the callback.</returns>
-                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<RpcCompatible3>
-                        abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result<'V>
-                        abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
-                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result
+                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result<'V>
                         [<Emit("$0[Symbol.toStringTag]")>]
                         abstract SymbolToStringTag: string
-                        [<Emit("$0($1...)")>]
-                        abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
+                        [<EmitIndexer>]
+                        abstract Item: float -> obj with get, set
 
                     module Result =
-                        type Result =
-                            inherit StubBase<obj>
-                            /// <summary>
-                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                            /// <summary>
-                            /// Attaches a callback for only the rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<obj>
-                            /// <summary>
-                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                            /// resolved value cannot be modified from the callback.
-                            /// </summary>
-                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj>
-                            abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result<'V>
-                            abstract __RPC_STUB_BRAND: obj with get, set
-                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result
-                            [<Emit("$0[Symbol.toStringTag]")>]
-                            abstract SymbolToStringTag: string
+                        module Map =
+                            type Result<'V> =
+                                inherit StubBase<'V[]>
+                                /// <summary>
+                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                /// <summary>
+                                /// Attaches a callback for only the rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                /// <summary>
+                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                /// resolved value cannot be modified from the callback.
+                                /// </summary>
+                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                [<Emit("$0[Symbol.toStringTag]")>]
+                                abstract SymbolToStringTag: string
+                                [<EmitIndexer>]
+                                abstract Item: float -> obj with get, set
 
-                        module Result =
-                            module Map =
-                                type Result<'V> =
-                                    inherit StubBase<'V[]>
-                                    /// <summary>
-                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                    /// <summary>
-                                    /// Attaches a callback for only the rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                    /// <summary>
-                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                    /// resolved value cannot be modified from the callback.
-                                    /// </summary>
-                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V>
-                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result<'V>
-                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                    abstract SymbolToStringTag: string
-                                    [<EmitIndexer>]
-                                    abstract Item: float -> obj with get, set
+                            module Result =
+                                module Map =
+                                    type Result<'V> =
+                                        inherit StubBase<'V[]>
+                                        /// <summary>
+                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                        /// <summary>
+                                        /// Attaches a callback for only the rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                        /// <summary>
+                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                        /// resolved value cannot be modified from the callback.
+                                        /// </summary>
+                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                        abstract SymbolToStringTag: string
+                                        [<EmitIndexer>]
+                                        abstract Item: float -> obj with get, set
 
-                                module Callback =
-                                    type Value =
-                                        inherit FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Base
-                                        inherit MapValuePlaceholder<obj>
-
-                                    module Value =
-                                        type Base =
-                                            abstract __RPC_STUB_BRAND: obj with get, set
-                                            abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result) with get, set
-                                            abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
-                                            abstract map: ((FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<obj>) with get, set
-                                            [<Emit("$0[Symbol.dispose]")>]
-                                            abstract SymbolDispose: (unit -> unit) with get
-                                            [<Emit("$0[Symbol.dispose] = $1")>]
-                                            abstract SymbolDispose: (unit -> unit) with set
-
-                                        module Dup =
-                                            type Result =
-                                                inherit StubBase<obj>
+                                    module Result =
+                                        module Map =
+                                            type Result<'V> =
+                                                inherit StubBase<'V[]>
                                                 /// <summary>
                                                 /// Attaches callbacks for the resolution and/or rejection of the Promise.
                                                 /// </summary>
                                                 /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                 /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
                                                 /// <summary>
                                                 /// Attaches a callback for only the rejection of the Promise.
                                                 /// </summary>
                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                 /// <returns>A Promise for the completion of the callback.</returns>
-                                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>>
+                                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
                                                 /// <summary>
                                                 /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                                                 /// resolved value cannot be modified from the callback.
                                                 /// </summary>
                                                 /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                 /// <returns>A Promise for the completion of the callback.</returns>
-                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>
-                                                abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<'V>
-                                                abstract __RPC_STUB_BRAND: obj with get, set
-                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result
+                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                 [<Emit("$0[Symbol.toStringTag]")>]
                                                 abstract SymbolToStringTag: string
+                                                [<EmitIndexer>]
+                                                abstract Item: float -> obj with get, set
 
                                             module Result =
                                                 module Map =
@@ -1451,9 +727,350 @@ module RpcCompatible3 =
                                                         /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                         /// <returns>A Promise for the completion of the callback.</returns>
                                                         abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                        abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result<'V>
-                                                        abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result<'V>
+                                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                        abstract SymbolToStringTag: string
+                                                        [<EmitIndexer>]
+                                                        abstract Item: float -> obj with get, set
+
+                                                    module Result =
+                                                        module Map =
+                                                            type Result<'V> =
+                                                                inherit StubBase<'V[]>
+                                                                /// <summary>
+                                                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                                /// </summary>
+                                                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                                /// <summary>
+                                                                /// Attaches a callback for only the rejection of the Promise.
+                                                                /// </summary>
+                                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                                abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
+                                                                /// <summary>
+                                                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                                /// resolved value cannot be modified from the callback.
+                                                                /// </summary>
+                                                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                                abstract SymbolToStringTag: string
+                                                                [<EmitIndexer>]
+                                                                abstract Item: float -> obj with get, set
+
+                                                            module Result =
+                                                                module Map =
+                                                                    type Result<'V> =
+                                                                        inherit StubBase<'V[]>
+                                                                        /// <summary>
+                                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                                        /// </summary>
+                                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                                        abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
+                                                                        /// <summary>
+                                                                        /// Attaches a callback for only the rejection of the Promise.
+                                                                        /// </summary>
+                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                                        abstract catch: ?onrejected: obj -> obj
+                                                                        /// <summary>
+                                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                                        /// resolved value cannot be modified from the callback.
+                                                                        /// </summary>
+                                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                                        abstract ``finally``: ?onfinally: obj -> obj
+                                                                        abstract map: callback: obj -> obj
+                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                                        abstract SymbolToStringTag: string
+                                                                        [<EmitIndexer>]
+                                                                        abstract Item: float -> obj with get, set
+
+module Map2 =
+    type Result<'V> =
+        inherit StubBase<'V[]>
+        /// <summary>
+        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+        /// </summary>
+        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+        /// <summary>
+        /// Attaches a callback for only the rejection of the Promise.
+        /// </summary>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+        /// <summary>
+        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+        /// resolved value cannot be modified from the callback.
+        /// </summary>
+        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result<'V2>
+        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result<'V>
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+        [<EmitIndexer>]
+        abstract Item: float -> obj with get, set
+
+    module Callback =
+        type Value =
+            inherit Map2.Callback.Value.Base
+            inherit MapValuePlaceholder<(unit[] -> obj)>
+            [<Emit("$0($1...)")>]
+            abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result
+
+        module Value =
+            type Base =
+                abstract __RPC_STUB_BRAND: (unit[] -> obj) with get, set
+                abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result) with get, set
+                abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                abstract map: Map2 with get, set
+                [<Emit("$0[Symbol.dispose]")>]
+                abstract SymbolDispose: (unit -> unit) with get
+                [<Emit("$0[Symbol.dispose] = $1")>]
+                abstract SymbolDispose: (unit -> unit) with set
+
+            module Dup =
+                type Result =
+                    inherit StubBase<(unit[] -> obj)>
+                    /// <summary>
+                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                    /// </summary>
+                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (RpcCompatible3 -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                    /// <summary>
+                    /// Attaches a callback for only the rejection of the Promise.
+                    /// </summary>
+                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                    /// <returns>A Promise for the completion of the callback.</returns>
+                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, RpcCompatible3>>
+                    /// <summary>
+                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                    /// resolved value cannot be modified from the callback.
+                    /// </summary>
+                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                    /// <returns>A Promise for the completion of the callback.</returns>
+                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<RpcCompatible3>
+                    abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result<'V>
+                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result
+                    [<Emit("$0[Symbol.toStringTag]")>]
+                    abstract SymbolToStringTag: string
+                    [<Emit("$0($1...)")>]
+                    abstract Invoke: [<ParamArray>] args: U2<MapValuePlaceholder<unit>, JS.Promise<unit>>[] -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result
+
+                module Result =
+                    type Result =
+                        inherit StubBase<obj>
+                        /// <summary>
+                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                        /// <summary>
+                        /// Attaches a callback for only the rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<obj>
+                        /// <summary>
+                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                        /// resolved value cannot be modified from the callback.
+                        /// </summary>
+                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj>
+                        abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result<'V>
+                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result
+                        [<Emit("$0[Symbol.toStringTag]")>]
+                        abstract SymbolToStringTag: string
+
+                    module Result =
+                        module Map =
+                            type Result<'V> =
+                                inherit StubBase<'V[]>
+                                /// <summary>
+                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                /// <summary>
+                                /// Attaches a callback for only the rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                /// <summary>
+                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                /// resolved value cannot be modified from the callback.
+                                /// </summary>
+                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V2>
+                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result<'V>
+                                [<Emit("$0[Symbol.toStringTag]")>]
+                                abstract SymbolToStringTag: string
+                                [<EmitIndexer>]
+                                abstract Item: float -> obj with get, set
+
+                            module Callback =
+                                type Value =
+                                    inherit FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Base
+                                    inherit MapValuePlaceholder<obj>
+
+                                module Value =
+                                    type Base =
+                                        abstract __RPC_STUB_BRAND: obj with get, set
+                                        abstract dup: (unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result) with get, set
+                                        abstract onRpcBroken: ((obj -> unit) -> unit) with get, set
+                                        abstract map: Map3 with get, set
+                                        [<Emit("$0[Symbol.dispose]")>]
+                                        abstract SymbolDispose: (unit -> unit) with get
+                                        [<Emit("$0[Symbol.dispose] = $1")>]
+                                        abstract SymbolDispose: (unit -> unit) with set
+
+                                    module Dup =
+                                        type Result =
+                                            inherit StubBase<obj>
+                                            /// <summary>
+                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                            /// </summary>
+                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                            /// <summary>
+                                            /// Attaches a callback for only the rejection of the Promise.
+                                            /// </summary>
+                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                            /// <returns>A Promise for the completion of the callback.</returns>
+                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>>
+                                            /// <summary>
+                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                            /// resolved value cannot be modified from the callback.
+                                            /// </summary>
+                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                            /// <returns>A Promise for the completion of the callback.</returns>
+                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Then.Onfulfilled.Value>
+                                            abstract map<'V>: callback: (FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result<'V>
+                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result
+                                            [<Emit("$0[Symbol.toStringTag]")>]
+                                            abstract SymbolToStringTag: string
+
+                                        module Result =
+                                            module Then =
+                                                module Onfulfilled =
+                                                    type Value =
+                                                        inherit FSharp.CloudEdge.Runtime.Workers.Disposable
+
+                            module Result =
+                                module Map =
+                                    type Result<'V> =
+                                        inherit StubBase<'V[]>
+                                        /// <summary>
+                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                        /// <summary>
+                                        /// Attaches a callback for only the rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                        /// <summary>
+                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                        /// resolved value cannot be modified from the callback.
+                                        /// </summary>
+                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V>
+                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                        abstract SymbolToStringTag: string
+                                        [<EmitIndexer>]
+                                        abstract Item: float -> obj with get, set
+
+                                    module Result =
+                                        module Map =
+                                            type Result<'V> =
+                                                inherit StubBase<'V[]>
+                                                /// <summary>
+                                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                /// <summary>
+                                                /// Attaches a callback for only the rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                /// <summary>
+                                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                /// resolved value cannot be modified from the callback.
+                                                /// </summary>
+                                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                abstract SymbolToStringTag: string
+                                                [<EmitIndexer>]
+                                                abstract Item: float -> obj with get, set
+
+                                            module Result =
+                                                module Map =
+                                                    type Result<'V> =
+                                                        inherit StubBase<'V[]>
+                                                        /// <summary>
+                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                        /// <summary>
+                                                        /// Attaches a callback for only the rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                        /// <summary>
+                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                        /// resolved value cannot be modified from the callback.
+                                                        /// </summary>
+                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                         [<Emit("$0[Symbol.toStringTag]")>]
                                                         abstract SymbolToStringTag: string
                                                         [<EmitIndexer>]
@@ -1483,9 +1100,8 @@ module RpcCompatible3 =
                                                                 /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                                 /// <returns>A Promise for the completion of the callback.</returns>
                                                                 abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result<'V>
+                                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                 [<Emit("$0[Symbol.toStringTag]")>]
                                                                 abstract SymbolToStringTag: string
                                                                 [<EmitIndexer>]
@@ -1515,9 +1131,8 @@ module RpcCompatible3 =
                                                                         /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                                         /// <returns>A Promise for the completion of the callback.</returns>
                                                                         abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                        abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                        abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                         [<Emit("$0[Symbol.toStringTag]")>]
                                                                         abstract SymbolToStringTag: string
                                                                         [<EmitIndexer>]
@@ -1533,13 +1148,13 @@ module RpcCompatible3 =
                                                                                 /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                                                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                 /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
                                                                                 /// <summary>
                                                                                 /// Attaches a callback for only the rejection of the Promise.
                                                                                 /// </summary>
                                                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                 /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                                                abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
                                                                                 /// <summary>
                                                                                 /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                                                                                 /// resolved value cannot be modified from the callback.
@@ -1547,9 +1162,8 @@ module RpcCompatible3 =
                                                                                 /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                                                 /// <returns>A Promise for the completion of the callback.</returns>
                                                                                 abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                                abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                 [<Emit("$0[Symbol.toStringTag]")>]
                                                                                 abstract SymbolToStringTag: string
                                                                                 [<EmitIndexer>]
@@ -1565,23 +1179,22 @@ module RpcCompatible3 =
                                                                                         /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                                                                                         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                         /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                                                        abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> JS.Promise<obj>
                                                                                         /// <summary>
                                                                                         /// Attaches a callback for only the rejection of the Promise.
                                                                                         /// </summary>
                                                                                         /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                         /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                                                        abstract catch: ?onrejected: obj -> JS.Promise<obj>
                                                                                         /// <summary>
                                                                                         /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                                                                                         /// resolved value cannot be modified from the callback.
                                                                                         /// </summary>
                                                                                         /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                                                         /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                                        abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                        abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                        abstract ``finally``: ?onfinally: obj -> JS.Promise<obj[]>
+                                                                                        abstract map: callback: (obj -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result
+                                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
                                                                                         [<Emit("$0[Symbol.toStringTag]")>]
                                                                                         abstract SymbolToStringTag: string
                                                                                         [<EmitIndexer>]
@@ -1589,587 +1202,509 @@ module RpcCompatible3 =
 
                                                                                     module Result =
                                                                                         module Map =
-                                                                                            type Result<'V> =
-                                                                                                inherit StubBase<'V[]>
+                                                                                            type Result =
                                                                                                 /// <summary>
                                                                                                 /// Attaches callbacks for the resolution and/or rejection of the Promise.
                                                                                                 /// </summary>
                                                                                                 /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
                                                                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                                 /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                                                                abstract ``then``: obj with get, set
                                                                                                 /// <summary>
                                                                                                 /// Attaches a callback for only the rejection of the Promise.
                                                                                                 /// </summary>
                                                                                                 /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
                                                                                                 /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
+                                                                                                abstract catch: obj with get, set
                                                                                                 /// <summary>
                                                                                                 /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
                                                                                                 /// resolved value cannot be modified from the callback.
                                                                                                 /// </summary>
                                                                                                 /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
                                                                                                 /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                                                abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                                abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                                                abstract ``finally``: obj with get, set
+                                                                                                abstract map: obj with get, set
+                                                                                                abstract __RPC_STUB_BRAND: obj with get, set
+                                                                                                abstract dup: obj with get, set
+                                                                                                abstract onRpcBroken: callback: (obj -> unit) -> unit
                                                                                                 [<Emit("$0[Symbol.toStringTag]")>]
                                                                                                 abstract SymbolToStringTag: string
+                                                                                                [<Emit("$0[Symbol.dispose]()")>]
+                                                                                                abstract SymbolDispose: unit -> unit
                                                                                                 [<EmitIndexer>]
                                                                                                 abstract Item: float -> obj with get, set
 
-                                                                                            module Result =
-                                                                                                module Map =
-                                                                                                    type Result<'V> =
-                                                                                                        inherit StubBase<'V[]>
-                                                                                                        /// <summary>
-                                                                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                                                        /// </summary>
-                                                                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                                        abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
-                                                                                                        /// <summary>
-                                                                                                        /// Attaches a callback for only the rejection of the Promise.
-                                                                                                        /// </summary>
-                                                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                                        /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                        abstract catch: ?onrejected: obj -> obj
-                                                                                                        /// <summary>
-                                                                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                                                        /// resolved value cannot be modified from the callback.
-                                                                                                        /// </summary>
-                                                                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                                                        /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                        abstract ``finally``: ?onfinally: obj -> obj
-                                                                                                        abstract map: callback: obj -> obj
-                                                                                                        abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Callback.Value.Dup.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                                        [<Emit("$0[Symbol.toStringTag]")>]
-                                                                                                        abstract SymbolToStringTag: string
-                                                                                                        [<EmitIndexer>]
-                                                                                                        abstract Item: float -> obj with get, set
+    module Result =
+        module Map =
+            type Result<'V> =
+                inherit StubBase<'V[]>
+                /// <summary>
+                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                /// </summary>
+                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                /// <summary>
+                /// Attaches a callback for only the rejection of the Promise.
+                /// </summary>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                /// <summary>
+                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                /// resolved value cannot be modified from the callback.
+                /// </summary>
+                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result<'V2>
+                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result<'V>
+                [<Emit("$0[Symbol.toStringTag]")>]
+                abstract SymbolToStringTag: string
+                [<EmitIndexer>]
+                abstract Item: float -> obj with get, set
 
-                                                module Then =
-                                                    module Onfulfilled =
-                                                        type Value =
-                                                            [<Emit("$0[Symbol.dispose]()")>]
-                                                            abstract SymbolDispose: unit -> unit
+            module Result =
+                module Map =
+                    type Result<'V> =
+                        inherit StubBase<'V[]>
+                        /// <summary>
+                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                        /// <summary>
+                        /// Attaches a callback for only the rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                        /// <summary>
+                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                        /// resolved value cannot be modified from the callback.
+                        /// </summary>
+                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result<'V2>
+                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result<'V>
+                        [<Emit("$0[Symbol.toStringTag]")>]
+                        abstract SymbolToStringTag: string
+                        [<EmitIndexer>]
+                        abstract Item: float -> obj with get, set
 
-                                module Result =
-                                    module Map =
-                                        type Result<'V> =
-                                            inherit StubBase<'V[]>
-                                            /// <summary>
-                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                            /// <summary>
-                                            /// Attaches a callback for only the rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                            /// <summary>
-                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                            /// resolved value cannot be modified from the callback.
-                                            /// </summary>
-                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V>
-                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result<'V>
-                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                            abstract SymbolToStringTag: string
-                                            [<EmitIndexer>]
-                                            abstract Item: float -> obj with get, set
+                    module Result =
+                        module Map =
+                            type Result<'V> =
+                                inherit StubBase<'V[]>
+                                /// <summary>
+                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                /// <summary>
+                                /// Attaches a callback for only the rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                /// <summary>
+                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                /// resolved value cannot be modified from the callback.
+                                /// </summary>
+                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result<'V>
+                                [<Emit("$0[Symbol.toStringTag]")>]
+                                abstract SymbolToStringTag: string
+                                [<EmitIndexer>]
+                                abstract Item: float -> obj with get, set
 
-                                        module Result =
-                                            module Map =
-                                                type Result<'V> =
-                                                    inherit StubBase<'V[]>
-                                                    /// <summary>
-                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                    /// <summary>
-                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                    /// <summary>
-                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                    /// resolved value cannot be modified from the callback.
-                                                    /// </summary>
-                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                    abstract SymbolToStringTag: string
-                                                    [<EmitIndexer>]
-                                                    abstract Item: float -> obj with get, set
+                            module Result =
+                                module Map =
+                                    type Result<'V> =
+                                        inherit StubBase<'V[]>
+                                        /// <summary>
+                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                        /// <summary>
+                                        /// Attaches a callback for only the rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                        /// <summary>
+                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                        /// resolved value cannot be modified from the callback.
+                                        /// </summary>
+                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                        abstract SymbolToStringTag: string
+                                        [<EmitIndexer>]
+                                        abstract Item: float -> obj with get, set
 
-                                                module Result =
-                                                    module Map =
-                                                        type Result<'V> =
-                                                            inherit StubBase<'V[]>
-                                                            /// <summary>
-                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                            /// <summary>
-                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                            /// <summary>
-                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                            /// resolved value cannot be modified from the callback.
-                                                            /// </summary>
-                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                            abstract SymbolToStringTag: string
-                                                            [<EmitIndexer>]
-                                                            abstract Item: float -> obj with get, set
+                                    module Result =
+                                        module Map =
+                                            type Result<'V> =
+                                                inherit StubBase<'V[]>
+                                                /// <summary>
+                                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                /// <summary>
+                                                /// Attaches a callback for only the rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                /// <summary>
+                                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                /// resolved value cannot be modified from the callback.
+                                                /// </summary>
+                                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                abstract SymbolToStringTag: string
+                                                [<EmitIndexer>]
+                                                abstract Item: float -> obj with get, set
 
-                                                        module Result =
-                                                            module Map =
-                                                                type Result<'V> =
-                                                                    inherit StubBase<'V[]>
-                                                                    /// <summary>
-                                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                    /// resolved value cannot be modified from the callback.
-                                                                    /// </summary>
-                                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                                    abstract SymbolToStringTag: string
-                                                                    [<EmitIndexer>]
-                                                                    abstract Item: float -> obj with get, set
+                                            module Result =
+                                                module Map =
+                                                    type Result<'V> =
+                                                        inherit StubBase<'V[]>
+                                                        /// <summary>
+                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                        /// <summary>
+                                                        /// Attaches a callback for only the rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                                        /// <summary>
+                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                        /// resolved value cannot be modified from the callback.
+                                                        /// </summary>
+                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                        abstract SymbolToStringTag: string
+                                                        [<EmitIndexer>]
+                                                        abstract Item: float -> obj with get, set
 
-                                                                module Result =
-                                                                    module Map =
-                                                                        type Result<'V> =
-                                                                            inherit StubBase<'V[]>
-                                                                            /// <summary>
-                                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                                            /// <summary>
-                                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                                            /// <summary>
-                                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                            /// resolved value cannot be modified from the callback.
-                                                                            /// </summary>
-                                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                                            abstract SymbolToStringTag: string
-                                                                            [<EmitIndexer>]
-                                                                            abstract Item: float -> obj with get, set
+                                                    module Result =
+                                                        module Map =
+                                                            type Result<'V> =
+                                                                inherit StubBase<'V[]>
+                                                                /// <summary>
+                                                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                                /// </summary>
+                                                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                                /// <summary>
+                                                                /// Attaches a callback for only the rejection of the Promise.
+                                                                /// </summary>
+                                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                                abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
+                                                                /// <summary>
+                                                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                                /// resolved value cannot be modified from the callback.
+                                                                /// </summary>
+                                                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                                abstract SymbolToStringTag: string
+                                                                [<EmitIndexer>]
+                                                                abstract Item: float -> obj with get, set
 
-                                                                        module Result =
-                                                                            module Map =
-                                                                                type Result<'V> =
-                                                                                    inherit StubBase<'V[]>
-                                                                                    /// <summary>
-                                                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                                    /// </summary>
-                                                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                                                    /// <summary>
-                                                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                                                    /// </summary>
-                                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                    abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
-                                                                                    /// <summary>
-                                                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                                    /// resolved value cannot be modified from the callback.
-                                                                                    /// </summary>
-                                                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                                                    abstract SymbolToStringTag: string
-                                                                                    [<EmitIndexer>]
-                                                                                    abstract Item: float -> obj with get, set
+                                                            module Result =
+                                                                module Map =
+                                                                    type Result<'V> =
+                                                                        inherit StubBase<'V[]>
+                                                                        /// <summary>
+                                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                                        /// </summary>
+                                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                                        abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
+                                                                        /// <summary>
+                                                                        /// Attaches a callback for only the rejection of the Promise.
+                                                                        /// </summary>
+                                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                                        abstract catch: ?onrejected: obj -> obj
+                                                                        /// <summary>
+                                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                                        /// resolved value cannot be modified from the callback.
+                                                                        /// </summary>
+                                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                                        abstract ``finally``: ?onfinally: obj -> obj
+                                                                        abstract map: callback: obj -> obj
+                                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map2.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                                        abstract SymbolToStringTag: string
+                                                                        [<EmitIndexer>]
+                                                                        abstract Item: float -> obj with get, set
 
-                                                                                module Result =
-                                                                                    module Map =
-                                                                                        type Result<'V> =
-                                                                                            inherit StubBase<'V[]>
-                                                                                            /// <summary>
-                                                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                                            /// </summary>
-                                                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                            abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> JS.Promise<obj>
-                                                                                            /// <summary>
-                                                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                                                            /// </summary>
-                                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                            abstract catch: ?onrejected: obj -> JS.Promise<obj>
-                                                                                            /// <summary>
-                                                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                                            /// resolved value cannot be modified from the callback.
-                                                                                            /// </summary>
-                                                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                            abstract ``finally``: ?onfinally: obj -> JS.Promise<obj[]>
-                                                                                            abstract map: callback: (obj -> obj) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result
-                                                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Callback.Value.Dup.Result.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                                                            abstract SymbolToStringTag: string
-                                                                                            [<EmitIndexer>]
-                                                                                            abstract Item: float -> obj with get, set
+module Map3 =
+    type Result<'V> =
+        inherit StubBase<'V[]>
+        /// <summary>
+        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+        /// </summary>
+        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+        /// <summary>
+        /// Attaches a callback for only the rejection of the Promise.
+        /// </summary>
+        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+        /// <summary>
+        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+        /// resolved value cannot be modified from the callback.
+        /// </summary>
+        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+        /// <returns>A Promise for the completion of the callback.</returns>
+        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result<'V2>
+        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result<'V>
+        [<Emit("$0[Symbol.toStringTag]")>]
+        abstract SymbolToStringTag: string
+        [<EmitIndexer>]
+        abstract Item: float -> obj with get, set
 
-                                                                                        module Result =
-                                                                                            module Map =
-                                                                                                type Result =
-                                                                                                    /// <summary>
-                                                                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                                                    /// </summary>
-                                                                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                                                    abstract ``then``: obj with get, set
-                                                                                                    /// <summary>
-                                                                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                                                                    /// </summary>
-                                                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                    abstract catch: obj with get, set
-                                                                                                    /// <summary>
-                                                                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                                                    /// resolved value cannot be modified from the callback.
-                                                                                                    /// </summary>
-                                                                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                                                    abstract ``finally``: obj with get, set
-                                                                                                    abstract map: obj with get, set
-                                                                                                    abstract __RPC_STUB_BRAND: obj with get, set
-                                                                                                    abstract dup: obj with get, set
-                                                                                                    abstract onRpcBroken: callback: (obj -> unit) -> unit
-                                                                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                                                                    abstract SymbolToStringTag: string
-                                                                                                    [<Emit("$0[Symbol.dispose]()")>]
-                                                                                                    abstract SymbolDispose: unit -> unit
-                                                                                                    [<EmitIndexer>]
-                                                                                                    abstract Item: float -> obj with get, set
+    module Result =
+        module Map =
+            type Result<'V> =
+                inherit StubBase<'V[]>
+                /// <summary>
+                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                /// </summary>
+                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                /// <summary>
+                /// Attaches a callback for only the rejection of the Promise.
+                /// </summary>
+                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                /// <summary>
+                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                /// resolved value cannot be modified from the callback.
+                /// </summary>
+                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                /// <returns>A Promise for the completion of the callback.</returns>
+                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result<'V2>
+                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result<'V>
+                [<Emit("$0[Symbol.toStringTag]")>]
+                abstract SymbolToStringTag: string
+                [<EmitIndexer>]
+                abstract Item: float -> obj with get, set
 
-        module Result =
-            module Map =
-                type Result<'V> =
-                    inherit StubBase<'V[]>
-                    /// <summary>
-                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                    /// </summary>
-                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                    /// <summary>
-                    /// Attaches a callback for only the rejection of the Promise.
-                    /// </summary>
-                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                    /// <returns>A Promise for the completion of the callback.</returns>
-                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                    /// <summary>
-                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                    /// resolved value cannot be modified from the callback.
-                    /// </summary>
-                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                    /// <returns>A Promise for the completion of the callback.</returns>
-                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result<'V>
-                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result<'V>
-                    [<Emit("$0[Symbol.toStringTag]")>]
-                    abstract SymbolToStringTag: string
-                    [<EmitIndexer>]
-                    abstract Item: float -> obj with get, set
+            module Result =
+                module Map =
+                    type Result<'V> =
+                        inherit StubBase<'V[]>
+                        /// <summary>
+                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                        /// <summary>
+                        /// Attaches a callback for only the rejection of the Promise.
+                        /// </summary>
+                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                        /// <summary>
+                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                        /// resolved value cannot be modified from the callback.
+                        /// </summary>
+                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                        /// <returns>A Promise for the completion of the callback.</returns>
+                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result<'V2>
+                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result<'V>
+                        [<Emit("$0[Symbol.toStringTag]")>]
+                        abstract SymbolToStringTag: string
+                        [<EmitIndexer>]
+                        abstract Item: float -> obj with get, set
 
-                module Result =
-                    module Map =
-                        type Result<'V> =
-                            inherit StubBase<'V[]>
-                            /// <summary>
-                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                            /// <summary>
-                            /// Attaches a callback for only the rejection of the Promise.
-                            /// </summary>
-                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                            /// <summary>
-                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                            /// resolved value cannot be modified from the callback.
-                            /// </summary>
-                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                            /// <returns>A Promise for the completion of the callback.</returns>
-                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result<'V>
-                            [<Emit("$0[Symbol.toStringTag]")>]
-                            abstract SymbolToStringTag: string
-                            [<EmitIndexer>]
-                            abstract Item: float -> obj with get, set
+                    module Result =
+                        module Map =
+                            type Result<'V> =
+                                inherit StubBase<'V[]>
+                                /// <summary>
+                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                /// <summary>
+                                /// Attaches a callback for only the rejection of the Promise.
+                                /// </summary>
+                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                /// <summary>
+                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                /// resolved value cannot be modified from the callback.
+                                /// </summary>
+                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                /// <returns>A Promise for the completion of the callback.</returns>
+                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result<'V>
+                                [<Emit("$0[Symbol.toStringTag]")>]
+                                abstract SymbolToStringTag: string
+                                [<EmitIndexer>]
+                                abstract Item: float -> obj with get, set
 
-                        module Result =
-                            module Map =
-                                type Result<'V> =
-                                    inherit StubBase<'V[]>
-                                    /// <summary>
-                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                    /// <summary>
-                                    /// Attaches a callback for only the rejection of the Promise.
-                                    /// </summary>
-                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                    /// <summary>
-                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                    /// resolved value cannot be modified from the callback.
-                                    /// </summary>
-                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                    abstract SymbolToStringTag: string
-                                    [<EmitIndexer>]
-                                    abstract Item: float -> obj with get, set
+                            module Result =
+                                module Map =
+                                    type Result<'V> =
+                                        inherit StubBase<'V[]>
+                                        /// <summary>
+                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                        abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                        /// <summary>
+                                        /// Attaches a callback for only the rejection of the Promise.
+                                        /// </summary>
+                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
+                                        /// <summary>
+                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                        /// resolved value cannot be modified from the callback.
+                                        /// </summary>
+                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                        abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                        abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                        abstract SymbolToStringTag: string
+                                        [<EmitIndexer>]
+                                        abstract Item: float -> obj with get, set
 
-                                module Result =
-                                    module Map =
-                                        type Result<'V> =
-                                            inherit StubBase<'V[]>
-                                            /// <summary>
-                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                            /// <summary>
-                                            /// Attaches a callback for only the rejection of the Promise.
-                                            /// </summary>
-                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                            /// <summary>
-                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                            /// resolved value cannot be modified from the callback.
-                                            /// </summary>
-                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                            abstract SymbolToStringTag: string
-                                            [<EmitIndexer>]
-                                            abstract Item: float -> obj with get, set
+                                    module Result =
+                                        module Map =
+                                            type Result<'V> =
+                                                inherit StubBase<'V[]>
+                                                /// <summary>
+                                                /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
+                                                /// <summary>
+                                                /// Attaches a callback for only the rejection of the Promise.
+                                                /// </summary>
+                                                /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
+                                                /// <summary>
+                                                /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                /// resolved value cannot be modified from the callback.
+                                                /// </summary>
+                                                /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                /// <returns>A Promise for the completion of the callback.</returns>
+                                                abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
+                                                abstract map<'V2>: callback: (obj -> 'V2) -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V2>
+                                                abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                [<Emit("$0[Symbol.toStringTag]")>]
+                                                abstract SymbolToStringTag: string
+                                                [<EmitIndexer>]
+                                                abstract Item: float -> obj with get, set
 
-                                        module Result =
-                                            module Map =
-                                                type Result<'V> =
-                                                    inherit StubBase<'V[]>
-                                                    /// <summary>
-                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                    /// <summary>
-                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                    /// </summary>
-                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                    /// <summary>
-                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                    /// resolved value cannot be modified from the callback.
-                                                    /// </summary>
-                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                    abstract SymbolToStringTag: string
-                                                    [<EmitIndexer>]
-                                                    abstract Item: float -> obj with get, set
+                                            module Result =
+                                                module Map =
+                                                    type Result<'V> =
+                                                        inherit StubBase<'V[]>
+                                                        /// <summary>
+                                                        /// Attaches callbacks for the resolution and/or rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of which ever callback is executed.</returns>
+                                                        abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
+                                                        /// <summary>
+                                                        /// Attaches a callback for only the rejection of the Promise.
+                                                        /// </summary>
+                                                        /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract catch: ?onrejected: obj -> obj
+                                                        /// <summary>
+                                                        /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+                                                        /// resolved value cannot be modified from the callback.
+                                                        /// </summary>
+                                                        /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
+                                                        /// <returns>A Promise for the completion of the callback.</returns>
+                                                        abstract ``finally``: ?onfinally: obj -> obj
+                                                        abstract map: callback: obj -> obj
+                                                        abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.Map3.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
+                                                        [<Emit("$0[Symbol.toStringTag]")>]
+                                                        abstract SymbolToStringTag: string
+                                                        [<EmitIndexer>]
+                                                        abstract Item: float -> obj with get, set
 
-                                                module Result =
-                                                    module Map =
-                                                        type Result<'V> =
-                                                            inherit StubBase<'V[]>
-                                                            /// <summary>
-                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                            abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> U2<'TResult1, JS.Promise<'TResult1>>) * ?onrejected: (obj -> U2<'TResult2, JS.Promise<'TResult2>>) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                            /// <summary>
-                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                            /// </summary>
-                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract catch<'TResult>: ?onrejected: (obj -> U2<'TResult, JS.Promise<'TResult>>) -> JS.Promise<U2<'TResult, obj[]>>
-                                                            /// <summary>
-                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                            /// resolved value cannot be modified from the callback.
-                                                            /// </summary>
-                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                            abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                            abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                            abstract SymbolToStringTag: string
-                                                            [<EmitIndexer>]
-                                                            abstract Item: float -> obj with get, set
-
-                                                        module Result =
-                                                            module Map =
-                                                                type Result<'V> =
-                                                                    inherit StubBase<'V[]>
-                                                                    /// <summary>
-                                                                    /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                    abstract ``then``<'TResult1, 'TResult2>: ?onfulfilled: (obj[] -> obj) * ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult1, 'TResult2>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback for only the rejection of the Promise.
-                                                                    /// </summary>
-                                                                    /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract catch<'TResult>: ?onrejected: (obj -> obj) -> JS.Promise<U2<'TResult, obj[]>>
-                                                                    /// <summary>
-                                                                    /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                    /// resolved value cannot be modified from the callback.
-                                                                    /// </summary>
-                                                                    /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                    /// <returns>A Promise for the completion of the callback.</returns>
-                                                                    abstract ``finally``: ?onfinally: (unit -> unit) -> JS.Promise<obj[]>
-                                                                    abstract map<'V>: callback: (obj -> 'V) -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                    abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                    [<Emit("$0[Symbol.toStringTag]")>]
-                                                                    abstract SymbolToStringTag: string
-                                                                    [<EmitIndexer>]
-                                                                    abstract Item: float -> obj with get, set
-
-                                                                module Result =
-                                                                    module Map =
-                                                                        type Result<'V> =
-                                                                            inherit StubBase<'V[]>
-                                                                            /// <summary>
-                                                                            /// Attaches callbacks for the resolution and/or rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onfulfilled">The callback to execute when the Promise is resolved.</param>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of which ever callback is executed.</returns>
-                                                                            abstract ``then``: ?onfulfilled: obj * ?onrejected: obj -> obj
-                                                                            /// <summary>
-                                                                            /// Attaches a callback for only the rejection of the Promise.
-                                                                            /// </summary>
-                                                                            /// <param name="onrejected">The callback to execute when the Promise is rejected.</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract catch: ?onrejected: obj -> obj
-                                                                            /// <summary>
-                                                                            /// Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
-                                                                            /// resolved value cannot be modified from the callback.
-                                                                            /// </summary>
-                                                                            /// <param name="onfinally">The callback to execute when the Promise is settled (fulfilled or rejected).</param>
-                                                                            /// <returns>A Promise for the completion of the callback.</returns>
-                                                                            abstract ``finally``: ?onfinally: obj -> obj
-                                                                            abstract map: callback: obj -> obj
-                                                                            abstract __RPC_STUB_BRAND: 'V[] with get, set
-                                                                            abstract dup: unit -> FSharp.CloudEdge.Runtime.Capnweb.RpcCompatible3.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result.Map.Result<'V>
-                                                                            [<Emit("$0[Symbol.toStringTag]")>]
-                                                                            abstract SymbolToStringTag: string
-                                                                            [<EmitIndexer>]
-                                                                            abstract Item: float -> obj with get, set
+module NodeHttpBatchRpcResponse =
+    [<Interface>]
+    type Options =
+        inherit RpcSessionOptions
+        abstract headers: obj option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?onSendError: (exn -> exn option), ?limits: RpcSessionOptions.Limits, ?headers: obj) : Options = jsNative
 
 module RpcSession =
     module GetStats =

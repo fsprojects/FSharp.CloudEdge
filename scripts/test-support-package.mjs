@@ -46,6 +46,6 @@ if (hash(path.join(installed, `xantham.fable.core.${version.toLowerCase()}.nupkg
 for (const file of ["Library.fs", "Helpers.fs", "Xantham.Fable.Core.fsproj"]) {
   if (!existsSync(path.join(installed, "fable", file))) throw new Error(`Support package is missing its Fable source asset: ${file}`);
 }
-run(dotnet, ["tool", "run", "fable", "--", "SupportPackage.fsproj", "--outDir", "fable-out", "--noCache"]);
+run(dotnet, ["tool", "run", "fickl", "--", "SupportPackage.fsproj", "--outDir", "fable-out", "--noCache"]);
 run(process.execPath, [options["--upstream-helpers"] ? "check-upstream.mjs" : "check.mjs"]);
 console.log(`Package-only support smoke passed for Xantham.Fable.Core ${version}; evidence: ${stage}`);

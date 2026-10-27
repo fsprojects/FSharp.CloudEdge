@@ -2,7 +2,8 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { spawnSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import { scratchDirectory } from "../scratch.mjs";
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import test from "node:test";
 import { canonical, catalogContract, checkedHash, diffContracts, operationContracts, runContracts } from "../../scripts/integration/contracts.mjs";
@@ -70,7 +71,7 @@ test("duplicate declaration identities and missing API evidence fail instead of 
 });
 
 test("authenticated files reject changed, missing and unrecorded input bytes", t => {
-  const directory = mkdtempSync(path.join(os.tmpdir(), "cloudedge-contract-hash-"));
+  const directory = mkdtempSync(path.join(scratchDirectory(), "cloudedge-contract-hash-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const file = path.join(directory, "index.d.ts"); writeFileSync(file, "interface Actor {}\n");
   const expected = createHash("sha256").update(readFileSync(file)).digest("hex");
@@ -155,7 +156,7 @@ test("identical inventory is unchanged and does not imply behavioral acceptance"
 });
 
 test("CLI refuses implicit baseline creation, overwrites and unsupported options", t => {
-  const directory = mkdtempSync(path.join(os.tmpdir(), "cloudedge-contract-cli-"));
+  const directory = mkdtempSync(path.join(scratchDirectory(), "cloudedge-contract-cli-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const first = path.join(directory, "before.json"), second = path.join(directory, "after.json");
   writeFileSync(first, JSON.stringify(snapshot())); writeFileSync(second, JSON.stringify(snapshot()));
@@ -167,11 +168,11 @@ test("CLI refuses implicit baseline creation, overwrites and unsupported options
 });
 
 test("CLI returns distinct success, drift and invalid-evidence statuses", t => {
-  const directory = mkdtempSync(path.join(os.tmpdir(), "cloudedge-contract-exits-"));
+  const directory = mkdtempSync(path.join(scratchDirectory(), "cloudedge-contract-exits-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const first = path.join(directory, "before.json"), second = path.join(directory, "after.json");
   writeFileSync(first, JSON.stringify(snapshot())); writeFileSync(second, JSON.stringify(snapshot()));
-  const invoke = () => spawnSync(process.execPath, [new URL("../../scripts/integration/contracts.mjs", import.meta.url).pathname,
+  const invoke = () => spawnSync(process.execPath, [fileURLToPath(new URL("../../scripts/integration/contracts.mjs", import.meta.url)),
     "diff", first, second], { encoding: "utf8" });
   assert.equal(invoke().status, 0);
   const changed = snapshot(); changed.libraries.workers.version = "2.0.0";

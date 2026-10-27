@@ -1,7 +1,7 @@
 # Build selected SDK partitions
 
-After restoring the pinned profiles and Hawaii tool package, and placing the
-primary Xantham checkout at the exact `xantham.source.xanthamRevision` pin:
+After bootstrapping the reviewed local generator/support packages and restoring
+the pinned dependency profiles:
 
 ```sh
 npm run build -- --resume
@@ -11,18 +11,20 @@ This builds the selected SDK/support libraries and the Hawaii management hierarc
 The [library guide](SDK-LIBRARY.md) describes the layout, dependency injection and fidelity
 contract. Run `npm run build` for fresh generation through both tools.
 
-Every delivered SDK target uses the source adapter in `generators/xantham`.
-`config/targets.json` owns its project path and exact Xantham revision once under
-`xantham.source`; individual targets only select optional projections. A target without a projection runs `Pipeline.run`, the same pipeline as the Xantham CLI, so library compilation is its compile gate. A target with a projection runs `Pipeline.runProjectedWith`, which also compiles the generated sources against the adapter's Xantham support assemblies before writing them; that validation has no catalog producer assemblies, so a projected target cannot import catalogs. The default `XanthamProjectRoot` is the primary sibling `../Xantham`; set `CLOUDEDGE_XANTHAM_ROOT` for another primary checkout location.
+Ordinary delivered SDK targets use the authenticated packaged Xantham CLI.
+The optional Agents Pi projection uses the source adapter in `generators/xantham`,
+whose project and exact source revision are recorded with the projection configuration.
+Projected generation runs `Pipeline.runProjectedWith` and compiles its output against
+the adapter's support assemblies before accepting it. That check has no catalog producer
+assemblies, so the projected target imports no catalogs. Set `CLOUDEDGE_XANTHAM_ROOT`
+to the reviewed checkout when its location differs from the default sibling layout.
 
 Generation requires clean pinned generator/support sources. Explicit development may set `CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1`, recording the source diff and untracked-source hashes as `source.dirty` in each receipt. Such receipts are development evidence: they authenticate only while the variable is set and the same diff persists. Acceptance regenerates at a committed `xanthamRevision` with the variable unset. Generated projects compile against the `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` packages in `projectDefaults`; `npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham` packs them from the checked-out Xantham revision, so bootstrap at the pin before regenerating.
 
-The generation receipt binds the source adapter configuration, compiled payload,
-TypeScript pin, profile and output hashes. Its build receipt associates source and
-ancestor build inputs with that payload; `--no-build` refuses stale associations.
-One frozen adapter build serves the selected generation closure. Project checks
-authenticate it again before compilation. Configurations without `xantham.source`
-retain the legacy pinned local Xantham CLI mode.
+Generation receipts bind the selected tool payload, TypeScript pin, installed profile,
+catalog references and output hashes. Project checks authenticate those inputs again
+before compilation. Projected targets additionally bind the adapter configuration,
+source and ancestor build inputs; `--no-build` refuses stale build associations.
 
 For SDK-only work:
 
@@ -33,7 +35,7 @@ npm run build:sdk -- workers containers
 npm run build:sdk -- --all --plan
 ```
 
-The default is the server selection in [`config/sdk-delivery.json`](../config/sdk-delivery.json) plus every configured support target, including `agents-pi`. A default build therefore materializes the complete delivered inventory that `test:contracts` and `test:agents-pi` read. It includes Agents, Sandbox, Containers, AI Gateway, Workers AI, AI Search and the selected server helpers. React/web-client behavior and optional integration work remain outside the default build. Management stays OpenAPI → Hawaii.
+The default is the server selection in [`config/sdk-delivery.json`](../config/sdk-delivery.json) plus every configured support target, including `agents-pi`. It includes Agents, Sandbox, Containers, AI Gateway, Workers AI, AI Search and the selected server helpers. Pi's additional composition and runtime gate remains opt-in. React/web-client behavior and optional integration work remain outside the default build. Management stays OpenAPI → Hawaii.
 
 Each library selects exact public subpaths from the pinned compiler partition. Inputs left out require a reason; newly inventoried inputs require an explicit disposition. Included declaration files retain their full exported APIs. Support catalogs are supplied through `catalogImports`. Delivery configuration rejects an import unless the consumer and producer have identical inference settings (normally one named `inferenceProfiles` entry) and the consumer ships the producer's package; Xantham then validates source and API identities. A consumer that generates a shipped declaration absent from every referenced catalog emits it in `groups/<module>.fs`; that file must appear in the target's `files` list, ahead of the entry file.
 
@@ -58,9 +60,9 @@ and versions; `config/sdk-delivery.json` records reasons for excluded inputs.
 
 ## Agents Pi operations
 
-`agents-pi` adds Agents 0.27.0's `agents/harness/pi` and `agents/models/pi-ai`
-entrypoints beside the existing Agents 0.22 delivery. Its isolated profile pins
-pi-ai, pi-durable and Chord at 1.1.0. The generated project owns their reached
+`agents-pi` adds Agents 0.30.1's `agents/harness/pi` and `agents/models/pi-ai`
+entrypoints in an isolated profile alongside the main Agents 0.30.1 delivery. It pins
+pi-ai, pi-durable and Chord at 1.4.0. The generated project owns their reached
 binding types in a recursive namespace source, so references between packages
 compile together.
 
@@ -70,7 +72,7 @@ npm run build:sdk -- agents-pi
 npm run test:agents-pi
 ```
 
-This support target adds early operation projections to the shared source runner. It calls Xantham's projection API and actual Myriad plugin before shaping. Its receipt additionally hashes the exact projection selection and projection provenance in the manifest. It keeps its own profile and imports no catalogs: its Workers types pin `5.20261009.1`, which wrangler 4.130.0 requires, and its projection validation compiles without producer assemblies.
+This support target adds early operation projections to the source runner. It calls Xantham's projection API and actual Myriad plugin before shaping. Its receipt additionally hashes the exact projection selection and projection provenance in the manifest. It keeps its own profile with Workers types `5.20261025.1` and imports no catalogs, because projection validation compiles without producer assemblies.
 
 The shared public input is `FSharp.CloudEdge.Pi.HarnessSubmit.Input`. Its `Text`
 case takes a string; its `Items` case takes typed text/image payloads. The same
@@ -88,7 +90,7 @@ Other lossy mappings remain recorded in the manifest. Reached dependency types
 are included; standalone pi-ai/pi-durable value exports remain outside this
 Agents entrypoint selection.
 
-`test:agents-pi` pins Fable 5.17.2 and Fable.Core 5.2.0. It enables the optional
+`test:agents-pi` pins public Fickl 0.6.7 and Fable.Core 5.6.0. It enables the optional
 SDKComposition consumer with `CloudEdgeIncludeAgentsPi=true`; the default
 composition excludes this project and its Pi consumer. It rejects malformed image
 payloads at compile time, then runs the generated F# constructor and operations

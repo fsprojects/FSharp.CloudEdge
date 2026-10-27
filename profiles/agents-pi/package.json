@@ -4,14 +4,15 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/workers-types": "5.20261009.1",
-    "@earendil-works/chord": "1.1.0",
-    "@earendil-works/pi-ai": "1.1.0",
-    "@earendil-works/pi-durable": "1.1.0",
+    "@cloudflare/workers-types": "5.20261025.1",
+    "@earendil-works/chord": "1.4.0",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-durable": "1.4.0",
     "@types/node": "22.20.1",
-    "agents": "0.27.0",
+    "agents": "0.30.1",
     "ai": "7.0.93",
     "esbuild": "0.28.2",
-    "wrangler": "4.130.0"
+    "wrangler": "4.130.0",
+    "zod": "4.6.7"
   }
 }

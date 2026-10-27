@@ -1,0 +1,10 @@
+# Preserve byte-authenticated inventories and Hawaii input/output artifacts on checkout.
+generators/hawaii/**/*.json text eol=lf
+inventory/*.json text eol=lf
+Hawaii.Bindings.slnx text eol=lf
+src/Core/FSharp.CloudEdge.Core.Api/*.fs text eol=lf
+src/Core/FSharp.CloudEdge.Core.Api/*.fsproj text eol=lf
+src/Management/**/*.fs text eol=lf
+src/Management/**/*.fsproj text eol=lf
+src/Tenancy/**/*.fs text eol=lf
+src/Tenancy/**/*.fsproj text eol=lf

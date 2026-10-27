@@ -134,11 +134,12 @@ let listAccounts (apiToken: string) =
 
 ## Local Build
 
-FSharp.CloudEdge builds from source. Both generators run as pinned local .NET tools. Xantham `0.4.0-beta.1` and its support packages restore from the [temporary Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham), which [`NuGet.Config`](NuGet.Config) lists; Hawaii is packed from its source checkout on first setup. You need:
+FSharp.CloudEdge builds from source. Bootstrap packs Xantham, its matching support libraries and Hawaii from reviewed source checkouts into the local feed. Package archives and installed tool payloads are authenticated against [`config/tool-packages.json`](config/tool-packages.json). Runtime compilation uses the pinned public Fickl tool. You need:
 
 - the .NET SDK `10.0.401` or a later `10.0.4xx` patch, as [`global.json`](global.json) requires
 - Node.js with npm, and Python 3 for the Hawaii runner
 - Hawaii on its [`fsharp-cloudedge-support`](https://github.com/FidelityFramework/Hawaii/tree/fsharp-cloudedge-support) branch
+- the reviewed Xantham source revision used by the local bootstrap
 - BAREWire, for the ByteBridge consumer in the solution
 
 The default layout:
@@ -146,12 +147,14 @@ The default layout:
 ```text
 repos/
   FSharp.CloudEdge/
+  Xantham/
   Hawaii/
   BAREWire/
 ```
 
 ```sh
 npm ci
+npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
 npm run tools:bootstrap -- --only hawaii
 npm run tools:restore
 npm run install:profiles -- --delivery

@@ -1,4 +1,4 @@
-import { spawn } from 'node:child_process';
+import { spawnOwned, stopOwned } from './process-lifetime.mjs';
 import { createHash } from 'node:crypto';
 import { createWriteStream, existsSync, readFileSync, mkdirSync, writeFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
@@ -76,21 +76,23 @@ export async function executeStep(step, roots, log, timeoutMs = 1_800_000, signa
   return new Promise(resolve => {
     const output = createWriteStream(log);
     const executable = step.command === 'node' ? process.execPath : step.command === 'dotnet' ? (process.env.CLOUDEDGE_DOTNET ?? 'dotnet') : step.command;
-    const child = spawn(executable, step.args, { cwd, detached: true, stdio: ['ignore', 'pipe', 'pipe'],
+    const child = spawnOwned(executable, step.args, { cwd, stdio: ['ignore', 'pipe', 'pipe'],
       env: { ...process.env, CloudEdgeRoot: roots.sdk, CLOUDEDGE_ROOT: roots.sdk, WRANGLER_SEND_METRICS: 'false', NO_COLOR: '1' } });
     child.stdout.pipe(output, { end: false }); child.stderr.pipe(output, { end: false });
-    let error, killTimer, timedOut = false;
+    let error, stopping = false, timedOut = false;
+    let treeTermination = Promise.resolve();
     const stop = () => {
-      if (!child.pid || child.exitCode !== null || child.signalCode !== null) return;
-      try { process.kill(-child.pid, 'SIGTERM'); } catch (e) { if (e.code !== 'ESRCH') error = e.message; }
-      killTimer ??= setTimeout(() => { try { process.kill(-child.pid, 'SIGKILL'); } catch {} }, 5000);
+      if (!child.pid || stopping) return;
+      stopping = true;
+      treeTermination = stopOwned(child).catch(e => { error = e.message; });
     };
     const timer = setTimeout(() => { timedOut = true; stop(); }, timeoutMs);
     signal?.addEventListener('abort', stop, { once: true });
     if (signal?.aborted) stop();
     child.on('error', e => { error = e.message; });
-    child.on('close', (code, terminationSignal) => {
-      clearTimeout(timer); clearTimeout(killTimer); signal?.removeEventListener('abort', stop);
+    child.on('close', async (code, terminationSignal) => {
+      await treeTermination;
+      clearTimeout(timer); signal?.removeEventListener('abort', stop);
       output.end(() => resolve({ status: !error && !timedOut && !signal?.aborted && code === 0 ? 'passed' : 'failed',
         exitCode: code, terminationSignal, timedOut, ...(error ? { error } : {}), log, logSha256: hash(log) }));
     });
@@ -116,9 +118,11 @@ async function main() {
   const controller = new AbortController();
   const interrupt = () => controller.abort();
   process.once('SIGTERM', interrupt); process.once('SIGINT', interrupt);
+  const runnerInputs = () => Object.fromEntries(['suite.mjs', 'process-lifetime.mjs', 'step-job.ps1', 'step-process.mjs']
+    .map(file => [file, hash(fileURLToPath(new URL(file, import.meta.url)))]));
   const results = [], report = { schemaVersion: 1, profile: values.profile, requestedCases: values.case ?? [],
     selectionKind: values.case?.length ? 'explicit-cases' : 'profile',
-    startedAt: new Date().toISOString(), node: process.version, roots, manifestSha256: hash(manifestFile), runnerSha256: hash(fileURLToPath(import.meta.url)), results };
+    startedAt: new Date().toISOString(), node: process.version, roots, manifestSha256: hash(manifestFile), runnerSha256: hash(fileURLToPath(import.meta.url)), runnerInputSha256: runnerInputs(), results };
   try {
     for (const entry of selected) {
       const result = { id: entry.id, owner: entry.owner, contract: entry.contract, profiles: entry.profiles, startedAt: new Date().toISOString(), steps: [] };
@@ -145,6 +149,7 @@ async function main() {
     Object.assign(report, summarize(results), { finishedAt: new Date().toISOString(), selectedCases: selected.length,
       coverageScope: 'Passing local cases establish only their named contracts. Release requires every catalogued case, including live, native, client and transport profiles.' });
     if (hash(manifestFile) !== report.manifestSha256) { report.passed = false; report.inputChanged = 'Suite manifest changed during the run'; }
+    if (JSON.stringify(runnerInputs()) !== JSON.stringify(report.runnerInputSha256)) { report.passed = false; report.inputChanged = 'Runner or owned-process helper changed during the run'; }
     if (results.length !== selected.length) report.passed = false;
     report.profileComplete = report.passed && report.selectionKind === 'profile';
     writeFileSync(path.join(directory, 'report.json'), JSON.stringify(report, null, 2) + '\n');

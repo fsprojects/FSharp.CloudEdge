@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { executableScript } from "./fake-executable.mjs";
 import test from "node:test";
 import { generate } from "../scripts/generate.mjs";
 
@@ -12,7 +14,7 @@ const hash = (text) => createHash("sha256").update(text).digest("hex");
 function fixture(t) {
   const scratch = new URL("./.scratch/generation-tooling/", import.meta.url);
   mkdirSync(scratch, { recursive: true });
-  const root = mkdtempSync(path.join(scratch.pathname, "cloudedge-generation-"));
+  const root = mkdtempSync(path.join(fileURLToPath(scratch), "cloudedge-generation-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const write = (name, value) => {
     const file = path.join(root, name);
@@ -23,7 +25,7 @@ function fixture(t) {
   write("package.json", { type: "module", devDependencies: { typescript: compilerVersion } });
   write("package-lock.json", { packages: { "": { devDependencies: { typescript: compilerVersion } }, "node_modules/typescript": { version: compilerVersion } } });
   write("node_modules/typescript/package.json", { name: "typescript", version: compilerVersion, type: "module" });
-  write("node_modules/typescript/lib/getExePath.js", 'export default () => new URL("../../@typescript/typescript-linux-x64/lib/tsc", import.meta.url).pathname;');
+  write("node_modules/typescript/lib/getExePath.js", 'import { fileURLToPath } from "node:url"; export default () => fileURLToPath(new URL("../../@typescript/typescript-linux-x64/lib/tsc", import.meta.url));');
   write("node_modules/@typescript/typescript-linux-x64/package.json", { version: compilerVersion });
   write("node_modules/@typescript/typescript-linux-x64/lib/tsc", "compiler");
   write("profiles/sdk/package.json", { devDependencies: { sdk: "1.2.3" } });
@@ -57,7 +59,7 @@ if (process.env.FAKE_PACKAGE_LOG) writeFileSync(process.env.FAKE_PACKAGE_LOG, ar
 if (process.env.FAKE_MUTATE_FILE) writeFileSync(process.env.FAKE_MUTATE_FILE, "{}");
 if (process.env.FAKE_MUTATE_SNAPSHOT) writeFileSync(path.join(args[args.indexOf("generate") + 1], "index.d.ts"), "changed snapshot");
 `);
-  chmodSync(dotnet, 0o755);
+  executableScript(t, dotnet);
   const target = (id, dependencies = []) => ({ id, package: "sdk", version: "1.2.3", profile: "sdk", dependencies,
     outputDirectory: `src/${id}`, files: [`${id}.fs`], generator: { module: id } });
   const config = { schemaVersion: 2, toolchain: { typescript: compilerVersion },
@@ -238,7 +240,9 @@ test("candidate catalogs schedule the selected prefix and record absolute inputs
   const reference = path.join(f.root, "artifacts/owner/declarations.json");
   assert.deepEqual(receipt.catalogCandidates, ["owner"]);
   assert.deepEqual(receipt.effectiveGenerator.declarationReferences, [reference]);
-  assert.deepEqual(receipt.declarationReferenceSha256, { "../../../../artifacts/owner/declarations.json": hash(readFileSync(reference)) });
+  assert.deepEqual(receipt.declarationReferenceSha256, {
+    [path.relative(path.join(f.root, "profiles/sdk/node_modules/sdk"), reference)]: hash(readFileSync(reference)),
+  });
 });
 
 test("an unused candidate is still a scheduling prerequisite and failure blocks its successors", async (t) => {

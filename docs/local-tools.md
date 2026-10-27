@@ -1,12 +1,11 @@
 # Local generator tools
 
 Contributors regenerate bindings with pinned Xantham and Hawaii .NET tools, recorded in
-`.config/dotnet-tools.json` and `config/tool-packages.json`. Xantham `0.4.0-beta.1` and its
-support packages (`Xantham.Fable.Core` `0.2.0`, `Xantham.Fable.Core.TS` `0.4.0-beta.1`) are
-published prereleases restored from the
-[temporary Xantham Cloudsmith feed](https://app.cloudsmith.com/shayanhabibi/r/xantham), which
-[`NuGet.Config`](../NuGet.Config) lists as `xantham-temporary`. Hawaii is still built from its
-source checkout by the bootstrap step.
+`.config/dotnet-tools.json` and `config/tool-packages.json`. The current contributor setup
+packs Xantham and its matching support libraries from a reviewed source checkout, and
+Hawaii from its reviewed branch. [`NuGet.Config`](../NuGet.Config) lists the ignored local
+feed and nuget.org. The public Fickl tool and transitive Fickl.Core support dependency
+are pinned independently of the local generator packages.
 
 Applications consuming [CloudEdge packages](https://www.nuget.org/packages?q=FSharp.CloudEdge)
 use the released Xantham support packages selected in
@@ -15,23 +14,22 @@ checkouts or the contributor bootstrap process.
 
 ## First setup
 
-Use the reviewed Hawaii branch beside FSharp.CloudEdge. The bootstrap script accepts an alternate location when your checkout layout differs:
+Use the reviewed Xantham revision and Hawaii branch beside FSharp.CloudEdge. The bootstrap script accepts explicit locations when your checkout layout differs:
 
 ```sh
 npm ci
+npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
 npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
 npm run tools:restore
 npm run tools:check
 ```
 
-`npm run test:support-package` smoke-tests a `Xantham.Fable.Core` archive from a local feed
-directory. For the published package, download `Xantham.Fable.Core.0.2.0.nupkg` from the
-Cloudsmith feed into a directory, check its SHA-256 against `config/tool-packages.json`, and pass
-that directory with `npm run test:support-package -- --feed <directory>`.
+`npm run test:support-package` smoke-tests the exact local `Xantham.Fable.Core` archive
+selected in the configuration. An alternate verified feed can be supplied with
+`npm run test:support-package -- --feed <directory>`.
 
-Running `npm run tools:bootstrap -- --only xantham` against a source checkout replaces the
-published Xantham pins with local `-local.<digest>` builds. Use it only to test unreleased
-generator changes.
+The Xantham bootstrap records immutable `-local.<digest>` package versions for the selected
+source and build recipe. Review the recorded source revision before accepting generated output.
 
 Bootstrap runs `dotnet pack` on each generator project in Release configuration, writes the packages to the ignored `artifacts/tool-feed/` directory, and installs them into this repository's local tool manifest. The normal calls are:
 
@@ -42,10 +40,15 @@ dotnet tool run hawaii-unofficial -- --version
 
 The manifest at `.config/dotnet-tools.json` pins the versions. `config/tool-packages.json` records package and installed payload hashes, which the generation runners check before and after invoking a tool. Source and build receipts remain under `artifacts/tools/bootstrap/`. The pinned TypeScript compiler still comes from the root npm installation; Xantham's tool package does not embed it.
 
-Local package versions include a digest of the source and build recipe. Hawaii generation runs only the bootstrapped package, so updating the Hawaii checkout has no effect until you bootstrap it again. SDK generation instead builds the primary Xantham checkout at `xantham.source.xanthamRevision` through `generators/xantham` ([SDK build](sdk-build.md)); the Xantham bootstrap still supplies the `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` packages that generated projects compile against, packed from the checked-out revision:
+Local package versions include a digest of the source and build recipe. Hawaii and ordinary
+SDK generation run the authenticated installed tools, so changing a source checkout has no
+effect until bootstrap runs again. The optional Agents Pi operation projection additionally
+builds `generators/xantham` against its exact configured source revision. Set
+`CLOUDEDGE_XANTHAM_ROOT` to that checkout when using an alternate layout. The support
+packages and projected source adapter must describe the same accepted generator revision:
 
 ```sh
-npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
+npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
 ```
 
 Review the resulting manifest, package lock and generated-source changes together. Keep existing package versions immutable. Bootstrap refuses a cached archive that disagrees with its build receipt.
@@ -60,13 +63,13 @@ Their temporary projects live under `artifacts/`. Generated SDK projects referen
 package versions rather than peer source projects.
 
 `NuGet.Config` includes the local feed and nuget.org. `npm run test:support-package` checks
-package-only .NET compilation and Fable key-value properties and indexers.
+package-only .NET compilation and Fickl-compiled key-value properties and indexers.
 `npm run repro:upstream-support-helpers` exercises the corrected helper functions in the
 bootstrapped package; the regression is described in [upstream issues](upstream-issues.md).
 
 ## Routine generation
 
-After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). Hawaii commands resolve the installed tool through the local manifest and do not compile the Hawaii repository. SDK generation compiles and runs the source adapter against the pinned primary Xantham checkout; the packaged `xantham` tool does not generate SDK targets.
+After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). Ordinary generation resolves the installed tools through the local manifest. Only explicitly projected SDK targets compile and run the source adapter against their pinned Xantham checkout.
 
 `npm run tools:restore` restores the versions already in the manifest. It requires access to the local archives until those versions are available from a package feed. A fresh contributor therefore needs either the matching reviewed archives or the source bootstrap step. Locally rebuilding a package can change archive bytes; review the new package lock and rerun validation before treating its output as equivalent.
 

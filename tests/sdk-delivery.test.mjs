@@ -45,7 +45,7 @@ test("catalog injection produces an ordered support dependency with a relocatabl
   const consumer = configuration.targets[1];
   assert.deepEqual(consumer.dependencies, ["ai-v4"]);
   assert.equal(path.resolve("/repo/profiles/sdk/node_modules/sdk", consumer.generator.declarationReferences[0]),
-    "/repo/artifacts/ai-v4/declarations.json");
+    path.resolve("/repo/artifacts/ai-v4/declarations.json"));
   f.delivery.catalogImports["ai-v4"] = ["sdk"];
   assert.throws(() => deliveryConfiguration(f.configuration, f.partitions, f.delivery, "/repo"), /Cyclic target dependencies/);
 });

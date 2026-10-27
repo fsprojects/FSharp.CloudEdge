@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
-import { spawn, spawnSync } from 'node:child_process';
-import { once } from 'node:events';
+import { spawnSync } from 'node:child_process';
+import { spawnOwned, stopOwned } from '../../scripts/integration/process-lifetime.mjs';
 import { createRequire } from 'node:module';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
@@ -21,6 +21,7 @@ const target = configuration.targets.find(target => target.id === 'agents-pi');
 assert.ok(target?.projection, 'Generate the strict agents-pi delivery first');
 const inputFiles = ['tests/AgentsPi/Client.fs', 'tests/AgentsPi/worker.mjs', 'tests/AgentsPi/check.mjs', 'tests/AgentsPi/AgentsPi.fsproj', 'tests/AgentsPi/.config/dotnet-tools.json', 'tests/SDKComposition/SDKComposition.fsproj', 'tests/SDKComposition/Pi.fs', 'profiles/agents-pi/package.json', 'profiles/agents-pi/package-lock.json', 'artifacts/agents-pi/generation.json', ...target.files.map(file => target.outputDirectory + '/' + file)];
 const inputs = () => Object.fromEntries(inputFiles.map(file => [file, hash(path.join(root, file))]));
+inputFiles.push('scripts/integration/process-lifetime.mjs', 'scripts/integration/step-job.ps1', 'scripts/integration/step-process.mjs');
 const before = inputs();
 const scratch = path.join(root, 'tests/.scratch/agents-pi');
 mkdirSync(scratch, { recursive: true });
@@ -37,7 +38,7 @@ command.index = 0;
 let child, output = '', url;
 const start = async () => {
   output = '';
-  child = spawn(process.execPath, [path.join(root, 'profiles/agents-pi/node_modules/wrangler/bin/wrangler.js'), 'dev', '--local', '--config', path.join(run, 'wrangler.json'), '--ip', '127.0.0.1', '--port', '0', '--inspector-port', '0', '--persist-to', path.join(run, 'state')], { cwd: root, detached: true, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, WRANGLER_SEND_METRICS: 'false', NO_COLOR: '1' } });
+  child = spawnOwned(process.execPath, [path.join(root, 'profiles/agents-pi/node_modules/wrangler/bin/wrangler.js'), 'dev', '--local', '--config', path.join(run, 'wrangler.json'), '--ip', '127.0.0.1', '--port', '0', '--inspector-port', '0', '--persist-to', path.join(run, 'state')], { cwd: root, stdio: ['ignore', 'pipe', 'pipe'], env: { ...process.env, WRANGLER_SEND_METRICS: 'false', NO_COLOR: '1' } });
   for (const stream of [child.stdout, child.stderr]) stream.on('data', chunk => { output += chunk; });
   for (let i = 0; i < 300; i++) {
     const match = output.match(/Ready on (http:\/\/127\.0\.0\.1:\d+)/);
@@ -48,12 +49,8 @@ const start = async () => {
   throw Error('Local workerd startup timed out: ' + output);
 };
 const stop = async () => {
-  if (!child || child.exitCode !== null) return;
-  const exited = once(child, 'exit');
-  process.kill(-child.pid, 'SIGTERM');
-  let timer;
-  try { await Promise.race([exited, new Promise((_, reject) => { timer = setTimeout(() => { process.kill(-child.pid, 'SIGKILL'); reject(Error('Local runtime shutdown timed out')); }, 10000); })]); }
-  finally { clearTimeout(timer); writeFileSync(path.join(run, 'worker.log'), output); }
+  try { await stopOwned(child, 10000); }
+  finally { writeFileSync(path.join(run, 'worker.log'), output); }
 };
 const request = async suffix => {
   const response = await fetch(url + '/agents/pi-probe/validation' + suffix, { signal: AbortSignal.timeout(20000) });
@@ -75,12 +72,12 @@ try {
   mkdirSync(negative);
   for (const file of ['Directory.Build.props', 'Directory.Build.targets']) writeFileSync(path.join(negative, file), '<Project />');
   writeFileSync(path.join(negative, 'Bad.fs'), 'module Bad\nmodule Input = FSharp.CloudEdge.Pi.HarnessSubmit\nlet invalid : Input.InputItemsItemImage = { Text = "wrong payload"; TextSignature = None }\n');
-  writeFileSync(path.join(negative, 'Bad.fsproj'), `<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup><Compile Include="Bad.fs" /><ProjectReference Include="${path.join(root, target.outputDirectory, target.generator.module + '.fsproj')}" /><PackageReference Include="Fable.Core" Version="5.2.0" /></ItemGroup></Project>`);
+  writeFileSync(path.join(negative, 'Bad.fsproj'), `<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><TargetFramework>net8.0</TargetFramework></PropertyGroup><ItemGroup><Compile Include="Bad.fs" /><ProjectReference Include="${path.join(root, target.outputDirectory, target.generator.module + '.fsproj')}" /><PackageReference Include="Fable.Core" Version="5.6.0" /></ItemGroup></Project>`);
   const negativeLog = command(['build', 'Bad.fsproj', '-c', 'Release'], negative, 1);
   assert.match(negativeLog, /FS1129|FS0764/);
   report.assertions.push('Image constructor rejects text payload fields at F# compile time');
   command(['tool', 'restore'], directory);
-  command(['fable', 'AgentsPi.fsproj', '--outDir', path.join(run, 'fable'), '--noCache'], directory);
+  command(['fickl', 'AgentsPi.fsproj', '--outDir', path.join(run, 'fable'), '--noCache'], directory);
   mkdirSync(path.join(run, 'bundle'));
   const bundle = path.join(run, 'bundle/worker.mjs');
   await build({ entryPoints: [path.join(directory, 'worker.mjs')], outfile: bundle, bundle: true, format: 'esm', platform: 'node', target: 'es2022', banner: { js: 'import { createRequire } from "node:module"; const require = createRequire("/worker.mjs");' }, conditions: ['workerd', 'worker', 'browser'], mainFields: ['module', 'main'], external: ['cloudflare:*', 'node:*'], nodePaths: [path.join(root, 'profiles/agents-pi/node_modules')], alias: { 'cloudedge-pi-client': path.join(run, 'fable/Client.js') }, logLevel: 'warning' });

@@ -69,10 +69,10 @@ type Parameter =
     abstract ``type``: string with get, set
     abstract description: string with get, set
     abstract ``$ref``: string option with get, set
-    abstract schema: obj option with get, set
+    abstract schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 option with get, set
     abstract ``in``: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, required: bool, ``type``: string, description: string, ?``$ref``: string, ?schema: obj, ?``in``: string) : Parameter = jsNative
+    static member Create (name: string, required: bool, ``type``: string, description: string, ?``$ref``: string, ?schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?``in``: string) : Parameter = jsNative
 
 [<Interface>]
 type Meta =
@@ -83,15 +83,13 @@ type Meta =
 
 [<Interface>]
 type AiTextGenerationToolInputWithFunction =
-    abstract name: string with get, set
-    abstract description: string with get, set
-    abstract parameters: AiTextGenerationToolInputWithFunction.Parameters option with get, set
+    inherit BaseAiTextGeneration.Inputs.Tools.Item.Function
     abstract ``function``: (obj -> JS.Promise<string>) option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, description: string, ?parameters: AiTextGenerationToolInputWithFunction.Parameters, ?``function``: (obj -> JS.Promise<string>)) : AiTextGenerationToolInputWithFunction = jsNative
 
 [<Interface>]
-type ToolsSchema<'T> =
+type ToolsSchema<'T when 'T :> FSharp.CloudEdge.Support.JsonSchema.JSONSchema7> =
     abstract name: string with get, set
     abstract description: string with get, set
     abstract parameters: 'T with get, set
@@ -402,7 +400,7 @@ type ParameterObject =
 
 type PathsObject<'T, 'P> =
     [<EmitIndexer>]
-    abstract Item: string -> obj option with get, set
+    abstract Item: string -> JS.Intersect<PathsObject.Item, JS.Intersect<PathsObject.Item2<'T>, 'P>> option with get, set
 
 [<Interface>]
 type ReferenceObject =
@@ -426,6 +424,10 @@ type ResponseObject =
     abstract links: JS.Record<string, U2<LinkObject, ReferenceObject>> option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (description: string, ?headers: JS.Record<string, U2<HeaderObject, ReferenceObject>>, ?content: JS.Record<string, MediaTypeObject>, ?links: JS.Record<string, U2<LinkObject, ReferenceObject>>) : ResponseObject = jsNative
+
+type ResponsesObject =
+    [<EmitIndexer>]
+    abstract Item: string -> U2<ReferenceObject, ResponseObject> with get, set
 
 type SecurityRequirementObject =
     [<EmitIndexer>]
@@ -471,15 +473,15 @@ type Exports =
     [<Import("createToolsFromOpenAPISpec", "@cloudflare/ai-utils")>]
     static member createToolsFromOpenAPISpec (spec: string, ?config: Config) : JS.Promise<AiTextGenerationToolInputWithFunction[]> = jsNative
     [<Import("runWithTools", "@cloudflare/ai-utils")>]
-    static member runWithTools (ai: obj, model: obj, input: RunWithTools.Input, ?config: RunWithTools.Config) : JS.Promise<obj> = jsNative
+    static member runWithTools (ai: FSharp.CloudEdge.Runtime.WorkersTypes.Ai<FSharp.CloudEdge.Runtime.WorkersTypes.AiModels>, model: obj, input: RunWithTools.Input, ?config: RunWithTools.Config) : JS.Promise<FSharp.CloudEdge.Runtime.WorkersTypes.BaseAiTextGeneration.PostProcessedOutputs> = jsNative
     [<Import("tool", "@cloudflare/ai-utils")>]
-    static member tool<'T> (tool: ToolsSchema<'T>) : ToolsSchema<'T> = jsNative
+    static member tool<'T when 'T :> FSharp.CloudEdge.Support.JsonSchema.JSONSchema7> (tool: ToolsSchema<'T>) : ToolsSchema<'T> = jsNative
     [<Import("fetchSpec", "@cloudflare/ai-utils")>]
     static member fetchSpec (spec: string) : JS.Promise<Document<obj> option> = jsNative
     [<Import("validateArgsWithZod", "@cloudflare/ai-utils")>]
-    static member validateArgsWithZod (args: obj, properties: JS.Record<string, obj>) : bool = jsNative
+    static member validateArgsWithZod (args: obj, properties: JS.Record<string, FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>) : bool = jsNative
     [<Import("autoTrimTools", "@cloudflare/ai-utils")>]
-    static member autoTrimTools (tools: AiTextGenerationToolInputWithFunction[], ai: obj, model: obj, messages: obj[]) : JS.Promise<AiTextGenerationToolInputWithFunction[]> = jsNative
+    static member autoTrimTools (tools: AiTextGenerationToolInputWithFunction[], ai: FSharp.CloudEdge.Runtime.WorkersTypes.Ai<FSharp.CloudEdge.Runtime.WorkersTypes.AiModels>, model: obj, messages: FSharp.CloudEdge.Runtime.WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item[]) : JS.Promise<AiTextGenerationToolInputWithFunction[]> = jsNative
 
 module AiTextGenerationToolInputWithFunction =
     [<Interface>]
@@ -499,24 +501,39 @@ module AiTextGenerationToolInputWithFunction =
                 [<ParamObject; Emit("$0")>]
                 static member Create (``type``: string, ?description: string) : Item = jsNative
 
+module BaseAiTextGeneration =
+    module Inputs =
+        module Tools =
+            [<Interface>]
+            type Item =
+                abstract ``type``: string with get, set
+                abstract ``function``: BaseAiTextGeneration.Inputs.Tools.Item.Function with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (``type``: string, ``function``: BaseAiTextGeneration.Inputs.Tools.Item.Function) : Item = jsNative
+
+            module Item =
+                [<Interface>]
+                type Function =
+                    abstract name: string with get, set
+                    abstract description: string with get, set
+                    abstract parameters: AiTextGenerationToolInputWithFunction.Parameters option with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (name: string, description: string, ?parameters: AiTextGenerationToolInputWithFunction.Parameters) : Function = jsNative
+
 module CallbackObject =
     [<Interface>]
     type Item<'T> =
-        abstract ``$ref``: string option with get, set
-        abstract summary: string option with get, set
-        abstract description: string option with get, set
-        abstract servers: ServerObject[] option with get, set
-        abstract parameters: U2<ParameterObject, ReferenceObject>[] option with get, set
-        abstract delete: obj option with get, set
-        abstract get: obj option with get, set
-        abstract head: obj option with get, set
-        abstract options: obj option with get, set
-        abstract patch: obj option with get, set
-        abstract post: obj option with get, set
-        abstract put: obj option with get, set
-        abstract trace: obj option with get, set
+        inherit FSharp.CloudEdge.Runtime.AIUtils.PathsObject.Item
+        abstract delete: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract get: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract head: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract options: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract patch: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract post: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract put: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract trace: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?``$ref``: string, ?summary: string, ?description: string, ?servers: ServerObject[], ?parameters: U2<ParameterObject, ReferenceObject>[], ?delete: obj, ?get: obj, ?head: obj, ?options: obj, ?patch: obj, ?post: obj, ?put: obj, ?trace: obj) : Item<'T> = jsNative
+        static member Create (?``$ref``: string, ?summary: string, ?description: string, ?servers: ServerObject[], ?parameters: U2<ParameterObject, ReferenceObject>[], ?delete: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?get: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?head: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?options: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?patch: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?post: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?put: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?trace: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>) : Item<'T> = jsNative
 
 module Config =
     [<Interface>]
@@ -540,16 +557,59 @@ module ConfigRule =
     module Matcher =
         [<Interface>]
         type Values =
-            abstract url: obj with get, set
+            abstract url: FSharp.CloudEdge.Runtime.Workers.URL with get, set
             abstract ``method``: HttpMethod with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (url: obj, ``method``: HttpMethod) : Values = jsNative
+            static member Create (url: FSharp.CloudEdge.Runtime.Workers.URL, ``method``: HttpMethod) : Values = jsNative
 
 module Document =
     module XExpressOpenapiAdditionalMiddleware =
         type Item = delegate of request: obj * response: obj * next: obj -> JS.Promise<unit>
 
         type Item2 = delegate of request: obj * response: obj * next: obj -> unit
+
+module PathsObject =
+    [<Interface>]
+    type Item =
+        abstract ``$ref``: string option with get, set
+        abstract summary: string option with get, set
+        abstract description: string option with get, set
+        abstract servers: ServerObject[] option with get, set
+        abstract parameters: U2<ParameterObject, ReferenceObject>[] option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?``$ref``: string, ?summary: string, ?description: string, ?servers: ServerObject[], ?parameters: U2<ParameterObject, ReferenceObject>[]) : Item = jsNative
+
+    [<Interface>]
+    type Item2<'T> =
+        abstract delete: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract get: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract head: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract options: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract patch: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract post: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract put: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        abstract trace: JS.Intersect<PathsObject.Item2.Delete.Members, 'T> option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?delete: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?get: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?head: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?options: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?patch: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?post: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?put: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>, ?trace: JS.Intersect<PathsObject.Item2.Delete.Members, 'T>) : Item2<'T> = jsNative
+
+    module Item2 =
+        module Delete =
+            [<Interface>]
+            type Members =
+                abstract tags: string[] option with get, set
+                abstract summary: string option with get, set
+                abstract description: string option with get, set
+                abstract externalDocs: ExternalDocumentationObject option with get, set
+                abstract operationId: string option with get, set
+                abstract parameters: U2<ParameterObject, ReferenceObject>[] option with get, set
+                abstract requestBody: U2<ReferenceObject, RequestBodyObject> option with get, set
+                abstract responses: ResponsesObject with get, set
+                abstract callbacks: JS.Record<string, U2<CallbackObject, ReferenceObject>> option with get, set
+                abstract deprecated: bool option with get, set
+                abstract security: SecurityRequirementObject[] option with get, set
+                abstract servers: ServerObject[] option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (responses: ResponsesObject, ?tags: string[], ?summary: string, ?description: string, ?externalDocs: ExternalDocumentationObject, ?operationId: string, ?parameters: U2<ParameterObject, ReferenceObject>[], ?requestBody: U2<ReferenceObject, RequestBodyObject>, ?callbacks: JS.Record<string, U2<CallbackObject, ReferenceObject>>, ?deprecated: bool, ?security: SecurityRequirementObject[], ?servers: ServerObject[]) : Members = jsNative
 
 module RunWithTools =
     [<Interface>]
@@ -564,10 +624,10 @@ module RunWithTools =
 
     [<Interface>]
     type Input =
-        abstract messages: obj[] with get, set
+        abstract messages: FSharp.CloudEdge.Runtime.WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item[] with get, set
         abstract tools: AiTextGenerationToolInputWithFunction[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (messages: obj[], tools: AiTextGenerationToolInputWithFunction[]) : Input = jsNative
+        static member Create (messages: FSharp.CloudEdge.Runtime.WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item[], tools: AiTextGenerationToolInputWithFunction[]) : Input = jsNative
 
     module Config =
-        type TrimFunction = delegate of tools: AiTextGenerationToolInputWithFunction[] * ai: obj * model: obj * messages: obj[] -> JS.Promise<AiTextGenerationToolInputWithFunction[]>
+        type TrimFunction = delegate of tools: AiTextGenerationToolInputWithFunction[] * ai: FSharp.CloudEdge.Runtime.WorkersTypes.Ai<FSharp.CloudEdge.Runtime.WorkersTypes.AiModels> * model: obj * messages: FSharp.CloudEdge.Runtime.WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item[] -> JS.Promise<AiTextGenerationToolInputWithFunction[]>

@@ -17,12 +17,12 @@
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj" />
   </Folder>
   <Folder Name="/Runtime/Compute/">
     <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.Computer/FSharp.CloudEdge.Runtime.Computer.fsproj" />
     <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.ComputerArtifacts/FSharp.CloudEdge.Runtime.ComputerArtifacts.fsproj" />
     <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.Sandbox/FSharp.CloudEdge.Runtime.Sandbox.fsproj" />
-    <Project Path="src/Runtime/Compute/FSharp.CloudEdge.Runtime.SandboxBridge/FSharp.CloudEdge.Runtime.SandboxBridge.fsproj" />
   </Folder>
   <Folder Name="/Runtime/FeatureFlags/">
     <Project Path="src/Runtime/FeatureFlags/FSharp.CloudEdge.Runtime.Flagship/FSharp.CloudEdge.Runtime.Flagship.fsproj" />
@@ -49,7 +49,16 @@
   </Folder>
   <Folder Name="/Support/AI/">
     <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj" />
+    <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V4.ProviderUtils/FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fsproj" />
+    <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V7/FSharp.CloudEdge.Support.AI.V7.fsproj" />
     <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible.fsproj" />
     <Project Path="src/Support/AI/FSharp.CloudEdge.Support.AI.V3.Provider/FSharp.CloudEdge.Support.AI.V3.Provider.fsproj" />
+  </Folder>
+  <Folder Name="/Support/Http/">
+    <Project Path="src/Support/Http/FSharp.CloudEdge.Support.Hono.V4/FSharp.CloudEdge.Support.Hono.V4.fsproj" />
+  </Folder>
+  <Folder Name="/Support/Schema/">
+    <Project Path="src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4/FSharp.CloudEdge.Support.Zod.V4.fsproj" />
+    <Project Path="src/Support/Schema/FSharp.CloudEdge.Support.JsonSchema/FSharp.CloudEdge.Support.JsonSchema.fsproj" />
   </Folder>
 </Solution>

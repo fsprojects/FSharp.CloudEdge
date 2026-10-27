@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { buildProjects, checkProjects, planProjects, reconcileProjects, writeProjects } from "../scripts/projects.mjs";
 import { catalogCandidates, declarationReferences } from "../scripts/catalogs.mjs";
@@ -25,7 +26,7 @@ const configuration = () => ({
 function temporary(t) {
   const scratch = new URL("./.scratch/project-tooling/", import.meta.url);
   mkdirSync(scratch, { recursive: true });
-  const root = mkdtempSync(path.join(scratch.pathname, "cloudedge-projects-"));
+  const root = mkdtempSync(path.join(fileURLToPath(scratch), "cloudedge-projects-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   return root;
 }

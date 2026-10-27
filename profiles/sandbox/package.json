@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/sandbox": "0.12.9",
-    "@cloudflare/workers-types": "5.20260906.1",
+    "@cloudflare/sandbox": "1.0.3",
+    "@cloudflare/workers-types": "5.20261025.1",
     "@openai/agents": "0.3.9",
     "@opencode-ai/sdk": "1.18.29",
     "@types/node": "26.4.1",

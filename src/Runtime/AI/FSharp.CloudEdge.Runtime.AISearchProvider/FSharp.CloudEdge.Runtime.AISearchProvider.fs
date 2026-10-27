@@ -23,42 +23,37 @@ type AISearchChatSettings =
     /// AI Search chat model id. Omit to use the instance's configured default.
     /// </summary>
     abstract model: string option with get, set
-    abstract ai_search_options: obj option with get, set
+    abstract ai_search_options: FSharp.CloudEdge.Runtime.Workers.AiSearchOptions option with get, set
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-[<Interface>]
 type AISearchChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3
     abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
     abstract settings: AISearchChatSettings
-    abstract config: obj
-    abstract buildRequest: obj with get, set
-    [<ParamObject; Emit("({ specificationVersion: 'v3', ...$0 })")>]
-    static member Create (supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, modelId: string, settings: AISearchChatSettings, config: obj, provider: string, buildRequest: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V3.Provider.LanguageModelV3StreamResult>)) : AISearchChatLanguageModel = jsNative
 
 [<Interface>]
 type AISearchNamespaceSettings =
-    abstract binding: obj with get, set
+    abstract binding: FSharp.CloudEdge.Runtime.Workers.AiSearchNamespace with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (binding: obj) : AISearchNamespaceSettings = jsNative
+    static member Create (binding: FSharp.CloudEdge.Runtime.Workers.AiSearchNamespace) : AISearchNamespaceSettings = jsNative
 
 [<Interface>]
 type AISearchItemProvider =
-    abstract info: (unit -> JS.Promise<obj>) with get, set
-    abstract download: (unit -> JS.Promise<obj>) with get, set
+    abstract info: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchItemInfo>) with get, set
+    abstract download: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchItemContentResult>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (info: (unit -> JS.Promise<obj>), download: (unit -> JS.Promise<obj>)) : AISearchItemProvider = jsNative
+    static member Create (info: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchItemInfo>), download: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchItemContentResult>)) : AISearchItemProvider = jsNative
 
 [<Interface>]
 type AISearchItemsProvider =
-    abstract list: (obj option -> JS.Promise<obj>) with get, set
-    abstract upload: Func<string, obj, obj option, JS.Promise<obj>> with get, set
-    abstract uploadAndPoll: Func<string, obj, AISearchItemsProvider.UploadAndPoll.Options option, JS.Promise<obj>> with get, set
+    abstract list: (FSharp.CloudEdge.Runtime.Workers.AiSearchListItemsParams option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchListItemsResponse>) with get, set
+    abstract upload: FSharp.CloudEdge.Runtime.WorkersTypes.Upload with get, set
+    abstract uploadAndPoll: FSharp.CloudEdge.Runtime.WorkersTypes.UploadAndPoll with get, set
     abstract delete: (string -> JS.Promise<unit>) with get, set
     abstract get: itemId: string -> AISearchItemProvider
     [<ParamObject; Emit("$0")>]
-    static member Create (list: (obj option -> JS.Promise<obj>), upload: Func<string, obj, obj option, JS.Promise<obj>>, uploadAndPoll: Func<string, obj, AISearchItemsProvider.UploadAndPoll.Options option, JS.Promise<obj>>, delete: (string -> JS.Promise<unit>), get: (string -> AISearchItemProvider)) : AISearchItemsProvider = jsNative
+    static member Create (list: (FSharp.CloudEdge.Runtime.Workers.AiSearchListItemsParams option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchListItemsResponse>), upload: FSharp.CloudEdge.Runtime.WorkersTypes.Upload, uploadAndPoll: FSharp.CloudEdge.Runtime.WorkersTypes.UploadAndPoll, delete: (string -> JS.Promise<unit>), get: (string -> AISearchItemProvider)) : AISearchItemsProvider = jsNative
 
 [<Interface>]
 type AISearchInstanceProvider =
@@ -69,13 +64,13 @@ type AISearchInstanceProvider =
     /// <summary>
     /// Search this AI Search instance for relevant chunks.
     /// </summary>
-    abstract search: (U2<AISearchInstanceProvider.Search.Params, AISearchInstanceProvider.Search.Params2> -> JS.Promise<obj>) with get, set
+    abstract search: (FSharp.CloudEdge.Runtime.Workers.AiSearchSearchRequest -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchSearchResponse>) with get, set
     /// <summary>
     /// Upload, list, and delete source items.
     /// </summary>
     abstract items: AISearchItemsProvider with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (chat: (AISearchChatSettings option -> AISearchChatLanguageModel), search: (U2<AISearchInstanceProvider.Search.Params, AISearchInstanceProvider.Search.Params2> -> JS.Promise<obj>), items: AISearchItemsProvider) : AISearchInstanceProvider = jsNative
+    static member Create (chat: (AISearchChatSettings option -> AISearchChatLanguageModel), search: (FSharp.CloudEdge.Runtime.Workers.AiSearchSearchRequest -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchSearchResponse>), items: AISearchItemsProvider) : AISearchInstanceProvider = jsNative
 
 [<Interface>]
 type AISearchNamespaceProvider =
@@ -87,9 +82,9 @@ type AISearchNamespaceProvider =
     /// <summary>
     /// List instances in the bound namespace.
     /// </summary>
-    abstract list: (obj option -> JS.Promise<obj>) with get, set
+    abstract list: (FSharp.CloudEdge.Runtime.Workers.AiSearchListInstancesParams option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchListResponse>) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (get: (string -> AISearchInstanceProvider), list: (obj option -> JS.Promise<obj>)) : AISearchNamespaceProvider = jsNative
+    static member Create (get: (string -> AISearchInstanceProvider), list: (FSharp.CloudEdge.Runtime.Workers.AiSearchListInstancesParams option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.AiSearchListResponse>)) : AISearchNamespaceProvider = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -111,46 +106,6 @@ module AISearchChatLanguageModel =
     [<Interface>]
     type Config =
         abstract provider: string with get, set
-        abstract binding: obj with get, set
+        abstract binding: FSharp.CloudEdge.Runtime.Workers.AiSearchInstance with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, binding: obj) : Config = jsNative
-
-module AISearchInstanceProvider =
-    module Search =
-        [<Interface>]
-        type Params =
-            /// <summary>
-            /// Simple query string.
-            /// </summary>
-            abstract query: string with get, set
-            abstract messages: unit option with get, set
-            abstract ai_search_options: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (query: string, ?messages: unit, ?ai_search_options: obj) : Params = jsNative
-
-        [<Interface>]
-        type Params2 =
-            abstract query: unit option with get, set
-            /// <summary>
-            /// Conversation-style input. At least one user message with non-empty content is required.
-            /// </summary>
-            abstract messages: obj[] with get, set
-            abstract ai_search_options: obj option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (messages: obj[], ?query: unit, ?ai_search_options: obj) : Params2 = jsNative
-
-module AISearchItemsProvider =
-    module UploadAndPoll =
-        [<Interface>]
-        type Options =
-            abstract metadata: JS.Record<string, obj> option with get, set
-            /// <summary>
-            /// Polling interval in milliseconds (default 1000).
-            /// </summary>
-            abstract pollIntervalMs: float option with get, set
-            /// <summary>
-            /// Maximum time to wait in milliseconds (default 30000).
-            /// </summary>
-            abstract timeoutMs: float option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?metadata: JS.Record<string, obj>, ?pollIntervalMs: float, ?timeoutMs: float) : Options = jsNative
+        static member Create (provider: string, binding: FSharp.CloudEdge.Runtime.Workers.AiSearchInstance) : Config = jsNative

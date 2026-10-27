@@ -169,7 +169,9 @@ class FixtureValidationTests(unittest.TestCase):
 
 class GenerationEvidenceTests(unittest.TestCase):
     def setUp(self):
-        self.directory = tempfile.TemporaryDirectory(prefix="cloudedge-schema-evidence-")
+        scratch = Path(__file__).resolve().parents[2] / "tests/.scratch/management-tooling"
+        scratch.mkdir(parents=True, exist_ok=True)
+        self.directory = tempfile.TemporaryDirectory(prefix="cloudedge-schema-evidence-", dir=scratch)
         self.addCleanup(self.directory.cleanup)
         self.root = Path(self.directory.name)
         self.hawaii = self.root / "generators/hawaii"

@@ -68,7 +68,7 @@ type PluginData =
 [<Erase>]
 type Exports =
     [<Import("default", "@cloudflare/pages-plugin-cloudflare-access")>]
-    static member pagesPluginCloudflareAccess (args: PluginArgs) : obj = jsNative
+    static member pagesPluginCloudflareAccess (args: PluginArgs) : (FSharp.CloudEdge.Runtime.WorkersTypes.PagesPluginCloudflareAccess.Result.Context -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>) = jsNative
 
 /// <summary>@cloudflare/pages-plugin-cloudflare-access/api</summary>
 module Api =
@@ -81,11 +81,11 @@ module Api =
 
     [<Interface>]
     type GenerateLoginURL0 =
-        abstract redirectURL: U2<string, Fable.Core.TS.Dom.URL> with get, set
+        abstract redirectURL: U2<string, FSharp.CloudEdge.Runtime.Workers.URL> with get, set
         abstract domain: string with get, set
         abstract aud: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (redirectURL: U2<string, Fable.Core.TS.Dom.URL>, domain: string, aud: string) : GenerateLoginURL0 = jsNative
+        static member Create (redirectURL: U2<string, FSharp.CloudEdge.Runtime.Workers.URL>, domain: string, aud: string) : GenerateLoginURL0 = jsNative
 
     [<Interface>]
     type GenerateLogoutURL0 =

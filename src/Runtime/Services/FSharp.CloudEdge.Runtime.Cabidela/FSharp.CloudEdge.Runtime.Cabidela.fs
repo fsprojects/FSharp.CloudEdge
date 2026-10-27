@@ -34,11 +34,7 @@ type SchemaNavigation =
     [<ParamObject; Emit("$0")>]
     static member Create (path: string[], schema: obj, payload: obj, evaluatedProperties: Fable.Core.TS.Es.Set<string>, errors: Fable.Core.TS.Es.Set<string>, defaultsCallbacks: obj[], ?carryProperties: bool, ?deferredApplyDefaults: bool, ?absorvErrors: bool) : SchemaNavigation = jsNative
 
-[<Interface>]
 type Cabidela =
-    abstract schema: obj with get, set
-    abstract options: obj with get, set
-    abstract definitions: obj with get, set
     abstract setSchema: schema: obj -> unit
     abstract addSchema: subSchema: obj * ?combine: bool -> unit
     abstract getSchema: unit -> obj
@@ -49,8 +45,6 @@ type Cabidela =
     abstract parseList: list: obj * needle: SchemaNavigation * ?breakCondition: Fable.Core.TS.Es.Function -> float
     abstract parseSubSchema: needle: SchemaNavigation -> float
     abstract validate: payload: obj -> bool
-    [<ParamObject; Emit("$0")>]
-    static member Create (schema: obj, options: obj, definitions: obj, setSchema: (obj -> unit), addSchema: Action<obj, bool option>, getSchema: (unit -> obj), setOptions: (CabidelaOptions -> unit), throw: Action<string, SchemaNavigation>, parseAdditionalProperties: Func<SchemaNavigation, obj, Fable.Core.TS.Es.Set<string>, float>, parseObject: (SchemaNavigation -> bool), parseList: Func<obj, SchemaNavigation, Fable.Core.TS.Es.Function option, float>, parseSubSchema: (SchemaNavigation -> float), validate: (obj -> bool)) : Cabidela = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]

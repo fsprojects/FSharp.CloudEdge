@@ -3,6 +3,6 @@
   <ItemGroup>
     <Compile Include="Client.fs" />
     <ProjectReference Include="../../src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj" />
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Fable.Core" Version="5.6.0" />
   </ItemGroup>
 </Project>

@@ -12,11 +12,13 @@ from unittest import mock
 spec = importlib.util.spec_from_file_location("hawaii_tool_consumer", Path(__file__).resolve().parents[1] / "generate.py")
 pipeline = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pipeline)
+SCRATCH = Path(__file__).resolve().parents[3] / "tests/.scratch/hawaii-tooling"
 
 
 class PackagedToolInvocation(unittest.TestCase):
     def setUp(self):
-        self.temporary = tempfile.TemporaryDirectory(prefix="cloudedge-hawaii-package-")
+        SCRATCH.mkdir(parents=True, exist_ok=True)
+        self.temporary = tempfile.TemporaryDirectory(prefix="cloudedge hawaii package-", dir=SCRATCH)
         self.addCleanup(self.temporary.cleanup)
         self.root = Path(self.temporary.name)
         self.here = self.root / "generators/hawaii"
@@ -69,10 +71,23 @@ if args[:4]==['tool','run','hawaii-unofficial','--']:
     if (root/'mutate-pipeline').exists():
         source=root/'scripts/tool-packages.mjs'
         source.write_text(source.read_text()+'\\n')
-elif not (args and args[0]=='build' and '/Generated/' in args[1]):
+elif not (args and args[0]=='build' and 'Generated' in pathlib.Path(args[1]).parts):
     sys.exit('Unexpected source build or direct assembly invocation')
 ''')
         dotnet.chmod(0o755)
+        execute = pipeline.subprocess.run
+
+        def fixture_command(args, *positional, **options):
+            if Path(str(args[0])).name.lower() in {"dotnet", "dotnet.exe"}:
+                self.assertEqual(args[0], "dotnet", "Only the fixture's expected tool selection can be redirected")
+                self.assertEqual(Path(options["cwd"]).resolve(), self.root.resolve())
+                self.assertTrue(dotnet.is_file())
+                # Windows cannot execute a shebang file. Run this exact fake with
+                # Python on every platform, retaining real argv, logs and exit status.
+                return execute([sys.executable, str(dotnet), *args[1:]], *positional, **options)
+            return execute(args, *positional, **options)
+
+        mock.patch.object(pipeline.subprocess, "run", fixture_command).start()
         self.run_directory = self.root / "artifacts/run"
 
     def write(self, file, value):

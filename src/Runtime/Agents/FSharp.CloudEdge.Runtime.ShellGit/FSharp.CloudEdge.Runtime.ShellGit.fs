@@ -10,6 +10,12 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type StateEntryType =
+    | [<CompiledName("directory")>] Directory
+    | [<CompiledName("file")>] File
+    | [<CompiledName("symlink")>] Symlink
+
 [<Interface>]
 type StateAppliedEditResult =
     abstract path: string with get, set
@@ -95,9 +101,9 @@ type StateEdit =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("kind", CaseRules.None)>]
 type StateEditInstruction =
-    | [<CompiledName("replace")>] Replace of path: string * search: string * replacement: string * options: StateSearchOptions option
-    | [<CompiledName("write")>] Write of path: string * content: string
-    | [<CompiledName("writeJson")>] WriteJson of path: string * value: obj * options: StateJsonWriteOptions option
+    | [<CompiledName("replace"); Fickl.Core.InlineInterface>] Replace of StateReplaceEditInstruction
+    | [<CompiledName("write"); Fickl.Core.InlineInterface>] Write of StateWriteEditInstruction
+    | [<CompiledName("writeJson"); Fickl.Core.InlineInterface>] WriteJson of StateWriteJsonEditInstruction
 
 [<Interface>]
 type StateEditPlan =
@@ -106,12 +112,6 @@ type StateEditPlan =
     abstract totalInstructions: float with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (edits: StatePlannedEdit[], totalChanged: float, totalInstructions: float) : StateEditPlan = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type StateEntryType =
-    | [<CompiledName("directory")>] Directory
-    | [<CompiledName("file")>] File
-    | [<CompiledName("symlink")>] Symlink
 
 [<Interface>]
 type StateFileDetection =
@@ -174,33 +174,6 @@ type StateHashOptions =
 type StateJsonUpdateOperation =
     | [<CompiledName("set")>] Set of path: string * value: obj
     | [<CompiledName("delete")>] Delete of path: string
-
-[<Interface>]
-type StateJsonUpdateOperation2 =
-    /// <remarks>TypeScript type: <c>"set"</c></remarks>
-    abstract op: string with get, set
-    abstract path: string with get, set
-    abstract value: obj with get, set
-    [<ParamObject; Emit("({ op: 'set', ...$0 })")>]
-    static member Create (path: string, value: obj) : StateJsonUpdateOperation2 = jsNative
-
-module StateJsonUpdateOperation2 =
-    /// <remarks>TypeScript type: <c>"set"</c></remarks>
-    [<Literal>]
-    let op = "set"
-
-[<Interface>]
-type StateJsonUpdateOperation3 =
-    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
-    abstract op: string with get, set
-    abstract path: string with get, set
-    [<ParamObject; Emit("({ op: 'delete', ...$0 })")>]
-    static member Create (path: string) : StateJsonUpdateOperation3 = jsNative
-
-module StateJsonUpdateOperation3 =
-    /// <remarks>TypeScript type: <c>"delete"</c></remarks>
-    [<Literal>]
-    let op = "delete"
 
 [<Interface>]
 type StateJsonUpdateResult =
@@ -379,34 +352,16 @@ type EntryType =
     | [<CompiledName("symlink")>] Symlink
 
 type Workspace =
-    abstract sql: obj
-    abstract _nameOrFn: obj
-    abstract ``namespace``: obj
-    abstract tableName: obj
-    abstract indexName: obj
-    abstract r2: obj
-    abstract r2Prefix: obj
-    abstract threshold: obj
-    abstract onChange: obj
-    abstract initialized: obj with get, set
-    abstract _name: obj
-    abstract emit: obj with get, set
-    abstract _observe: obj with get, set
-    abstract ensureInit: obj with get, set
-    abstract getR2: obj with get, set
-    abstract resolveR2Prefix: obj with get, set
-    abstract r2Key: obj with get, set
-    abstract resolveSymlink: obj with get, set
     abstract symlink: target: string * linkPath: string -> JS.Promise<unit>
     abstract readlink: path: string -> JS.Promise<string>
     abstract lstat: path: string -> JS.Promise<Workspace.Lstat.Result.Item option>
     abstract stat: path: string -> JS.Promise<Workspace.Lstat.Result.Item option>
     abstract readFile: path: string -> JS.Promise<string option>
-    abstract readFileBytes: path: string -> JS.Promise<obj option>
-    abstract writeFileBytes: path: string * data: obj * ?mimeType: string -> JS.Promise<unit>
+    abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> option>
+    abstract writeFileBytes: path: string * data: U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?mimeType: string -> JS.Promise<unit>
     abstract writeFile: path: string * content: string * ?mimeType: string -> JS.Promise<unit>
-    abstract readFileStream: path: string -> JS.Promise<obj option>
-    abstract writeFileStream: path: string * stream: obj * ?mimeType: string -> JS.Promise<unit>
+    abstract readFileStream: path: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> option>
+    abstract writeFileStream: path: string * stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?mimeType: string -> JS.Promise<unit>
     abstract appendFile: path: string * content: string * ?mimeType: string -> JS.Promise<unit>
     abstract deleteFile: path: string -> JS.Promise<bool>
     abstract fileExists: path: string -> JS.Promise<bool>
@@ -424,8 +379,6 @@ type Workspace =
     abstract _getAllPaths: unit -> JS.Promise<string[]>
     /// <remarks>@internal</remarks>
     abstract _updateModifiedAt: path: string * mtime: Fable.Core.TS.Es.Date -> JS.Promise<unit>
-    abstract ensureParentDir: obj with get, set
-    abstract deleteDescendants: obj with get, set
 
 [<Interface>]
 type CpOptions =
@@ -436,10 +389,10 @@ type CpOptions =
 [<Interface>]
 type FileSystem =
     abstract readFile: path: string -> JS.Promise<string>
-    abstract readFileBytes: path: string -> JS.Promise<obj>
+    abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
     abstract writeFile: path: string * content: string -> JS.Promise<unit>
-    abstract writeFileBytes: path: string * content: obj -> JS.Promise<unit>
-    abstract appendFile: path: string * content: obj -> JS.Promise<unit>
+    abstract writeFileBytes: path: string * content: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> JS.Promise<unit>
+    abstract appendFile: path: string * content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
     abstract exists: path: string -> JS.Promise<bool>
     /// <summary>
     /// Follows symlinks. Throws ENOENT if path does not exist.
@@ -461,7 +414,7 @@ type FileSystem =
     abstract resolvePath: ``base``: string * path: string -> string
     abstract glob: pattern: string -> JS.Promise<string[]>
     [<ParamObject; Emit("$0")>]
-    static member Create (readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<obj>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, obj, JS.Promise<unit>>, appendFile: Func<string, obj, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, MkdirOptions option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, RmOptions option, JS.Promise<unit>>, cp: Func<string, string, CpOptions option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: (string -> JS.Promise<string>), resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : FileSystem = jsNative
+    static member Create (readFile: (string -> JS.Promise<string>), readFileBytes: (string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), writeFile: Func<string, string, JS.Promise<unit>>, writeFileBytes: Func<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, JS.Promise<unit>>, appendFile: Func<string, U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, JS.Promise<unit>>, exists: (string -> JS.Promise<bool>), stat: (string -> JS.Promise<FsStat>), lstat: (string -> JS.Promise<FsStat>), mkdir: Func<string, MkdirOptions option, JS.Promise<unit>>, readdir: (string -> JS.Promise<string[]>), readdirWithFileTypes: (string -> JS.Promise<FileSystemDirent[]>), rm: Func<string, RmOptions option, JS.Promise<unit>>, cp: Func<string, string, CpOptions option, JS.Promise<unit>>, mv: Func<string, string, JS.Promise<unit>>, symlink: Func<string, string, JS.Promise<unit>>, readlink: (string -> JS.Promise<string>), realpath: (string -> JS.Promise<string>), resolvePath: Func<string, string, string>, glob: (string -> JS.Promise<string[]>)) : FileSystem = jsNative
 
 [<Interface>]
 type FileSystemDirent =
@@ -469,12 +422,6 @@ type FileSystemDirent =
     abstract ``type``: FileSystemEntryType with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (name: string, ``type``: FileSystemEntryType) : FileSystemDirent = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type FileSystemEntryType =
-    | [<CompiledName("directory")>] Directory
-    | [<CompiledName("file")>] File
-    | [<CompiledName("symlink")>] Symlink
 
 [<Interface>]
 type FsStat =
@@ -499,37 +446,10 @@ type RmOptions =
     static member Create (?recursive: bool, ?force: bool) : RmOptions = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ExecutionEndStatus =
-    | [<CompiledName("completed")>] Completed
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("rejected")>] Rejected
-    | [<CompiledName("rolled_back")>] RolledBack
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type PassEndStatus =
-    | [<CompiledName("completed")>] Completed
-    | [<CompiledName("error")>] Error
-    | [<CompiledName("paused")>] Paused
-    | [<CompiledName("rejected")>] Rejected
-    | [<CompiledName("rolled_back")>] RolledBack
+type FileSystemEntryType =
+    | [<CompiledName("directory")>] Directory
+    | [<CompiledName("file")>] File
+    | [<CompiledName("symlink")>] Symlink
 
 /// <summary>@cloudflare/shell/git</summary>
 module Git =
@@ -616,7 +536,7 @@ module Git =
         abstract commit: opts: Git.Git.Commit.Opts -> JS.Promise<Git.Git.Commit.Result.Item>
         abstract log: ?opts: Git.Git.Log.Opts -> JS.Promise<FSharp.CloudEdge.Runtime.ShellGit.Git.GitLogEntry[]>
         abstract branch: ?opts: Git.Git.Branch.Opts -> JS.Promise<U3<Git.Git.Branch.Result.Item, Git.Git.Branch.Result.Item2, Git.Git.Branch.Result.Item3>>
-        abstract checkout: opts: Git.Git.Checkout.Opts -> JS.Promise<U2<Git.Git.Checkout.Result.Item, Git.Git.Checkout.Result.Item2>>
+        abstract checkout: opts: Git.Git.Checkout.Opts -> JS.Promise<Git.Git.Checkout.Result.Item>
         abstract fetch: ?opts: Git.Git.Fetch.Opts -> JS.Promise<Git.Git.Fetch.Result.Item>
         abstract pull: ?opts: Git.Git.Pull.Opts -> JS.Promise<Git.Git.Pull.Result.Item>
         abstract push: ?opts: Git.Git.Push.Opts -> JS.Promise<Git.Git.Push.Result.Item>
@@ -624,7 +544,7 @@ module Git =
         abstract init: ?opts: Git.Git.Init.Opts -> JS.Promise<Git.Git.Init.Result.Item>
         abstract remote: opts: Git.Git.Remote.Opts -> JS.Promise<U3<Git.Git.Remote.Result.Item.Item[], Git.Git.Remote.Result.Item, Git.Git.Remote.Result.Item2>>
         [<ParamObject; Emit("$0")>]
-        static member Create (clone: (Git.Git.Clone.Opts -> JS.Promise<Git.Git.Clone.Result.Item>), status: (Git.Git.Status.Opts option -> JS.Promise<FSharp.CloudEdge.Runtime.ShellGit.Git.GitStatusEntry[]>), add: (Git.Git.Add.Opts -> JS.Promise<Git.Git.Add.Result.Item>), rm: (Git.Git.Rm.Opts -> JS.Promise<Git.Git.Rm.Result.Item>), commit: (Git.Git.Commit.Opts -> JS.Promise<Git.Git.Commit.Result.Item>), log: (Git.Git.Log.Opts option -> JS.Promise<FSharp.CloudEdge.Runtime.ShellGit.Git.GitLogEntry[]>), branch: (Git.Git.Branch.Opts option -> JS.Promise<U3<Git.Git.Branch.Result.Item, Git.Git.Branch.Result.Item2, Git.Git.Branch.Result.Item3>>), checkout: (Git.Git.Checkout.Opts -> JS.Promise<U2<Git.Git.Checkout.Result.Item, Git.Git.Checkout.Result.Item2>>), fetch: (Git.Git.Fetch.Opts option -> JS.Promise<Git.Git.Fetch.Result.Item>), pull: (Git.Git.Pull.Opts option -> JS.Promise<Git.Git.Pull.Result.Item>), push: (Git.Git.Push.Opts option -> JS.Promise<Git.Git.Push.Result.Item>), diff: (Git.Git.Diff.Opts option -> JS.Promise<Git.Git.Diff.Result.Item.Item[]>), init: (Git.Git.Init.Opts option -> JS.Promise<Git.Git.Init.Result.Item>), remote: (Git.Git.Remote.Opts -> JS.Promise<U3<Git.Git.Remote.Result.Item.Item[], Git.Git.Remote.Result.Item, Git.Git.Remote.Result.Item2>>)) : Git = jsNative
+        static member Create (clone: (Git.Git.Clone.Opts -> JS.Promise<Git.Git.Clone.Result.Item>), status: (Git.Git.Status.Opts option -> JS.Promise<FSharp.CloudEdge.Runtime.ShellGit.Git.GitStatusEntry[]>), add: (Git.Git.Add.Opts -> JS.Promise<Git.Git.Add.Result.Item>), rm: (Git.Git.Rm.Opts -> JS.Promise<Git.Git.Rm.Result.Item>), commit: (Git.Git.Commit.Opts -> JS.Promise<Git.Git.Commit.Result.Item>), log: (Git.Git.Log.Opts option -> JS.Promise<FSharp.CloudEdge.Runtime.ShellGit.Git.GitLogEntry[]>), branch: (Git.Git.Branch.Opts option -> JS.Promise<U3<Git.Git.Branch.Result.Item, Git.Git.Branch.Result.Item2, Git.Git.Branch.Result.Item3>>), checkout: (Git.Git.Checkout.Opts -> JS.Promise<Git.Git.Checkout.Result.Item>), fetch: (Git.Git.Fetch.Opts option -> JS.Promise<Git.Git.Fetch.Result.Item>), pull: (Git.Git.Pull.Opts option -> JS.Promise<Git.Git.Pull.Result.Item>), push: (Git.Git.Push.Opts option -> JS.Promise<Git.Git.Push.Result.Item>), diff: (Git.Git.Diff.Opts option -> JS.Promise<Git.Git.Diff.Result.Item.Item[]>), init: (Git.Git.Init.Opts option -> JS.Promise<Git.Git.Init.Result.Item>), remote: (Git.Git.Remote.Opts -> JS.Promise<U3<Git.Git.Remote.Result.Item.Item[], Git.Git.Remote.Result.Item, Git.Git.Remote.Result.Item2>>)) : Git = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -633,12 +553,12 @@ module Git =
         /// Create a git ToolProvider from a Workspace.
         /// </summary>
         [<Import("gitTools", "@cloudflare/shell/git")>]
-        static member gitTools (workspace: Workspace, ?options: FSharp.CloudEdge.Runtime.ShellGit.Git.GitToolsOptions) : Workers.ToolProvider = jsNative
+        static member gitTools (workspace: Workspace, ?options: FSharp.CloudEdge.Runtime.ShellGit.Git.GitToolsOptions) : FSharp.CloudEdge.Runtime.CodeMode.ToolProvider = jsNative
         /// <summary>
         /// Create a git ToolProvider from a raw FileSystem.
         /// </summary>
         [<Import("gitToolsFromFs", "@cloudflare/shell/git")>]
-        static member gitToolsFromFs (filesystem: FileSystem, ?options: FSharp.CloudEdge.Runtime.ShellGit.Git.GitToolsOptions) : Workers.ToolProvider = jsNative
+        static member gitToolsFromFs (filesystem: FileSystem, ?options: FSharp.CloudEdge.Runtime.ShellGit.Git.GitToolsOptions) : FSharp.CloudEdge.Runtime.CodeMode.ToolProvider = jsNative
         /// <summary>
         /// Create a git command set bound to a FileSystem.
         /// All paths are relative to <c>dir</c> (default: "/").
@@ -713,19 +633,13 @@ module Git =
             module Result =
                 [<Interface>]
                 type Item =
-                    abstract branch: string with get, set
-                    abstract created: bool with get, set
-                    abstract ref: unit option with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (branch: string, created: bool, ?ref: unit) : Item = jsNative
-
-                [<Interface>]
-                type Item2 =
+                    abstract branch: string option with get, set
+                    abstract created: bool option with get, set
                     abstract ref: string option with get, set
-                    abstract branch: unit option with get, set
-                    abstract created: unit option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (?ref: string, ?branch: unit, ?created: unit) : Item2 = jsNative
+                    static member Create (branch: string, created: bool) : Item = jsNative
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (ref: string option) : Item = jsNative
 
         module Clone =
             [<Interface>]
@@ -801,7 +715,7 @@ module Git =
                 type Item =
                     abstract fetchHead: string option with get, set
                     abstract fetchHeadDescription: string option with get, set
-                    [<ParamObject; Emit("$0")>]
+                    [<ParamObject; Emit("(o => ({...o, \"fetchHead\": o[\"fetchHead\"] ?? null, \"fetchHeadDescription\": o[\"fetchHeadDescription\"] ?? null}))($0)")>]
                     static member Create (?fetchHead: string, ?fetchHeadDescription: string) : Item = jsNative
 
         module Init =
@@ -961,10 +875,10 @@ module Workers =
     type StateBackend =
         abstract getCapabilities: unit -> JS.Promise<StateCapabilities>
         abstract readFile: path: string -> JS.Promise<string>
-        abstract readFileBytes: path: string -> JS.Promise<obj>
+        abstract readFileBytes: path: string -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
         abstract writeFile: path: string * content: string -> JS.Promise<unit>
-        abstract writeFileBytes: path: string * content: obj -> JS.Promise<unit>
-        abstract appendFile: path: string * content: obj -> JS.Promise<unit>
+        abstract writeFileBytes: path: string * content: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> -> JS.Promise<unit>
+        abstract appendFile: path: string * content: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> JS.Promise<unit>
         abstract readJson: path: string -> JS.Promise<obj>
         abstract writeJson: path: string * value: obj * ?options: StateJsonWriteOptions -> JS.Promise<unit>
         abstract queryJson: path: string * query: string -> JS.Promise<obj>
@@ -1007,91 +921,13 @@ module Workers =
         abstract applyEdits: edits: StateEdit[] * ?options: StateApplyEditsOptions -> JS.Promise<StateApplyEditsResult>
 
     type StateConnector =
-        abstract ``__#1@#private``: obj with get, set
-        abstract name: unit -> string
+        inherit FSharp.CloudEdge.Runtime.CodeMode.CodemodeConnector<obj, obj>
         abstract instructions: unit -> string
         /// <summary>
         /// The single authoring surface: one record, one entry per tool.
         /// Derived connectors (MCP, OpenAPI) generate this for you.
         /// </summary>
-        abstract tools: unit -> JS.Record<string, obj>
-        abstract getTypeScriptTypes: unit -> JS.Promise<string>
-        abstract ``__#6@#private``: obj with get, set
-        /// <summary>
-        /// Decoration hook, called once per tool. Override to adjust tools you
-        /// didn't author inline — e.g. mark a derived MCP tool as requiring
-        /// approval, or attach a revert:
-        /// <code lang="ts">
-        /// protected tool(name: string, t: ConnectorTool): ConnectorTool {
-        ///   if (name === "create_issue") {
-        ///     return { ...t, requiresApproval: true };
-        ///   }
-        ///   return t;
-        /// }
-        /// </code>
-        /// </summary>
-        abstract tool: _name: string * t: obj -> obj
-        abstract resolvedTools: unit -> JS.Promise<JS.Record<string, obj>>
-        abstract describe: unit -> JS.Promise<obj>
-        abstract executeTool: ``method``: string * args: obj * ?ctx: obj -> JS.Promise<obj>
-        /// <summary>
-        /// Revert an applied action. Returns whether a revert actually ran — reads and
-        /// tools without a <c>revert</c> are a no-op and return <c>false</c>, so the runtime can
-        /// mark only the entries it truly reverted.
-        /// </summary>
-        abstract revertAction: ``method``: string * args: obj * result: obj * ?ctx: obj -> JS.Promise<bool>
-        /// <summary>
-        /// Called at the end of every execution <i>pass</i> — including a pass that ends
-        /// in a pause awaiting approval, where <c>disposeExecution</c> deliberately does
-        /// NOT fire. Override to release per-pass resources: an open socket, a lease,
-        /// an in-memory cache entry. Per-execution resources (e.g. a browser session
-        /// that must survive the pause for the resume) belong in <c>disposeExecution</c>.
-        /// <br /><br />
-        /// On a terminal pass, <c>onPassEnd</c> fires first, then <c>disposeExecution</c>.
-        /// <br /><br />
-        /// Contract for implementers: be idempotent, don't rely on instance memory
-        /// (a resume may run on a fresh instance), and don't throw — the runtime
-        /// ignores rejections from this hook.
-        /// </summary>
-        abstract onPassEnd: _executionId: string * _status: PassEndStatus -> JS.Promise<unit>
-        /// <summary>
-        /// Called once when a codemode execution reaches a terminal state — completed,
-        /// errored, rejected, or rolled back — and will not resume. Override to tear
-        /// down any per-execution resource this connector opened for that run, keyed
-        /// by <c>executionId</c> (e.g. close a browser/CDP session).
-        /// <br /><br />
-        /// It is deliberately <i>not</i> called when a run pauses for approval: a paused
-        /// run may resume later, possibly in a fresh Worker invocation, so a resource
-        /// scoped to the whole run must outlive a pause. This hook is the single point
-        /// where teardown is safe.
-        /// <br /><br />
-        /// Contract for implementers:
-        /// - Be idempotent. It may fire more than once for the same execution (a
-        ///   completed run that is later rolled back) and a no-op is expected the
-        ///   second time.
-        /// - Don't rely on instance memory. It may run on a different connector
-        ///   instance than the one that opened the resource (the host can reconstruct
-        ///   connectors per request, and the opening pass may have hibernated), so
-        ///   read what you need from durable storage keyed by <c>executionId</c>.
-        /// - Don't throw. Teardown failures must not turn a finished run into a
-        ///   failure; the runtime ignores rejections from this hook.
-        /// <br /><br />
-        /// The default is a no-op, so connectors that own no per-execution state
-        /// don't implement it.
-        /// </summary>
-        abstract disposeExecution: _executionId: string * _status: ExecutionEndStatus -> JS.Promise<unit>
-        abstract __WORKER_ENTRYPOINT_BRAND: unit
-        abstract ctx: obj with get, set
-        abstract env: obj with get, set
-        abstract email: (obj -> JS.Promise<unit> option) option with get, set
-        abstract fetch: (obj -> obj) option with get, set
-        abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-        abstract queue: (obj -> JS.Promise<unit> option) option with get, set
-        abstract scheduled: (obj -> JS.Promise<unit> option) option with get, set
-        abstract tail: (obj[] -> JS.Promise<unit> option) option with get, set
-        abstract tailStream: (obj -> obj) option with get, set
-        abstract test: (obj -> JS.Promise<unit> option) option with get, set
-        abstract trace: (obj[] -> JS.Promise<unit> option) option with get, set
+        abstract tools: unit -> JS.Record<string, FSharp.CloudEdge.Runtime.CodeMode.ConnectorTool>
 
     [<Interface>]
     type StateMethodSpec =
@@ -1103,10 +939,10 @@ module Workers =
         /// <summary>
         /// Reads are replayed by re-execution; writes are logged durably.
         /// </summary>
-        abstract kind: Workers.StateMethodSpec.Kind with get, set
+        abstract kind: FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateTokenResult.Scope with get, set
         abstract description: string with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (``params``: string[], kind: Workers.StateMethodSpec.Kind, description: string) : StateMethodSpec = jsNative
+        static member Create (``params``: string[], kind: FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateTokenResult.Scope, description: string) : StateMethodSpec = jsNative
 
     type STATEMETHODS =
         abstract appendFile: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateMethodSpec with get, set
@@ -1156,36 +992,11 @@ module Workers =
         abstract writeFileBytes: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateMethodSpec with get, set
         abstract writeJson: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateMethodSpec with get, set
 
-    /// <summary>
-    /// A ToolProvider contributes tools to the codemode sandbox under a namespace.
-    /// <br /><br />
-    /// Each provider's tools are accessible as <c>name.toolName()</c> in sandbox code.
-    /// If <c>name</c> is omitted, tools are exposed under the default <c>codemode.*</c> namespace.
-    /// </summary>
-    /// <example>
-    /// <code>
-    /// Multiple providers with different namespaces
-    /// ```ts
-    /// createCodeTool({
-    /// tools: [
-    /// { name: "github", tools: githubTools },
-    /// { name: "shell", tools: shellTools },
-    /// { tools: aiTools }, // default "codemode" namespace
-    /// ],
-    /// executor,
-    /// });
-    /// // sandbox: github.listIssues(), shell.exec(), codemode.search()
-    /// </code>
-    /// <code>
-    /// </code>
-    /// </example>
-    type ToolProvider = obj
-
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
         [<Import("StateConnector", "@cloudflare/shell/workers"); EmitConstructor>]
-        static member StateConnector (ctx: obj, backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.ShellGit.Workers.StateConnector = jsNative
+        static member StateConnector (ctx: U2<FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj>, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj>>, backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.ShellGit.Workers.StateConnector = jsNative
         /// <summary>
         /// Create a <c>StateConnector</c> for <c>createCodemodeRuntime</c>.
         /// <code lang="ts">
@@ -1201,7 +1012,7 @@ module Workers =
         /// </code>
         /// </summary>
         [<Import("stateConnector", "@cloudflare/shell/workers")>]
-        static member stateConnector (ctx: obj, backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.ShellGit.Workers.StateConnector = jsNative
+        static member stateConnector (ctx: U2<FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj>, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj>>, backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.ShellGit.Workers.StateConnector = jsNative
         [<Import("STATE_METHODS", "@cloudflare/shell/workers")>]
         static member STATE_METHODS: FSharp.CloudEdge.Runtime.ShellGit.Workers.STATEMETHODS = jsNative
         /// <summary>
@@ -1233,13 +1044,13 @@ module Workers =
         /// </code>
         /// </summary>
         [<Import("stateTools", "@cloudflare/shell/workers")>]
-        static member stateTools (workspace: Workspace) : FSharp.CloudEdge.Runtime.ShellGit.Workers.ToolProvider = jsNative
+        static member stateTools (workspace: Workspace) : FSharp.CloudEdge.Runtime.CodeMode.ToolProvider = jsNative
         /// <summary>
         /// Creates a <c>ToolProvider</c> from a raw <c>StateBackend</c>.
         /// Use <c>stateTools(workspace)</c> for the common case.
         /// </summary>
         [<Import("stateToolsFromBackend", "@cloudflare/shell/workers")>]
-        static member stateToolsFromBackend (backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.ShellGit.Workers.ToolProvider = jsNative
+        static member stateToolsFromBackend (backend: FSharp.CloudEdge.Runtime.ShellGit.Workers.StateBackend) : FSharp.CloudEdge.Runtime.CodeMode.ToolProvider = jsNative
 
     module ObjectArgsToPositional =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -1290,467 +1101,6 @@ module Workers =
             | [<CompiledName("writeFile")>] WriteFile
             | [<CompiledName("writeFileBytes")>] WriteFileBytes
             | [<CompiledName("writeJson")>] WriteJson
-
-    module StateConnector =
-        module Fetch =
-            module Request =
-                type Item<'HostMetadata> =
-                    /// <summary>
-                    /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-                    /// </summary>
-                    /// <example><c>395747</c></example>
-                    abstract asn: float option with get, set
-                    /// <summary>
-                    /// The organization which owns the ASN of the incoming request.
-                    /// </summary>
-                    /// <example><c>"Google Cloud"</c></example>
-                    abstract asOrganization: string option with get, set
-                    /// <summary>
-                    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-                    /// </summary>
-                    /// <example><c>"gzip, deflate, br"</c></example>
-                    abstract clientAcceptEncoding: string option with get, set
-                    /// <summary>
-                    /// The number of milliseconds it took for the request to reach your worker.
-                    /// </summary>
-                    /// <example><c>22</c></example>
-                    abstract clientTcpRtt: float option with get, set
-                    /// <summary>
-                    /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-                    /// airport code of the data center that the request hit.
-                    /// </summary>
-                    /// <example><c>"DFW"</c></example>
-                    abstract colo: string with get, set
-                    /// <summary>
-                    /// Represents the upstream's response to a
-                    /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-                    /// from cloudflare.
-                    /// <br /><br />
-                    /// For workers with no upstream, this will always be <c>1</c>.
-                    /// </summary>
-                    /// <example><c>3</c></example>
-                    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-                    /// <summary>
-                    /// The HTTP Protocol the request used.
-                    /// </summary>
-                    /// <example><c>"HTTP/2"</c></example>
-                    abstract httpProtocol: string with get, set
-                    /// <summary>
-                    /// The browser-requested prioritization information in the request object.
-                    /// <br /><br />
-                    /// If no information was set, defaults to the empty string <c>""</c>
-                    /// </summary>
-                    /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-                    /// <defaultValue>""</defaultValue>
-                    abstract requestPriority: string with get, set
-                    /// <summary>
-                    /// The TLS version of the connection to Cloudflare.
-                    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                    /// </summary>
-                    /// <example><c>"TLSv1.3"</c></example>
-                    abstract tlsVersion: string with get, set
-                    /// <summary>
-                    /// The cipher for the connection to Cloudflare.
-                    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                    /// </summary>
-                    /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-                    abstract tlsCipher: string with get, set
-                    /// <summary>
-                    /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-                    /// <br /><br />
-                    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-                    /// </summary>
-                    abstract tlsExportedAuthenticator: obj option with get, set
-                    /// <summary>
-                    /// Results of Cloudflare's Bot Management analysis
-                    /// </summary>
-                    abstract botManagement: Workers.StateConnector.Fetch.Request.Item.BotManagement with get, set
-                    /// <summary>
-                    /// Duplicate of <c>botManagement.score</c>.
-                    /// </summary>
-                    /// <remarks>@deprecated</remarks>
-                    abstract clientTrustScore: float with get, set
-                    /// <summary>
-                    /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-                    /// <br /><br />
-                    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-                    /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-                    /// </summary>
-                    abstract hostMetadata: 'HostMetadata option with get, set
-                    /// <summary>
-                    /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-                    /// <br /><br />
-                    /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-                    /// <br /><br />
-                    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-                    /// <br /><br />
-                    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-                    /// </summary>
-                    /// <example><c>"GB"</c></example>
-                    abstract country: Workers.StateConnector.Fetch.Request.Item.Country option with get, set
-                    /// <summary>
-                    /// If present, this property indicates that the request originated in the EU
-                    /// </summary>
-                    /// <example><c>"1"</c></example>
-                    abstract isEUCountry: string option with get, set
-                    /// <summary>
-                    /// A two-letter code indicating the continent the request originated from.
-                    /// </summary>
-                    /// <example><c>"AN"</c></example>
-                    abstract continent: ContinentCode option with get, set
-                    /// <summary>
-                    /// The city the request originated from
-                    /// </summary>
-                    /// <example><c>"Austin"</c></example>
-                    abstract city: string option with get, set
-                    /// <summary>
-                    /// Postal code of the incoming request
-                    /// </summary>
-                    /// <example><c>"78701"</c></example>
-                    abstract postalCode: string option with get, set
-                    /// <summary>
-                    /// Latitude of the incoming request
-                    /// </summary>
-                    /// <example><c>"30.27130"</c></example>
-                    abstract latitude: string option with get, set
-                    /// <summary>
-                    /// Longitude of the incoming request
-                    /// </summary>
-                    /// <example><c>"-97.74260"</c></example>
-                    abstract longitude: string option with get, set
-                    /// <summary>
-                    /// Timezone of the incoming request
-                    /// </summary>
-                    /// <example><c>"America/Chicago"</c></example>
-                    abstract timezone: string option with get, set
-                    /// <summary>
-                    /// If known, the ISO 3166-2 name for the first level region associated with
-                    /// the IP address of the incoming request
-                    /// </summary>
-                    /// <example><c>"Texas"</c></example>
-                    abstract region: string option with get, set
-                    /// <summary>
-                    /// If known, the ISO 3166-2 code for the first-level region associated with
-                    /// the IP address of the incoming request
-                    /// </summary>
-                    /// <example><c>"TX"</c></example>
-                    abstract regionCode: string option with get, set
-                    /// <summary>
-                    /// Metro code (DMA) of the incoming request
-                    /// </summary>
-                    /// <example><c>"635"</c></example>
-                    abstract metroCode: string option with get, set
-                    /// <summary>
-                    /// Information about the client certificate presented to Cloudflare.
-                    /// <br /><br />
-                    /// This is populated when the incoming request is served over TLS using
-                    /// either Cloudflare Access or API Shield (mTLS)
-                    /// and the presented SSL certificate has a valid
-                    /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-                    /// (i.e., not <c>null</c> or <c>""</c>).
-                    /// <br /><br />
-                    /// Otherwise, a set of placeholder values are used.
-                    /// <br /><br />
-                    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-                    /// the object is populated (i.e. the above conditions were met).
-                    /// </summary>
-                    abstract tlsClientAuth: obj with get, set
-                    [<EmitIndexer>]
-                    abstract Item: string -> obj with get, set
-
-                module Item =
-                    [<Interface>]
-                    type BotManagement =
-                        /// <summary>
-                        /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                        /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                        /// </summary>
-                        /// <example><c>54</c></example>
-                        abstract score: float with get, set
-                        /// <summary>
-                        /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                        /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                        /// </summary>
-                        abstract verifiedBot: bool with get, set
-                        /// <summary>
-                        /// A boolean value that is true if the request originates from a
-                        /// Cloudflare-verified proxy service.
-                        /// </summary>
-                        abstract corporateProxy: bool with get, set
-                        /// <summary>
-                        /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                        /// </summary>
-                        abstract staticResource: bool with get, set
-                        /// <summary>
-                        /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                        /// </summary>
-                        abstract detectionIds: float[] with get, set
-                        /// <summary>
-                        /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                        /// across different destination IPs, Ports, and X509 certificates.
-                        /// </summary>
-                        abstract ja3Hash: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Country =
-                        | AD
-                        | AE
-                        | AF
-                        | AG
-                        | AI
-                        | AL
-                        | AM
-                        | AO
-                        | AQ
-                        | AR
-                        | AS
-                        | AT
-                        | AU
-                        | AW
-                        | AX
-                        | AZ
-                        | BA
-                        | BB
-                        | BD
-                        | BE
-                        | BF
-                        | BG
-                        | BH
-                        | BI
-                        | BJ
-                        | BL
-                        | BM
-                        | BN
-                        | BO
-                        | BQ
-                        | BR
-                        | BS
-                        | BT
-                        | BV
-                        | BW
-                        | BY
-                        | BZ
-                        | CA
-                        | CC
-                        | CD
-                        | CF
-                        | CG
-                        | CH
-                        | CI
-                        | CK
-                        | CL
-                        | CM
-                        | CN
-                        | CO
-                        | CR
-                        | CU
-                        | CV
-                        | CW
-                        | CX
-                        | CY
-                        | CZ
-                        | DE
-                        | DJ
-                        | DK
-                        | DM
-                        | DO
-                        | DZ
-                        | EC
-                        | EE
-                        | EG
-                        | EH
-                        | ER
-                        | ES
-                        | ET
-                        | FI
-                        | FJ
-                        | FK
-                        | FM
-                        | FO
-                        | FR
-                        | GA
-                        | GB
-                        | GD
-                        | GE
-                        | GF
-                        | GG
-                        | GH
-                        | GI
-                        | GL
-                        | GM
-                        | GN
-                        | GP
-                        | GQ
-                        | GR
-                        | GS
-                        | GT
-                        | GU
-                        | GW
-                        | GY
-                        | HK
-                        | HM
-                        | HN
-                        | HR
-                        | HT
-                        | HU
-                        | ID
-                        | IE
-                        | IL
-                        | IM
-                        | IN
-                        | IO
-                        | IQ
-                        | IR
-                        | IS
-                        | IT
-                        | JE
-                        | JM
-                        | JO
-                        | JP
-                        | KE
-                        | KG
-                        | KH
-                        | KI
-                        | KM
-                        | KN
-                        | KP
-                        | KR
-                        | KW
-                        | KY
-                        | KZ
-                        | LA
-                        | LB
-                        | LC
-                        | LI
-                        | LK
-                        | LR
-                        | LS
-                        | LT
-                        | LU
-                        | LV
-                        | LY
-                        | MA
-                        | MC
-                        | MD
-                        | ME
-                        | MF
-                        | MG
-                        | MH
-                        | MK
-                        | ML
-                        | MM
-                        | MN
-                        | MO
-                        | MP
-                        | MQ
-                        | MR
-                        | MS
-                        | MT
-                        | MU
-                        | MV
-                        | MW
-                        | MX
-                        | MY
-                        | MZ
-                        | NA
-                        | NC
-                        | NE
-                        | NF
-                        | NG
-                        | NI
-                        | NL
-                        | NO
-                        | NP
-                        | NR
-                        | NU
-                        | NZ
-                        | OM
-                        | PA
-                        | PE
-                        | PF
-                        | PG
-                        | PH
-                        | PK
-                        | PL
-                        | PM
-                        | PN
-                        | PR
-                        | PS
-                        | PT
-                        | PW
-                        | PY
-                        | QA
-                        | RE
-                        | RO
-                        | RS
-                        | RU
-                        | RW
-                        | SA
-                        | SB
-                        | SC
-                        | SD
-                        | SE
-                        | SG
-                        | SH
-                        | SI
-                        | SJ
-                        | SK
-                        | SL
-                        | SM
-                        | SN
-                        | SO
-                        | SR
-                        | SS
-                        | ST
-                        | SV
-                        | SX
-                        | SY
-                        | SZ
-                        | T1
-                        | TC
-                        | TD
-                        | TF
-                        | TG
-                        | TH
-                        | TJ
-                        | TK
-                        | TL
-                        | TM
-                        | TN
-                        | TO
-                        | TR
-                        | TT
-                        | TV
-                        | TW
-                        | TZ
-                        | UA
-                        | UG
-                        | UM
-                        | US
-                        | UY
-                        | UZ
-                        | VA
-                        | VC
-                        | VE
-                        | VG
-                        | VI
-                        | VN
-                        | VU
-                        | WF
-                        | WS
-                        | YE
-                        | YT
-                        | ZA
-                        | ZM
-                        | ZW
-
-    module StateMethodSpec =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Kind =
-            | [<CompiledName("read")>] Read
-            | [<CompiledName("write")>] Write
 
 module Workspace =
     module Cp =

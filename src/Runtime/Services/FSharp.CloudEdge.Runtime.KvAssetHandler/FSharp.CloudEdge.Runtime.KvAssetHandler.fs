@@ -18,28 +18,10 @@ type CacheControl =
     [<ParamObject; Emit("$0")>]
     static member Create (browserTTL: float, edgeTTL: float, bypassCache: bool) : CacheControl = jsNative
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
-
 [<Interface>]
 type Options =
-    abstract cacheControl: U2<Options.CacheControl, (obj -> Options.CacheControl)> with get, set
-    abstract ASSET_NAMESPACE: obj with get, set
+    abstract cacheControl: U2<Options.CacheControl, (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> Options.CacheControl)> with get, set
+    abstract ASSET_NAMESPACE: FSharp.CloudEdge.Runtime.Workers.KVNamespace<string> with get, set
     abstract ASSET_MANIFEST: U2<string, JS.Record<string, string>> with get, set
     abstract mapRequestToAsset: Options.MapRequestToAsset option with get, set
     abstract defaultMimeType: string with get, set
@@ -47,7 +29,7 @@ type Options =
     abstract pathIsEncoded: bool with get, set
     abstract defaultETag: Options.MapRequestToAsset.Options.DefaultETag with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (cacheControl: U2<Options.CacheControl, (obj -> Options.CacheControl)>, ASSET_NAMESPACE: obj, ASSET_MANIFEST: U2<string, JS.Record<string, string>>, defaultMimeType: string, defaultDocument: string, pathIsEncoded: bool, defaultETag: Options.MapRequestToAsset.Options.DefaultETag, ?mapRequestToAsset: Options.MapRequestToAsset) : Options = jsNative
+    static member Create (cacheControl: U2<Options.CacheControl, (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> Options.CacheControl)>, ASSET_NAMESPACE: FSharp.CloudEdge.Runtime.Workers.KVNamespace<string>, ASSET_MANIFEST: U2<string, JS.Record<string, string>>, defaultMimeType: string, defaultDocument: string, pathIsEncoded: bool, defaultETag: Options.MapRequestToAsset.Options.DefaultETag, ?mapRequestToAsset: Options.MapRequestToAsset) : Options = jsNative
 
 [<Interface>]
 type KVError =
@@ -60,6 +42,7 @@ type KVError =
     static member Create (status: float, name: string, message: string, ?stack: string, ?cause: obj) : KVError = jsNative
 
 [<Interface>]
+[<Import("MethodNotAllowedError", "@cloudflare/kv-asset-handler")>]
 type MethodNotAllowedError =
     inherit KVError
     [<ParamObject; Emit("$0")>]
@@ -69,8 +52,71 @@ type MethodNotAllowedError =
     /// </summary>
     [<Import("MethodNotAllowedError.isError", "@cloudflare/kv-asset-handler")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("MethodNotAllowedError.captureStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("MethodNotAllowedError.prepareStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
+[<Import("NotFoundError", "@cloudflare/kv-asset-handler")>]
 type NotFoundError =
     inherit KVError
     [<ParamObject; Emit("$0")>]
@@ -80,8 +126,71 @@ type NotFoundError =
     /// </summary>
     [<Import("NotFoundError.isError", "@cloudflare/kv-asset-handler")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("NotFoundError.captureStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("NotFoundError.prepareStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
+[<Import("InternalError", "@cloudflare/kv-asset-handler")>]
 type InternalError =
     inherit KVError
     [<ParamObject; Emit("$0")>]
@@ -91,6 +200,68 @@ type InternalError =
     /// </summary>
     [<Import("InternalError.isError", "@cloudflare/kv-asset-handler")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("InternalError.captureStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("InternalError.prepareStackTrace", "@cloudflare/kv-asset-handler")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -109,24 +280,24 @@ type Exports =
     /// </summary>
     /// <param name="request">incoming request</param>
     [<Import("mapRequestToAsset", "@cloudflare/kv-asset-handler")>]
-    static member mapRequestToAsset (request: obj, ?options: Options.MapRequestToAsset.Options) : obj = jsNative
+    static member mapRequestToAsset (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?options: Options.MapRequestToAsset.Options) : FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> = jsNative
     /// <summary>
     /// maps the path of incoming request to /index.html if it evaluates to
     /// any HTML file.
     /// </summary>
     /// <param name="request">incoming request</param>
     [<Import("serveSinglePageApp", "@cloudflare/kv-asset-handler")>]
-    static member serveSinglePageApp (request: obj, ?options: Options.MapRequestToAsset.Options) : obj = jsNative
+    static member serveSinglePageApp (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, ?options: Options.MapRequestToAsset.Options) : FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> = jsNative
     [<Import("getAssetFromKV", "@cloudflare/kv-asset-handler")>]
-    static member getAssetFromKV (``event``: GetAssetFromKV.Event, ?options: Options.MapRequestToAsset.Options) : JS.Promise<obj> = jsNative
+    static member getAssetFromKV (``event``: GetAssetFromKV.Event, ?options: Options.MapRequestToAsset.Options) : JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response> = jsNative
 
 module GetAssetFromKV =
     [<Interface>]
     type Event =
-        abstract request: obj with get, set
+        abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
         abstract waitUntil: (JS.Promise<obj> -> unit) with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (request: obj, waitUntil: (JS.Promise<obj> -> unit)) : Event = jsNative
+        static member Create (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, waitUntil: (JS.Promise<obj> -> unit)) : Event = jsNative
 
 module Options =
     [<Interface>]
@@ -137,467 +308,13 @@ module Options =
         [<ParamObject; Emit("$0")>]
         static member Create (?browserTTL: float, ?edgeTTL: float, ?bypassCache: bool) : CacheControl = jsNative
 
-    type MapRequestToAsset = delegate of req: obj * options: Options.MapRequestToAsset.Options option -> obj
-
-    module CacheControl =
-        module Req =
-            type Item<'HostMetadata> =
-                /// <summary>
-                /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-                /// </summary>
-                /// <example><c>395747</c></example>
-                abstract asn: float option with get, set
-                /// <summary>
-                /// The organization which owns the ASN of the incoming request.
-                /// </summary>
-                /// <example><c>"Google Cloud"</c></example>
-                abstract asOrganization: string option with get, set
-                /// <summary>
-                /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-                /// </summary>
-                /// <example><c>"gzip, deflate, br"</c></example>
-                abstract clientAcceptEncoding: string option with get, set
-                /// <summary>
-                /// The number of milliseconds it took for the request to reach your worker.
-                /// </summary>
-                /// <example><c>22</c></example>
-                abstract clientTcpRtt: float option with get, set
-                /// <summary>
-                /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-                /// airport code of the data center that the request hit.
-                /// </summary>
-                /// <example><c>"DFW"</c></example>
-                abstract colo: string with get, set
-                /// <summary>
-                /// Represents the upstream's response to a
-                /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-                /// from cloudflare.
-                /// <br /><br />
-                /// For workers with no upstream, this will always be <c>1</c>.
-                /// </summary>
-                /// <example><c>3</c></example>
-                abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-                /// <summary>
-                /// The HTTP Protocol the request used.
-                /// </summary>
-                /// <example><c>"HTTP/2"</c></example>
-                abstract httpProtocol: string with get, set
-                /// <summary>
-                /// The browser-requested prioritization information in the request object.
-                /// <br /><br />
-                /// If no information was set, defaults to the empty string <c>""</c>
-                /// </summary>
-                /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-                /// <defaultValue>""</defaultValue>
-                abstract requestPriority: string with get, set
-                /// <summary>
-                /// The TLS version of the connection to Cloudflare.
-                /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                /// </summary>
-                /// <example><c>"TLSv1.3"</c></example>
-                abstract tlsVersion: string with get, set
-                /// <summary>
-                /// The cipher for the connection to Cloudflare.
-                /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                /// </summary>
-                /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-                abstract tlsCipher: string with get, set
-                /// <summary>
-                /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-                /// <br /><br />
-                /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-                /// </summary>
-                abstract tlsExportedAuthenticator: obj option with get, set
-                /// <summary>
-                /// Results of Cloudflare's Bot Management analysis
-                /// </summary>
-                abstract botManagement: Options.CacheControl.Req.Item.BotManagement with get, set
-                /// <summary>
-                /// Duplicate of <c>botManagement.score</c>.
-                /// </summary>
-                /// <remarks>@deprecated</remarks>
-                abstract clientTrustScore: float with get, set
-                /// <summary>
-                /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-                /// <br /><br />
-                /// This field is only present if you have Cloudflare for SaaS enabled on your account
-                /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-                /// </summary>
-                abstract hostMetadata: 'HostMetadata option with get, set
-                /// <summary>
-                /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-                /// <br /><br />
-                /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-                /// <br /><br />
-                /// If Cloudflare is unable to determine where the request originated this property is omitted.
-                /// <br /><br />
-                /// The country code <c>"T1"</c> is used for requests originating on TOR.
-                /// </summary>
-                /// <example><c>"GB"</c></example>
-                abstract country: Options.CacheControl.Req.Item.Country option with get, set
-                /// <summary>
-                /// If present, this property indicates that the request originated in the EU
-                /// </summary>
-                /// <example><c>"1"</c></example>
-                abstract isEUCountry: string option with get, set
-                /// <summary>
-                /// A two-letter code indicating the continent the request originated from.
-                /// </summary>
-                /// <example><c>"AN"</c></example>
-                abstract continent: ContinentCode option with get, set
-                /// <summary>
-                /// The city the request originated from
-                /// </summary>
-                /// <example><c>"Austin"</c></example>
-                abstract city: string option with get, set
-                /// <summary>
-                /// Postal code of the incoming request
-                /// </summary>
-                /// <example><c>"78701"</c></example>
-                abstract postalCode: string option with get, set
-                /// <summary>
-                /// Latitude of the incoming request
-                /// </summary>
-                /// <example><c>"30.27130"</c></example>
-                abstract latitude: string option with get, set
-                /// <summary>
-                /// Longitude of the incoming request
-                /// </summary>
-                /// <example><c>"-97.74260"</c></example>
-                abstract longitude: string option with get, set
-                /// <summary>
-                /// Timezone of the incoming request
-                /// </summary>
-                /// <example><c>"America/Chicago"</c></example>
-                abstract timezone: string option with get, set
-                /// <summary>
-                /// If known, the ISO 3166-2 name for the first level region associated with
-                /// the IP address of the incoming request
-                /// </summary>
-                /// <example><c>"Texas"</c></example>
-                abstract region: string option with get, set
-                /// <summary>
-                /// If known, the ISO 3166-2 code for the first-level region associated with
-                /// the IP address of the incoming request
-                /// </summary>
-                /// <example><c>"TX"</c></example>
-                abstract regionCode: string option with get, set
-                /// <summary>
-                /// Metro code (DMA) of the incoming request
-                /// </summary>
-                /// <example><c>"635"</c></example>
-                abstract metroCode: string option with get, set
-                /// <summary>
-                /// Information about the client certificate presented to Cloudflare.
-                /// <br /><br />
-                /// This is populated when the incoming request is served over TLS using
-                /// either Cloudflare Access or API Shield (mTLS)
-                /// and the presented SSL certificate has a valid
-                /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-                /// (i.e., not <c>null</c> or <c>""</c>).
-                /// <br /><br />
-                /// Otherwise, a set of placeholder values are used.
-                /// <br /><br />
-                /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-                /// the object is populated (i.e. the above conditions were met).
-                /// </summary>
-                abstract tlsClientAuth: obj with get, set
-                [<EmitIndexer>]
-                abstract Item: string -> obj with get, set
-
-            module Item =
-                [<Interface>]
-                type BotManagement =
-                    /// <summary>
-                    /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                    /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                    /// </summary>
-                    /// <example><c>54</c></example>
-                    abstract score: float with get, set
-                    /// <summary>
-                    /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                    /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                    /// </summary>
-                    abstract verifiedBot: bool with get, set
-                    /// <summary>
-                    /// A boolean value that is true if the request originates from a
-                    /// Cloudflare-verified proxy service.
-                    /// </summary>
-                    abstract corporateProxy: bool with get, set
-                    /// <summary>
-                    /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                    /// </summary>
-                    abstract staticResource: bool with get, set
-                    /// <summary>
-                    /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                    /// </summary>
-                    abstract detectionIds: float[] with get, set
-                    /// <summary>
-                    /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                    /// across different destination IPs, Ports, and X509 certificates.
-                    /// </summary>
-                    abstract ja3Hash: string with get, set
-                    [<ParamObject; Emit("$0")>]
-                    static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-                [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                type Country =
-                    | AD
-                    | AE
-                    | AF
-                    | AG
-                    | AI
-                    | AL
-                    | AM
-                    | AO
-                    | AQ
-                    | AR
-                    | AS
-                    | AT
-                    | AU
-                    | AW
-                    | AX
-                    | AZ
-                    | BA
-                    | BB
-                    | BD
-                    | BE
-                    | BF
-                    | BG
-                    | BH
-                    | BI
-                    | BJ
-                    | BL
-                    | BM
-                    | BN
-                    | BO
-                    | BQ
-                    | BR
-                    | BS
-                    | BT
-                    | BV
-                    | BW
-                    | BY
-                    | BZ
-                    | CA
-                    | CC
-                    | CD
-                    | CF
-                    | CG
-                    | CH
-                    | CI
-                    | CK
-                    | CL
-                    | CM
-                    | CN
-                    | CO
-                    | CR
-                    | CU
-                    | CV
-                    | CW
-                    | CX
-                    | CY
-                    | CZ
-                    | DE
-                    | DJ
-                    | DK
-                    | DM
-                    | DO
-                    | DZ
-                    | EC
-                    | EE
-                    | EG
-                    | EH
-                    | ER
-                    | ES
-                    | ET
-                    | FI
-                    | FJ
-                    | FK
-                    | FM
-                    | FO
-                    | FR
-                    | GA
-                    | GB
-                    | GD
-                    | GE
-                    | GF
-                    | GG
-                    | GH
-                    | GI
-                    | GL
-                    | GM
-                    | GN
-                    | GP
-                    | GQ
-                    | GR
-                    | GS
-                    | GT
-                    | GU
-                    | GW
-                    | GY
-                    | HK
-                    | HM
-                    | HN
-                    | HR
-                    | HT
-                    | HU
-                    | ID
-                    | IE
-                    | IL
-                    | IM
-                    | IN
-                    | IO
-                    | IQ
-                    | IR
-                    | IS
-                    | IT
-                    | JE
-                    | JM
-                    | JO
-                    | JP
-                    | KE
-                    | KG
-                    | KH
-                    | KI
-                    | KM
-                    | KN
-                    | KP
-                    | KR
-                    | KW
-                    | KY
-                    | KZ
-                    | LA
-                    | LB
-                    | LC
-                    | LI
-                    | LK
-                    | LR
-                    | LS
-                    | LT
-                    | LU
-                    | LV
-                    | LY
-                    | MA
-                    | MC
-                    | MD
-                    | ME
-                    | MF
-                    | MG
-                    | MH
-                    | MK
-                    | ML
-                    | MM
-                    | MN
-                    | MO
-                    | MP
-                    | MQ
-                    | MR
-                    | MS
-                    | MT
-                    | MU
-                    | MV
-                    | MW
-                    | MX
-                    | MY
-                    | MZ
-                    | NA
-                    | NC
-                    | NE
-                    | NF
-                    | NG
-                    | NI
-                    | NL
-                    | NO
-                    | NP
-                    | NR
-                    | NU
-                    | NZ
-                    | OM
-                    | PA
-                    | PE
-                    | PF
-                    | PG
-                    | PH
-                    | PK
-                    | PL
-                    | PM
-                    | PN
-                    | PR
-                    | PS
-                    | PT
-                    | PW
-                    | PY
-                    | QA
-                    | RE
-                    | RO
-                    | RS
-                    | RU
-                    | RW
-                    | SA
-                    | SB
-                    | SC
-                    | SD
-                    | SE
-                    | SG
-                    | SH
-                    | SI
-                    | SJ
-                    | SK
-                    | SL
-                    | SM
-                    | SN
-                    | SO
-                    | SR
-                    | SS
-                    | ST
-                    | SV
-                    | SX
-                    | SY
-                    | SZ
-                    | T1
-                    | TC
-                    | TD
-                    | TF
-                    | TG
-                    | TH
-                    | TJ
-                    | TK
-                    | TL
-                    | TM
-                    | TN
-                    | TO
-                    | TR
-                    | TT
-                    | TV
-                    | TW
-                    | TZ
-                    | UA
-                    | UG
-                    | UM
-                    | US
-                    | UY
-                    | UZ
-                    | VA
-                    | VC
-                    | VE
-                    | VG
-                    | VI
-                    | VN
-                    | VU
-                    | WF
-                    | WS
-                    | YE
-                    | YT
-                    | ZA
-                    | ZM
-                    | ZW
+    type MapRequestToAsset = delegate of req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * options: Options.MapRequestToAsset.Options option -> FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>
 
     module MapRequestToAsset =
         [<Interface>]
         type Options =
-            abstract cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (obj -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)> option with get, set
-            abstract ASSET_NAMESPACE: obj option with get, set
+            abstract cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)> option with get, set
+            abstract ASSET_NAMESPACE: FSharp.CloudEdge.Runtime.Workers.KVNamespace<string> option with get, set
             abstract ASSET_MANIFEST: U2<string, JS.Record<string, string>> option with get, set
             abstract mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset option with get, set
             abstract defaultMimeType: string option with get, set
@@ -605,7 +322,7 @@ module Options =
             abstract pathIsEncoded: bool option with get, set
             abstract defaultETag: Options.MapRequestToAsset.Options.DefaultETag option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (obj -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)>, ?ASSET_NAMESPACE: obj, ?ASSET_MANIFEST: U2<string, JS.Record<string, string>>, ?mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset, ?defaultMimeType: string, ?defaultDocument: string, ?pathIsEncoded: bool, ?defaultETag: Options.MapRequestToAsset.Options.DefaultETag) : Options = jsNative
+            static member Create (?cacheControl: U2<FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl, (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> FSharp.CloudEdge.Runtime.KvAssetHandler.Options.CacheControl)>, ?ASSET_NAMESPACE: FSharp.CloudEdge.Runtime.Workers.KVNamespace<string>, ?ASSET_MANIFEST: U2<string, JS.Record<string, string>>, ?mapRequestToAsset: FSharp.CloudEdge.Runtime.KvAssetHandler.Options.MapRequestToAsset, ?defaultMimeType: string, ?defaultDocument: string, ?pathIsEncoded: bool, ?defaultETag: Options.MapRequestToAsset.Options.DefaultETag) : Options = jsNative
 
         module Options =
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -618,6 +335,64 @@ type MethodNotAllowedErrorConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: ?message: string * ?status: float -> MethodNotAllowedError
 
@@ -626,6 +401,64 @@ type NotFoundErrorConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: ?message: string * ?status: float -> NotFoundError
 
@@ -634,5 +467,63 @@ type InternalErrorConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: ?message: string * ?status: float -> InternalError

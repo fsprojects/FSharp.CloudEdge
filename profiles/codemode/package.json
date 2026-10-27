@@ -4,13 +4,13 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/codemode": "0.5.1",
-    "@cloudflare/workers-types": "5.20260906.1",
+    "@cloudflare/codemode": "0.5.5",
+    "@cloudflare/workers-types": "5.20261025.1",
     "@modelcontextprotocol/sdk": "1.30.0",
     "@tanstack/ai": "0.53.0",
     "@types/node": "26.4.1",
     "ai": "7.0.93",
     "vite": "8.1.0",
-    "zod": "4.5.4"
+    "zod": "4.6.7"
   }
 }

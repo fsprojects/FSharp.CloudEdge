@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
+import { executableScript } from "./fake-executable.mjs";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createHash } from "node:crypto";
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { scratchDirectory } from "./scratch.mjs";
 import path from "node:path";
 import test from "node:test";
 import { zipSync } from "fflate";
@@ -26,7 +27,7 @@ test("source adapter configuration has one shared pin and rejects conflicting pr
 });
 
 function fixture(t) {
-  const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-tool-package-"));
+  const root = mkdtempSync(path.join(scratchDirectory(), "cloudedge-tool-package-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const definition = { packageId: "Example.Tool", command: "example", version: "1.2.3-local.test" };
   const directory = path.join(root, "nuget/example.tool", definition.version);
@@ -56,7 +57,7 @@ function fixture(t) {
   json(path.join(sdk, "dotnet.runtimeconfig.json"), { runtimeOptions: { tfm: "net10.0" } });
   const dotnet = path.join(root, "dotnet");
   write(dotnet, `#!${process.execPath}\nconst args = process.argv.slice(2);\nif (args.join(' ') === '--info') console.log(' Base Path: ' + process.env.TEST_SDK);\nelse if (args.join(' ') === 'nuget locals global-packages --list') console.log('global-packages: ' + process.env.TEST_NUGET);\nelse process.exit(9);\n`);
-  chmodSync(dotnet, 0o755);
+  executableScript(t, dotnet);
   const env = { ...process.env, CLOUDEDGE_DOTNET: dotnet, NUGET_PACKAGES: path.join(root, "nuget"), DOTNET_CLI_HOME: path.join(root, "cli-home"), TEST_SDK: sdk, TEST_NUGET: path.join(root, "nuget") };
   return { root, definition, directory, payload, archive, cache, manifest, lock, assembly, row, data, identity, env, sdk };
 }
@@ -214,7 +215,7 @@ test("projection build receipt binds source and ancestor build settings to the e
   const payload = path.join(path.dirname(project), "bin/Release/net10.0/Adapter.dll");
   const compiler = path.join(root, "fake-dotnet.cjs");
   write(compiler, `#!${process.execPath}\nconst fs = require('node:fs');const path=require('node:path');const out=process.env.FIXTURE_PAYLOAD;fs.mkdirSync(path.dirname(out),{recursive:true});fs.writeFileSync(out,'compiled '+fs.readFileSync(process.env.FIXTURE_SOURCE,'utf8'));\n`);
-  chmodSync(compiler, 0o755);
+  executableScript(t, compiler);
   const env = { ...process.env, CLOUDEDGE_DOTNET: compiler, CLOUDEDGE_XANTHAM_ROOT: checkout, CLOUDEDGE_ALLOW_DIRTY_XANTHAM: "1", FIXTURE_PAYLOAD: payload, FIXTURE_SOURCE: source };
   const built = resolveProjectionTool(root, projection, env, true);
   assert.ok(sameTool(built, resolveProjectionTool(root, projection, env)));

@@ -2,24 +2,24 @@
   "version": 1,
   "isRoot": true,
   "tools": {
-    "fable": {
-      "version": "5.999.0-xantham.ea2e7f8d7.2",
-      "commands": [
-        "fable"
-      ],
-      "rollForward": false
-    },
     "hawaii.unofficial": {
-      "version": "1.0.0-local.8b77c5534f22eccbbb0f",
+      "version": "1.0.0-local.c3814098186d1b62c9e7",
       "commands": [
         "hawaii-unofficial"
       ],
       "rollForward": false
     },
     "xantham": {
-      "version": "0.1.0-local.f8e55127d660fe0eb80b",
+      "version": "0.1.0-local.e0d08eb8343e261f10ca",
       "commands": [
         "xantham"
+      ],
+      "rollForward": false
+    },
+    "fickl": {
+      "version": "0.6.7",
+      "commands": [
+        "fickl"
       ],
       "rollForward": false
     }

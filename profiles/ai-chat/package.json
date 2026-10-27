@@ -5,10 +5,11 @@
   "type": "module",
   "devDependencies": {
     "@ai-sdk/react": "4.0.96",
-    "@cloudflare/ai-chat": "0.11.0",
-    "@cloudflare/workers-types": "5.20260906.1",
+    "@cloudflare/ai-chat": "0.12.2",
+    "@cloudflare/workers-types": "5.20261025.1",
     "@types/json-schema": "7.0.15",
     "@types/node": "26.4.1",
-    "@types/react": "19.2.18"
+    "@types/react": "19.2.18",
+    "zod": "4.6.7"
   }
 }

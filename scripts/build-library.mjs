@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { buildSdk } from "./build-sdk.mjs";
 import { planProjects, checkProjects } from "./projects.mjs";
 import { resolveTool } from "./tool-packages.mjs";
+import { resolvePython } from "./python.mjs";
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const requireThat = (condition, message) => { if (!condition) throw new Error(message); };
@@ -108,7 +109,7 @@ export async function buildLibrary({ root = defaultRoot, args = process.argv.sli
       catch (error) { report.hawaiiRefreshReason = error.message; }
     }
     if (!report.hawaii) report.hawaii = { status: "generated",
-      ...execute("python3", hawaiiArgs, root, path.join(directory, `hawaii-${stamp}.log`), env) };
+      ...execute(resolvePython({ env, root }), hawaiiArgs, root, path.join(directory, `hawaii-${stamp}.log`), env) };
     const receipt = read("inventory/hawaii-output-ownership.json");
     for (const [file, hash] of Object.entries(receipt.files)) {
       requireThat(existsSync(path.join(root, file)) && sha256(path.join(root, file)) === hash,

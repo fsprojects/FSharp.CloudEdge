@@ -73,9 +73,9 @@ module SharedV4FileDataData =
 type SharedV4FileDataUrl =
     /// <remarks>TypeScript type: <c>"url"</c></remarks>
     abstract ``type``: string with get, set
-    abstract url: obj with get, set
+    abstract url: FSharp.CloudEdge.Runtime.Workers.URL with get, set
     [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: obj) : SharedV4FileDataUrl = jsNative
+    static member Create (url: FSharp.CloudEdge.Runtime.Workers.URL) : SharedV4FileDataUrl = jsNative
 
 module SharedV4FileDataUrl =
     /// <remarks>TypeScript type: <c>"url"</c></remarks>
@@ -115,12 +115,20 @@ module SharedV4FileDataText =
     [<Literal>]
     let ``type`` = "text"
 
+/// <summary>
+/// File data as a tagged discriminated union:
+/// <br /><br />
+/// - <c>{ type: 'data', data }</c>: raw bytes (<c>Uint8Array</c>) or base64-encoded string.
+/// - <c>{ type: 'url', url }</c>: a URL that points to the file.
+/// - <c>{ type: 'reference', reference }</c>: a provider reference (<c>{ [provider]: id }</c>).
+/// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline text document).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type SharedV4FileData =
-    | [<CompiledName("data")>] Data of data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    | [<CompiledName("reference")>] Reference of reference: SharedV4ProviderReference
-    | [<CompiledName("text")>] Text of text: string
-    | [<CompiledName("url")>] Url of url: obj
+    | [<CompiledName("data"); Fickl.Core.InlineInterface>] Data of SharedV4FileDataData
+    | [<CompiledName("reference"); Fickl.Core.InlineInterface>] Reference of SharedV4FileDataReference
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of SharedV4FileDataText
+    | [<CompiledName("url"); Fickl.Core.InlineInterface>] Url of SharedV4FileDataUrl
 
 type SharedV4Headers = FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers
 
@@ -140,112 +148,29 @@ type SharedV4ProviderMetadata = FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3
 
 type SharedV4ProviderOptions = FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata
 
+/// <summary>
+/// Warning from the model.
+/// <br /><br />
+/// For example, that certain features are unsupported or compatibility
+/// functionality is used (which might lead to suboptimal results).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type SharedV4Warning =
+    /// <param name="feature">The feature that is not supported.</param>
+    /// <param name="details">Additional details about the warning.</param>
     | [<CompiledName("unsupported")>] Unsupported of feature: string * details: string option
+    /// <param name="feature">The feature that is used in a compatibility mode.</param>
+    /// <param name="details">Additional details about the warning.</param>
     | [<CompiledName("compatibility")>] Compatibility of feature: string * details: string option
+    /// <param name="setting">The deprecated setting or feature name.</param>
+    /// <param name="message">A human-readable message explaining what to use instead.</param>
     | [<CompiledName("deprecated")>] Deprecated of setting: string * message: string
+    /// <param name="message">The message of the warning.</param>
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type SharedV4Warning2 =
-    /// <summary>
-    /// A feature is not supported by the model.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"unsupported"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The feature that is not supported.
-    /// </summary>
-    abstract feature: string with get, set
-    /// <summary>
-    /// Additional details about the warning.
-    /// </summary>
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported', ...$0 })")>]
-    static member Create (feature: string, ?details: string) : SharedV4Warning2 = jsNative
-
-module SharedV4Warning2 =
-    /// <summary>
-    /// A feature is not supported by the model.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"unsupported"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported"
-
-[<Interface>]
-type SharedV4Warning3 =
-    /// <summary>
-    /// A compatibility feature is used that might lead to suboptimal results.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"compatibility"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The feature that is used in a compatibility mode.
-    /// </summary>
-    abstract feature: string with get, set
-    /// <summary>
-    /// Additional details about the warning.
-    /// </summary>
-    abstract details: string option with get, set
+    static member CreateUnsupported (feature: string, ?details: string) : SharedV4Warning = jsNative
     [<ParamObject; Emit("({ type: 'compatibility', ...$0 })")>]
-    static member Create (feature: string, ?details: string) : SharedV4Warning3 = jsNative
-
-module SharedV4Warning3 =
-    /// <summary>
-    /// A compatibility feature is used that might lead to suboptimal results.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"compatibility"</c></remarks>
-    [<Literal>]
-    let ``type`` = "compatibility"
-
-[<Interface>]
-type SharedV4Warning4 =
-    /// <summary>
-    /// A deprecated feature or option is being used.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"deprecated"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The deprecated setting or feature name.
-    /// </summary>
-    abstract setting: string with get, set
-    /// <summary>
-    /// A human-readable message explaining what to use instead.
-    /// </summary>
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'deprecated', ...$0 })")>]
-    static member Create (setting: string, message: string) : SharedV4Warning4 = jsNative
-
-module SharedV4Warning4 =
-    /// <summary>
-    /// A deprecated feature or option is being used.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"deprecated"</c></remarks>
-    [<Literal>]
-    let ``type`` = "deprecated"
-
-[<Interface>]
-type SharedV4Warning5 =
-    /// <summary>
-    /// Other warning.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The message of the warning.
-    /// </summary>
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : SharedV4Warning5 = jsNative
-
-module SharedV4Warning5 =
-    /// <summary>
-    /// Other warning.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateCompatibility (feature: string, ?details: string) : SharedV4Warning = jsNative
 
 type SharedV3Headers = FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers
 
@@ -273,85 +198,26 @@ type SharedV3ProviderMetadata = JS.Record<string, JSONObject>
 
 type SharedV3ProviderOptions = FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata
 
+/// <summary>
+/// Warning from the model.
+/// <br /><br />
+/// For example, that certain features are unsupported or compatibility
+/// functionality is used (which might lead to suboptimal results).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type SharedV3Warning =
+    /// <param name="feature">The feature that is not supported.</param>
+    /// <param name="details">Additional details about the warning.</param>
     | [<CompiledName("unsupported")>] Unsupported of feature: string * details: string option
+    /// <param name="feature">The feature that is used in a compatibility mode.</param>
+    /// <param name="details">Additional details about the warning.</param>
     | [<CompiledName("compatibility")>] Compatibility of feature: string * details: string option
+    /// <param name="message">The message of the warning.</param>
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type SharedV3Warning2 =
-    /// <summary>
-    /// A feature is not supported by the model.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"unsupported"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The feature that is not supported.
-    /// </summary>
-    abstract feature: string with get, set
-    /// <summary>
-    /// Additional details about the warning.
-    /// </summary>
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported', ...$0 })")>]
-    static member Create (feature: string, ?details: string) : SharedV3Warning2 = jsNative
-
-module SharedV3Warning2 =
-    /// <summary>
-    /// A feature is not supported by the model.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"unsupported"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported"
-
-[<Interface>]
-type SharedV3Warning3 =
-    /// <summary>
-    /// A compatibility feature is used that might lead to suboptimal results.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"compatibility"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The feature that is used in a compatibility mode.
-    /// </summary>
-    abstract feature: string with get, set
-    /// <summary>
-    /// Additional details about the warning.
-    /// </summary>
-    abstract details: string option with get, set
+    static member CreateUnsupported (feature: string, ?details: string) : SharedV3Warning = jsNative
     [<ParamObject; Emit("({ type: 'compatibility', ...$0 })")>]
-    static member Create (feature: string, ?details: string) : SharedV3Warning3 = jsNative
-
-module SharedV3Warning3 =
-    /// <summary>
-    /// A compatibility feature is used that might lead to suboptimal results.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"compatibility"</c></remarks>
-    [<Literal>]
-    let ``type`` = "compatibility"
-
-[<Interface>]
-type SharedV3Warning4 =
-    /// <summary>
-    /// Other warning.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The message of the warning.
-    /// </summary>
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : SharedV3Warning4 = jsNative
-
-module SharedV3Warning4 =
-    /// <summary>
-    /// Other warning.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateCompatibility (feature: string, ?details: string) : SharedV3Warning = jsNative
 
 type SharedV2Headers = JS.Record<string, string>
 
@@ -413,7 +279,7 @@ type Experimental_BatchV4Status =
 type Experimental_BatchV4StartOptions<'REQUEST> =
     abstract requests: 'REQUEST[]
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    abstract abortSignal: obj option
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option
     abstract headers: JS.Record<string, string option> option
     /// <summary>
     /// URL the provider notifies when the batch reaches a terminal state.
@@ -422,7 +288,7 @@ type Experimental_BatchV4StartOptions<'REQUEST> =
     /// </summary>
     abstract webhookUrl: string option
     [<ParamObject; Emit("$0")>]
-    static member Create (requests: 'REQUEST[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Experimental_BatchV4StartOptions<'REQUEST> = jsNative
+    static member Create (requests: 'REQUEST[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Experimental_BatchV4StartOptions<'REQUEST> = jsNative
 
 /// <summary>
 /// Result of starting a batch.
@@ -442,10 +308,10 @@ type Experimental_BatchV4StartResult =
 type Experimental_BatchV4OperationOptions =
     abstract batchId: string
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    abstract abortSignal: obj option
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option
     abstract headers: JS.Record<string, string option> option
     [<ParamObject; Emit("$0")>]
-    static member Create (batchId: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : Experimental_BatchV4OperationOptions = jsNative
+    static member Create (batchId: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : Experimental_BatchV4OperationOptions = jsNative
 
 /// <summary>
 /// A complete terminal result for one request in a batch.
@@ -498,9 +364,9 @@ type Experimental_BatchV4ItemResult4 =
 type Experimental_BatchModelV4<'REQUEST, 'RESULT> =
     abstract experimental_doStartBatch: options: FSharp.CloudEdge.Support.AI.V4.Provider.Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>
     abstract experimental_doGetBatchStatus: options: Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>
-    abstract experimental_doGetBatchResults: options: Experimental_BatchV4OperationOptions -> JS.Promise<obj>
+    abstract experimental_doGetBatchResults: options: Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchV4ItemResult2<'RESULT>, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>
     [<ParamObject; Emit("$0")>]
-    static member Create (experimental_doStartBatch: (FSharp.CloudEdge.Support.AI.V4.Provider.Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<obj>)) : Experimental_BatchModelV4<'REQUEST, 'RESULT> = jsNative
+    static member Create (experimental_doStartBatch: (FSharp.CloudEdge.Support.AI.V4.Provider.Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchV4ItemResult2<'RESULT>, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>)) : Experimental_BatchModelV4<'REQUEST, 'RESULT> = jsNative
 
 [<Interface>]
 type EmbeddingModelV4CallOptions =
@@ -511,7 +377,7 @@ type EmbeddingModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional provider-specific options. They are passed through
     /// to the provider from the AI SDK and enable provider-specific
@@ -524,9 +390,9 @@ type EmbeddingModelV4CallOptions =
     /// </summary>
     abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (values: string[], ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : EmbeddingModelV4CallOptions = jsNative
+    static member Create (values: string[], ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : EmbeddingModelV4CallOptions = jsNative
 
-type EmbeddingModelV4Embedding = FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV2Embedding
+type EmbeddingModelV4Embedding = FSharp.CloudEdge.Runtime.Workers.AiSentenceSimilarityOutput
 
 /// <summary>
 /// The result of a embedding model doEmbed call.
@@ -624,7 +490,7 @@ type EmbeddingModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional provider-specific options. They are passed through
     /// to the provider from the AI SDK and enable provider-specific
@@ -637,9 +503,9 @@ type EmbeddingModelV3CallOptions =
     /// </summary>
     abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (values: string[], ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : EmbeddingModelV3CallOptions = jsNative
+    static member Create (values: string[], ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : EmbeddingModelV3CallOptions = jsNative
 
-type EmbeddingModelV3Embedding = FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV2Embedding
+type EmbeddingModelV3Embedding = FSharp.CloudEdge.Runtime.Workers.AiSentenceSimilarityOutput
 
 /// <summary>
 /// The result of a embedding model doEmbed call.
@@ -728,11 +594,7 @@ module EmbeddingModelV3 =
     [<Literal>]
     let specificationVersion = "v3"
 
-/// <summary>
-/// An embedding is a vector, i.e. an array of numbers.
-/// It is e.g. used to represent a text as a vector of word embeddings.
-/// </summary>
-type EmbeddingModelV2Embedding = float[]
+type EmbeddingModelV2Embedding = FSharp.CloudEdge.Runtime.Workers.AiSentenceSimilarityOutput
 
 /// <summary>
 /// Specification for an embedding model that implements the embedding model
@@ -803,7 +665,7 @@ module EmbeddingModelV2 =
             /// <summary>
             /// Abort signal for cancelling the operation.
             /// </summary>
-            abstract abortSignal: obj option with get, set
+            abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
             /// <summary>
             /// Additional provider-specific options. They are passed through
             /// to the provider from the AI SDK and enable provider-specific
@@ -816,7 +678,7 @@ module EmbeddingModelV2 =
             /// </summary>
             abstract headers: JS.Record<string, string option> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (values: 'VALUE[], ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?headers: JS.Record<string, string option>) : Options<'VALUE> = jsNative
+            static member Create (values: 'VALUE[], ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?headers: JS.Record<string, string option>) : Options<'VALUE> = jsNative
 
         module Result =
             [<Interface>]
@@ -867,6 +729,7 @@ module EmbeddingModelV2 =
 /// </summary>
 /// <remarks>@extends Error</remarks>
 [<Interface>]
+[<Import("AISDKError", "@ai-sdk/provider")>]
 type AISDKError =
     /// <summary>
     /// The underlying cause of the error, if any.
@@ -875,8 +738,6 @@ type AISDKError =
     abstract name: string with get, set
     abstract message: string with get, set
     abstract stack: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?cause: obj, ?stack: string) : AISDKError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -891,6 +752,68 @@ type AISDKError =
     /// </summary>
     [<Import("AISDKError.isError", "@ai-sdk/provider")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("AISDKError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("AISDKError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type AISDKError0 =
@@ -901,6 +824,7 @@ type AISDKError0 =
     static member Create (name: string, message: string, ?cause: obj) : AISDKError0 = jsNative
 
 [<Interface>]
+[<Import("APICallError", "@ai-sdk/provider")>]
 type APICallError =
     inherit AISDKError
     abstract url: string
@@ -910,8 +834,6 @@ type APICallError =
     abstract responseBody: string option
     abstract isRetryable: bool
     abstract data: obj option
-    [<ParamObject; Emit("$0")>]
-    static member Create (url: string, requestBodyValues: obj, isRetryable: bool, name: string, message: string, ?statusCode: float, ?responseHeaders: JS.Record<string, string>, ?responseBody: string, ?data: obj, ?stack: string, ?cause: obj) : APICallError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -924,6 +846,68 @@ type APICallError =
     static member isError (error: obj) : bool = jsNative
     [<Import("APICallError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("APICallError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("APICallError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type APICallError0 =
@@ -940,10 +924,9 @@ type APICallError0 =
     static member Create (message: string, url: string, requestBodyValues: obj, ?statusCode: float, ?responseHeaders: JS.Record<string, string>, ?responseBody: string, ?cause: obj, ?isRetryable: bool, ?data: obj) : APICallError0 = jsNative
 
 [<Interface>]
+[<Import("EmptyResponseBodyError", "@ai-sdk/provider")>]
 type EmptyResponseBodyError =
     inherit AISDKError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : EmptyResponseBodyError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -956,6 +939,68 @@ type EmptyResponseBodyError =
     static member isError (error: obj) : bool = jsNative
     [<Import("EmptyResponseBodyError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("EmptyResponseBodyError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("EmptyResponseBodyError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type EmptyResponseBodyError0 =
@@ -967,11 +1012,10 @@ type EmptyResponseBodyError0 =
 /// A function argument is invalid.
 /// </summary>
 [<Interface>]
+[<Import("InvalidArgumentError", "@ai-sdk/provider")>]
 type InvalidArgumentError =
     inherit AISDKError
     abstract argument: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (argument: string, name: string, message: string, ?stack: string, ?cause: obj) : InvalidArgumentError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -984,6 +1028,68 @@ type InvalidArgumentError =
     static member isError (error: obj) : bool = jsNative
     [<Import("InvalidArgumentError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("InvalidArgumentError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("InvalidArgumentError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type InvalidArgumentError0 =
@@ -998,11 +1104,10 @@ type InvalidArgumentError0 =
 /// process a prompt.
 /// </summary>
 [<Interface>]
+[<Import("InvalidPromptError", "@ai-sdk/provider")>]
 type InvalidPromptError =
     inherit AISDKError
     abstract prompt: obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (prompt: obj, name: string, message: string, ?stack: string, ?cause: obj) : InvalidPromptError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1015,6 +1120,68 @@ type InvalidPromptError =
     static member isError (error: obj) : bool = jsNative
     [<Import("InvalidPromptError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("InvalidPromptError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("InvalidPromptError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type InvalidPromptError0 =
@@ -1029,11 +1196,10 @@ type InvalidPromptError0 =
 /// This should be thrown by providers when they cannot parse the response from the API.
 /// </summary>
 [<Interface>]
+[<Import("InvalidResponseDataError", "@ai-sdk/provider")>]
 type InvalidResponseDataError =
     inherit AISDKError
     abstract data: obj
-    [<ParamObject; Emit("$0")>]
-    static member Create (data: obj, name: string, message: string, ?stack: string, ?cause: obj) : InvalidResponseDataError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1046,6 +1212,68 @@ type InvalidResponseDataError =
     static member isError (error: obj) : bool = jsNative
     [<Import("InvalidResponseDataError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("InvalidResponseDataError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("InvalidResponseDataError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type InvalidResponseDataError0 =
@@ -1055,11 +1283,10 @@ type InvalidResponseDataError0 =
     static member Create (data: obj, ?message: string) : InvalidResponseDataError0 = jsNative
 
 [<Interface>]
+[<Import("JSONParseError", "@ai-sdk/provider")>]
 type JSONParseError =
     inherit AISDKError
     abstract text: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (text: string, name: string, message: string, ?stack: string, ?cause: obj) : JSONParseError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1072,6 +1299,68 @@ type JSONParseError =
     static member isError (error: obj) : bool = jsNative
     [<Import("JSONParseError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("JSONParseError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("JSONParseError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type JSONParseError0 =
@@ -1081,10 +1370,9 @@ type JSONParseError0 =
     static member Create (text: string, cause: obj) : JSONParseError0 = jsNative
 
 [<Interface>]
+[<Import("LoadAPIKeyError", "@ai-sdk/provider")>]
 type LoadAPIKeyError =
     inherit AISDKError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : LoadAPIKeyError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1097,6 +1385,68 @@ type LoadAPIKeyError =
     static member isError (error: obj) : bool = jsNative
     [<Import("LoadAPIKeyError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("LoadAPIKeyError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("LoadAPIKeyError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type LoadAPIKeyError0 =
@@ -1105,10 +1455,9 @@ type LoadAPIKeyError0 =
     static member Create (message: string) : LoadAPIKeyError0 = jsNative
 
 [<Interface>]
+[<Import("LoadSettingError", "@ai-sdk/provider")>]
 type LoadSettingError =
     inherit AISDKError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : LoadSettingError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1121,6 +1470,68 @@ type LoadSettingError =
     static member isError (error: obj) : bool = jsNative
     [<Import("LoadSettingError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("LoadSettingError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("LoadSettingError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type LoadSettingError0 =
@@ -1132,10 +1543,9 @@ type LoadSettingError0 =
 /// Thrown when the AI provider fails to generate any content.
 /// </summary>
 [<Interface>]
+[<Import("NoContentGeneratedError", "@ai-sdk/provider")>]
 type NoContentGeneratedError =
     inherit AISDKError
-    [<ParamObject; Emit("$0")>]
-    static member Create (name: string, message: string, ?stack: string, ?cause: obj) : NoContentGeneratedError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1148,6 +1558,68 @@ type NoContentGeneratedError =
     static member isError (error: obj) : bool = jsNative
     [<Import("NoContentGeneratedError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("NoContentGeneratedError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("NoContentGeneratedError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type NoContentGeneratedError0 =
@@ -1156,12 +1628,11 @@ type NoContentGeneratedError0 =
     static member Create (?message: string) : NoContentGeneratedError0 = jsNative
 
 [<Interface>]
+[<Import("NoSuchModelError", "@ai-sdk/provider")>]
 type NoSuchModelError =
     inherit AISDKError
     abstract modelId: string
     abstract modelType: NoSuchModelError.ModelType
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: string, modelType: NoSuchModelError.ModelType, name: string, message: string, ?stack: string, ?cause: obj) : NoSuchModelError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1174,6 +1645,68 @@ type NoSuchModelError =
     static member isError (error: obj) : bool = jsNative
     [<Import("NoSuchModelError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("NoSuchModelError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("NoSuchModelError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type NoSuchModelError0 =
@@ -1189,12 +1722,11 @@ type NoSuchModelError0 =
 /// provider is not found in the provider reference mapping.
 /// </summary>
 [<Interface>]
+[<Import("NoSuchProviderReferenceError", "@ai-sdk/provider")>]
 type NoSuchProviderReferenceError =
     inherit AISDKError
     abstract provider: string
     abstract reference: SharedV4ProviderReference
-    [<ParamObject; Emit("$0")>]
-    static member Create (provider: string, reference: SharedV4ProviderReference, name: string, message: string, ?stack: string, ?cause: obj) : NoSuchProviderReferenceError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1207,6 +1739,68 @@ type NoSuchProviderReferenceError =
     static member isError (error: obj) : bool = jsNative
     [<Import("NoSuchProviderReferenceError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("NoSuchProviderReferenceError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("NoSuchProviderReferenceError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type NoSuchProviderReferenceError0 =
@@ -1217,14 +1811,13 @@ type NoSuchProviderReferenceError0 =
     static member Create (provider: string, reference: SharedV4ProviderReference, ?message: string) : NoSuchProviderReferenceError0 = jsNative
 
 [<Interface>]
+[<Import("TooManyEmbeddingValuesForCallError", "@ai-sdk/provider")>]
 type TooManyEmbeddingValuesForCallError =
     inherit AISDKError
     abstract provider: string
     abstract modelId: string
     abstract maxEmbeddingsPerCall: float
     abstract values: obj[]
-    [<ParamObject; Emit("$0")>]
-    static member Create (provider: string, modelId: string, maxEmbeddingsPerCall: float, values: obj[], name: string, message: string, ?stack: string, ?cause: obj) : TooManyEmbeddingValuesForCallError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1237,6 +1830,68 @@ type TooManyEmbeddingValuesForCallError =
     static member isError (error: obj) : bool = jsNative
     [<Import("TooManyEmbeddingValuesForCallError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("TooManyEmbeddingValuesForCallError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("TooManyEmbeddingValuesForCallError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type TypeValidationContext =
@@ -1256,12 +1911,11 @@ type TypeValidationContext =
     static member Create (?field: string, ?entityName: string, ?entityId: string) : TypeValidationContext = jsNative
 
 [<Interface>]
+[<Import("TypeValidationError", "@ai-sdk/provider")>]
 type TypeValidationError =
     inherit AISDKError
     abstract value: obj
     abstract context: TypeValidationContext option
-    [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, name: string, message: string, ?context: TypeValidationContext, ?stack: string, ?cause: obj) : TypeValidationError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1283,6 +1937,68 @@ type TypeValidationError =
     static member isError (error: obj) : bool = jsNative
     [<Import("TypeValidationError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("TypeValidationError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("TypeValidationError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type TypeValidationError0 =
@@ -1293,11 +2009,10 @@ type TypeValidationError0 =
     static member Create (value: obj, cause: obj, ?context: TypeValidationContext) : TypeValidationError0 = jsNative
 
 [<Interface>]
+[<Import("UnsupportedFunctionalityError", "@ai-sdk/provider")>]
 type UnsupportedFunctionalityError =
     inherit AISDKError
     abstract functionality: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (functionality: string, name: string, message: string, ?stack: string, ?cause: obj) : UnsupportedFunctionalityError = jsNative
     /// <summary>
     /// Checks if the given error is an AI SDK Error.
     /// </summary>
@@ -1310,6 +2025,68 @@ type UnsupportedFunctionalityError =
     static member isError (error: obj) : bool = jsNative
     [<Import("UnsupportedFunctionalityError.hasMarker", "@ai-sdk/provider")>]
     static member hasMarker (error: obj, marker: string) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("UnsupportedFunctionalityError.captureStackTrace", "@ai-sdk/provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("UnsupportedFunctionalityError.prepareStackTrace", "@ai-sdk/provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 [<Interface>]
 type UnsupportedFunctionalityError0 =
@@ -1330,7 +2107,7 @@ type FilesV4DeleteFileCallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -1343,7 +2120,7 @@ type FilesV4DeleteFileCallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (file: SharedV4ProviderReference, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DeleteFileCallOptions = jsNative
+    static member Create (file: SharedV4ProviderReference, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DeleteFileCallOptions = jsNative
 
 /// <summary>
 /// Result of deleting a file via the files interface.
@@ -1385,7 +2162,7 @@ type FilesV4DownloadFileCallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -1398,7 +2175,7 @@ type FilesV4DownloadFileCallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (file: SharedV4ProviderReference, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DownloadFileCallOptions = jsNative
+    static member Create (file: SharedV4ProviderReference, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DownloadFileCallOptions = jsNative
 
 /// <summary>
 /// Result of downloading file content via the files interface.
@@ -1409,7 +2186,7 @@ type FilesV4DownloadFileResult =
     /// The file content as a byte stream.
     /// The consumer is responsible for draining or cancelling the stream.
     /// </summary>
-    abstract content: obj with get, set
+    abstract content: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
     /// <summary>
     /// The IANA media type of the file, if available from the provider.
     /// </summary>
@@ -1425,7 +2202,7 @@ type FilesV4DownloadFileResult =
     /// </summary>
     abstract warnings: SharedV4Warning[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (content: obj, warnings: SharedV4Warning[], ?mediaType: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DownloadFileResult = jsNative
+    static member Create (content: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, warnings: SharedV4Warning[], ?mediaType: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4DownloadFileResult = jsNative
 
 /// <summary>
 /// Options for retrieving file metadata via the files interface.
@@ -1439,7 +2216,7 @@ type FilesV4GetFileMetadataCallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -1452,7 +2229,7 @@ type FilesV4GetFileMetadataCallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (file: SharedV4ProviderReference, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4GetFileMetadataCallOptions = jsNative
+    static member Create (file: SharedV4ProviderReference, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4GetFileMetadataCallOptions = jsNative
 
 /// <summary>
 /// Result of retrieving file metadata via the files interface.
@@ -1507,9 +2284,9 @@ type FilesV4GetFileMetadataResult =
 type FilesV4UploadFileStreamData =
     /// <remarks>TypeScript type: <c>"stream"</c></remarks>
     abstract ``type``: string with get, set
-    abstract stream: obj with get, set
+    abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
     [<ParamObject; Emit("({ type: 'stream', ...$0 })")>]
-    static member Create (stream: obj) : FilesV4UploadFileStreamData = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) : FilesV4UploadFileStreamData = jsNative
 
 module FilesV4UploadFileStreamData =
     /// <remarks>TypeScript type: <c>"stream"</c></remarks>
@@ -1541,7 +2318,7 @@ type FilesV4UploadFileCallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -1554,7 +2331,7 @@ type FilesV4UploadFileCallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (data: FilesV4UploadFileCallOptions.Data, mediaType: string, ?filename: string, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4UploadFileCallOptions = jsNative
+    static member Create (data: FilesV4UploadFileCallOptions.Data, mediaType: string, ?filename: string, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : FilesV4UploadFileCallOptions = jsNative
 
 /// <summary>
 /// Result of uploading a file via the files interface.
@@ -1650,60 +2427,32 @@ module FilesV4 =
     [<Literal>]
     let specificationVersion = "v4"
 
+/// <summary>
+/// An image file that can be used for image editing or variation generation.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ImageModelV4File =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("url")>] Url of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type ImageModelV4File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
+    /// <param name="mediaType">
     /// The IANA media type of the file, e.g. <c>image/png</c>. Any string is supported.
-    /// </summary>
-    /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-    abstract mediaType: string with get, set
-    /// <summary>
+    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+    /// </param>
+    /// <param name="data">
     /// Generated file data as base64 encoded strings or binary data.
     /// <br /><br />
     /// The file data should be returned without any unnecessary conversion.
     /// If the API returns base64 encoded strings, the file data should be returned
     /// as base64 encoded strings. If the API returns binary data, the file data should
     /// be returned as binary data.
-    /// </summary>
-    abstract data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    /// </param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="url">The URL of the image file.</param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("url")>] Url of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-    static member Create (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : ImageModelV4File2 = jsNative
-
-module ImageModelV4File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    [<Literal>]
-    let ``type`` = "file"
-
-[<Interface>]
-type ImageModelV4File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The URL of the image file.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateFile (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : ImageModelV4File = jsNative
     [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : ImageModelV4File3 = jsNative
-
-module ImageModelV4File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
+    static member CreateUrl (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : ImageModelV4File = jsNative
 
 [<Interface>]
 type ImageModelV4CallOptions =
@@ -1760,14 +2509,14 @@ type ImageModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?size: string, ?aspectRatio: string, ?seed: float, ?files: ImageModelV4File[], ?mask: ImageModelV4File, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : ImageModelV4CallOptions = jsNative
+    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?size: string, ?aspectRatio: string, ?seed: float, ?files: ImageModelV4File[], ?mask: ImageModelV4File, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : ImageModelV4CallOptions = jsNative
 
 /// <summary>
 /// Usage information for an image model call.
@@ -1911,60 +2660,32 @@ type ImageModelV3Usage =
     [<ParamObject; Emit("$0")>]
     static member Create (?inputTokens: float, ?outputTokens: float, ?totalTokens: float) : ImageModelV3Usage = jsNative
 
+/// <summary>
+/// An image file that can be used for image editing or variation generation.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ImageModelV3File =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: SharedV3ProviderMetadata option
-    | [<CompiledName("url")>] Url of url: string * providerOptions: SharedV3ProviderMetadata option
-
-[<Interface>]
-type ImageModelV3File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
+    /// <param name="mediaType">
     /// The IANA media type of the file, e.g. <c>image/png</c>. Any string is supported.
-    /// </summary>
-    /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-    abstract mediaType: string with get, set
-    /// <summary>
+    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+    /// </param>
+    /// <param name="data">
     /// Generated file data as base64 encoded strings or binary data.
     /// <br /><br />
     /// The file data should be returned without any unnecessary conversion.
     /// If the API returns base64 encoded strings, the file data should be returned
     /// as base64 encoded strings. If the API returns binary data, the file data should
     /// be returned as binary data.
-    /// </summary>
-    abstract data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: SharedV3ProviderMetadata option with get, set
+    /// </param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: SharedV3ProviderMetadata option
+    /// <param name="url">The URL of the image file.</param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("url")>] Url of url: string * providerOptions: SharedV3ProviderMetadata option
     [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-    static member Create (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: SharedV3ProviderMetadata) : ImageModelV3File2 = jsNative
-
-module ImageModelV3File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    [<Literal>]
-    let ``type`` = "file"
-
-[<Interface>]
-type ImageModelV3File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The URL of the image file.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: SharedV3ProviderMetadata option with get, set
+    static member CreateFile (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: SharedV3ProviderMetadata) : ImageModelV3File = jsNative
     [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, ?providerOptions: SharedV3ProviderMetadata) : ImageModelV3File3 = jsNative
-
-module ImageModelV3File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
+    static member CreateUrl (url: string, ?providerOptions: SharedV3ProviderMetadata) : ImageModelV3File = jsNative
 
 [<Interface>]
 type ImageModelV3CallOptions =
@@ -2021,14 +2742,14 @@ type ImageModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?size: string, ?aspectRatio: string, ?seed: float, ?files: ImageModelV3File[], ?mask: ImageModelV3File, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : ImageModelV3CallOptions = jsNative
+    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?size: string, ?aspectRatio: string, ?seed: float, ?files: ImageModelV3File[], ?mask: ImageModelV3File, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : ImageModelV3CallOptions = jsNative
 
 type ImageModelV3ProviderMetadata = JS.Record<string, obj>
 
@@ -2194,57 +2915,25 @@ type ImageModelV2CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: string, n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?size: string, ?aspectRatio: string, ?seed: float, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : ImageModelV2CallOptions = jsNative
+    static member Create (prompt: string, n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?size: string, ?aspectRatio: string, ?seed: float, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : ImageModelV2CallOptions = jsNative
 
+/// <summary>
+/// Warning from the model provider for this call. The call will proceed, but e.g.
+/// some settings might not be supported, which can lead to suboptimal results.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type ImageModelV2CallWarning =
-    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: ImageModelV2CallWarning2.Setting * details: string option
+    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: ImageModelV2CallWarning.Cases.UnsupportedSetting.Setting * details: string option
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type ImageModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract setting: ImageModelV2CallWarning2.Setting with get, set
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported-setting', ...$0 })")>]
-    static member Create (setting: ImageModelV2CallWarning2.Setting, ?details: string) : ImageModelV2CallWarning2 = jsNative
-
-module ImageModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported-setting"
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Setting =
-        | [<CompiledName("abortSignal")>] AbortSignal
-        | [<CompiledName("aspectRatio")>] AspectRatio
-        | [<CompiledName("headers")>] Headers
-        | [<CompiledName("n")>] N
-        | [<CompiledName("prompt")>] Prompt
-        | [<CompiledName("providerOptions")>] ProviderOptions
-        | [<CompiledName("seed")>] Seed
-        | [<CompiledName("size")>] Size
-
-[<Interface>]
-type ImageModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : ImageModelV2CallWarning3 = jsNative
-
-module ImageModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateUnsupportedSetting (setting: ImageModelV2CallWarning.Cases.UnsupportedSetting.Setting, ?details: string) : ImageModelV2CallWarning = jsNative
 
 type ImageModelV2ProviderMetadata = JS.Record<string, obj>
 
@@ -2577,7 +3266,7 @@ type LanguageModelV4FunctionTool =
     /// The parameters that the tool expects. The language model uses this to
     /// understand the tool's input requirements and to provide matching suggestions.
     /// </summary>
-    abstract inputSchema: JSONSchema7 with get, set
+    abstract inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 with get, set
     /// <summary>
     /// An optional list of input examples that show the language
     /// model what the input should look like.
@@ -2596,7 +3285,7 @@ type LanguageModelV4FunctionTool =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
-    static member Create (name: string, inputSchema: JSONSchema7, ?description: string, ?inputExamples: LanguageModelV4FunctionTool.InputExamples.Item[], ?strict: bool, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4FunctionTool = jsNative
+    static member Create (name: string, inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?description: string, ?inputExamples: LanguageModelV4FunctionTool.InputExamples.Item[], ?strict: bool, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4FunctionTool = jsNative
 
 module LanguageModelV4FunctionTool =
     /// <summary>
@@ -2613,105 +3302,6 @@ module LanguageModelV4FunctionTool =
             [<ParamObject; Emit("$0")>]
             static member Create (input: JSONObject) : Item = jsNative
 
-[<Interface>]
-type LanguageModelV4Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    abstract role: string with get, set
-    abstract content: string with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
-    static member Create (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message2 = jsNative
-
-module LanguageModelV4Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    [<Literal>]
-    let role = "system"
-
-[<Interface>]
-type LanguageModelV4Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV4Message3.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
-    static member Create (content: LanguageModelV4Message3.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message3 = jsNative
-
-module LanguageModelV4Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    [<Literal>]
-    let role = "user"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("file")>] File of filename: string option * data: SharedV4FileData * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV4Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV4Message4.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
-    static member Create (content: LanguageModelV4Message4.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message4 = jsNative
-
-module LanguageModelV4Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    [<Literal>]
-    let role = "assistant"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("custom")>] Custom of kind: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("file")>] File of filename: string option * data: SharedV4FileData * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("reasoning-file")>] ReasoningFile of data: LanguageModelV4ReasoningFilePart.Data * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("reasoning")>] Reasoning of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: obj * providerExecuted: bool option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * output: LanguageModelV4ToolResultOutput * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV4Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV4Message5.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
-    static member Create (content: LanguageModelV4Message5.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message5 = jsNative
-
-module LanguageModelV4Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let role = "tool"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("tool-approval-response")>] ToolApprovalResponse of approvalId: string * approved: bool * reason: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * output: LanguageModelV4ToolResultOutput * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
 /// <summary>
 /// A prompt is a list of messages.
 /// <br /><br />
@@ -2723,217 +3313,44 @@ module LanguageModelV4Message5 =
 /// </summary>
 type LanguageModelV4Prompt = LanguageModelV4Message[]
 
-[<Interface>]
-type LanguageModelV4ToolResultOutput2 =
-    /// <summary>
-    /// Text tool output that should be directly sent to the API.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-    static member Create (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput2 = jsNative
-
-module LanguageModelV4ToolResultOutput2 =
-    /// <summary>
-    /// Text tool output that should be directly sent to the API.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text"
-
-[<Interface>]
-type LanguageModelV4ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-    static member Create (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput3 = jsNative
-
-module LanguageModelV4ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "json"
-
-[<Interface>]
-type LanguageModelV4ToolResultOutput4 =
-    /// <summary>
-    /// Type when the user has denied the execution of the tool call.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// Optional reason for the execution denial.
-    /// </summary>
-    abstract reason: string option with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
-    static member Create (?reason: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput4 = jsNative
-
-module LanguageModelV4ToolResultOutput4 =
-    /// <summary>
-    /// Type when the user has denied the execution of the tool call.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
-    [<Literal>]
-    let ``type`` = "execution-denied"
-
-[<Interface>]
-type LanguageModelV4ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
-    static member Create (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput5 = jsNative
-
-module LanguageModelV4ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-text"
-
-[<Interface>]
-type LanguageModelV4ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'error-json', ...$0 })")>]
-    static member Create (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput6 = jsNative
-
-module LanguageModelV4ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-json"
-
-[<Interface>]
-type LanguageModelV4ToolResultOutput7 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: LanguageModelV4ToolResultOutput7.Value.Item[] with get, set
-    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
-    static member Create (value: LanguageModelV4ToolResultOutput7.Value.Item[]) : LanguageModelV4ToolResultOutput7 = jsNative
-
-module LanguageModelV4ToolResultOutput7 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    [<Literal>]
-    let ``type`` = "content"
-
-    module Value =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("file")>] File of data: SharedV4FileData * mediaType: string * filename: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("custom")>] Custom of providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-        [<Interface>]
-        type Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Text content.
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-            static member Create (text: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item2 = jsNative
-
-        module Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            [<Literal>]
-            let ``type`` = "text"
-
-        [<Interface>]
-        type Item3 =
-            /// <remarks>TypeScript type: <c>"file"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// File data as a tagged discriminated union:
-            /// <br /><br />
-            /// - <c>{ type: 'data', data }</c>: raw bytes (Uint8Array) or base64-encoded string.
-            /// - <c>{ type: 'url', url }</c>: a URL that points to the file.
-            /// - <c>{ type: 'reference', reference }</c>: a provider reference (<c>{ [provider]: id }</c>).
-            /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline text document).
-            /// </summary>
-            abstract data: SharedV4FileData with get, set
-            /// <summary>
-            /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
-            /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
-            /// <br /><br />
-            /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
-            /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
-            /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
-            /// <c>detectMediaType</c>) to resolve the field according to their API
-            /// requirements.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-            static member Create (data: SharedV4FileData, mediaType: string, ?filename: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item3 = jsNative
-
-        module Item3 =
-            /// <remarks>TypeScript type: <c>"file"</c></remarks>
-            [<Literal>]
-            let ``type`` = "file"
-
-        [<Interface>]
-        type Item4 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
-            static member Create (?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item4 = jsNative
-
-        module Item4 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            [<Literal>]
-            let ``type`` = "custom"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
 type LanguageModelV4Message =
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
     | [<CompiledName("system")>] System of content: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("user")>] User of content: LanguageModelV4Message3.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV4Message4.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool")>] Tool of content: LanguageModelV4Message5.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("user")>] User of content: LanguageModelV4Message.Cases.User.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV4Message.Cases.Assistant.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("tool")>] Tool of content: LanguageModelV4Message.Cases.Tool.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member CreateSystem (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member CreateUser (content: LanguageModelV4Message.Cases.User.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member CreateAssistant (content: LanguageModelV4Message.Cases.Assistant.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message = jsNative
+    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
+    static member CreateTool (content: LanguageModelV4Message.Cases.Tool.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Message = jsNative
 
 /// <summary>
 /// Text content part of a prompt. It contains a string of text.
@@ -3020,8 +3437,8 @@ module LanguageModelV4ReasoningFilePart =
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Data =
-        | [<CompiledName("data")>] Data of data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-        | [<CompiledName("url")>] Url of url: obj
+        | [<CompiledName("data"); Fickl.Core.InlineInterface>] Data of SharedV4FileDataData
+        | [<CompiledName("url"); Fickl.Core.InlineInterface>] Url of SharedV4FileDataUrl
 
 /// <summary>
 /// Provider-specific content part of a prompt. It contains no standardized
@@ -3200,14 +3617,37 @@ module LanguageModelV4ToolApprovalResponsePart =
     [<Literal>]
     let ``type`` = "tool-approval-response"
 
+/// <summary>
+/// Result of a tool call.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV4ToolResultOutput =
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("text")>] Text of value: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("json")>] Json of value: JSONValue * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="reason">Optional reason for the execution denial.</param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("error-json")>] ErrorJson of value: JSONValue * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("content")>] Content of value: LanguageModelV4ToolResultOutput7.Value.Item[]
+    | [<CompiledName("content")>] Content of value: LanguageModelV4ToolResultOutput.Cases.Content.Value.Item[]
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member CreateText (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput = jsNative
+    [<ParamObject; Emit("(o => ({type: 'json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+    static member CreateJson (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput = jsNative
+    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
+    static member CreateExecutionDenied (?reason: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput = jsNative
+    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
+    static member CreateErrorText (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput = jsNative
+    [<ParamObject; Emit("(o => ({type: 'error-json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+    static member CreateErrorJson (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4ToolResultOutput = jsNative
 
 /// <summary>
 /// The configuration of a provider tool.
@@ -3252,55 +3692,6 @@ type LanguageModelV4ToolChoice =
     | [<CompiledName("none")>] None
     | [<CompiledName("required")>] Required
     | [<CompiledName("tool")>] Tool of toolName: string
-
-[<Interface>]
-type LanguageModelV4ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'auto' })")>]
-    static member Create () : LanguageModelV4ToolChoice2 = jsNative
-
-module LanguageModelV4ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    [<Literal>]
-    let ``type`` = "auto"
-
-[<Interface>]
-type LanguageModelV4ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'none' })")>]
-    static member Create () : LanguageModelV4ToolChoice3 = jsNative
-
-module LanguageModelV4ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    [<Literal>]
-    let ``type`` = "none"
-
-[<Interface>]
-type LanguageModelV4ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'required' })")>]
-    static member Create () : LanguageModelV4ToolChoice4 = jsNative
-
-module LanguageModelV4ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    [<Literal>]
-    let ``type`` = "required"
-
-[<Interface>]
-type LanguageModelV4ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract toolName: string with get, set
-    [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
-    static member Create (toolName: string) : LanguageModelV4ToolChoice5 = jsNative
-
-module LanguageModelV4ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool"
 
 [<Interface>]
 type LanguageModelV4CallOptions =
@@ -3374,7 +3765,7 @@ type LanguageModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -3392,7 +3783,7 @@ type LanguageModelV4CallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: LanguageModelV4Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV4CallOptions.ResponseFormat, LanguageModelV4CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV4CallOptions.Tools.Item[], ?toolChoice: LanguageModelV4ToolChoice, ?includeRawChunks: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?reasoning: LanguageModelV4CallOptions.Reasoning, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4CallOptions = jsNative
+    static member Create (prompt: LanguageModelV4Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV4CallOptions.ResponseFormat, LanguageModelV4CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV4CallOptions.Tools.Item[], ?toolChoice: LanguageModelV4ToolChoice, ?includeRawChunks: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?reasoning: LanguageModelV4CallOptions.Reasoning, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4CallOptions = jsNative
 
 /// <summary>
 /// A provider-specific content block that does not map to another standardized
@@ -3516,92 +3907,28 @@ module LanguageModelV4ReasoningFile =
     [<Literal>]
     let ``type`` = "reasoning-file"
 
+/// <summary>
+/// A source that has been used as input to generate the response.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("sourceType", CaseRules.None)>]
 type LanguageModelV4Source =
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("url")>] Url of ``type``: string * id: string * url: string * title: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("document")>] Document of ``type``: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV4Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// The URL of the source.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// The title of the source.
-    /// </summary>
-    abstract title: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
-    static member Create (id: string, url: string, ?title: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Source2 = jsNative
-
-module LanguageModelV4Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let sourceType = "url"
-
-[<Interface>]
-type LanguageModelV4Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// IANA media type of the document (e.g., 'application/pdf').
-    /// </summary>
-    abstract mediaType: string with get, set
-    /// <summary>
-    /// The title of the document.
-    /// </summary>
-    abstract title: string with get, set
-    /// <summary>
-    /// Optional filename of the document.
-    /// </summary>
-    abstract filename: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
-    static member Create (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Source3 = jsNative
-
-module LanguageModelV4Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    [<Literal>]
-    let sourceType = "document"
+    [<ParamObject; Emit("({ sourceType: 'url', type: 'source', ...$0 })")>]
+    static member CreateUrl (id: string, url: string, ?title: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Source = jsNative
+    [<ParamObject; Emit("({ sourceType: 'document', type: 'source', ...$0 })")>]
+    static member CreateDocument (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Source = jsNative
 
 /// <summary>
 /// Text that the model has generated.
@@ -3748,15 +4075,37 @@ module LanguageModelV4ToolResult =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV4Content =
-    | [<CompiledName("custom")>] Custom of kind: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("file")>] File of mediaType: string * data: LanguageModelV4ReasoningFilePart.Data * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("reasoning")>] Reasoning of text: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("reasoning-file")>] ReasoningFile of mediaType: string * data: LanguageModelV4ReasoningFilePart.Data * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("text")>] Text of text: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-approval-request")>] ToolApprovalRequest of approvalId: string * toolCallId: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * dynamic: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: U5<string, float, bool, JSONValue[], JSONObject> * isError: bool option * preliminary: bool option * dynamic: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of LanguageModelV4CustomContent
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV4File
+    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV4Reasoning
+    | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of LanguageModelV4ReasoningFile
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV4Text
+    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of LanguageModelV4ToolApprovalRequest
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV4ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV4ToolResult
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Content = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4Content = jsNative
 
 /// <summary>
 /// Reason why a language model finished generating a response.
@@ -3867,13 +4216,31 @@ type LanguageModelV4GenerateResult =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV4StreamPart =
-    | [<CompiledName("custom")>] Custom of kind: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("file")>] File of mediaType: string * data: LanguageModelV4ReasoningFilePart.Data * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("reasoning-file")>] ReasoningFile of mediaType: string * data: LanguageModelV4ReasoningFilePart.Data * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-approval-request")>] ToolApprovalRequest of approvalId: string * toolCallId: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * dynamic: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: U5<string, float, bool, JSONValue[], JSONObject> * isError: bool option * preliminary: bool option * dynamic: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of LanguageModelV4CustomContent
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV4File
+    | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of LanguageModelV4ReasoningFile
+    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of LanguageModelV4ToolApprovalRequest
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV4ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV4ToolResult
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("text-start")>] TextStart of providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * id: string
     | [<CompiledName("text-delta")>] TextDelta of id: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * delta: string
     | [<CompiledName("text-end")>] TextEnd of providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * id: string
@@ -3887,207 +4254,36 @@ type LanguageModelV4StreamPart =
     | [<CompiledName("finish")>] Finish of usage: LanguageModelV4Usage * finishReason: LanguageModelV4FinishReason * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("raw")>] Raw of rawValue: obj
     | [<CompiledName("error")>] Error of error: obj
+    /// <param name="id">ID for the generated response, if the provider sends one.</param>
+    /// <param name="timestamp">Timestamp for the start of the generated response, if the provider sends one.</param>
+    /// <param name="modelId">The ID of the response model that was used to generate the response, if the provider sends one.</param>
     | [<CompiledName("response-metadata")>] ResponseMetadata of id: string option * timestamp: Fable.Core.TS.Es.Date option * modelId: string option
-
-[<Interface>]
-type LanguageModelV4StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart10 = jsNative
-
-module LanguageModelV4StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-end"
-
-[<Interface>]
-type LanguageModelV4StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract warnings: SharedV4Warning[] with get, set
-    [<ParamObject; Emit("({ type: 'stream-start', ...$0 })")>]
-    static member Create (warnings: SharedV4Warning[]) : LanguageModelV4StreamPart11 = jsNative
-
-module LanguageModelV4StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "stream-start"
-
-[<Interface>]
-type LanguageModelV4StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract usage: LanguageModelV4Usage with get, set
-    abstract finishReason: LanguageModelV4FinishReason with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-    static member Create (usage: LanguageModelV4Usage, finishReason: LanguageModelV4FinishReason, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart12 = jsNative
-
-module LanguageModelV4StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    [<Literal>]
-    let ``type`` = "finish"
-
-[<Interface>]
-type LanguageModelV4StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract rawValue: obj with get, set
-    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-    static member Create (rawValue: obj) : LanguageModelV4StreamPart13 = jsNative
-
-module LanguageModelV4StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    [<Literal>]
-    let ``type`` = "raw"
-
-[<Interface>]
-type LanguageModelV4StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (error: obj) : LanguageModelV4StreamPart14 = jsNative
-
-module LanguageModelV4StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type LanguageModelV4StreamPart15 =
-    inherit LanguageModelV4ResponseMetadata
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
-    static member Create (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV4StreamPart15 = jsNative
-
-module LanguageModelV4StreamPart15 =
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-metadata"
-
-[<Interface>]
-type LanguageModelV4StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart2 = jsNative
-
-module LanguageModelV4StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-start"
-
-[<Interface>]
-type LanguageModelV4StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateTextStart (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart3 = jsNative
-
-module LanguageModelV4StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-delta"
-
-[<Interface>]
-type LanguageModelV4StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextDelta (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart4 = jsNative
-
-module LanguageModelV4StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-end"
-
-[<Interface>]
-type LanguageModelV4StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextEnd (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart5 = jsNative
-
-module LanguageModelV4StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-start"
-
-[<Interface>]
-type LanguageModelV4StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateReasoningStart (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart6 = jsNative
-
-module LanguageModelV4StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-delta"
-
-[<Interface>]
-type LanguageModelV4StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateReasoningDelta (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart7 = jsNative
-
-module LanguageModelV4StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-end"
-
-[<Interface>]
-type LanguageModelV4StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract toolName: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    abstract providerExecuted: bool option with get, set
-    abstract dynamic: bool option with get, set
-    abstract title: string option with get, set
+    static member CreateReasoningEnd (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-start', ...$0 })")>]
-    static member Create (id: string, toolName: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : LanguageModelV4StreamPart8 = jsNative
-
-module LanguageModelV4StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-start"
-
-[<Interface>]
-type LanguageModelV4StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateToolInputStart (id: string, toolName: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : LanguageModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart9 = jsNative
-
-module LanguageModelV4StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-delta"
+    static member CreateToolInputDelta (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
+    static member CreateToolInputEnd (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+    static member CreateFinish (usage: LanguageModelV4Usage, finishReason: LanguageModelV4FinishReason, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV4StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
+    static member CreateResponseMetadata (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV4StreamPart = jsNative
 
 /// <summary>
 /// The result of a language model doStream call.
@@ -4097,7 +4293,7 @@ type LanguageModelV4StreamResult =
     /// <summary>
     /// The stream.
     /// </summary>
-    abstract stream: obj with get, set
+    abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV4StreamPart> with get, set
     /// <summary>
     /// Optional request information for telemetry and debugging purposes.
     /// </summary>
@@ -4107,7 +4303,7 @@ type LanguageModelV4StreamResult =
     /// </summary>
     abstract response: LanguageModelV4StreamResult.Response option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (stream: obj, ?request: LanguageModelV4StreamResult.Request, ?response: LanguageModelV4StreamResult.Response) : LanguageModelV4StreamResult = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV4StreamPart>, ?request: LanguageModelV4StreamResult.Request, ?response: LanguageModelV4StreamResult.Response) : LanguageModelV4StreamResult = jsNative
 
 /// <summary>
 /// Specification for a language model that implements the language model interface version 4.
@@ -4319,7 +4515,7 @@ type LanguageModelV3FunctionTool =
     /// The parameters that the tool expects. The language model uses this to
     /// understand the tool's input requirements and to provide matching suggestions.
     /// </summary>
-    abstract inputSchema: JSONSchema7 with get, set
+    abstract inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 with get, set
     /// <summary>
     /// An optional list of input examples that show the language
     /// model what the input should look like.
@@ -4338,7 +4534,7 @@ type LanguageModelV3FunctionTool =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
-    static member Create (name: string, inputSchema: JSONSchema7, ?description: string, ?inputExamples: LanguageModelV3FunctionTool.InputExamples.Item[], ?strict: bool, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3FunctionTool = jsNative
+    static member Create (name: string, inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?description: string, ?inputExamples: LanguageModelV3FunctionTool.InputExamples.Item[], ?strict: bool, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3FunctionTool = jsNative
 
 module LanguageModelV3FunctionTool =
     /// <summary>
@@ -4358,104 +4554,7 @@ module LanguageModelV3FunctionTool =
 /// <summary>
 /// Data content. Can be a Uint8Array, base64 encoded data as a string or a URL.
 /// </summary>
-type LanguageModelV3DataContent = obj
-
-[<Interface>]
-type LanguageModelV3Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    abstract role: string with get, set
-    abstract content: string with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
-    static member Create (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message2 = jsNative
-
-module LanguageModelV3Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    [<Literal>]
-    let role = "system"
-
-[<Interface>]
-type LanguageModelV3Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV3Message3.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
-    static member Create (content: LanguageModelV3Message3.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message3 = jsNative
-
-module LanguageModelV3Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    [<Literal>]
-    let role = "user"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("file")>] File of filename: string option * data: LanguageModelV3DataContent * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV3Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV3Message4.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
-    static member Create (content: LanguageModelV3Message4.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message4 = jsNative
-
-module LanguageModelV3Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    [<Literal>]
-    let role = "assistant"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("file")>] File of filename: string option * data: LanguageModelV3DataContent * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("reasoning")>] Reasoning of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: obj * providerExecuted: bool option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * output: LanguageModelV3ToolResultOutput * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV3Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV3Message5.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
-    static member Create (content: LanguageModelV3Message5.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message5 = jsNative
-
-module LanguageModelV3Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let role = "tool"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("tool-approval-response")>] ToolApprovalResponse of approvalId: string * approved: bool * reason: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * output: LanguageModelV3ToolResultOutput * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+type LanguageModelV3DataContent = U3<string, FSharp.CloudEdge.Runtime.Workers.URL, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 /// <summary>
 /// A prompt is a list of messages.
@@ -4468,343 +4567,44 @@ module LanguageModelV3Message5 =
 /// </summary>
 type LanguageModelV3Prompt = LanguageModelV3Message[]
 
-[<Interface>]
-type LanguageModelV3ToolResultOutput2 =
-    /// <summary>
-    /// Text tool output that should be directly sent to the API.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-    static member Create (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput2 = jsNative
-
-module LanguageModelV3ToolResultOutput2 =
-    /// <summary>
-    /// Text tool output that should be directly sent to the API.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text"
-
-[<Interface>]
-type LanguageModelV3ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-    static member Create (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput3 = jsNative
-
-module LanguageModelV3ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "json"
-
-[<Interface>]
-type LanguageModelV3ToolResultOutput4 =
-    /// <summary>
-    /// Type when the user has denied the execution of the tool call.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// Optional reason for the execution denial.
-    /// </summary>
-    abstract reason: string option with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
-    static member Create (?reason: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput4 = jsNative
-
-module LanguageModelV3ToolResultOutput4 =
-    /// <summary>
-    /// Type when the user has denied the execution of the tool call.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"execution-denied"</c></remarks>
-    [<Literal>]
-    let ``type`` = "execution-denied"
-
-[<Interface>]
-type LanguageModelV3ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
-    static member Create (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput5 = jsNative
-
-module LanguageModelV3ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-text"
-
-[<Interface>]
-type LanguageModelV3ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    /// <summary>
-    /// Provider-specific options.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'error-json', ...$0 })")>]
-    static member Create (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput6 = jsNative
-
-module LanguageModelV3ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-json"
-
-[<Interface>]
-type LanguageModelV3ToolResultOutput7 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: LanguageModelV3ToolResultOutput7.Value.Item[] with get, set
-    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
-    static member Create (value: LanguageModelV3ToolResultOutput7.Value.Item[]) : LanguageModelV3ToolResultOutput7 = jsNative
-
-module LanguageModelV3ToolResultOutput7 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    [<Literal>]
-    let ``type`` = "content"
-
-    module Value =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("file-url")>] FileUrl of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("file-id")>] FileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("custom")>] Custom of providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-        [<Interface>]
-        type Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Text content.
-            /// </summary>
-            abstract text: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-            static member Create (text: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item2 = jsNative
-
-        module Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            [<Literal>]
-            let ``type`` = "text"
-
-        [<Interface>]
-        type Item3 =
-            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded media data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Optional filename of the file.
-            /// </summary>
-            abstract filename: string option with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'file-data', ...$0 })")>]
-            static member Create (data: string, mediaType: string, ?filename: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item3 = jsNative
-
-        module Item3 =
-            /// <remarks>TypeScript type: <c>"file-data"</c></remarks>
-            [<Literal>]
-            let ``type`` = "file-data"
-
-        [<Interface>]
-        type Item4 =
-            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the file.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'file-url', ...$0 })")>]
-            static member Create (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item4 = jsNative
-
-        module Item4 =
-            /// <remarks>TypeScript type: <c>"file-url"</c></remarks>
-            [<Literal>]
-            let ``type`` = "file-url"
-
-        [<Interface>]
-        type Item5 =
-            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// ID of the file.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, JS.Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'file-id', ...$0 })")>]
-            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item5 = jsNative
-
-        module Item5 =
-            /// <remarks>TypeScript type: <c>"file-id"</c></remarks>
-            [<Literal>]
-            let ``type`` = "file-id"
-
-        [<Interface>]
-        type Item6 =
-            /// <summary>
-            /// Images that are referenced using base64 encoded data.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded image data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'image-data', ...$0 })")>]
-            static member Create (data: string, mediaType: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item6 = jsNative
-
-        module Item6 =
-            /// <summary>
-            /// Images that are referenced using base64 encoded data.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-data"</c></remarks>
-            [<Literal>]
-            let ``type`` = "image-data"
-
-        [<Interface>]
-        type Item7 =
-            /// <summary>
-            /// Images that are referenced using a URL.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// URL of the image.
-            /// </summary>
-            abstract url: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'image-url', ...$0 })")>]
-            static member Create (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item7 = jsNative
-
-        module Item7 =
-            /// <summary>
-            /// Images that are referenced using a URL.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-url"</c></remarks>
-            [<Literal>]
-            let ``type`` = "image-url"
-
-        [<Interface>]
-        type Item8 =
-            /// <summary>
-            /// Images that are referenced using a provider file id.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Image that is referenced using a provider file id.
-            /// <br /><br />
-            /// If you use multiple providers, you need to
-            /// specify the provider specific ids using
-            /// the Record option. The key is the provider
-            /// name, e.g. 'openai' or 'anthropic'.
-            /// </summary>
-            abstract fileId: U2<string, JS.Record<string, string>> with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'image-file-id', ...$0 })")>]
-            static member Create (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item8 = jsNative
-
-        module Item8 =
-            /// <summary>
-            /// Images that are referenced using a provider file id.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"image-file-id"</c></remarks>
-            [<Literal>]
-            let ``type`` = "image-file-id"
-
-        [<Interface>]
-        type Item9 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Provider-specific options.
-            /// </summary>
-            abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
-            static member Create (?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item9 = jsNative
-
-        module Item9 =
-            /// <summary>
-            /// Custom content part. This can be used to implement
-            /// provider-specific content parts.
-            /// </summary>
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            [<Literal>]
-            let ``type`` = "custom"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
 type LanguageModelV3Message =
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
     | [<CompiledName("system")>] System of content: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("user")>] User of content: LanguageModelV3Message3.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV3Message4.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("tool")>] Tool of content: LanguageModelV3Message5.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("user")>] User of content: LanguageModelV3Message.Cases.User.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV3Message.Cases.Assistant.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("tool")>] Tool of content: LanguageModelV3Message.Cases.Tool.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member CreateSystem (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member CreateUser (content: LanguageModelV3Message.Cases.User.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member CreateAssistant (content: LanguageModelV3Message.Cases.Assistant.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message = jsNative
+    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
+    static member CreateTool (content: LanguageModelV3Message.Cases.Tool.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3Message = jsNative
 
 /// <summary>
 /// Text content part of a prompt. It contains a string of text.
@@ -4997,14 +4797,37 @@ module LanguageModelV3ToolApprovalResponsePart =
     [<Literal>]
     let ``type`` = "tool-approval-response"
 
+/// <summary>
+/// Result of a tool call.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV3ToolResultOutput =
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("text")>] Text of value: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("json")>] Json of value: JSONValue * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="reason">Optional reason for the execution denial.</param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("execution-denied")>] ExecutionDenied of reason: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("error-text")>] ErrorText of value: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="value"></param>
+    /// <param name="providerOptions">Provider-specific options.</param>
     | [<CompiledName("error-json")>] ErrorJson of value: JSONValue * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("content")>] Content of value: LanguageModelV3ToolResultOutput7.Value.Item[]
+    | [<CompiledName("content")>] Content of value: LanguageModelV3ToolResultOutput.Cases.Content.Value.Item[]
+    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+    static member CreateText (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput = jsNative
+    [<ParamObject; Emit("(o => ({type: 'json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+    static member CreateJson (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput = jsNative
+    [<ParamObject; Emit("({ type: 'execution-denied', ...$0 })")>]
+    static member CreateExecutionDenied (?reason: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput = jsNative
+    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
+    static member CreateErrorText (value: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput = jsNative
+    [<ParamObject; Emit("(o => ({type: 'error-json', ...o, \"value\": o[\"value\"] ?? null}))($0)")>]
+    static member CreateErrorJson (value: JSONValue, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3ToolResultOutput = jsNative
 
 /// <summary>
 /// The configuration of a provider tool.
@@ -5049,55 +4872,6 @@ type LanguageModelV3ToolChoice =
     | [<CompiledName("none")>] None
     | [<CompiledName("required")>] Required
     | [<CompiledName("tool")>] Tool of toolName: string
-
-[<Interface>]
-type LanguageModelV3ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'auto' })")>]
-    static member Create () : LanguageModelV3ToolChoice2 = jsNative
-
-module LanguageModelV3ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    [<Literal>]
-    let ``type`` = "auto"
-
-[<Interface>]
-type LanguageModelV3ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'none' })")>]
-    static member Create () : LanguageModelV3ToolChoice3 = jsNative
-
-module LanguageModelV3ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    [<Literal>]
-    let ``type`` = "none"
-
-[<Interface>]
-type LanguageModelV3ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'required' })")>]
-    static member Create () : LanguageModelV3ToolChoice4 = jsNative
-
-module LanguageModelV3ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    [<Literal>]
-    let ``type`` = "required"
-
-[<Interface>]
-type LanguageModelV3ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract toolName: string with get, set
-    [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
-    static member Create (toolName: string) : LanguageModelV3ToolChoice5 = jsNative
-
-module LanguageModelV3ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool"
 
 [<Interface>]
 type LanguageModelV3CallOptions =
@@ -5171,7 +4945,7 @@ type LanguageModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -5184,7 +4958,7 @@ type LanguageModelV3CallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: LanguageModelV3Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV3CallOptions.ResponseFormat, LanguageModelV3CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV3CallOptions.Tools.Item[], ?toolChoice: LanguageModelV3ToolChoice, ?includeRawChunks: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3CallOptions = jsNative
+    static member Create (prompt: LanguageModelV3Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV3CallOptions.ResponseFormat, LanguageModelV3CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV3CallOptions.Tools.Item[], ?toolChoice: LanguageModelV3ToolChoice, ?includeRawChunks: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : LanguageModelV3CallOptions = jsNative
 
 /// <summary>
 /// A file that has been generated by the model.
@@ -5241,92 +5015,28 @@ module LanguageModelV3Reasoning =
     [<Literal>]
     let ``type`` = "reasoning"
 
+/// <summary>
+/// A source that has been used as input to generate the response.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("sourceType", CaseRules.None)>]
 type LanguageModelV3Source =
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("url")>] Url of ``type``: string * id: string * url: string * title: string option * providerMetadata: SharedV3ProviderMetadata option
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("document")>] Document of ``type``: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV3ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV3Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// The URL of the source.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// The title of the source.
-    /// </summary>
-    abstract title: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
-    static member Create (id: string, url: string, ?title: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Source2 = jsNative
-
-module LanguageModelV3Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let sourceType = "url"
-
-[<Interface>]
-type LanguageModelV3Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// IANA media type of the document (e.g., 'application/pdf').
-    /// </summary>
-    abstract mediaType: string with get, set
-    /// <summary>
-    /// The title of the document.
-    /// </summary>
-    abstract title: string with get, set
-    /// <summary>
-    /// Optional filename of the document.
-    /// </summary>
-    abstract filename: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
-    static member Create (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Source3 = jsNative
-
-module LanguageModelV3Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    [<Literal>]
-    let sourceType = "document"
+    [<ParamObject; Emit("({ sourceType: 'url', type: 'source', ...$0 })")>]
+    static member CreateUrl (id: string, url: string, ?title: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Source = jsNative
+    [<ParamObject; Emit("({ sourceType: 'document', type: 'source', ...$0 })")>]
+    static member CreateDocument (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Source = jsNative
 
 /// <summary>
 /// Text that the model has generated.
@@ -5473,13 +5183,35 @@ module LanguageModelV3ToolResult =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV3Content =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("reasoning")>] Reasoning of text: string * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("text")>] Text of text: string * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-approval-request")>] ToolApprovalRequest of approvalId: string * toolCallId: string * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * dynamic: bool option * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: U5<string, float, bool, JSONValue[], JSONObject> * isError: bool option * preliminary: bool option * dynamic: bool option * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: SharedV3ProviderMetadata option
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV3File
+    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV3Reasoning
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV3Text
+    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of LanguageModelV3ToolApprovalRequest
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV3ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV3ToolResult
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: SharedV3ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV3ProviderMetadata option
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Content = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3Content = jsNative
 
 /// <summary>
 /// Reason why a language model finished generating a response.
@@ -5590,11 +5322,29 @@ type LanguageModelV3GenerateResult =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV3StreamPart =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-approval-request")>] ToolApprovalRequest of approvalId: string * toolCallId: string * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * dynamic: bool option * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: U5<string, float, bool, JSONValue[], JSONObject> * isError: bool option * preliminary: bool option * dynamic: bool option * providerMetadata: SharedV3ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: SharedV3ProviderMetadata option
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV3File
+    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of LanguageModelV3ToolApprovalRequest
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV3ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV3ToolResult
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: SharedV3ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV3ProviderMetadata option
     | [<CompiledName("text-start")>] TextStart of providerMetadata: SharedV3ProviderMetadata option * id: string
     | [<CompiledName("text-delta")>] TextDelta of id: string * providerMetadata: SharedV3ProviderMetadata option * delta: string
     | [<CompiledName("text-end")>] TextEnd of providerMetadata: SharedV3ProviderMetadata option * id: string
@@ -5608,207 +5358,36 @@ type LanguageModelV3StreamPart =
     | [<CompiledName("finish")>] Finish of usage: LanguageModelV3Usage * finishReason: LanguageModelV3FinishReason * providerMetadata: SharedV3ProviderMetadata option
     | [<CompiledName("raw")>] Raw of rawValue: obj
     | [<CompiledName("error")>] Error of error: obj
+    /// <param name="id">ID for the generated response, if the provider sends one.</param>
+    /// <param name="timestamp">Timestamp for the start of the generated response, if the provider sends one.</param>
+    /// <param name="modelId">The ID of the response model that was used to generate the response, if the provider sends one.</param>
     | [<CompiledName("response-metadata")>] ResponseMetadata of id: string option * timestamp: Fable.Core.TS.Es.Date option * modelId: string option
-
-[<Interface>]
-type LanguageModelV3StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart10 = jsNative
-
-module LanguageModelV3StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-end"
-
-[<Interface>]
-type LanguageModelV3StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract warnings: SharedV3Warning[] with get, set
-    [<ParamObject; Emit("({ type: 'stream-start', ...$0 })")>]
-    static member Create (warnings: SharedV3Warning[]) : LanguageModelV3StreamPart11 = jsNative
-
-module LanguageModelV3StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "stream-start"
-
-[<Interface>]
-type LanguageModelV3StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract usage: LanguageModelV3Usage with get, set
-    abstract finishReason: LanguageModelV3FinishReason with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-    static member Create (usage: LanguageModelV3Usage, finishReason: LanguageModelV3FinishReason, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart12 = jsNative
-
-module LanguageModelV3StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    [<Literal>]
-    let ``type`` = "finish"
-
-[<Interface>]
-type LanguageModelV3StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract rawValue: obj with get, set
-    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-    static member Create (rawValue: obj) : LanguageModelV3StreamPart13 = jsNative
-
-module LanguageModelV3StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    [<Literal>]
-    let ``type`` = "raw"
-
-[<Interface>]
-type LanguageModelV3StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (error: obj) : LanguageModelV3StreamPart14 = jsNative
-
-module LanguageModelV3StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type LanguageModelV3StreamPart15 =
-    inherit LanguageModelV3ResponseMetadata
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
-    static member Create (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV3StreamPart15 = jsNative
-
-module LanguageModelV3StreamPart15 =
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-metadata"
-
-[<Interface>]
-type LanguageModelV3StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart2 = jsNative
-
-module LanguageModelV3StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-start"
-
-[<Interface>]
-type LanguageModelV3StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateTextStart (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart3 = jsNative
-
-module LanguageModelV3StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-delta"
-
-[<Interface>]
-type LanguageModelV3StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextDelta (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart4 = jsNative
-
-module LanguageModelV3StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-end"
-
-[<Interface>]
-type LanguageModelV3StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextEnd (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart5 = jsNative
-
-module LanguageModelV3StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-start"
-
-[<Interface>]
-type LanguageModelV3StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateReasoningStart (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart6 = jsNative
-
-module LanguageModelV3StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-delta"
-
-[<Interface>]
-type LanguageModelV3StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
+    static member CreateReasoningDelta (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart7 = jsNative
-
-module LanguageModelV3StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-end"
-
-[<Interface>]
-type LanguageModelV3StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract toolName: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
-    abstract providerExecuted: bool option with get, set
-    abstract dynamic: bool option with get, set
-    abstract title: string option with get, set
+    static member CreateReasoningEnd (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-start', ...$0 })")>]
-    static member Create (id: string, toolName: string, ?providerMetadata: SharedV3ProviderMetadata, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : LanguageModelV3StreamPart8 = jsNative
-
-module LanguageModelV3StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-start"
-
-[<Interface>]
-type LanguageModelV3StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: SharedV3ProviderMetadata option with get, set
+    static member CreateToolInputStart (id: string, toolName: string, ?providerMetadata: SharedV3ProviderMetadata, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : LanguageModelV3StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart9 = jsNative
-
-module LanguageModelV3StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-delta"
+    static member CreateToolInputDelta (id: string, delta: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
+    static member CreateToolInputEnd (id: string, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+    static member CreateFinish (usage: LanguageModelV3Usage, finishReason: LanguageModelV3FinishReason, ?providerMetadata: SharedV3ProviderMetadata) : LanguageModelV3StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
+    static member CreateResponseMetadata (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV3StreamPart = jsNative
 
 /// <summary>
 /// The result of a language model doStream call.
@@ -5818,7 +5397,7 @@ type LanguageModelV3StreamResult =
     /// <summary>
     /// The stream.
     /// </summary>
-    abstract stream: obj with get, set
+    abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV3StreamPart> with get, set
     /// <summary>
     /// Optional request information for telemetry and debugging purposes.
     /// </summary>
@@ -5828,7 +5407,7 @@ type LanguageModelV3StreamResult =
     /// </summary>
     abstract response: LanguageModelV3StreamResult.Response option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (stream: obj, ?request: LanguageModelV3StreamResult.Request, ?response: LanguageModelV3StreamResult.Response) : LanguageModelV3StreamResult = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV3StreamPart>, ?request: LanguageModelV3StreamResult.Request, ?response: LanguageModelV3StreamResult.Response) : LanguageModelV3StreamResult = jsNative
 
 /// <summary>
 /// Specification for a language model that implements the language model interface version 3.
@@ -6034,13 +5613,13 @@ type LanguageModelV2FunctionTool =
     /// The parameters that the tool expects. The language model uses this to
     /// understand the tool's input requirements and to provide matching suggestions.
     /// </summary>
-    abstract inputSchema: JSONSchema7 with get, set
+    abstract inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 with get, set
     /// <summary>
     /// The provider-specific options for the tool.
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
     [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
-    static member Create (name: string, inputSchema: JSONSchema7, ?description: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2FunctionTool = jsNative
+    static member Create (name: string, inputSchema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?description: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2FunctionTool = jsNative
 
 module LanguageModelV2FunctionTool =
     /// <summary>
@@ -6053,98 +5632,7 @@ module LanguageModelV2FunctionTool =
 /// <summary>
 /// Data content. Can be a Uint8Array, base64 encoded data as a string or a URL.
 /// </summary>
-type LanguageModelV2DataContent = obj
-
-[<Interface>]
-type LanguageModelV2Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    abstract role: string with get, set
-    abstract content: string with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
-    static member Create (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message2 = jsNative
-
-module LanguageModelV2Message2 =
-    /// <remarks>TypeScript type: <c>"system"</c></remarks>
-    [<Literal>]
-    let role = "system"
-
-[<Interface>]
-type LanguageModelV2Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV2Message3.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
-    static member Create (content: LanguageModelV2Message3.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message3 = jsNative
-
-module LanguageModelV2Message3 =
-    /// <remarks>TypeScript type: <c>"user"</c></remarks>
-    [<Literal>]
-    let role = "user"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("file")>] File of filename: string option * data: LanguageModelV2DataContent * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV2Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV2Message4.Content.Item[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
-    static member Create (content: LanguageModelV2Message4.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message4 = jsNative
-
-module LanguageModelV2Message4 =
-    /// <remarks>TypeScript type: <c>"assistant"</c></remarks>
-    [<Literal>]
-    let role = "assistant"
-
-    module Content =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("file")>] File of filename: string option * data: LanguageModelV2DataContent * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("reasoning")>] Reasoning of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: obj * providerExecuted: bool option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * output: LanguageModelV2ToolResultOutput * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV2Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract role: string with get, set
-    abstract content: LanguageModelV2ToolResultPart[] with get, set
-    /// <summary>
-    /// Additional provider-specific options. They are passed through
-    /// to the provider from the AI SDK and enable provider-specific
-    /// functionality that can be fully encapsulated in the provider.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
-    static member Create (content: LanguageModelV2ToolResultPart[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message5 = jsNative
-
-module LanguageModelV2Message5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let role = "tool"
+type LanguageModelV2DataContent = U3<string, FSharp.CloudEdge.Runtime.Workers.URL, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
 
 /// <summary>
 /// A prompt is a list of messages.
@@ -6157,120 +5645,44 @@ module LanguageModelV2Message5 =
 /// </summary>
 type LanguageModelV2Prompt = LanguageModelV2Message[]
 
-[<Interface>]
-type LanguageModelV2ToolResultOutput2 =
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-    static member Create (value: string) : LanguageModelV2ToolResultOutput2 = jsNative
-
-module LanguageModelV2ToolResultOutput2 =
-    /// <remarks>TypeScript type: <c>"text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text"
-
-[<Interface>]
-type LanguageModelV2ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-    static member Create (value: JSONValue) : LanguageModelV2ToolResultOutput3 = jsNative
-
-module LanguageModelV2ToolResultOutput3 =
-    /// <remarks>TypeScript type: <c>"json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "json"
-
-[<Interface>]
-type LanguageModelV2ToolResultOutput4 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: string with get, set
-    [<ParamObject; Emit("({ type: 'error-text', ...$0 })")>]
-    static member Create (value: string) : LanguageModelV2ToolResultOutput4 = jsNative
-
-module LanguageModelV2ToolResultOutput4 =
-    /// <remarks>TypeScript type: <c>"error-text"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-text"
-
-[<Interface>]
-type LanguageModelV2ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: JSONValue with get, set
-    [<ParamObject; Emit("({ type: 'error-json', ...$0 })")>]
-    static member Create (value: JSONValue) : LanguageModelV2ToolResultOutput5 = jsNative
-
-module LanguageModelV2ToolResultOutput5 =
-    /// <remarks>TypeScript type: <c>"error-json"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error-json"
-
-[<Interface>]
-type LanguageModelV2ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract value: LanguageModelV2ToolResultOutput6.Value.Item[] with get, set
-    [<ParamObject; Emit("({ type: 'content', ...$0 })")>]
-    static member Create (value: LanguageModelV2ToolResultOutput6.Value.Item[]) : LanguageModelV2ToolResultOutput6 = jsNative
-
-module LanguageModelV2ToolResultOutput6 =
-    /// <remarks>TypeScript type: <c>"content"</c></remarks>
-    [<Literal>]
-    let ``type`` = "content"
-
-    module Value =
-        [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-        type Item =
-            | [<CompiledName("text")>] Text of text: string
-            | [<CompiledName("media")>] Media of data: string * mediaType: string
-
-        [<Interface>]
-        type Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Text content.
-            /// </summary>
-            abstract text: string with get, set
-            [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-            static member Create (text: string) : Item2 = jsNative
-
-        module Item2 =
-            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-            [<Literal>]
-            let ``type`` = "text"
-
-        [<Interface>]
-        type Item3 =
-            /// <remarks>TypeScript type: <c>"media"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Base-64 encoded media data.
-            /// </summary>
-            abstract data: string with get, set
-            /// <summary>
-            /// IANA media type.
-            /// </summary>
-            /// <remarks>@see https://www.iana.org/assignments/media-types/media-types.xhtml</remarks>
-            abstract mediaType: string with get, set
-            [<ParamObject; Emit("({ type: 'media', ...$0 })")>]
-            static member Create (data: string, mediaType: string) : Item3 = jsNative
-
-        module Item3 =
-            /// <remarks>TypeScript type: <c>"media"</c></remarks>
-            [<Literal>]
-            let ``type`` = "media"
-
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("role", CaseRules.None)>]
 type LanguageModelV2Message =
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
     | [<CompiledName("system")>] System of content: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-    | [<CompiledName("user")>] User of content: LanguageModelV2Message3.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV2Message4.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("user")>] User of content: LanguageModelV2Message.Cases.User.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
+    | [<CompiledName("assistant")>] Assistant of content: LanguageModelV2Message.Cases.Assistant.Content.Item[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
+    /// <param name="content"></param>
+    /// <param name="providerOptions">
+    /// Additional provider-specific options. They are passed through
+    /// to the provider from the AI SDK and enable provider-specific
+    /// functionality that can be fully encapsulated in the provider.
+    /// </param>
     | [<CompiledName("tool")>] Tool of content: LanguageModelV2ToolResultPart[] * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
+    [<ParamObject; Emit("({ role: 'system', ...$0 })")>]
+    static member CreateSystem (content: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message = jsNative
+    [<ParamObject; Emit("({ role: 'user', ...$0 })")>]
+    static member CreateUser (content: LanguageModelV2Message.Cases.User.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message = jsNative
+    [<ParamObject; Emit("({ role: 'assistant', ...$0 })")>]
+    static member CreateAssistant (content: LanguageModelV2Message.Cases.Assistant.Content.Item[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message = jsNative
+    [<ParamObject; Emit("({ role: 'tool', ...$0 })")>]
+    static member CreateTool (content: LanguageModelV2ToolResultPart[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2Message = jsNative
 
 /// <summary>
 /// Text content part of a prompt. It contains a string of text.
@@ -6435,7 +5847,7 @@ type LanguageModelV2ToolResultOutput =
     | [<CompiledName("json")>] Json of value: JSONValue
     | [<CompiledName("error-text")>] ErrorText of value: string
     | [<CompiledName("error-json")>] ErrorJson of value: JSONValue
-    | [<CompiledName("content")>] Content of value: LanguageModelV2ToolResultOutput6.Value.Item[]
+    | [<CompiledName("content")>] Content of value: LanguageModelV2ToolResultOutput.Cases.Content.Value.Item[]
 
 /// <summary>
 /// The configuration of a tool that is defined by the provider.
@@ -6476,55 +5888,6 @@ type LanguageModelV2ToolChoice =
     | [<CompiledName("none")>] None
     | [<CompiledName("required")>] Required
     | [<CompiledName("tool")>] Tool of toolName: string
-
-[<Interface>]
-type LanguageModelV2ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'auto' })")>]
-    static member Create () : LanguageModelV2ToolChoice2 = jsNative
-
-module LanguageModelV2ToolChoice2 =
-    /// <remarks>TypeScript type: <c>"auto"</c></remarks>
-    [<Literal>]
-    let ``type`` = "auto"
-
-[<Interface>]
-type LanguageModelV2ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'none' })")>]
-    static member Create () : LanguageModelV2ToolChoice3 = jsNative
-
-module LanguageModelV2ToolChoice3 =
-    /// <remarks>TypeScript type: <c>"none"</c></remarks>
-    [<Literal>]
-    let ``type`` = "none"
-
-[<Interface>]
-type LanguageModelV2ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'required' })")>]
-    static member Create () : LanguageModelV2ToolChoice4 = jsNative
-
-module LanguageModelV2ToolChoice4 =
-    /// <remarks>TypeScript type: <c>"required"</c></remarks>
-    [<Literal>]
-    let ``type`` = "required"
-
-[<Interface>]
-type LanguageModelV2ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract toolName: string with get, set
-    [<ParamObject; Emit("({ type: 'tool', ...$0 })")>]
-    static member Create (toolName: string) : LanguageModelV2ToolChoice5 = jsNative
-
-module LanguageModelV2ToolChoice5 =
-    /// <remarks>TypeScript type: <c>"tool"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool"
 
 [<Interface>]
 type LanguageModelV2CallOptions =
@@ -6598,7 +5961,7 @@ type LanguageModelV2CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
@@ -6611,548 +5974,21 @@ type LanguageModelV2CallOptions =
     /// </summary>
     abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (prompt: LanguageModelV2Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV2CallOptions.ResponseFormat, LanguageModelV2CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV2CallOptions.Tools.Item[], ?toolChoice: LanguageModelV2ToolChoice, ?includeRawChunks: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2CallOptions = jsNative
+    static member Create (prompt: LanguageModelV2Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV2CallOptions.ResponseFormat, LanguageModelV2CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV2CallOptions.Tools.Item[], ?toolChoice: LanguageModelV2ToolChoice, ?includeRawChunks: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata) : LanguageModelV2CallOptions = jsNative
 
+/// <summary>
+/// Warning from the model provider for this call. The call will proceed, but e.g.
+/// some settings might not be supported, which can lead to suboptimal results.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV2CallWarning =
-    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: LanguageModelV2CallWarning2.Setting * details: string option
+    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting * details: string option
     | [<CompiledName("unsupported-tool")>] UnsupportedTool of tool: LanguageModelV2CallOptions.Tools.Item * details: string option
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type LanguageModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract setting: LanguageModelV2CallWarning2.Setting with get, set
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported-setting', ...$0 })")>]
-    static member Create (setting: LanguageModelV2CallWarning2.Setting, ?details: string) : LanguageModelV2CallWarning2 = jsNative
-
-module LanguageModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported-setting"
-
-    type Setting =
-        inherit seq<string>
-        /// <summary>
-        /// Returns a string representation of a string.
-        /// </summary>
-        abstract toString: (unit -> string) with get, set
-        /// <summary>
-        /// Returns the character at the specified index.
-        /// </summary>
-        /// <param name="pos">The zero-based index of the desired character.</param>
-        abstract charAt: (float -> string) with get, set
-        /// <summary>
-        /// Returns the Unicode value of the character at the specified location, or NaN if the index is out of bounds.
-        /// </summary>
-        /// <param name="index">The zero-based index of the desired character.</param>
-        abstract charCodeAt: (float -> float) with get, set
-        /// <summary>
-        /// Returns a string that contains the concatenation of two or more strings.
-        /// </summary>
-        /// <param name="strings">The strings to append to the end of the string.</param>
-        abstract concat: (string[] -> string) with get, set
-        /// <summary>
-        /// Returns the position of the first occurrence of a substring, or -1 if it is not present.
-        /// </summary>
-        /// <param name="searchString">The substring to search for in the string</param>
-        /// <param name="position">The index at which to begin searching the String object. If omitted, search starts at the beginning of the string.</param>
-        abstract indexOf: Func<string, float option, float> with get, set
-        /// <summary>
-        /// Returns the last occurrence of a substring in the string, or -1 if it is not present.
-        /// </summary>
-        /// <param name="searchString">The substring to search for.</param>
-        /// <param name="position">The index at which to begin searching. If omitted, the search begins at the end of the string.</param>
-        abstract lastIndexOf: Func<string, float option, float> with get, set
-        /// <summary>
-        /// Determines whether two strings are equivalent in the current locale.
-        /// Determines whether two strings are equivalent in the current or specified locale.
-        /// </summary>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string -> float
-        /// <summary>
-        /// Determines whether two strings are equivalent in the current locale.
-        /// Determines whether two strings are equivalent in the current or specified locale.
-        /// </summary>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.CollatorOptions -> float
-        /// <summary>
-        /// Determines whether two strings are equivalent in the current locale.
-        /// Determines whether two strings are equivalent in the current or specified locale.
-        /// </summary>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        /// <param name="that">String to compare to target string</param>
-        /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
-        /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
-        abstract localeCompare: that: string * ?locales: U3<string, Fable.Core.TS.Es.Locale, U2<string, Fable.Core.TS.Es.Locale>[]> * ?options: Fable.Core.TS.Es.CollatorOptions -> float
-        /// <summary>
-        /// Matches a string with a regular expression, and returns an array containing the results of that search.
-        /// Matches a string or an object that supports being matched against, and returns an array
-        /// containing the results of that search, or null if no matches are found.
-        /// </summary>
-        /// <param name="regexp">A variable name or string literal containing the regular expression pattern and flags.</param>
-        /// <param name="matcher">An object that supports being matched against.</param>
-        abstract ``match``: regexp: U2<string, Fable.Core.TS.Es.RegExp> -> Fable.Core.TS.Es.RegExpMatchArray option
-        /// <summary>
-        /// Matches a string with a regular expression, and returns an array containing the results of that search.
-        /// Matches a string or an object that supports being matched against, and returns an array
-        /// containing the results of that search, or null if no matches are found.
-        /// </summary>
-        /// <param name="regexp">A variable name or string literal containing the regular expression pattern and flags.</param>
-        /// <param name="matcher">An object that supports being matched against.</param>
-        abstract ``match``: matcher: LanguageModelV2CallWarning2.Setting.Match.Matcher -> Fable.Core.TS.Es.RegExpMatchArray option
-        /// <summary>
-        /// Replaces text in a string, using a regular expression or search string.
-        /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
-        /// Replaces text in a string, using an object that supports replacement within a string.
-        /// </summary>
-        /// <param name="searchValue">A string or regular expression to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
-        /// <param name="replaceValue">The replacement text.</param>
-        /// <param name="searchValue">A object can search for and replace matches within a string.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replace: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replaceValue: string -> string
-        /// <summary>
-        /// Replaces text in a string, using a regular expression or search string.
-        /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
-        /// Replaces text in a string, using an object that supports replacement within a string.
-        /// </summary>
-        /// <param name="searchValue">A string or regular expression to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
-        /// <param name="replaceValue">The replacement text.</param>
-        /// <param name="searchValue">A object can search for and replace matches within a string.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replace: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replacer: LanguageModelV2CallWarning2.Setting.Replace.Replacer -> string
-        /// <summary>
-        /// Replaces text in a string, using a regular expression or search string.
-        /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
-        /// Replaces text in a string, using an object that supports replacement within a string.
-        /// </summary>
-        /// <param name="searchValue">A string or regular expression to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
-        /// <param name="replaceValue">The replacement text.</param>
-        /// <param name="searchValue">A object can search for and replace matches within a string.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replace: searchValue: LanguageModelV2CallWarning2.Setting.Replace.SearchValue * replaceValue: string -> string
-        /// <summary>
-        /// Replaces text in a string, using a regular expression or search string.
-        /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
-        /// Replaces text in a string, using an object that supports replacement within a string.
-        /// </summary>
-        /// <param name="searchValue">A string or regular expression to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
-        /// <param name="replaceValue">The replacement text.</param>
-        /// <param name="searchValue">A object can search for and replace matches within a string.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replace: searchValue: LanguageModelV2CallWarning2.Setting.Replace.SearchValue2 * replacer: LanguageModelV2CallWarning2.Setting.Replace.Replacer2 -> string
-        /// <summary>
-        /// Finds the first substring match in a regular expression search.
-        /// </summary>
-        /// <param name="regexp">The regular expression pattern and applicable flags.</param>
-        /// <param name="searcher">An object which supports searching within a string.</param>
-        abstract search: regexp: U2<string, Fable.Core.TS.Es.RegExp> -> float
-        /// <summary>
-        /// Finds the first substring match in a regular expression search.
-        /// </summary>
-        /// <param name="regexp">The regular expression pattern and applicable flags.</param>
-        /// <param name="searcher">An object which supports searching within a string.</param>
-        abstract search: searcher: LanguageModelV2CallWarning2.Setting.Search.Searcher -> float
-        /// <summary>
-        /// Returns a section of a string.
-        /// </summary>
-        /// <param name="start">The index to the beginning of the specified portion of stringObj.</param>
-        /// <param name="end">
-        /// The index to the end of the specified portion of stringObj. The substring includes the characters up to, but not including, the character indicated by end.
-        /// If this value is not specified, the substring continues to the end of stringObj.
-        /// </param>
-        abstract slice: Func<float option, float option, string> with get, set
-        /// <summary>
-        /// Split a string into substrings using the specified separator and return them as an array.
-        /// </summary>
-        /// <param name="separator">A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</param>
-        /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
-        /// <param name="splitter">An object that can split a string.</param>
-        /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
-        abstract split: separator: U2<string, Fable.Core.TS.Es.RegExp> * ?limit: float -> string[]
-        /// <summary>
-        /// Split a string into substrings using the specified separator and return them as an array.
-        /// </summary>
-        /// <param name="separator">A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</param>
-        /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
-        /// <param name="splitter">An object that can split a string.</param>
-        /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
-        abstract split: splitter: LanguageModelV2CallWarning2.Setting.Split.Splitter * ?limit: float -> string[]
-        /// <summary>
-        /// Returns the substring at the specified location within a String object.
-        /// </summary>
-        /// <param name="start">The zero-based index number indicating the beginning of the substring.</param>
-        /// <param name="end">
-        /// Zero-based index number indicating the end of the substring. The substring includes the characters up to, but not including, the character indicated by end.
-        /// If end is omitted, the characters from start through the end of the original string are returned.
-        /// </param>
-        abstract substring: Func<float, float option, string> with get, set
-        /// <summary>
-        /// Converts all the alphabetic characters in a string to lowercase.
-        /// </summary>
-        abstract toLowerCase: (unit -> string) with get, set
-        /// <summary>
-        /// Converts all alphabetic characters to lowercase, taking into account the host environment's current locale.
-        /// </summary>
-        abstract toLocaleLowerCase: ?locales: U2<string, string[]> -> string
-        /// <summary>
-        /// Converts all alphabetic characters to lowercase, taking into account the host environment's current locale.
-        /// </summary>
-        abstract toLocaleLowerCase: ?locales: U3<string, Fable.Core.TS.Es.Locale, U2<string, Fable.Core.TS.Es.Locale>[]> -> string
-        /// <summary>
-        /// Converts all the alphabetic characters in a string to uppercase.
-        /// </summary>
-        abstract toUpperCase: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale.
-        /// </summary>
-        abstract toLocaleUpperCase: ?locales: U2<string, string[]> -> string
-        /// <summary>
-        /// Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale.
-        /// </summary>
-        abstract toLocaleUpperCase: ?locales: U3<string, Fable.Core.TS.Es.Locale, U2<string, Fable.Core.TS.Es.Locale>[]> -> string
-        /// <summary>
-        /// Removes the leading and trailing white space and line terminator characters from a string.
-        /// </summary>
-        abstract trim: (unit -> string) with get, set
-        /// <summary>
-        /// Returns the length of a String object.
-        /// </summary>
-        abstract length: float
-        /// <summary>
-        /// Gets a substring beginning at the specified location and having the specified length.
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        /// <param name="from">The starting position of the desired substring. The index of the first character in the string is zero.</param>
-        /// <param name="length">The number of characters to include in the returned substring.</param>
-        abstract substr: Func<float, float option, string> with get, set
-        /// <summary>
-        /// Returns the primitive value of the specified object.
-        /// </summary>
-        abstract valueOf: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a nonnegative integer Number less than 1114112 (0x110000) that is the code point
-        /// value of the UTF-16 encoded code point starting at the string element at position pos in
-        /// the String resulting from converting this object to a String.
-        /// If there is no element at that position, the result is undefined.
-        /// If a valid UTF-16 surrogate pair does not begin at pos, the result is the code unit at pos.
-        /// </summary>
-        abstract codePointAt: (float -> float option) with get, set
-        /// <summary>
-        /// Returns true if searchString appears as a substring of the result of converting this
-        /// object to a String, at one or more positions that are
-        /// greater than or equal to position; otherwise, returns false.
-        /// </summary>
-        /// <param name="searchString">search string</param>
-        /// <param name="position">If position is undefined, 0 is assumed, so as to search all of the String.</param>
-        abstract includes: Func<string, float option, bool> with get, set
-        /// <summary>
-        /// Returns true if the sequence of elements of searchString converted to a String is the
-        /// same as the corresponding elements of this object (converted to a String) starting at
-        /// endPosition – length(this). Otherwise returns false.
-        /// </summary>
-        abstract endsWith: Func<string, float option, bool> with get, set
-        /// <summary>
-        /// Returns the String value result of normalizing the string into the normalization form
-        /// named by form as specified in Unicode Standard Annex #15, Unicode Normalization Forms.
-        /// </summary>
-        /// <param name="form">
-        /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
-        /// is "NFC"
-        /// </param>
-        /// <param name="form">
-        /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
-        /// is "NFC"
-        /// </param>
-        abstract normalize: form: LanguageModelV2CallWarning2.Setting.Normalize.Form -> string
-        /// <summary>
-        /// Returns the String value result of normalizing the string into the normalization form
-        /// named by form as specified in Unicode Standard Annex #15, Unicode Normalization Forms.
-        /// </summary>
-        /// <param name="form">
-        /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
-        /// is "NFC"
-        /// </param>
-        /// <param name="form">
-        /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
-        /// is "NFC"
-        /// </param>
-        abstract normalize: ?form: string -> string
-        /// <summary>
-        /// Returns a String value that is made from count copies appended together. If count is 0,
-        /// the empty string is returned.
-        /// </summary>
-        /// <param name="count">number of copies to append</param>
-        abstract repeat: (float -> string) with get, set
-        /// <summary>
-        /// Returns true if the sequence of elements of searchString converted to a String is the
-        /// same as the corresponding elements of this object (converted to a String) starting at
-        /// position. Otherwise returns false.
-        /// </summary>
-        abstract startsWith: Func<string, float option, bool> with get, set
-        /// <summary>
-        /// Returns an <c>&lt;a&gt;</c> HTML anchor element and sets the name attribute to the text value
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract anchor: (string -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;big&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract big: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;blink&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract blink: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;b&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract bold: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;tt&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract ``fixed``: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;font&gt;</c> HTML element and sets the color attribute value
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract fontcolor: (string -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;font&gt;</c> HTML element and sets the size attribute value
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract fontsize: size: float -> string
-        /// <summary>
-        /// Returns a <c>&lt;font&gt;</c> HTML element and sets the size attribute value
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract fontsize: size: string -> string
-        /// <summary>
-        /// Returns an <c>&lt;i&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract italics: (unit -> string) with get, set
-        /// <summary>
-        /// Returns an <c>&lt;a&gt;</c> HTML element and sets the href attribute value
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract link: (string -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;small&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract small: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;strike&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract strike: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;sub&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract sub: (unit -> string) with get, set
-        /// <summary>
-        /// Returns a <c>&lt;sup&gt;</c> HTML element
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
-        abstract sup: (unit -> string) with get, set
-        /// <summary>
-        /// Pads the current string with a given string (repeated and/or truncated, if needed) so that the resulting string has a given length.
-        /// The padding is applied from the start of the current string.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart">MDN</a>
-        /// </summary>
-        /// <param name="targetLength">
-        /// The length of the resulting string once the current <c>str</c> has been padded.
-        /// If the value is less than or equal to <c>str.length</c>, then <c>str</c> is returned as-is.
-        /// </param>
-        /// <param name="padString">
-        /// The string to pad the current <c>str</c> with.
-        /// If <c>padString</c> is too long to stay within <c>targetLength</c>, it will be truncated from the end.
-        /// The default value is the space character (U+0020).
-        /// </param>
-        abstract padStart: Func<float, string option, string> with get, set
-        /// <summary>
-        /// Pads the current string with a given string (repeated and/or truncated, if needed) so that the resulting string has a given length.
-        /// The padding is applied from the end of the current string.
-        /// <br /><br />
-        /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd">MDN</a>
-        /// </summary>
-        /// <param name="targetLength">
-        /// The length of the resulting string once the current <c>str</c> has been padded.
-        /// If the value is less than or equal to <c>str.length</c>, then <c>str</c> is returned as-is.
-        /// </param>
-        /// <param name="padString">
-        /// The string to pad the current <c>str</c> with.
-        /// If <c>padString</c> is too long to stay within <c>targetLength</c>, it will be truncated from the end.
-        /// The default value is the space character (U+0020).
-        /// </param>
-        abstract padEnd: Func<float, string option, string> with get, set
-        /// <summary>
-        /// Removes the trailing white space and line terminator characters from a string.
-        /// </summary>
-        abstract trimEnd: (unit -> string) with get, set
-        /// <summary>
-        /// Removes the leading white space and line terminator characters from a string.
-        /// </summary>
-        abstract trimStart: (unit -> string) with get, set
-        /// <summary>
-        /// Removes the leading white space and line terminator characters from a string.
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility. Use <c>trimStart</c> instead</remarks>
-        abstract trimLeft: (unit -> string) with get, set
-        /// <summary>
-        /// Removes the trailing white space and line terminator characters from a string.
-        /// </summary>
-        /// <remarks>@deprecated A legacy feature for browser compatibility. Use <c>trimEnd</c> instead</remarks>
-        abstract trimRight: (unit -> string) with get, set
-        /// <summary>
-        /// Matches a string with a regular expression, and returns an iterable of matches
-        /// containing the results of that search.
-        /// </summary>
-        /// <param name="regexp">A regular expression</param>
-        abstract matchAll: (Fable.Core.TS.Es.RegExp -> Fable.Core.TS.Es.RegExpStringIterator<Fable.Core.TS.Es.RegExpExecArray>) with get, set
-        /// <summary>
-        /// Replace all instances of a substring in a string, using a regular expression or search string.
-        /// </summary>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace for every successful match of searchValue in this string.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replaceAll: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replaceValue: string -> string
-        /// <summary>
-        /// Replace all instances of a substring in a string, using a regular expression or search string.
-        /// </summary>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replaceValue">A string containing the text to replace for every successful match of searchValue in this string.</param>
-        /// <param name="searchValue">A string to search for.</param>
-        /// <param name="replacer">A function that returns the replacement text.</param>
-        abstract replaceAll: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replacer: LanguageModelV2CallWarning2.Setting.ReplaceAll.Replacer -> string
-        /// <summary>
-        /// Returns a new String consisting of the single UTF-16 code unit located at the specified index.
-        /// </summary>
-        /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
-        abstract at: (float -> string option) with get, set
-        /// <summary>
-        /// Returns true if all leading surrogates and trailing surrogates appear paired and in order.
-        /// </summary>
-        abstract isWellFormed: (unit -> bool) with get, set
-        /// <summary>
-        /// Returns a string where all lone or out-of-order surrogates have been replaced by the Unicode replacement character (U+FFFD).
-        /// </summary>
-        abstract toWellFormed: (unit -> string) with get, set
-        [<EmitIndexer>]
-        abstract Item: float -> string
-
-    module Setting =
-        module Match =
-            type Matcher =
-                [<Emit("$0[Symbol.match]($1...)")>]
-                abstract SymbolMatch: string: string -> Fable.Core.TS.Es.RegExpMatchArray option
-
-        module Normalize =
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Form =
-                | NFC
-                | NFD
-                | NFKC
-                | NFKD
-
-        module Replace =
-            type Replacer = delegate of substring: string * args: obj[] -> string
-
-            type Replacer2 = delegate of substring: string * args: obj[] -> string
-
-            type SearchValue =
-                [<Emit("$0[Symbol.replace]($1...)")>]
-                abstract SymbolReplace: string: string * replaceValue: string -> string
-
-            type SearchValue2 =
-                [<Emit("$0[Symbol.replace]($1...)")>]
-                abstract SymbolReplace: string: string * replacer: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV2CallWarning2.Setting.Replace.SearchValue2.SymbolReplace.Replacer -> string
-
-            module SearchValue2 =
-                module SymbolReplace =
-                    type Replacer = delegate of substring: string * args: obj[] -> string
-
-        module ReplaceAll =
-            type Replacer = delegate of substring: string * args: obj[] -> string
-
-        module Search =
-            type Searcher =
-                [<Emit("$0[Symbol.search]($1...)")>]
-                abstract SymbolSearch: string: string -> float
-
-        module Split =
-            type Splitter =
-                [<Emit("$0[Symbol.split]($1...)")>]
-                abstract SymbolSplit: string: string * ?limit: float -> string[]
-
-[<Interface>]
-type LanguageModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"unsupported-tool"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract tool: LanguageModelV2CallOptions.Tools.Item with get, set
-    abstract details: string option with get, set
+    static member CreateUnsupportedSetting (setting: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting, ?details: string) : LanguageModelV2CallWarning = jsNative
     [<ParamObject; Emit("({ type: 'unsupported-tool', ...$0 })")>]
-    static member Create (tool: LanguageModelV2CallOptions.Tools.Item, ?details: string) : LanguageModelV2CallWarning3 = jsNative
-
-module LanguageModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"unsupported-tool"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported-tool"
-
-[<Interface>]
-type LanguageModelV2CallWarning4 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : LanguageModelV2CallWarning4 = jsNative
-
-module LanguageModelV2CallWarning4 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateUnsupportedTool (tool: LanguageModelV2CallOptions.Tools.Item, ?details: string) : LanguageModelV2CallWarning = jsNative
 
 /// <summary>
 /// A file that has been generated by the model.
@@ -7205,92 +6041,28 @@ module LanguageModelV2Reasoning =
     [<Literal>]
     let ``type`` = "reasoning"
 
+/// <summary>
+/// A source that has been used as input to generate the response.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("sourceType", CaseRules.None)>]
 type LanguageModelV2Source =
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("url")>] Url of ``type``: string * id: string * url: string * title: string option * providerMetadata: SharedV2ProviderMetadata option
+    /// <param name="type">TypeScript type: <c>"source"</c></param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
     | [<CompiledName("document")>] Document of ``type``: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV2ProviderMetadata option
-
-[<Interface>]
-type LanguageModelV2Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// The URL of the source.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// The title of the source.
-    /// </summary>
-    abstract title: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
-    static member Create (id: string, url: string, ?title: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Source2 = jsNative
-
-module LanguageModelV2Source2 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - URL sources reference web content.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let sourceType = "url"
-
-[<Interface>]
-type LanguageModelV2Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    abstract sourceType: string with get, set
-    /// <summary>
-    /// The ID of the source.
-    /// </summary>
-    abstract id: string with get, set
-    /// <summary>
-    /// IANA media type of the document (e.g., 'application/pdf').
-    /// </summary>
-    abstract mediaType: string with get, set
-    /// <summary>
-    /// The title of the document.
-    /// </summary>
-    abstract title: string with get, set
-    /// <summary>
-    /// Optional filename of the document.
-    /// </summary>
-    abstract filename: string option with get, set
-    /// <summary>
-    /// Additional provider metadata for the source.
-    /// </summary>
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
-    static member Create (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Source3 = jsNative
-
-module LanguageModelV2Source3 =
-    /// <remarks>TypeScript type: <c>"source"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source"
-    /// <summary>
-    /// The type of source - document sources reference files/documents.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"document"</c></remarks>
-    [<Literal>]
-    let sourceType = "document"
+    [<ParamObject; Emit("({ sourceType: 'url', type: 'source', ...$0 })")>]
+    static member CreateUrl (id: string, url: string, ?title: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Source = jsNative
+    [<ParamObject; Emit("({ sourceType: 'document', type: 'source', ...$0 })")>]
+    static member CreateDocument (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Source = jsNative
 
 /// <summary>
 /// Text that the model has generated.
@@ -7351,12 +6123,34 @@ module LanguageModelV2ToolCall =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV2Content =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    | [<CompiledName("reasoning")>] Reasoning of text: string * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("text")>] Text of text: string * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: obj * isError: bool option * providerExecuted: bool option * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: SharedV2ProviderMetadata option
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV2File
+    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV2Reasoning
+    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV2Text
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV2ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV2Content2
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: SharedV2ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV2ProviderMetadata option
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Content = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2Content = jsNative
 
 [<Interface>]
 type LanguageModelV2Content2 =
@@ -7458,10 +6252,28 @@ type LanguageModelV2Usage =
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type LanguageModelV2StreamPart =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-    | [<CompiledName("tool-call")>] ToolCall of toolCallId: string * toolName: string * input: string * providerExecuted: bool option * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("tool-result")>] ToolResult of toolCallId: string * toolName: string * result: obj * isError: bool option * providerExecuted: bool option * providerMetadata: SharedV2ProviderMetadata option
-    | [<CompiledName("source")>] Source of id: string * providerMetadata: SharedV2ProviderMetadata option
+    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV2File
+    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV2ToolCall
+    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV2Content2
+    /// <param name="sourceType">
+    /// The type of source - URL sources reference web content.
+    /// TypeScript type: <c>"url"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="url">The URL of the source.</param>
+    /// <param name="title">The title of the source.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'url'")>] Source of sourceType: string * id: string * url: string * title: string option * providerMetadata: SharedV2ProviderMetadata option
+    /// <param name="sourceType">
+    /// The type of source - document sources reference files/documents.
+    /// TypeScript type: <c>"document"</c>
+    /// </param>
+    /// <param name="id">The ID of the source.</param>
+    /// <param name="mediaType">IANA media type of the document (e.g., 'application/pdf').</param>
+    /// <param name="title">The title of the document.</param>
+    /// <param name="filename">Optional filename of the document.</param>
+    /// <param name="providerMetadata">Additional provider metadata for the source.</param>
+    | [<CompiledName("source"); CaseTest("$0.sourceType === 'document'")>] Source2 of sourceType: string * id: string * mediaType: string * title: string * filename: string option * providerMetadata: SharedV2ProviderMetadata option
     | [<CompiledName("text-start")>] TextStart of providerMetadata: SharedV2ProviderMetadata option * id: string
     | [<CompiledName("text-delta")>] TextDelta of id: string * providerMetadata: SharedV2ProviderMetadata option * delta: string
     | [<CompiledName("text-end")>] TextEnd of providerMetadata: SharedV2ProviderMetadata option * id: string
@@ -7475,205 +6287,36 @@ type LanguageModelV2StreamPart =
     | [<CompiledName("finish")>] Finish of usage: LanguageModelV2Usage * finishReason: LanguageModelV2FinishReason * providerMetadata: SharedV2ProviderMetadata option
     | [<CompiledName("raw")>] Raw of rawValue: obj
     | [<CompiledName("error")>] Error of error: obj
+    /// <param name="id">ID for the generated response, if the provider sends one.</param>
+    /// <param name="timestamp">Timestamp for the start of the generated response, if the provider sends one.</param>
+    /// <param name="modelId">The ID of the response model that was used to generate the response, if the provider sends one.</param>
     | [<CompiledName("response-metadata")>] ResponseMetadata of id: string option * timestamp: Fable.Core.TS.Es.Date option * modelId: string option
-
-[<Interface>]
-type LanguageModelV2StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart10 = jsNative
-
-module LanguageModelV2StreamPart10 =
-    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-end"
-
-[<Interface>]
-type LanguageModelV2StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract warnings: LanguageModelV2CallWarning[] with get, set
-    [<ParamObject; Emit("({ type: 'stream-start', ...$0 })")>]
-    static member Create (warnings: LanguageModelV2CallWarning[]) : LanguageModelV2StreamPart11 = jsNative
-
-module LanguageModelV2StreamPart11 =
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "stream-start"
-
-[<Interface>]
-type LanguageModelV2StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract usage: LanguageModelV2Usage with get, set
-    abstract finishReason: LanguageModelV2FinishReason with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-    static member Create (usage: LanguageModelV2Usage, finishReason: LanguageModelV2FinishReason, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart12 = jsNative
-
-module LanguageModelV2StreamPart12 =
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    [<Literal>]
-    let ``type`` = "finish"
-
-[<Interface>]
-type LanguageModelV2StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract rawValue: obj with get, set
-    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-    static member Create (rawValue: obj) : LanguageModelV2StreamPart13 = jsNative
-
-module LanguageModelV2StreamPart13 =
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    [<Literal>]
-    let ``type`` = "raw"
-
-[<Interface>]
-type LanguageModelV2StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (error: obj) : LanguageModelV2StreamPart14 = jsNative
-
-module LanguageModelV2StreamPart14 =
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type LanguageModelV2StreamPart15 =
-    inherit LanguageModelV2ResponseMetadata
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    abstract ``type``: string with get, set
-    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
-    static member Create (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV2StreamPart15 = jsNative
-
-module LanguageModelV2StreamPart15 =
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-metadata"
-
-[<Interface>]
-type LanguageModelV2StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract id: string with get, set
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
+    static member CreateSource (id: string, url: string, ?title: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'source', sourceType: 'document', ...$0 })")>]
+    static member CreateSource2 (id: string, mediaType: string, title: string, ?filename: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart2 = jsNative
-
-module LanguageModelV2StreamPart2 =
-    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-start"
-
-[<Interface>]
-type LanguageModelV2StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateTextStart (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart3 = jsNative
-
-module LanguageModelV2StreamPart3 =
-    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-delta"
-
-[<Interface>]
-type LanguageModelV2StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextDelta (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'text-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart4 = jsNative
-
-module LanguageModelV2StreamPart4 =
-    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "text-end"
-
-[<Interface>]
-type LanguageModelV2StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract id: string with get, set
+    static member CreateTextEnd (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-start', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart5 = jsNative
-
-module LanguageModelV2StreamPart5 =
-    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-start"
-
-[<Interface>]
-type LanguageModelV2StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract delta: string with get, set
+    static member CreateReasoningStart (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart6 = jsNative
-
-module LanguageModelV2StreamPart6 =
-    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-delta"
-
-[<Interface>]
-type LanguageModelV2StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
+    static member CreateReasoningDelta (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'reasoning-end', ...$0 })")>]
-    static member Create (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart7 = jsNative
-
-module LanguageModelV2StreamPart7 =
-    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-    [<Literal>]
-    let ``type`` = "reasoning-end"
-
-[<Interface>]
-type LanguageModelV2StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract toolName: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
-    abstract providerExecuted: bool option with get, set
+    static member CreateReasoningEnd (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-start', ...$0 })")>]
-    static member Create (id: string, toolName: string, ?providerMetadata: SharedV2ProviderMetadata, ?providerExecuted: bool) : LanguageModelV2StreamPart8 = jsNative
-
-module LanguageModelV2StreamPart8 =
-    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-start"
-
-[<Interface>]
-type LanguageModelV2StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: SharedV2ProviderMetadata option with get, set
+    static member CreateToolInputStart (id: string, toolName: string, ?providerMetadata: SharedV2ProviderMetadata, ?providerExecuted: bool) : LanguageModelV2StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'tool-input-delta', ...$0 })")>]
-    static member Create (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart9 = jsNative
-
-module LanguageModelV2StreamPart9 =
-    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "tool-input-delta"
+    static member CreateToolInputDelta (id: string, delta: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
+    static member CreateToolInputEnd (id: string, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+    static member CreateFinish (usage: LanguageModelV2Usage, finishReason: LanguageModelV2FinishReason, ?providerMetadata: SharedV2ProviderMetadata) : LanguageModelV2StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
+    static member CreateResponseMetadata (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : LanguageModelV2StreamPart = jsNative
 
 /// <summary>
 /// Specification for a language model that implements the language model interface version 2.
@@ -7796,7 +6439,7 @@ module LanguageModelV2 =
         module Result =
             [<Interface>]
             type Item =
-                abstract stream: obj with get, set
+                abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV2StreamPart> with get, set
                 /// <summary>
                 /// Optional request information for telemetry and debugging purposes.
                 /// </summary>
@@ -7806,7 +6449,7 @@ module LanguageModelV2 =
                 /// </summary>
                 abstract response: LanguageModelV2.DoStream.Result.Item.Response option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (stream: obj, ?request: LanguageModelV2.DoStream.Result.Item.Request, ?response: LanguageModelV2.DoStream.Result.Item.Response) : Item = jsNative
+                static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<LanguageModelV2StreamPart>, ?request: LanguageModelV2.DoStream.Result.Item.Request, ?response: LanguageModelV2.DoStream.Result.Item.Response) : Item = jsNative
 
             module Item =
                 [<Interface>]
@@ -8129,7 +6772,7 @@ type Experimental_BatchLanguageModelV4 =
     inherit LanguageModelV4
     inherit Experimental_BatchLanguageModelV4.Base
     [<ParamObject; Emit("({ specificationVersion: 'v4', ...$0 })")>]
-    static member Create (provider: string, modelId: string, supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, doGenerate: (LanguageModelV4CallOptions -> JS.Promise<LanguageModelV4GenerateResult>), doStream: (LanguageModelV4CallOptions -> JS.Promise<LanguageModelV4StreamResult>), experimental_doStartBatch: (Experimental_BatchLanguageModelV4.ExperimentalDoStartBatch.Options -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<obj>)) : Experimental_BatchLanguageModelV4 = jsNative
+    static member Create (provider: string, modelId: string, supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, doGenerate: (LanguageModelV4CallOptions -> JS.Promise<LanguageModelV4GenerateResult>), doStream: (LanguageModelV4CallOptions -> JS.Promise<LanguageModelV4StreamResult>), experimental_doStartBatch: (Experimental_BatchLanguageModelV4.ExperimentalDoStartBatch.Options -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchLanguageModelV4.ExperimentalDoGetBatchResults.Result.Item.Item, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>)) : Experimental_BatchLanguageModelV4 = jsNative
 
 [<Interface>]
 type RerankingModelV4CallOptions =
@@ -8149,7 +6792,7 @@ type RerankingModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional provider-specific options. They are passed through
     /// to the provider from the AI SDK and enable provider-specific
@@ -8162,7 +6805,7 @@ type RerankingModelV4CallOptions =
     /// </summary>
     abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (documents: RerankingModelV4CallOptions.Documents, query: string, ?topN: float, ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : RerankingModelV4CallOptions = jsNative
+    static member Create (documents: RerankingModelV4CallOptions.Documents, query: string, ?topN: float, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : RerankingModelV4CallOptions = jsNative
 
 /// <summary>
 /// The result of a reranking model doRerank call.
@@ -8268,14 +6911,14 @@ type SpeechModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : SpeechModelV4CallOptions = jsNative
+    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : SpeechModelV4CallOptions = jsNative
 
 /// <summary>
 /// The result of a speech model doGenerate call.
@@ -8382,14 +7025,14 @@ type TranscriptionModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : TranscriptionModelV4CallOptions = jsNative
+    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : TranscriptionModelV4CallOptions = jsNative
 
 /// <summary>
 /// The result of a transcription model doGenerate call.
@@ -8444,7 +7087,7 @@ type Experimental_TranscriptionModelV4StreamOptions =
     /// <c>Uint8Array</c> chunks contain raw audio bytes. <c>string</c> chunks contain
     /// base64-encoded raw audio bytes.
     /// </summary>
-    abstract audio: obj with get, set
+    abstract audio: FSharp.CloudEdge.Runtime.Workers.ReadableStream<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>> with get, set
     /// <summary>
     /// The input audio format for the raw audio chunks.
     /// </summary>
@@ -8459,7 +7102,7 @@ type Experimental_TranscriptionModelV4StreamOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP/WebSocket-based providers that support headers.
@@ -8470,7 +7113,7 @@ type Experimental_TranscriptionModelV4StreamOptions =
     /// </summary>
     abstract includeRawChunks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (audio: obj, inputAudioFormat: SharedV4AudioFormat, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool) : Experimental_TranscriptionModelV4StreamOptions = jsNative
+    static member Create (audio: FSharp.CloudEdge.Runtime.Workers.ReadableStream<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>, inputAudioFormat: SharedV4AudioFormat, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool) : Experimental_TranscriptionModelV4StreamOptions = jsNative
 
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_TranscriptionModelV4StreamPart =
@@ -8479,189 +7122,19 @@ type Experimental_TranscriptionModelV4StreamPart =
     | [<CompiledName("transcript-partial")>] TranscriptPartial of id: string option * text: string * startSecond: float option * durationInSeconds: float option * channelIndex: float option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("transcript-final")>] TranscriptFinal of id: string option * text: string * startSecond: float option * endSecond: float option * channelIndex: float option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("response-metadata")>] ResponseMetadata of timestamp: Fable.Core.TS.Es.Date option * modelId: string option * headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option * body: obj option
-    | [<CompiledName("finish")>] Finish of text: string * segments: Experimental_TranscriptionModelV4StreamPart7.Segments.Item[] * language: string option * durationInSeconds: float option * providerMetadata: JS.Record<string, JSONObject> option
+    | [<CompiledName("finish")>] Finish of text: string * segments: Experimental_TranscriptionModelV4StreamPart.Cases.Finish.Segments.Item[] * language: string option * durationInSeconds: float option * providerMetadata: JS.Record<string, JSONObject> option
     | [<CompiledName("raw")>] Raw of rawValue: obj
     | [<CompiledName("error")>] Error of error: obj
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart2 =
-    /// <summary>
-    /// Stream start event with warnings for the call, e.g. unsupported settings.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract warnings: SharedV4Warning[] with get, set
-    [<ParamObject; Emit("({ type: 'stream-start', ...$0 })")>]
-    static member Create (warnings: SharedV4Warning[]) : Experimental_TranscriptionModelV4StreamPart2 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart2 =
-    /// <summary>
-    /// Stream start event with warnings for the call, e.g. unsupported settings.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "stream-start"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart3 =
-    /// <summary>
-    /// Append-only transcript delta.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("({ type: 'transcript-delta', ...$0 })")>]
-    static member Create (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart3 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart3 =
-    /// <summary>
-    /// Append-only transcript delta.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript-delta"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart4 =
-    /// <summary>
-    /// Non-final transcript text. The text may be revised by later parts.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-partial"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract text: string with get, set
-    abstract startSecond: float option with get, set
-    abstract durationInSeconds: float option with get, set
-    abstract channelIndex: float option with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateTranscriptDelta (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'transcript-partial', ...$0 })")>]
-    static member Create (text: string, ?id: string, ?startSecond: float, ?durationInSeconds: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart4 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart4 =
-    /// <summary>
-    /// Non-final transcript text. The text may be revised by later parts.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-partial"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript-partial"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart5 =
-    /// <summary>
-    /// Final transcript text for a provider-defined segment or utterance.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-final"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract text: string with get, set
-    abstract startSecond: float option with get, set
-    abstract endSecond: float option with get, set
-    abstract channelIndex: float option with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateTranscriptPartial (text: string, ?id: string, ?startSecond: float, ?durationInSeconds: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'transcript-final', ...$0 })")>]
-    static member Create (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart5 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart5 =
-    /// <summary>
-    /// Final transcript text for a provider-defined segment or utterance.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"transcript-final"</c></remarks>
-    [<Literal>]
-    let ``type`` = "transcript-final"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart6 =
-    /// <summary>
-    /// Metadata for the response, emitted once available.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract timestamp: Fable.Core.TS.Es.Date option with get, set
-    abstract modelId: string option with get, set
-    abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
-    abstract body: obj option with get, set
+    static member CreateTranscriptFinal (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TranscriptionModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
-    static member Create (?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Experimental_TranscriptionModelV4StreamPart6 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart6 =
-    /// <summary>
-    /// Metadata for the response, emitted once available.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-metadata"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart7 =
-    /// <summary>
-    /// Metadata that is available after the stream is finished.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract text: string with get, set
-    abstract segments: Experimental_TranscriptionModelV4StreamPart7.Segments.Item[] with get, set
-    abstract language: string option with get, set
-    abstract durationInSeconds: float option with get, set
-    abstract providerMetadata: JS.Record<string, JSONObject> option with get, set
+    static member CreateResponseMetadata (?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Experimental_TranscriptionModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-    static member Create (text: string, segments: Experimental_TranscriptionModelV4StreamPart7.Segments.Item[], ?language: string, ?durationInSeconds: float, ?providerMetadata: JS.Record<string, JSONObject>) : Experimental_TranscriptionModelV4StreamPart7 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart7 =
-    /// <summary>
-    /// Metadata that is available after the stream is finished.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    [<Literal>]
-    let ``type`` = "finish"
-
-    module Segments =
-        [<Interface>]
-        type Item =
-            abstract text: string with get, set
-            abstract startSecond: float with get, set
-            abstract endSecond: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (text: string, startSecond: float, endSecond: float) : Item = jsNative
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart8 =
-    /// <summary>
-    /// Raw provider chunks if enabled.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract rawValue: obj with get, set
-    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-    static member Create (rawValue: obj) : Experimental_TranscriptionModelV4StreamPart8 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart8 =
-    /// <summary>
-    /// Raw provider chunks if enabled.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    [<Literal>]
-    let ``type`` = "raw"
-
-[<Interface>]
-type Experimental_TranscriptionModelV4StreamPart9 =
-    /// <summary>
-    /// Error parts are streamed, allowing for multiple errors.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (error: obj) : Experimental_TranscriptionModelV4StreamPart9 = jsNative
-
-module Experimental_TranscriptionModelV4StreamPart9 =
-    /// <summary>
-    /// Error parts are streamed, allowing for multiple errors.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
+    static member CreateFinish (text: string, segments: Experimental_TranscriptionModelV4StreamPart.Cases.Finish.Segments.Item[], ?language: string, ?durationInSeconds: float, ?providerMetadata: JS.Record<string, JSONObject>) : Experimental_TranscriptionModelV4StreamPart = jsNative
 
 /// <summary>
 /// The result of a transcription model doStream call.
@@ -8671,7 +7144,7 @@ type Experimental_TranscriptionModelV4StreamResult =
     /// <summary>
     /// The stream.
     /// </summary>
-    abstract stream: obj with get, set
+    abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Experimental_TranscriptionModelV4StreamPart> with get, set
     /// <summary>
     /// Optional request information for telemetry and debugging purposes.
     /// </summary>
@@ -8681,7 +7154,7 @@ type Experimental_TranscriptionModelV4StreamResult =
     /// </summary>
     abstract response: Experimental_TranscriptionModelV4StreamResult.Response option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (stream: obj, ?request: Experimental_TranscriptionModelV4StreamResult.Request, ?response: Experimental_TranscriptionModelV4StreamResult.Response) : Experimental_TranscriptionModelV4StreamResult = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Experimental_TranscriptionModelV4StreamPart>, ?request: Experimental_TranscriptionModelV4StreamResult.Request, ?response: Experimental_TranscriptionModelV4StreamResult.Response) : Experimental_TranscriptionModelV4StreamResult = jsNative
 
 /// <summary>
 /// Transcription model specification version 4.
@@ -8925,7 +7398,7 @@ type RerankingModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional provider-specific options. They are passed through
     /// to the provider from the AI SDK and enable provider-specific
@@ -8938,7 +7411,7 @@ type RerankingModelV3CallOptions =
     /// </summary>
     abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (documents: RerankingModelV3CallOptions.Documents, query: string, ?topN: float, ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : RerankingModelV3CallOptions = jsNative
+    static member Create (documents: RerankingModelV3CallOptions.Documents, query: string, ?topN: float, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : RerankingModelV3CallOptions = jsNative
 
 /// <summary>
 /// Specification for a reranking model that implements the reranking model interface version 3.
@@ -9083,14 +7556,14 @@ type SpeechModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : SpeechModelV3CallOptions = jsNative
+    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : SpeechModelV3CallOptions = jsNative
 
 /// <summary>
 /// Speech model specification version 3.
@@ -9227,14 +7700,14 @@ type TranscriptionModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : TranscriptionModelV3CallOptions = jsNative
+    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : TranscriptionModelV3CallOptions = jsNative
 
 /// <summary>
 /// Transcription model specification version 3.
@@ -9484,58 +7957,25 @@ type SpeechModelV2CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JS.Record<string, JSONValue>>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : SpeechModelV2CallOptions = jsNative
+    static member Create (text: string, ?voice: string, ?outputFormat: string, ?instructions: string, ?speed: float, ?language: string, ?providerOptions: JS.Record<string, JS.Record<string, JSONValue>>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : SpeechModelV2CallOptions = jsNative
 
+/// <summary>
+/// Warning from the model provider for this call. The call will proceed, but e.g.
+/// some settings might not be supported, which can lead to suboptimal results.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type SpeechModelV2CallWarning =
-    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: SpeechModelV2CallWarning2.Setting * details: string option
+    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: SpeechModelV2CallWarning.Cases.UnsupportedSetting.Setting * details: string option
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type SpeechModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract setting: SpeechModelV2CallWarning2.Setting with get, set
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported-setting', ...$0 })")>]
-    static member Create (setting: SpeechModelV2CallWarning2.Setting, ?details: string) : SpeechModelV2CallWarning2 = jsNative
-
-module SpeechModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported-setting"
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Setting =
-        | [<CompiledName("abortSignal")>] AbortSignal
-        | [<CompiledName("headers")>] Headers
-        | [<CompiledName("instructions")>] Instructions
-        | [<CompiledName("language")>] Language
-        | [<CompiledName("outputFormat")>] OutputFormat
-        | [<CompiledName("providerOptions")>] ProviderOptions
-        | [<CompiledName("speed")>] Speed
-        | [<CompiledName("text")>] Text
-        | [<CompiledName("voice")>] Voice
-
-[<Interface>]
-type SpeechModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : SpeechModelV2CallWarning3 = jsNative
-
-module SpeechModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateUnsupportedSetting (setting: SpeechModelV2CallWarning.Cases.UnsupportedSetting.Setting, ?details: string) : SpeechModelV2CallWarning = jsNative
 
 /// <summary>
 /// Speech model specification version 2.
@@ -9672,54 +8112,25 @@ type TranscriptionModelV2CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JS.Record<string, JSONValue>>, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : TranscriptionModelV2CallOptions = jsNative
+    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, mediaType: string, ?providerOptions: JS.Record<string, JS.Record<string, JSONValue>>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : TranscriptionModelV2CallOptions = jsNative
 
+/// <summary>
+/// Warning from the model provider for this call. The call will proceed, but e.g.
+/// some settings might not be supported, which can lead to suboptimal results.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type TranscriptionModelV2CallWarning =
-    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: TranscriptionModelV2CallWarning2.Setting * details: string option
+    | [<CompiledName("unsupported-setting")>] UnsupportedSetting of setting: TranscriptionModelV2CallWarning.Cases.UnsupportedSetting.Setting * details: string option
     | [<CompiledName("other")>] Other of message: string
-
-[<Interface>]
-type TranscriptionModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract setting: TranscriptionModelV2CallWarning2.Setting with get, set
-    abstract details: string option with get, set
     [<ParamObject; Emit("({ type: 'unsupported-setting', ...$0 })")>]
-    static member Create (setting: TranscriptionModelV2CallWarning2.Setting, ?details: string) : TranscriptionModelV2CallWarning2 = jsNative
-
-module TranscriptionModelV2CallWarning2 =
-    /// <remarks>TypeScript type: <c>"unsupported-setting"</c></remarks>
-    [<Literal>]
-    let ``type`` = "unsupported-setting"
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Setting =
-        | [<CompiledName("abortSignal")>] AbortSignal
-        | [<CompiledName("audio")>] Audio
-        | [<CompiledName("headers")>] Headers
-        | [<CompiledName("mediaType")>] MediaType
-        | [<CompiledName("providerOptions")>] ProviderOptions
-
-[<Interface>]
-type TranscriptionModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract message: string with get, set
-    [<ParamObject; Emit("({ type: 'other', ...$0 })")>]
-    static member Create (message: string) : TranscriptionModelV2CallWarning3 = jsNative
-
-module TranscriptionModelV2CallWarning3 =
-    /// <remarks>TypeScript type: <c>"other"</c></remarks>
-    [<Literal>]
-    let ``type`` = "other"
+    static member CreateUnsupportedSetting (setting: TranscriptionModelV2CallWarning.Cases.UnsupportedSetting.Setting, ?details: string) : TranscriptionModelV2CallWarning = jsNative
 
 /// <summary>
 /// Transcription model specification version 2.
@@ -9924,9 +8335,9 @@ type Experimental_RealtimeModelV4ToolDefinition =
     /// <summary>
     /// JSON Schema describing the parameters the tool expects.
     /// </summary>
-    abstract parameters: JSONSchema7 with get, set
+    abstract parameters: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 with get, set
     [<ParamObject; Emit("({ type: 'function', ...$0 })")>]
-    static member Create (name: string, parameters: JSONSchema7, ?description: string) : Experimental_RealtimeModelV4ToolDefinition = jsNative
+    static member Create (name: string, parameters: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?description: string) : Experimental_RealtimeModelV4ToolDefinition = jsNative
 
 module Experimental_RealtimeModelV4ToolDefinition =
     /// <summary>
@@ -9953,7 +8364,7 @@ type Experimental_RealtimeModelV4SessionConfig =
     /// <summary>
     /// Which output modalities the model should produce.
     /// </summary>
-    abstract outputModalities: Experimental_RealtimeModelV4SessionConfig.OutputModalities.Item[] option with get, set
+    abstract outputModalities: FSharp.CloudEdge.Runtime.Workers.ChatCompletionsCommonOptions.Modalities.Item[] option with get, set
     /// <summary>
     /// Audio format configuration for input audio.
     /// </summary>
@@ -9993,7 +8404,7 @@ type Experimental_RealtimeModelV4SessionConfig =
     /// </summary>
     abstract providerOptions: JS.Record<string, obj> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?instructions: string, ?voice: string, ?outputModalities: Experimental_RealtimeModelV4SessionConfig.OutputModalities.Item[], ?inputAudioFormat: SharedV4AudioFormat, ?inputAudioTranscription: Experimental_RealtimeModelV4SessionConfig.InputAudioTranscription, ?outputAudioTranscription: Experimental_RealtimeModelV4SessionConfig.OutputAudioTranscription, ?outputAudioFormat: SharedV4AudioFormat, ?turnDetection: Experimental_RealtimeModelV4SessionConfig.TurnDetection, ?tools: Experimental_RealtimeModelV4ToolDefinition[], ?providerOptions: JS.Record<string, obj>) : Experimental_RealtimeModelV4SessionConfig = jsNative
+    static member Create (?instructions: string, ?voice: string, ?outputModalities: FSharp.CloudEdge.Runtime.Workers.ChatCompletionsCommonOptions.Modalities.Item[], ?inputAudioFormat: SharedV4AudioFormat, ?inputAudioTranscription: Experimental_RealtimeModelV4SessionConfig.InputAudioTranscription, ?outputAudioTranscription: Experimental_RealtimeModelV4SessionConfig.OutputAudioTranscription, ?outputAudioFormat: SharedV4AudioFormat, ?turnDetection: Experimental_RealtimeModelV4SessionConfig.TurnDetection, ?tools: Experimental_RealtimeModelV4ToolDefinition[], ?providerOptions: JS.Record<string, obj>) : Experimental_RealtimeModelV4SessionConfig = jsNative
 
 /// <summary>
 /// Options for creating an ephemeral client secret for browser-side
@@ -10035,11 +8446,15 @@ type Experimental_RealtimeModelV4ClientSecretResult =
     [<ParamObject; Emit("$0")>]
     static member Create (token: string, url: string, ?expiresAt: float) : Experimental_RealtimeModelV4ClientSecretResult = jsNative
 
+/// <summary>
+/// A conversation item that can be created by the client and sent to
+/// the model via the conversation.item.create event.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_RealtimeModelV4ConversationItem =
-    | [<CompiledName("audio-message")>] AudioMessage of role: string * audio: string
-    | [<CompiledName("function-call-output")>] FunctionCallOutput of callId: string * name: string option * output: string
-    | [<CompiledName("text-message")>] TextMessage of role: string * text: string
+    | [<CompiledName("audio-message"); Fickl.Core.InlineInterface>] AudioMessage of Experimental_RealtimeModelV4AudioMessage
+    | [<CompiledName("function-call-output"); Fickl.Core.InlineInterface>] FunctionCallOutput of Experimental_RealtimeModelV4FunctionCallOutput
+    | [<CompiledName("text-message"); Fickl.Core.InlineInterface>] TextMessage of Experimental_RealtimeModelV4TextMessage
 
 /// <summary>
 /// A text message from the user.
@@ -10116,140 +8531,35 @@ module Experimental_RealtimeModelV4FunctionCallOutput =
     [<Literal>]
     let ``type`` = "function-call-output"
 
+/// <summary>
+/// Normalized events sent from the browser to the realtime model.
+/// Each provider maps this to its native event format before sending
+/// over the WebSocket.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_RealtimeModelV4ClientEvent =
     | [<CompiledName("session-update")>] SessionUpdate of config: Experimental_RealtimeModelV4SessionConfig
+    /// <param name="audio">Base64-encoded audio chunk to append to the input buffer.</param>
     | [<CompiledName("input-audio-append")>] InputAudioAppend of audio: string
     | [<CompiledName("input-audio-commit")>] InputAudioCommit
     | [<CompiledName("input-audio-clear")>] InputAudioClear
     | [<CompiledName("conversation-item-create")>] ConversationItemCreate of item: Experimental_RealtimeModelV4ConversationItem
+    /// <param name="itemId">The ID of the assistant message item to truncate.</param>
+    /// <param name="contentIndex">The index of the content part to truncate.</param>
+    /// <param name="audioEndMs">Truncate audio after this many milliseconds.</param>
     | [<CompiledName("conversation-item-truncate")>] ConversationItemTruncate of itemId: string * contentIndex: float * audioEndMs: float
-    | [<CompiledName("response-create")>] ResponseCreate of options: Experimental_RealtimeModelV4ClientEvent8.Options option
+    | [<CompiledName("response-create")>] ResponseCreate of options: Experimental_RealtimeModelV4ClientEvent.Cases.ResponseCreate.Options option
     | [<CompiledName("response-cancel")>] ResponseCancel
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent2 =
-    /// <remarks>TypeScript type: <c>"session-update"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract config: Experimental_RealtimeModelV4SessionConfig with get, set
-    [<ParamObject; Emit("({ type: 'session-update', ...$0 })")>]
-    static member Create (config: Experimental_RealtimeModelV4SessionConfig) : Experimental_RealtimeModelV4ClientEvent2 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent2 =
-    /// <remarks>TypeScript type: <c>"session-update"</c></remarks>
-    [<Literal>]
-    let ``type`` = "session-update"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent3 =
-    /// <remarks>TypeScript type: <c>"input-audio-append"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// Base64-encoded audio chunk to append to the input buffer.
-    /// </summary>
-    abstract audio: string with get, set
-    [<ParamObject; Emit("({ type: 'input-audio-append', ...$0 })")>]
-    static member Create (audio: string) : Experimental_RealtimeModelV4ClientEvent3 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent3 =
-    /// <remarks>TypeScript type: <c>"input-audio-append"</c></remarks>
-    [<Literal>]
-    let ``type`` = "input-audio-append"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent4 =
-    /// <remarks>TypeScript type: <c>"input-audio-commit"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'input-audio-commit' })")>]
-    static member Create () : Experimental_RealtimeModelV4ClientEvent4 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent4 =
-    /// <remarks>TypeScript type: <c>"input-audio-commit"</c></remarks>
-    [<Literal>]
-    let ``type`` = "input-audio-commit"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent5 =
-    /// <remarks>TypeScript type: <c>"input-audio-clear"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'input-audio-clear' })")>]
-    static member Create () : Experimental_RealtimeModelV4ClientEvent5 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent5 =
-    /// <remarks>TypeScript type: <c>"input-audio-clear"</c></remarks>
-    [<Literal>]
-    let ``type`` = "input-audio-clear"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent6 =
-    /// <remarks>TypeScript type: <c>"conversation-item-create"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract item: Experimental_RealtimeModelV4ConversationItem with get, set
-    [<ParamObject; Emit("({ type: 'conversation-item-create', ...$0 })")>]
-    static member Create (item: Experimental_RealtimeModelV4ConversationItem) : Experimental_RealtimeModelV4ClientEvent6 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent6 =
-    /// <remarks>TypeScript type: <c>"conversation-item-create"</c></remarks>
-    [<Literal>]
-    let ``type`` = "conversation-item-create"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent7 =
-    /// <remarks>TypeScript type: <c>"conversation-item-truncate"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The ID of the assistant message item to truncate.
-    /// </summary>
-    abstract itemId: string with get, set
-    /// <summary>
-    /// The index of the content part to truncate.
-    /// </summary>
-    abstract contentIndex: float with get, set
-    /// <summary>
-    /// Truncate audio after this many milliseconds.
-    /// </summary>
-    abstract audioEndMs: float with get, set
-    [<ParamObject; Emit("({ type: 'conversation-item-truncate', ...$0 })")>]
-    static member Create (itemId: string, contentIndex: float, audioEndMs: float) : Experimental_RealtimeModelV4ClientEvent7 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent7 =
-    /// <remarks>TypeScript type: <c>"conversation-item-truncate"</c></remarks>
-    [<Literal>]
-    let ``type`` = "conversation-item-truncate"
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent8 =
-    /// <remarks>TypeScript type: <c>"response-create"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract options: Experimental_RealtimeModelV4ClientEvent8.Options option with get, set
     [<ParamObject; Emit("({ type: 'response-create', ...$0 })")>]
-    static member Create (?options: Experimental_RealtimeModelV4ClientEvent8.Options) : Experimental_RealtimeModelV4ClientEvent8 = jsNative
+    static member CreateResponseCreate (?options: Experimental_RealtimeModelV4ClientEvent.Cases.ResponseCreate.Options) : Experimental_RealtimeModelV4ClientEvent = jsNative
 
-module Experimental_RealtimeModelV4ClientEvent8 =
-    /// <remarks>TypeScript type: <c>"response-create"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-create"
-
-    [<Interface>]
-    type Options =
-        abstract modalities: string[] option with get, set
-        abstract instructions: string option with get, set
-        abstract metadata: JS.Record<string, obj> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?modalities: string[], ?instructions: string, ?metadata: JS.Record<string, obj>) : Options = jsNative
-
-[<Interface>]
-type Experimental_RealtimeModelV4ClientEvent9 =
-    /// <remarks>TypeScript type: <c>"response-cancel"</c></remarks>
-    abstract ``type``: string with get, set
-    [<Emit("({ type: 'response-cancel' })")>]
-    static member Create () : Experimental_RealtimeModelV4ClientEvent9 = jsNative
-
-module Experimental_RealtimeModelV4ClientEvent9 =
-    /// <remarks>TypeScript type: <c>"response-cancel"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-cancel"
-
+/// <summary>
+/// Normalized events emitted by the realtime model (model → browser).
+/// Each provider maps its native event format to this discriminated union.
+/// <br /><br />
+/// Every event includes a <c>raw</c> field with the original provider-specific
+/// event data for debugging and provider-specific access.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_RealtimeModelV4ServerEvent =
     | [<CompiledName("session-created")>] SessionCreated of sessionId: string option * raw: obj
@@ -10265,16 +8575,55 @@ type Experimental_RealtimeModelV4ServerEvent =
     | [<CompiledName("output-item-done")>] OutputItemDone of responseId: string * itemId: string * raw: obj
     | [<CompiledName("content-part-added")>] ContentPartAdded of responseId: string * itemId: string * raw: obj
     | [<CompiledName("content-part-done")>] ContentPartDone of responseId: string * itemId: string * raw: obj
+    /// <param name="responseId"></param>
+    /// <param name="itemId"></param>
+    /// <param name="delta">Base64-encoded audio chunk.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("audio-delta")>] AudioDelta of responseId: string * itemId: string * delta: string * raw: obj
     | [<CompiledName("audio-done")>] AudioDone of responseId: string * itemId: string * raw: obj
+    /// <param name="responseId"></param>
+    /// <param name="itemId"></param>
+    /// <param name="delta">Text chunk of the audio transcript.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("audio-transcript-delta")>] AudioTranscriptDelta of responseId: string * itemId: string * delta: string * raw: obj
     | [<CompiledName("audio-transcript-done")>] AudioTranscriptDone of responseId: string * itemId: string * transcript: string option * raw: obj
+    /// <param name="responseId"></param>
+    /// <param name="itemId"></param>
+    /// <param name="delta">Text chunk of the model's text response.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("text-delta")>] TextDelta of responseId: string * itemId: string * delta: string * raw: obj
     | [<CompiledName("text-done")>] TextDone of responseId: string * itemId: string * text: string option * raw: obj
+    /// <param name="responseId"></param>
+    /// <param name="itemId"></param>
+    /// <param name="callId"></param>
+    /// <param name="delta">Partial JSON string of function call arguments.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("function-call-arguments-delta")>] FunctionCallArgumentsDelta of responseId: string * itemId: string * callId: string * delta: string * raw: obj
+    /// <param name="responseId"></param>
+    /// <param name="itemId"></param>
+    /// <param name="callId"></param>
+    /// <param name="name">The name of the function to call.</param>
+    /// <param name="arguments">Complete JSON string of function call arguments.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("function-call-arguments-done")>] FunctionCallArgumentsDone of responseId: string * itemId: string * callId: string * name: string * arguments: string * raw: obj
     | [<CompiledName("error")>] Error of message: string * code: string option * raw: obj
+    /// <param name="rawType">The original event type string from the provider.</param>
+    /// <param name="raw"></param>
     | [<CompiledName("custom")>] Custom of rawType: string * raw: obj
+    [<ParamObject; Emit("({ type: 'session-created', ...$0 })")>]
+    static member CreateSessionCreated (raw: obj, ?sessionId: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'speech-started', ...$0 })")>]
+    static member CreateSpeechStarted (raw: obj, ?itemId: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'speech-stopped', ...$0 })")>]
+    static member CreateSpeechStopped (raw: obj, ?itemId: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'audio-committed', ...$0 })")>]
+    static member CreateAudioCommitted (raw: obj, ?itemId: string, ?previousItemId: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'audio-transcript-done', ...$0 })")>]
+    static member CreateAudioTranscriptDone (responseId: string, itemId: string, raw: obj, ?transcript: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'text-done', ...$0 })")>]
+    static member CreateTextDone (responseId: string, itemId: string, raw: obj, ?text: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
+    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+    static member CreateError (message: string, raw: obj, ?code: string) : Experimental_RealtimeModelV4ServerEvent = jsNative
 
 [<Interface>]
 type Experimental_RealtimeModelV4ServerEvent10 =
@@ -10751,13 +9100,10 @@ type Experimental_RealtimeFactoryV4GetTokenResult =
     [<ParamObject; Emit("$0")>]
     static member Create (token: string, url: string, ?expiresAt: float) : Experimental_RealtimeFactoryV4GetTokenResult = jsNative
 
-[<Interface>]
 type Experimental_RealtimeFactoryV4 =
     abstract getToken: options: Experimental_RealtimeFactoryV4GetTokenOptions -> JS.Promise<Experimental_RealtimeFactoryV4GetTokenResult>
     [<Emit("$0($1...)")>]
     abstract Invoke: modelId: string -> Experimental_RealtimeModelV4
-    [<ParamObject; Emit("$0")>]
-    static member Create (getToken: (Experimental_RealtimeFactoryV4GetTokenOptions -> JS.Promise<Experimental_RealtimeFactoryV4GetTokenResult>)) : Experimental_RealtimeFactoryV4 = jsNative
 
 /// <summary>
 /// Options for a speech translation model stream call.
@@ -10770,7 +9116,7 @@ type Experimental_SpeechTranslationModelV4StreamOptions =
     /// <c>Uint8Array</c> chunks contain raw audio bytes. <c>string</c> chunks contain
     /// base64-encoded raw audio bytes.
     /// </summary>
-    abstract audio: obj with get, set
+    abstract audio: FSharp.CloudEdge.Runtime.Workers.ReadableStream<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>> with get, set
     /// <summary>
     /// The input audio format for the raw audio chunks.
     /// </summary>
@@ -10801,7 +9147,7 @@ type Experimental_SpeechTranslationModelV4StreamOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP/WebSocket-based providers that support headers.
@@ -10812,7 +9158,7 @@ type Experimental_SpeechTranslationModelV4StreamOptions =
     /// </summary>
     abstract includeRawChunks: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (audio: obj, inputAudioFormat: SharedV4AudioFormat, targetLanguage: string, ?sourceLanguage: string, ?outputAudioFormat: SharedV4AudioFormat, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool) : Experimental_SpeechTranslationModelV4StreamOptions = jsNative
+    static member Create (audio: FSharp.CloudEdge.Runtime.Workers.ReadableStream<U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>, inputAudioFormat: SharedV4AudioFormat, targetLanguage: string, ?sourceLanguage: string, ?outputAudioFormat: SharedV4AudioFormat, ?providerOptions: JS.Record<string, JSONObject>, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool) : Experimental_SpeechTranslationModelV4StreamOptions = jsNative
 
 /// <summary>
 /// Usage information for a speech translation call.
@@ -10855,281 +9201,33 @@ type Experimental_SpeechTranslationModelV4StreamPart =
     | [<CompiledName("source-transcript-partial")>] SourceTranscriptPartial of id: string option * text: string * startSecond: float option * endSecond: float option * channelIndex: float option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("source-transcript-final")>] SourceTranscriptFinal of id: string option * text: string * startSecond: float option * endSecond: float option * channelIndex: float option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
     | [<CompiledName("response-metadata")>] ResponseMetadata of timestamp: Fable.Core.TS.Es.Date option * modelId: string option * headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option * body: obj option
+    /// <param name="sourceText">The final source-language transcript of the input audio.</param>
+    /// <param name="outputText">
+    /// The final output text. May be an empty string for providers that
+    /// produce only audio output.
+    /// </param>
+    /// <param name="durationInSeconds">The duration of the source audio in seconds, if available.</param>
+    /// <param name="usage">Usage information for the call, if reported by the provider.</param>
+    /// <param name="providerMetadata">Additional provider-specific metadata.</param>
     | [<CompiledName("finish")>] Finish of sourceText: string * outputText: string * durationInSeconds: float option * usage: Experimental_SpeechTranslationModelV4Usage option * providerMetadata: JS.Record<string, JSONObject> option
     | [<CompiledName("raw")>] Raw of rawValue: obj
     | [<CompiledName("error")>] Error of error: obj
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart10 =
-    /// <summary>
-    /// Metadata that is available after the stream is finished.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The final source-language transcript of the input audio.
-    /// </summary>
-    abstract sourceText: string with get, set
-    /// <summary>
-    /// The final output text. May be an empty string for providers that
-    /// produce only audio output.
-    /// </summary>
-    abstract outputText: string with get, set
-    /// <summary>
-    /// The duration of the source audio in seconds, if available.
-    /// </summary>
-    abstract durationInSeconds: float option with get, set
-    /// <summary>
-    /// Usage information for the call, if reported by the provider.
-    /// </summary>
-    abstract usage: Experimental_SpeechTranslationModelV4Usage option with get, set
-    /// <summary>
-    /// Additional provider-specific metadata.
-    /// </summary>
-    abstract providerMetadata: JS.Record<string, JSONObject> option with get, set
-    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-    static member Create (sourceText: string, outputText: string, ?durationInSeconds: float, ?usage: Experimental_SpeechTranslationModelV4Usage, ?providerMetadata: JS.Record<string, JSONObject>) : Experimental_SpeechTranslationModelV4StreamPart10 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart10 =
-    /// <summary>
-    /// Metadata that is available after the stream is finished.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-    [<Literal>]
-    let ``type`` = "finish"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart11 =
-    /// <summary>
-    /// Raw provider chunks if enabled.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract rawValue: obj with get, set
-    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-    static member Create (rawValue: obj) : Experimental_SpeechTranslationModelV4StreamPart11 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart11 =
-    /// <summary>
-    /// Raw provider chunks if enabled.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-    [<Literal>]
-    let ``type`` = "raw"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart12 =
-    /// <summary>
-    /// Error parts are streamed, allowing for multiple errors.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract error: obj with get, set
-    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-    static member Create (error: obj) : Experimental_SpeechTranslationModelV4StreamPart12 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart12 =
-    /// <summary>
-    /// Error parts are streamed, allowing for multiple errors.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let ``type`` = "error"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart2 =
-    /// <summary>
-    /// Stream start event with warnings for the call, e.g. unsupported settings.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract warnings: SharedV4Warning[] with get, set
-    [<ParamObject; Emit("({ type: 'stream-start', ...$0 })")>]
-    static member Create (warnings: SharedV4Warning[]) : Experimental_SpeechTranslationModelV4StreamPart2 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart2 =
-    /// <summary>
-    /// Stream start event with warnings for the call, e.g. unsupported settings.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"stream-start"</c></remarks>
-    [<Literal>]
-    let ``type`` = "stream-start"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart3 =
-    /// <summary>
-    /// Output audio chunk.
-    /// <br /><br />
-    /// <c>Uint8Array</c> chunks contain raw audio bytes. <c>string</c> chunks contain
-    /// base64-encoded raw audio bytes.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
     [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
-    static member Create (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart3 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart3 =
-    /// <summary>
-    /// Output audio chunk.
-    /// <br /><br />
-    /// <c>Uint8Array</c> chunks contain raw audio bytes. <c>string</c> chunks contain
-    /// base64-encoded raw audio bytes.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-    [<Literal>]
-    let ``type`` = "audio"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart4 =
-    /// <summary>
-    /// Append-only output text delta.
-    /// <br /><br />
-    /// Output text is append-only: providers stream <c>output-text-delta</c>
-    /// parts and finalize per-utterance with <c>output-text-final</c>. There is
-    /// no partial/revision part for output text by design for now.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"output-text-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateAudio (audio: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'output-text-delta', ...$0 })")>]
-    static member Create (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart4 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart4 =
-    /// <summary>
-    /// Append-only output text delta.
-    /// <br /><br />
-    /// Output text is append-only: providers stream <c>output-text-delta</c>
-    /// parts and finalize per-utterance with <c>output-text-final</c>. There is
-    /// no partial/revision part for output text by design for now.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"output-text-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "output-text-delta"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart5 =
-    /// <summary>
-    /// Final output text for a provider-defined segment or utterance.
-    /// <br /><br />
-    /// Output text is append-only: providers stream <c>output-text-delta</c>
-    /// parts and finalize per-utterance with <c>output-text-final</c>. There is
-    /// no partial/revision part for output text by design for now.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"output-text-final"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract text: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateOutputTextDelta (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'output-text-final', ...$0 })")>]
-    static member Create (text: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart5 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart5 =
-    /// <summary>
-    /// Final output text for a provider-defined segment or utterance.
-    /// <br /><br />
-    /// Output text is append-only: providers stream <c>output-text-delta</c>
-    /// parts and finalize per-utterance with <c>output-text-final</c>. There is
-    /// no partial/revision part for output text by design for now.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"output-text-final"</c></remarks>
-    [<Literal>]
-    let ``type`` = "output-text-final"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart6 =
-    /// <summary>
-    /// Append-only source transcript delta.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-delta"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract delta: string with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateOutputTextFinal (text: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'source-transcript-delta', ...$0 })")>]
-    static member Create (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart6 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart6 =
-    /// <summary>
-    /// Append-only source transcript delta.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-delta"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source-transcript-delta"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart7 =
-    /// <summary>
-    /// Non-final source transcript text. The text may be revised by later parts.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-partial"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract text: string with get, set
-    abstract startSecond: float option with get, set
-    abstract endSecond: float option with get, set
-    abstract channelIndex: float option with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateSourceTranscriptDelta (delta: string, ?id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'source-transcript-partial', ...$0 })")>]
-    static member Create (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart7 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart7 =
-    /// <summary>
-    /// Non-final source transcript text. The text may be revised by later parts.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-partial"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source-transcript-partial"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart8 =
-    /// <summary>
-    /// Final source transcript text for a provider-defined segment or utterance.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-final"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract id: string option with get, set
-    abstract text: string with get, set
-    abstract startSecond: float option with get, set
-    abstract endSecond: float option with get, set
-    abstract channelIndex: float option with get, set
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    static member CreateSourceTranscriptPartial (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'source-transcript-final', ...$0 })")>]
-    static member Create (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart8 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart8 =
-    /// <summary>
-    /// Final source transcript text for a provider-defined segment or utterance.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"source-transcript-final"</c></remarks>
-    [<Literal>]
-    let ``type`` = "source-transcript-final"
-
-[<Interface>]
-type Experimental_SpeechTranslationModelV4StreamPart9 =
-    /// <summary>
-    /// Metadata for the response, emitted once available.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract timestamp: Fable.Core.TS.Es.Date option with get, set
-    abstract modelId: string option with get, set
-    abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
-    abstract body: obj option with get, set
+    static member CreateSourceTranscriptFinal (text: string, ?id: string, ?startSecond: float, ?endSecond: float, ?channelIndex: float, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
     [<ParamObject; Emit("({ type: 'response-metadata', ...$0 })")>]
-    static member Create (?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Experimental_SpeechTranslationModelV4StreamPart9 = jsNative
-
-module Experimental_SpeechTranslationModelV4StreamPart9 =
-    /// <summary>
-    /// Metadata for the response, emitted once available.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"response-metadata"</c></remarks>
-    [<Literal>]
-    let ``type`` = "response-metadata"
+    static member CreateResponseMetadata (?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
+    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+    static member CreateFinish (sourceText: string, outputText: string, ?durationInSeconds: float, ?usage: Experimental_SpeechTranslationModelV4Usage, ?providerMetadata: JS.Record<string, JSONObject>) : Experimental_SpeechTranslationModelV4StreamPart = jsNative
 
 /// <summary>
 /// The result of a speech translation model doStream call.
@@ -11139,7 +9237,7 @@ type Experimental_SpeechTranslationModelV4StreamResult =
     /// <summary>
     /// The stream.
     /// </summary>
-    abstract stream: obj with get, set
+    abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Experimental_SpeechTranslationModelV4StreamPart> with get, set
     /// <summary>
     /// Optional request information for telemetry and debugging purposes.
     /// </summary>
@@ -11149,7 +9247,7 @@ type Experimental_SpeechTranslationModelV4StreamResult =
     /// </summary>
     abstract response: Experimental_SpeechTranslationModelV4StreamResult.Response option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (stream: obj, ?request: Experimental_SpeechTranslationModelV4StreamResult.Request, ?response: Experimental_SpeechTranslationModelV4StreamResult.Response) : Experimental_SpeechTranslationModelV4StreamResult = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Experimental_SpeechTranslationModelV4StreamPart>, ?request: Experimental_SpeechTranslationModelV4StreamResult.Request, ?response: Experimental_SpeechTranslationModelV4StreamResult.Response) : Experimental_SpeechTranslationModelV4StreamResult = jsNative
 
 /// <summary>
 /// Speech translation model specification version 4.
@@ -11199,62 +9297,32 @@ module Experimental_SpeechTranslationModelV4 =
     [<Literal>]
     let specificationVersion = "v4"
 
+/// <summary>
+/// A video or image file that can be used for video editing or image-to-video generation.
+/// Supports both image inputs (for image-to-video) and video inputs (for editing).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_VideoModelV4File =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-    | [<CompiledName("url")>] Url of url: string * mediaType: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-
-[<Interface>]
-type Experimental_VideoModelV4File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
+    /// <param name="mediaType">
     /// The IANA media type of the file.
     /// Video types: 'video/mp4', 'video/webm', 'video/quicktime'
     /// Image types: 'image/png', 'image/jpeg', 'image/webp'
-    /// </summary>
-    abstract mediaType: string with get, set
-    /// <summary>
-    /// File data as base64 encoded string or binary data.
-    /// </summary>
-    abstract data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-    static member Create (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4File2 = jsNative
-
-module Experimental_VideoModelV4File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    [<Literal>]
-    let ``type`` = "file"
-
-[<Interface>]
-type Experimental_VideoModelV4File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The URL of the video or image file.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
+    /// </param>
+    /// <param name="data">File data as base64 encoded string or binary data.</param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    /// <param name="url">The URL of the video or image file.</param>
+    /// <param name="mediaType">
     /// The media type of the referenced file, when known.
     /// Video types: 'video/mp4', 'video/webm', 'video/quicktime'
     /// Image types: 'image/png', 'image/jpeg', 'image/webp'
-    /// </summary>
-    abstract mediaType: string option with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+    /// </param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("url")>] Url of url: string * mediaType: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+    static member CreateFile (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4File = jsNative
     [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, ?mediaType: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4File3 = jsNative
-
-module Experimental_VideoModelV4File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
+    static member CreateUrl (url: string, ?mediaType: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4File = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type Experimental_VideoModelV4FrameType =
@@ -11358,80 +9426,23 @@ type Experimental_VideoModelV4CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV4File, ?frameImages: Experimental_VideoModelV4FrameImage[], ?inputReferences: Experimental_VideoModelV4File[], ?generateAudio: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : Experimental_VideoModelV4CallOptions = jsNative
+    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV4File, ?frameImages: Experimental_VideoModelV4FrameImage[], ?inputReferences: Experimental_VideoModelV4File[], ?generateAudio: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : Experimental_VideoModelV4CallOptions = jsNative
 
+/// <summary>
+/// Generated video data. Can be a URL, base64-encoded string, or binary data.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_VideoModelV4VideoData =
     | [<CompiledName("url")>] Url of url: string * mediaType: string
     | [<CompiledName("base64")>] Base64 of data: string * mediaType: string
     | [<CompiledName("binary")>] Binary of data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> * mediaType: string
-
-[<Interface>]
-type Experimental_VideoModelV4VideoData2 =
-    /// <summary>
-    /// Video available as a URL (most common for video providers).
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract url: string with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, mediaType: string) : Experimental_VideoModelV4VideoData2 = jsNative
-
-module Experimental_VideoModelV4VideoData2 =
-    /// <summary>
-    /// Video available as a URL (most common for video providers).
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
-
-[<Interface>]
-type Experimental_VideoModelV4VideoData3 =
-    /// <summary>
-    /// Video as base64-encoded string.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"base64"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract data: string with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'base64', ...$0 })")>]
-    static member Create (data: string, mediaType: string) : Experimental_VideoModelV4VideoData3 = jsNative
-
-module Experimental_VideoModelV4VideoData3 =
-    /// <summary>
-    /// Video as base64-encoded string.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"base64"</c></remarks>
-    [<Literal>]
-    let ``type`` = "base64"
-
-[<Interface>]
-type Experimental_VideoModelV4VideoData4 =
-    /// <summary>
-    /// Video as binary data.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"binary"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'binary', ...$0 })")>]
-    static member Create (data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, mediaType: string) : Experimental_VideoModelV4VideoData4 = jsNative
-
-module Experimental_VideoModelV4VideoData4 =
-    /// <summary>
-    /// Video as binary data.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"binary"</c></remarks>
-    [<Literal>]
-    let ``type`` = "binary"
 
 /// <summary>
 /// The result of a video model doGenerate call.
@@ -11499,132 +9510,34 @@ type Experimental_VideoModelV4OperationStartResult =
     /// Response information for telemetry and debugging purposes.
     /// </summary>
     abstract response: Experimental_VideoModelV4OperationStartResult.Response with get, set
-    [<ParamObject; Emit("$0")>]
+    [<ParamObject; Emit("(o => ({...o, \"operation\": o[\"operation\"] ?? null}))($0)")>]
     static member Create (operation: JSONValue, warnings: SharedV4Warning[], response: Experimental_VideoModelV4OperationStartResult.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStartResult = jsNative
 
+/// <summary>
+/// Result returned by <c>doStatus</c> when checking the status of an
+/// asynchronous video generation.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("status", CaseRules.None)>]
 type Experimental_VideoModelV4OperationStatusResult =
-    | [<CompiledName("pending")>] Pending of warnings: SharedV4Warning[] option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult2.Response
-    | [<CompiledName("completed")>] Completed of videos: Experimental_VideoModelV4VideoData[] * warnings: SharedV4Warning[] * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult3.Response
-    | [<CompiledName("error")>] Error of error: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult4.Response
-
-[<Interface>]
-type Experimental_VideoModelV4OperationStatusResult2 =
-    /// <summary>
-    /// The video generation is still in progress.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    abstract status: string with get, set
-    /// <summary>
-    /// Warnings for the call.
-    /// </summary>
-    abstract warnings: SharedV4Warning[] option with get, set
-    /// <summary>
-    /// Additional provider-specific metadata.
-    /// </summary>
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    /// <summary>
-    /// Response information for telemetry and debugging purposes.
-    /// </summary>
-    abstract response: Experimental_VideoModelV4OperationStatusResult2.Response with get, set
+    /// <param name="warnings">Warnings for the call.</param>
+    /// <param name="providerMetadata">Additional provider-specific metadata.</param>
+    /// <param name="response">Response information for telemetry and debugging purposes.</param>
+    | [<CompiledName("pending")>] Pending of warnings: SharedV4Warning[] option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult.Cases.Pending.Response
+    /// <param name="videos">Generated videos.</param>
+    /// <param name="warnings">Warnings for the call.</param>
+    /// <param name="providerMetadata">Additional provider-specific metadata.</param>
+    /// <param name="response">Response information for telemetry and debugging purposes.</param>
+    | [<CompiledName("completed")>] Completed of videos: Experimental_VideoModelV4VideoData[] * warnings: SharedV4Warning[] * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult.Cases.Completed.Response
+    /// <param name="error">A human-readable error message describing why the generation failed.</param>
+    /// <param name="providerMetadata">Additional provider-specific metadata.</param>
+    /// <param name="response">Response information for telemetry and debugging purposes.</param>
+    | [<CompiledName("error")>] Error of error: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * response: Experimental_VideoModelV4OperationStatusResult.Cases.Error.Response
     [<ParamObject; Emit("({ status: 'pending', ...$0 })")>]
-    static member Create (response: Experimental_VideoModelV4OperationStatusResult2.Response, ?warnings: SharedV4Warning[], ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult2 = jsNative
-
-module Experimental_VideoModelV4OperationStatusResult2 =
-    /// <summary>
-    /// The video generation is still in progress.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"pending"</c></remarks>
-    [<Literal>]
-    let status = "pending"
-
-    [<Interface>]
-    type Response =
-        abstract timestamp: Fable.Core.TS.Es.Date with get, set
-        abstract modelId: string with get, set
-        abstract headers: JS.Record<string, string> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
-
-[<Interface>]
-type Experimental_VideoModelV4OperationStatusResult3 =
-    /// <summary>
-    /// The video generation is complete.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
-    abstract status: string with get, set
-    /// <summary>
-    /// Generated videos.
-    /// </summary>
-    abstract videos: Experimental_VideoModelV4VideoData[] with get, set
-    /// <summary>
-    /// Warnings for the call.
-    /// </summary>
-    abstract warnings: SharedV4Warning[] with get, set
-    /// <summary>
-    /// Additional provider-specific metadata.
-    /// </summary>
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    /// <summary>
-    /// Response information for telemetry and debugging purposes.
-    /// </summary>
-    abstract response: Experimental_VideoModelV4OperationStatusResult3.Response with get, set
+    static member CreatePending (response: Experimental_VideoModelV4OperationStatusResult.Cases.Pending.Response, ?warnings: SharedV4Warning[], ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult = jsNative
     [<ParamObject; Emit("({ status: 'completed', ...$0 })")>]
-    static member Create (videos: Experimental_VideoModelV4VideoData[], warnings: SharedV4Warning[], response: Experimental_VideoModelV4OperationStatusResult3.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult3 = jsNative
-
-module Experimental_VideoModelV4OperationStatusResult3 =
-    /// <summary>
-    /// The video generation is complete.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"completed"</c></remarks>
-    [<Literal>]
-    let status = "completed"
-
-    [<Interface>]
-    type Response =
-        abstract timestamp: Fable.Core.TS.Es.Date with get, set
-        abstract modelId: string with get, set
-        abstract headers: JS.Record<string, string> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
-
-[<Interface>]
-type Experimental_VideoModelV4OperationStatusResult4 =
-    /// <summary>
-    /// The video generation failed.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    abstract status: string with get, set
-    /// <summary>
-    /// A human-readable error message describing why the generation failed.
-    /// </summary>
-    abstract error: string with get, set
-    /// <summary>
-    /// Additional provider-specific metadata.
-    /// </summary>
-    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-    /// <summary>
-    /// Response information for telemetry and debugging purposes.
-    /// </summary>
-    abstract response: Experimental_VideoModelV4OperationStatusResult4.Response with get, set
+    static member CreateCompleted (videos: Experimental_VideoModelV4VideoData[], warnings: SharedV4Warning[], response: Experimental_VideoModelV4OperationStatusResult.Cases.Completed.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult = jsNative
     [<ParamObject; Emit("({ status: 'error', ...$0 })")>]
-    static member Create (error: string, response: Experimental_VideoModelV4OperationStatusResult4.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult4 = jsNative
-
-module Experimental_VideoModelV4OperationStatusResult4 =
-    /// <summary>
-    /// The video generation failed.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-    [<Literal>]
-    let status = "error"
-
-    [<Interface>]
-    type Response =
-        abstract timestamp: Fable.Core.TS.Es.Date with get, set
-        abstract modelId: string with get, set
-        abstract headers: JS.Record<string, string> option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
+    static member CreateError (error: string, response: Experimental_VideoModelV4OperationStatusResult.Cases.Error.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_VideoModelV4OperationStatusResult = jsNative
 
 /// <summary>
 /// Data received from a webhook notification during asynchronous video
@@ -11744,7 +9657,7 @@ module Experimental_VideoModelV4 =
             /// </summary>
             abstract webhookUrl: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV4File, ?frameImages: Experimental_VideoModelV4FrameImage[], ?inputReferences: Experimental_VideoModelV4File[], ?generateAudio: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Options = jsNative
+            static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV4File, ?frameImages: Experimental_VideoModelV4FrameImage[], ?inputReferences: Experimental_VideoModelV4File[], ?generateAudio: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Options = jsNative
 
     module DoStatus =
         [<Interface>]
@@ -11756,13 +9669,13 @@ module Experimental_VideoModelV4 =
             /// <summary>
             /// Abort signal for cancelling the operation.
             /// </summary>
-            abstract abortSignal: obj option with get, set
+            abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
             /// <summary>
             /// Additional HTTP headers.
             /// </summary>
             abstract headers: JS.Record<string, string option> option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (operation: JSONValue, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : Options = jsNative
+            [<ParamObject; Emit("(o => ({...o, \"operation\": o[\"operation\"] ?? null}))($0)")>]
+            static member Create (operation: JSONValue, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : Options = jsNative
 
     module HandleWebhookOption =
         [<Interface>]
@@ -11787,7 +9700,7 @@ module Experimental_VideoModelV4 =
                             type Item =
                                 abstract headers: JS.Record<string, string> with get, set
                                 abstract body: JSONValue with get, set
-                                [<ParamObject; Emit("$0")>]
+                                [<ParamObject; Emit("(o => ({...o, \"body\": o[\"body\"] ?? null}))($0)")>]
                                 static member Create (headers: JS.Record<string, string>, body: JSONValue) : Item = jsNative
 
         module Result =
@@ -11805,56 +9718,27 @@ module Experimental_VideoModelV4 =
             [<ParamObject; Emit("$0")>]
             static member Create (modelId: string) : Options = jsNative
 
+/// <summary>
+/// A video or image file that can be used for video editing or image-to-video generation.
+/// Supports both image inputs (for image-to-video) and video inputs (for editing).
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_VideoModelV3File =
-    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: SharedV3ProviderMetadata option
-    | [<CompiledName("url")>] Url of url: string * providerOptions: SharedV3ProviderMetadata option
-
-[<Interface>]
-type Experimental_VideoModelV3File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
+    /// <param name="mediaType">
     /// The IANA media type of the file.
     /// Video types: 'video/mp4', 'video/webm', 'video/quicktime'
     /// Image types: 'image/png', 'image/jpeg', 'image/webp'
-    /// </summary>
-    abstract mediaType: string with get, set
-    /// <summary>
-    /// File data as base64 encoded string or binary data.
-    /// </summary>
-    abstract data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: SharedV3ProviderMetadata option with get, set
+    /// </param>
+    /// <param name="data">File data as base64 encoded string or binary data.</param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("file")>] File of mediaType: string * data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * providerOptions: SharedV3ProviderMetadata option
+    /// <param name="url">The URL of the video or image file.</param>
+    /// <param name="providerOptions">Optional provider-specific metadata for the file part.</param>
+    | [<CompiledName("url")>] Url of url: string * providerOptions: SharedV3ProviderMetadata option
     [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-    static member Create (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: SharedV3ProviderMetadata) : Experimental_VideoModelV3File2 = jsNative
-
-module Experimental_VideoModelV3File2 =
-    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-    [<Literal>]
-    let ``type`` = "file"
-
-[<Interface>]
-type Experimental_VideoModelV3File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    /// <summary>
-    /// The URL of the video or image file.
-    /// </summary>
-    abstract url: string with get, set
-    /// <summary>
-    /// Optional provider-specific metadata for the file part.
-    /// </summary>
-    abstract providerOptions: SharedV3ProviderMetadata option with get, set
+    static member CreateFile (mediaType: string, data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, ?providerOptions: SharedV3ProviderMetadata) : Experimental_VideoModelV3File = jsNative
     [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, ?providerOptions: SharedV3ProviderMetadata) : Experimental_VideoModelV3File3 = jsNative
-
-module Experimental_VideoModelV3File3 =
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
+    static member CreateUrl (url: string, ?providerOptions: SharedV3ProviderMetadata) : Experimental_VideoModelV3File = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type Experimental_VideoModelV3FrameType =
@@ -11958,80 +9842,23 @@ type Experimental_VideoModelV3CallOptions =
     /// <summary>
     /// Abort signal for cancelling the operation.
     /// </summary>
-    abstract abortSignal: obj option with get, set
+    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
     /// <summary>
     /// Additional HTTP headers to be sent with the request.
     /// Only applicable for HTTP-based providers.
     /// </summary>
     abstract headers: JS.Record<string, string option> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV3File, ?frameImages: Experimental_VideoModelV3FrameImage[], ?inputReferences: Experimental_VideoModelV3File[], ?generateAudio: bool, ?abortSignal: obj, ?headers: JS.Record<string, string option>) : Experimental_VideoModelV3CallOptions = jsNative
+    static member Create (n: float, providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?prompt: string, ?aspectRatio: string, ?resolution: string, ?duration: float, ?fps: float, ?seed: float, ?image: Experimental_VideoModelV3File, ?frameImages: Experimental_VideoModelV3FrameImage[], ?inputReferences: Experimental_VideoModelV3File[], ?generateAudio: bool, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : Experimental_VideoModelV3CallOptions = jsNative
 
+/// <summary>
+/// Generated video data. Can be a URL, base64-encoded string, or binary data.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
 type Experimental_VideoModelV3VideoData =
     | [<CompiledName("url")>] Url of url: string * mediaType: string
     | [<CompiledName("base64")>] Base64 of data: string * mediaType: string
     | [<CompiledName("binary")>] Binary of data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> * mediaType: string
-
-[<Interface>]
-type Experimental_VideoModelV3VideoData2 =
-    /// <summary>
-    /// Video available as a URL (most common for video providers).
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract url: string with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'url', ...$0 })")>]
-    static member Create (url: string, mediaType: string) : Experimental_VideoModelV3VideoData2 = jsNative
-
-module Experimental_VideoModelV3VideoData2 =
-    /// <summary>
-    /// Video available as a URL (most common for video providers).
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"url"</c></remarks>
-    [<Literal>]
-    let ``type`` = "url"
-
-[<Interface>]
-type Experimental_VideoModelV3VideoData3 =
-    /// <summary>
-    /// Video as base64-encoded string.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"base64"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract data: string with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'base64', ...$0 })")>]
-    static member Create (data: string, mediaType: string) : Experimental_VideoModelV3VideoData3 = jsNative
-
-module Experimental_VideoModelV3VideoData3 =
-    /// <summary>
-    /// Video as base64-encoded string.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"base64"</c></remarks>
-    [<Literal>]
-    let ``type`` = "base64"
-
-[<Interface>]
-type Experimental_VideoModelV3VideoData4 =
-    /// <summary>
-    /// Video as binary data.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"binary"</c></remarks>
-    abstract ``type``: string with get, set
-    abstract data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>> with get, set
-    abstract mediaType: string with get, set
-    [<ParamObject; Emit("({ type: 'binary', ...$0 })")>]
-    static member Create (data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, mediaType: string) : Experimental_VideoModelV3VideoData4 = jsNative
-
-module Experimental_VideoModelV3VideoData4 =
-    /// <summary>
-    /// Video as binary data.
-    /// </summary>
-    /// <remarks>TypeScript type: <c>"binary"</c></remarks>
-    [<Literal>]
-    let ``type`` = "binary"
 
 /// <summary>
 /// Video generation model specification version 3.
@@ -12152,14 +9979,6 @@ module Experimental_VideoModelV3 =
             [<ParamObject; Emit("$0")>]
             static member Create (modelId: string) : Options = jsNative
 
-/// <summary>
-/// JSON Schema v7
-/// </summary>
-/// <remarks>@see https://tools.ietf.org/html/draft-handrews-json-schema-validation-01</remarks>
-type JSONSchema7Definition = obj
-
-type JSONSchema7 = obj
-
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
@@ -12269,9 +10088,9 @@ module Experimental_BatchLanguageModelV4 =
     type Base =
         abstract experimental_doStartBatch: options: Experimental_BatchLanguageModelV4.ExperimentalDoStartBatch.Options -> JS.Promise<Experimental_BatchV4StartResult>
         abstract experimental_doGetBatchStatus: options: Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>
-        abstract experimental_doGetBatchResults: options: Experimental_BatchV4OperationOptions -> JS.Promise<obj>
+        abstract experimental_doGetBatchResults: options: Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchLanguageModelV4.ExperimentalDoGetBatchResults.Result.Item.Item, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>
         [<ParamObject; Emit("$0")>]
-        static member Create (experimental_doStartBatch: (Experimental_BatchLanguageModelV4.ExperimentalDoStartBatch.Options -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<obj>)) : Base = jsNative
+        static member Create (experimental_doStartBatch: (Experimental_BatchLanguageModelV4.ExperimentalDoStartBatch.Options -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchLanguageModelV4.ExperimentalDoGetBatchResults.Result.Item.Item, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>)) : Base = jsNative
 
     module ExperimentalDoGetBatchResults =
         module Result =
@@ -12295,7 +10114,7 @@ module Experimental_BatchLanguageModelV4 =
         type Options =
             abstract requests: Experimental_LanguageModelV4BatchRequest[]
             abstract providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            abstract abortSignal: obj option
+            abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option
             abstract headers: JS.Record<string, string option> option
             /// <summary>
             /// URL the provider notifies when the batch reaches a terminal state.
@@ -12304,7 +10123,7 @@ module Experimental_BatchLanguageModelV4 =
             /// </summary>
             abstract webhookUrl: string option
             [<ParamObject; Emit("$0")>]
-            static member Create (requests: Experimental_LanguageModelV4BatchRequest[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: obj, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Options = jsNative
+            static member Create (requests: Experimental_LanguageModelV4BatchRequest[], ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?webhookUrl: string) : Options = jsNative
 
 module Experimental_BatchV4ItemResult4 =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -12417,6 +10236,17 @@ module Experimental_LanguageModelV4BatchRequest =
         [<ParamObject; Emit("$0")>]
         static member Create (prompt: LanguageModelV4Message[], ?maxOutputTokens: float, ?temperature: float, ?stopSequences: string[], ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?responseFormat: U2<LanguageModelV4CallOptions.ResponseFormat, LanguageModelV4CallOptions.ResponseFormat2>, ?seed: float, ?tools: LanguageModelV4CallOptions.Tools.Item[], ?toolChoice: LanguageModelV4ToolChoice, ?reasoning: LanguageModelV4CallOptions.Reasoning, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Options = jsNative
 
+module Experimental_RealtimeModelV4ClientEvent =
+    module Cases =
+        module ResponseCreate =
+            [<Interface>]
+            type Options =
+                abstract modalities: string[] option with get, set
+                abstract instructions: string option with get, set
+                abstract metadata: JS.Record<string, obj> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (?modalities: string[], ?instructions: string, ?metadata: JS.Record<string, obj>) : Options = jsNative
+
 module Experimental_RealtimeModelV4SessionConfig =
     [<Interface>]
     type InputAudioTranscription =
@@ -12478,12 +10308,6 @@ module Experimental_RealtimeModelV4SessionConfig =
         [<ParamObject; Emit("$0")>]
         static member Create (``type``: Experimental_RealtimeModelV4SessionConfig.TurnDetection.Type, ?threshold: float, ?silenceDurationMs: float, ?prefixPaddingMs: float) : TurnDetection = jsNative
 
-    module OutputModalities =
-        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-        type Item =
-            | [<CompiledName("audio")>] Audio
-            | [<CompiledName("text")>] Text
-
     module TurnDetection =
         [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
         type Type =
@@ -12521,6 +10345,18 @@ module Experimental_SpeechTranslationModelV4StreamResult =
         abstract body: obj option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Response = jsNative
+
+module Experimental_TranscriptionModelV4StreamPart =
+    module Cases =
+        module Finish =
+            module Segments =
+                [<Interface>]
+                type Item =
+                    abstract text: string with get, set
+                    abstract startSecond: float with get, set
+                    abstract endSecond: float with get, set
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (text: string, startSecond: float, endSecond: float) : Item = jsNative
 
 module Experimental_TranscriptionModelV4StreamResult =
     [<Interface>]
@@ -12571,6 +10407,35 @@ module Experimental_VideoModelV4OperationStartResult =
         [<ParamObject; Emit("$0")>]
         static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
 
+module Experimental_VideoModelV4OperationStatusResult =
+    module Cases =
+        module Completed =
+            [<Interface>]
+            type Response =
+                abstract timestamp: Fable.Core.TS.Es.Date with get, set
+                abstract modelId: string with get, set
+                abstract headers: JS.Record<string, string> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
+
+        module Error =
+            [<Interface>]
+            type Response =
+                abstract timestamp: Fable.Core.TS.Es.Date with get, set
+                abstract modelId: string with get, set
+                abstract headers: JS.Record<string, string> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
+
+        module Pending =
+            [<Interface>]
+            type Response =
+                abstract timestamp: Fable.Core.TS.Es.Date with get, set
+                abstract modelId: string with get, set
+                abstract headers: JS.Record<string, string> option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (timestamp: Fable.Core.TS.Es.Date, modelId: string, ?headers: JS.Record<string, string>) : Response = jsNative
+
 module Experimental_VideoModelV4Result =
     [<Interface>]
     type Response =
@@ -12592,9 +10457,23 @@ module Experimental_VideoModelV4Result =
 module FilesV4UploadFileCallOptions =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Data =
-        | [<CompiledName("stream")>] Stream of stream: obj
-        | [<CompiledName("data")>] Data of data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-        | [<CompiledName("text")>] Text of text: string
+        | [<CompiledName("stream"); Fickl.Core.InlineInterface>] Stream of FilesV4UploadFileStreamData
+        | [<CompiledName("data"); Fickl.Core.InlineInterface>] Data of SharedV4FileDataData
+        | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of SharedV4FileDataText
+
+module ImageModelV2CallWarning =
+    module Cases =
+        module UnsupportedSetting =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Setting =
+                | [<CompiledName("abortSignal")>] AbortSignal
+                | [<CompiledName("aspectRatio")>] AspectRatio
+                | [<CompiledName("headers")>] Headers
+                | [<CompiledName("n")>] N
+                | [<CompiledName("prompt")>] Prompt
+                | [<CompiledName("providerOptions")>] ProviderOptions
+                | [<CompiledName("seed")>] Seed
+                | [<CompiledName("size")>] Size
 
 module ImageModelV2ProviderMetadata =
     type Item =
@@ -12649,7 +10528,7 @@ module LanguageModelV2CallOptions =
         /// <summary>
         /// JSON schema that the generated output should conform to.
         /// </summary>
-        abstract schema: JSONSchema7 option with get, set
+        abstract schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 option with get, set
         /// <summary>
         /// Name of output that should be generated. Used by some providers for additional LLM guidance.
         /// </summary>
@@ -12659,7 +10538,7 @@ module LanguageModelV2CallOptions =
         /// </summary>
         abstract description: string option with get, set
         [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-        static member Create (?schema: JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
+        static member Create (?schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
 
     module ResponseFormat2 =
         /// <remarks>TypeScript type: <c>"json"</c></remarks>
@@ -12669,8 +10548,524 @@ module LanguageModelV2CallOptions =
     module Tools =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Item =
-            | [<CompiledName("function")>] Function of name: string * description: string option * inputSchema: JSONSchema7 * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata option
-            | [<CompiledName("provider-defined")>] ProviderDefined of id: string * name: string * args: JS.Record<string, obj>
+            | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of LanguageModelV2FunctionTool
+            | [<CompiledName("provider-defined"); Fickl.Core.InlineInterface>] ProviderDefined of LanguageModelV2ProviderDefinedTool
+
+module LanguageModelV2CallWarning =
+    module Cases =
+        module UnsupportedSetting =
+            type Setting =
+                inherit seq<string>
+                /// <summary>
+                /// Returns a string representation of a string.
+                /// </summary>
+                abstract toString: (unit -> string) with get, set
+                /// <summary>
+                /// Returns the character at the specified index.
+                /// </summary>
+                /// <param name="pos">The zero-based index of the desired character.</param>
+                abstract charAt: (float -> string) with get, set
+                /// <summary>
+                /// Returns the Unicode value of the character at the specified location, or NaN if the index is out of bounds.
+                /// </summary>
+                /// <param name="index">The zero-based index of the desired character.</param>
+                abstract charCodeAt: (float -> float) with get, set
+                /// <summary>
+                /// Returns a string that contains the concatenation of two or more strings.
+                /// </summary>
+                /// <param name="strings">The strings to append to the end of the string.</param>
+                abstract concat: (string[] -> string) with get, set
+                /// <summary>
+                /// Returns the position of the first occurrence of a substring, or -1 if it is not present.
+                /// </summary>
+                /// <param name="searchString">The substring to search for in the string</param>
+                /// <param name="position">The index at which to begin searching the String object. If omitted, search starts at the beginning of the string.</param>
+                abstract indexOf: Func<string, float option, float> with get, set
+                /// <summary>
+                /// Returns the last occurrence of a substring in the string, or -1 if it is not present.
+                /// </summary>
+                /// <param name="searchString">The substring to search for.</param>
+                /// <param name="position">The index at which to begin searching. If omitted, the search begins at the end of the string.</param>
+                abstract lastIndexOf: Func<string, float option, float> with get, set
+                /// <summary>
+                /// Determines whether two strings are equivalent in the current locale.
+                /// Determines whether two strings are equivalent in the current or specified locale.
+                /// </summary>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                abstract localeCompare: that: string -> float
+                /// <summary>
+                /// Determines whether two strings are equivalent in the current locale.
+                /// Determines whether two strings are equivalent in the current or specified locale.
+                /// </summary>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                abstract localeCompare: that: string * ?locales: U2<string, string[]> * ?options: Fable.Core.TS.Es.Intl.CollatorOptions -> float
+                /// <summary>
+                /// Determines whether two strings are equivalent in the current locale.
+                /// Determines whether two strings are equivalent in the current or specified locale.
+                /// </summary>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                /// <param name="that">String to compare to target string</param>
+                /// <param name="locales">A locale string or array of locale strings that contain one or more language or locale tags. If you include more than one locale string, list them in descending order of priority so that the first entry is the preferred locale. If you omit this parameter, the default locale of the JavaScript runtime is used. This parameter must conform to BCP 47 standards; see the Intl.Collator object for details.</param>
+                /// <param name="options">An object that contains one or more properties that specify comparison options. see the Intl.Collator object for details.</param>
+                abstract localeCompare: that: string * ?locales: U3<string, Fable.Core.TS.Es.Intl.Locale, U2<string, Fable.Core.TS.Es.Intl.Locale>[]> * ?options: Fable.Core.TS.Es.Intl.CollatorOptions -> float
+                /// <summary>
+                /// Matches a string with a regular expression, and returns an array containing the results of that search.
+                /// Matches a string or an object that supports being matched against, and returns an array
+                /// containing the results of that search, or null if no matches are found.
+                /// </summary>
+                /// <param name="regexp">A variable name or string literal containing the regular expression pattern and flags.</param>
+                /// <param name="matcher">An object that supports being matched against.</param>
+                abstract ``match``: regexp: U2<string, Fable.Core.TS.Es.RegExp> -> Fable.Core.TS.Es.RegExpMatchArray option
+                /// <summary>
+                /// Matches a string with a regular expression, and returns an array containing the results of that search.
+                /// Matches a string or an object that supports being matched against, and returns an array
+                /// containing the results of that search, or null if no matches are found.
+                /// </summary>
+                /// <param name="regexp">A variable name or string literal containing the regular expression pattern and flags.</param>
+                /// <param name="matcher">An object that supports being matched against.</param>
+                abstract ``match``: matcher: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Match.Matcher -> Fable.Core.TS.Es.RegExpMatchArray option
+                /// <summary>
+                /// Replaces text in a string, using a regular expression or search string.
+                /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
+                /// Replaces text in a string, using an object that supports replacement within a string.
+                /// </summary>
+                /// <param name="searchValue">A string or regular expression to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
+                /// <param name="replaceValue">The replacement text.</param>
+                /// <param name="searchValue">A object can search for and replace matches within a string.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replace: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replaceValue: string -> string
+                /// <summary>
+                /// Replaces text in a string, using a regular expression or search string.
+                /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
+                /// Replaces text in a string, using an object that supports replacement within a string.
+                /// </summary>
+                /// <param name="searchValue">A string or regular expression to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
+                /// <param name="replaceValue">The replacement text.</param>
+                /// <param name="searchValue">A object can search for and replace matches within a string.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replace: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replacer: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Replace.Replacer -> string
+                /// <summary>
+                /// Replaces text in a string, using a regular expression or search string.
+                /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
+                /// Replaces text in a string, using an object that supports replacement within a string.
+                /// </summary>
+                /// <param name="searchValue">A string or regular expression to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
+                /// <param name="replaceValue">The replacement text.</param>
+                /// <param name="searchValue">A object can search for and replace matches within a string.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replace: searchValue: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Replace.SearchValue * replaceValue: string -> string
+                /// <summary>
+                /// Replaces text in a string, using a regular expression or search string.
+                /// Passes a string and replaceValue to the <c>[Symbol.replace]</c> method on searchValue. This method is expected to implement its own replacement algorithm.
+                /// Replaces text in a string, using an object that supports replacement within a string.
+                /// </summary>
+                /// <param name="searchValue">A string or regular expression to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace. When the {@linkcode searchValue} is a <c>RegExp</c>, all matches are replaced if the <c>g</c> flag is set (or only those matches at the beginning, if the <c>y</c> flag is also present). Otherwise, only the first match of {@linkcode searchValue} is replaced.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                /// <param name="searchValue">An object that supports searching for and replacing matches within a string.</param>
+                /// <param name="replaceValue">The replacement text.</param>
+                /// <param name="searchValue">A object can search for and replace matches within a string.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replace: searchValue: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Replace.SearchValue2 * replacer: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Replace.Replacer2 -> string
+                /// <summary>
+                /// Finds the first substring match in a regular expression search.
+                /// </summary>
+                /// <param name="regexp">The regular expression pattern and applicable flags.</param>
+                /// <param name="searcher">An object which supports searching within a string.</param>
+                abstract search: regexp: U2<string, Fable.Core.TS.Es.RegExp> -> float
+                /// <summary>
+                /// Finds the first substring match in a regular expression search.
+                /// </summary>
+                /// <param name="regexp">The regular expression pattern and applicable flags.</param>
+                /// <param name="searcher">An object which supports searching within a string.</param>
+                abstract search: searcher: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Search.Searcher -> float
+                /// <summary>
+                /// Returns a section of a string.
+                /// </summary>
+                /// <param name="start">The index to the beginning of the specified portion of stringObj.</param>
+                /// <param name="end">
+                /// The index to the end of the specified portion of stringObj. The substring includes the characters up to, but not including, the character indicated by end.
+                /// If this value is not specified, the substring continues to the end of stringObj.
+                /// </param>
+                abstract slice: Func<float option, float option, string> with get, set
+                /// <summary>
+                /// Split a string into substrings using the specified separator and return them as an array.
+                /// </summary>
+                /// <param name="separator">A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</param>
+                /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
+                /// <param name="splitter">An object that can split a string.</param>
+                /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
+                abstract split: separator: U2<string, Fable.Core.TS.Es.RegExp> * ?limit: float -> string[]
+                /// <summary>
+                /// Split a string into substrings using the specified separator and return them as an array.
+                /// </summary>
+                /// <param name="separator">A string that identifies character or characters to use in separating the string. If omitted, a single-element array containing the entire string is returned.</param>
+                /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
+                /// <param name="splitter">An object that can split a string.</param>
+                /// <param name="limit">A value used to limit the number of elements returned in the array.</param>
+                abstract split: splitter: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Split.Splitter * ?limit: float -> string[]
+                /// <summary>
+                /// Returns the substring at the specified location within a String object.
+                /// </summary>
+                /// <param name="start">The zero-based index number indicating the beginning of the substring.</param>
+                /// <param name="end">
+                /// Zero-based index number indicating the end of the substring. The substring includes the characters up to, but not including, the character indicated by end.
+                /// If end is omitted, the characters from start through the end of the original string are returned.
+                /// </param>
+                abstract substring: Func<float, float option, string> with get, set
+                /// <summary>
+                /// Converts all the alphabetic characters in a string to lowercase.
+                /// </summary>
+                abstract toLowerCase: (unit -> string) with get, set
+                /// <summary>
+                /// Converts all alphabetic characters to lowercase, taking into account the host environment's current locale.
+                /// </summary>
+                abstract toLocaleLowerCase: ?locales: U2<string, string[]> -> string
+                /// <summary>
+                /// Converts all alphabetic characters to lowercase, taking into account the host environment's current locale.
+                /// </summary>
+                abstract toLocaleLowerCase: ?locales: U3<string, Fable.Core.TS.Es.Intl.Locale, U2<string, Fable.Core.TS.Es.Intl.Locale>[]> -> string
+                /// <summary>
+                /// Converts all the alphabetic characters in a string to uppercase.
+                /// </summary>
+                abstract toUpperCase: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale.
+                /// </summary>
+                abstract toLocaleUpperCase: ?locales: U2<string, string[]> -> string
+                /// <summary>
+                /// Returns a string where all alphabetic characters have been converted to uppercase, taking into account the host environment's current locale.
+                /// </summary>
+                abstract toLocaleUpperCase: ?locales: U3<string, Fable.Core.TS.Es.Intl.Locale, U2<string, Fable.Core.TS.Es.Intl.Locale>[]> -> string
+                /// <summary>
+                /// Removes the leading and trailing white space and line terminator characters from a string.
+                /// </summary>
+                abstract trim: (unit -> string) with get, set
+                /// <summary>
+                /// Returns the length of a String object.
+                /// </summary>
+                abstract length: float
+                /// <summary>
+                /// Gets a substring beginning at the specified location and having the specified length.
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                /// <param name="from">The starting position of the desired substring. The index of the first character in the string is zero.</param>
+                /// <param name="length">The number of characters to include in the returned substring.</param>
+                abstract substr: Func<float, float option, string> with get, set
+                /// <summary>
+                /// Returns the primitive value of the specified object.
+                /// </summary>
+                abstract valueOf: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a nonnegative integer Number less than 1114112 (0x110000) that is the code point
+                /// value of the UTF-16 encoded code point starting at the string element at position pos in
+                /// the String resulting from converting this object to a String.
+                /// If there is no element at that position, the result is undefined.
+                /// If a valid UTF-16 surrogate pair does not begin at pos, the result is the code unit at pos.
+                /// </summary>
+                abstract codePointAt: (float -> float option) with get, set
+                /// <summary>
+                /// Returns true if searchString appears as a substring of the result of converting this
+                /// object to a String, at one or more positions that are
+                /// greater than or equal to position; otherwise, returns false.
+                /// </summary>
+                /// <param name="searchString">search string</param>
+                /// <param name="position">If position is undefined, 0 is assumed, so as to search all of the String.</param>
+                abstract includes: Func<string, float option, bool> with get, set
+                /// <summary>
+                /// Returns true if the sequence of elements of searchString converted to a String is the
+                /// same as the corresponding elements of this object (converted to a String) starting at
+                /// endPosition – length(this). Otherwise returns false.
+                /// </summary>
+                abstract endsWith: Func<string, float option, bool> with get, set
+                /// <summary>
+                /// Returns the String value result of normalizing the string into the normalization form
+                /// named by form as specified in Unicode Standard Annex #15, Unicode Normalization Forms.
+                /// </summary>
+                /// <param name="form">
+                /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
+                /// is "NFC"
+                /// </param>
+                /// <param name="form">
+                /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
+                /// is "NFC"
+                /// </param>
+                abstract normalize: form: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Normalize.Form -> string
+                /// <summary>
+                /// Returns the String value result of normalizing the string into the normalization form
+                /// named by form as specified in Unicode Standard Annex #15, Unicode Normalization Forms.
+                /// </summary>
+                /// <param name="form">
+                /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
+                /// is "NFC"
+                /// </param>
+                /// <param name="form">
+                /// Applicable values: "NFC", "NFD", "NFKC", or "NFKD", If not specified default
+                /// is "NFC"
+                /// </param>
+                abstract normalize: ?form: string -> string
+                /// <summary>
+                /// Returns a String value that is made from count copies appended together. If count is 0,
+                /// the empty string is returned.
+                /// </summary>
+                /// <param name="count">number of copies to append</param>
+                abstract repeat: (float -> string) with get, set
+                /// <summary>
+                /// Returns true if the sequence of elements of searchString converted to a String is the
+                /// same as the corresponding elements of this object (converted to a String) starting at
+                /// position. Otherwise returns false.
+                /// </summary>
+                abstract startsWith: Func<string, float option, bool> with get, set
+                /// <summary>
+                /// Returns an <c>&lt;a&gt;</c> HTML anchor element and sets the name attribute to the text value
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract anchor: (string -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;big&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract big: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;blink&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract blink: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;b&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract bold: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;tt&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract ``fixed``: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;font&gt;</c> HTML element and sets the color attribute value
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract fontcolor: (string -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;font&gt;</c> HTML element and sets the size attribute value
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract fontsize: size: float -> string
+                /// <summary>
+                /// Returns a <c>&lt;font&gt;</c> HTML element and sets the size attribute value
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract fontsize: size: string -> string
+                /// <summary>
+                /// Returns an <c>&lt;i&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract italics: (unit -> string) with get, set
+                /// <summary>
+                /// Returns an <c>&lt;a&gt;</c> HTML element and sets the href attribute value
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract link: (string -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;small&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract small: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;strike&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract strike: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;sub&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract sub: (unit -> string) with get, set
+                /// <summary>
+                /// Returns a <c>&lt;sup&gt;</c> HTML element
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility</remarks>
+                abstract sup: (unit -> string) with get, set
+                /// <summary>
+                /// Pads the current string with a given string (repeated and/or truncated, if needed) so that the resulting string has a given length.
+                /// The padding is applied from the start of the current string.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padStart">MDN</a>
+                /// </summary>
+                /// <param name="targetLength">
+                /// The length of the resulting string once the current <c>str</c> has been padded.
+                /// If the value is less than or equal to <c>str.length</c>, then <c>str</c> is returned as-is.
+                /// </param>
+                /// <param name="padString">
+                /// The string to pad the current <c>str</c> with.
+                /// If <c>padString</c> is too long to stay within <c>targetLength</c>, it will be truncated from the end.
+                /// The default value is the space character (U+0020).
+                /// </param>
+                abstract padStart: Func<float, string option, string> with get, set
+                /// <summary>
+                /// Pads the current string with a given string (repeated and/or truncated, if needed) so that the resulting string has a given length.
+                /// The padding is applied from the end of the current string.
+                /// <br /><br />
+                /// <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/padEnd">MDN</a>
+                /// </summary>
+                /// <param name="targetLength">
+                /// The length of the resulting string once the current <c>str</c> has been padded.
+                /// If the value is less than or equal to <c>str.length</c>, then <c>str</c> is returned as-is.
+                /// </param>
+                /// <param name="padString">
+                /// The string to pad the current <c>str</c> with.
+                /// If <c>padString</c> is too long to stay within <c>targetLength</c>, it will be truncated from the end.
+                /// The default value is the space character (U+0020).
+                /// </param>
+                abstract padEnd: Func<float, string option, string> with get, set
+                /// <summary>
+                /// Removes the trailing white space and line terminator characters from a string.
+                /// </summary>
+                abstract trimEnd: (unit -> string) with get, set
+                /// <summary>
+                /// Removes the leading white space and line terminator characters from a string.
+                /// </summary>
+                abstract trimStart: (unit -> string) with get, set
+                /// <summary>
+                /// Removes the leading white space and line terminator characters from a string.
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility. Use <c>trimStart</c> instead</remarks>
+                abstract trimLeft: (unit -> string) with get, set
+                /// <summary>
+                /// Removes the trailing white space and line terminator characters from a string.
+                /// </summary>
+                /// <remarks>@deprecated A legacy feature for browser compatibility. Use <c>trimEnd</c> instead</remarks>
+                abstract trimRight: (unit -> string) with get, set
+                /// <summary>
+                /// Matches a string with a regular expression, and returns an iterable of matches
+                /// containing the results of that search.
+                /// </summary>
+                /// <param name="regexp">A regular expression</param>
+                abstract matchAll: (Fable.Core.TS.Es.RegExp -> Fable.Core.TS.Es.RegExpStringIterator<Fable.Core.TS.Es.RegExpExecArray>) with get, set
+                /// <summary>
+                /// Replace all instances of a substring in a string, using a regular expression or search string.
+                /// </summary>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace for every successful match of searchValue in this string.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replaceAll: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replaceValue: string -> string
+                /// <summary>
+                /// Replace all instances of a substring in a string, using a regular expression or search string.
+                /// </summary>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replaceValue">A string containing the text to replace for every successful match of searchValue in this string.</param>
+                /// <param name="searchValue">A string to search for.</param>
+                /// <param name="replacer">A function that returns the replacement text.</param>
+                abstract replaceAll: searchValue: U2<string, Fable.Core.TS.Es.RegExp> * replacer: LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.ReplaceAll.Replacer -> string
+                /// <summary>
+                /// Returns a new String consisting of the single UTF-16 code unit located at the specified index.
+                /// </summary>
+                /// <param name="index">The zero-based index of the desired code unit. A negative index will count back from the last item.</param>
+                abstract at: (float -> string option) with get, set
+                /// <summary>
+                /// Returns true if all leading surrogates and trailing surrogates appear paired and in order.
+                /// </summary>
+                abstract isWellFormed: (unit -> bool) with get, set
+                /// <summary>
+                /// Returns a string where all lone or out-of-order surrogates have been replaced by the Unicode replacement character (U+FFFD).
+                /// </summary>
+                abstract toWellFormed: (unit -> string) with get, set
+                [<EmitIndexer>]
+                abstract Item: float -> string
+
+            module Setting =
+                module Match =
+                    type Matcher =
+                        [<Emit("$0[Symbol.match]($1...)")>]
+                        abstract SymbolMatch: string: string -> Fable.Core.TS.Es.RegExpMatchArray option
+
+                module Normalize =
+                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+                    type Form =
+                        | NFC
+                        | NFD
+                        | NFKC
+                        | NFKD
+
+                module Replace =
+                    type Replacer = delegate of substring: string * args: obj[] -> string
+
+                    type Replacer2 = delegate of substring: string * args: obj[] -> string
+
+                    type SearchValue =
+                        [<Emit("$0[Symbol.replace]($1...)")>]
+                        abstract SymbolReplace: string: string * replaceValue: string -> string
+
+                    type SearchValue2 =
+                        [<Emit("$0[Symbol.replace]($1...)")>]
+                        abstract SymbolReplace: string: string * replacer: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV2CallWarning.Cases.UnsupportedSetting.Setting.Replace.SearchValue2.SymbolReplace.Replacer -> string
+
+                    module SearchValue2 =
+                        module SymbolReplace =
+                            type Replacer = delegate of substring: string * args: obj[] -> string
+
+                module ReplaceAll =
+                    type Replacer = delegate of substring: string * args: obj[] -> string
+
+                module Search =
+                    type Searcher =
+                        [<Emit("$0[Symbol.search]($1...)")>]
+                        abstract SymbolSearch: string: string -> float
+
+                module Split =
+                    type Splitter =
+                        [<Emit("$0[Symbol.split]($1...)")>]
+                        abstract SymbolSplit: string: string * ?limit: float -> string[]
+
+module LanguageModelV2Message =
+    module Cases =
+        module Assistant =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV2FilePart
+                    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV2ReasoningPart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV2TextPart
+                    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV2ToolCallPart
+                    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV2ToolResultPart
+
+        module User =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV2FilePart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV2TextPart
 
 module LanguageModelV2Middleware =
     module OverrideModelId =
@@ -12723,6 +11118,21 @@ module LanguageModelV2Middleware =
             [<ParamObject; Emit("$0")>]
             static member Create (doGenerate: (unit -> JS.Promise<LanguageModelV2.DoGenerate.Result.Item>), doStream: (unit -> JS.Promise<LanguageModelV2.DoStream.Result.Item>), ``params``: LanguageModelV2CallOptions, model: LanguageModelV2) : Options = jsNative
 
+module LanguageModelV2ToolResultOutput =
+    module Cases =
+        module Content =
+            module Value =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    /// <param name="text">Text content.</param>
+                    | [<CompiledName("text")>] Text of text: string
+                    /// <param name="data">Base-64 encoded media data.</param>
+                    /// <param name="mediaType">
+                    /// IANA media type.
+                    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+                    /// </param>
+                    | [<CompiledName("media")>] Media of data: string * mediaType: string
+
 module LanguageModelV3CallOptions =
     [<Interface>]
     type ResponseFormat =
@@ -12743,7 +11153,7 @@ module LanguageModelV3CallOptions =
         /// <summary>
         /// JSON schema that the generated output should conform to.
         /// </summary>
-        abstract schema: JSONSchema7 option with get, set
+        abstract schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 option with get, set
         /// <summary>
         /// Name of output that should be generated. Used by some providers for additional LLM guidance.
         /// </summary>
@@ -12753,7 +11163,7 @@ module LanguageModelV3CallOptions =
         /// </summary>
         abstract description: string option with get, set
         [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-        static member Create (?schema: JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
+        static member Create (?schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
 
     module ResponseFormat2 =
         /// <remarks>TypeScript type: <c>"json"</c></remarks>
@@ -12763,8 +11173,8 @@ module LanguageModelV3CallOptions =
     module Tools =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Item =
-            | [<CompiledName("function")>] Function of name: string * description: string option * inputSchema: JSONSchema7 * inputExamples: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV3FunctionTool.InputExamples.Item[] option * strict: bool option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("provider")>] Provider of id: string * name: string * args: JS.Record<string, obj>
+            | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of LanguageModelV3FunctionTool
+            | [<CompiledName("provider"); Fickl.Core.InlineInterface>] Provider of LanguageModelV3ProviderTool
 
 module LanguageModelV3GenerateResult =
     [<Interface>]
@@ -12790,6 +11200,32 @@ module LanguageModelV3GenerateResult =
         [<ParamObject; Emit("$0")>]
         static member Create (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Response = jsNative
 
+module LanguageModelV3Message =
+    module Cases =
+        module Assistant =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV3FilePart
+                    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV3ReasoningPart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV3TextPart
+                    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV3ToolCallPart
+                    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV3ToolResultPart
+
+        module Tool =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of LanguageModelV3ToolApprovalResponsePart
+                    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV3ToolResultPart
+
+        module User =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV3FilePart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV3TextPart
+
 module LanguageModelV3StreamResult =
     [<Interface>]
     type Request =
@@ -12808,6 +11244,75 @@ module LanguageModelV3StreamResult =
         abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : Response = jsNative
+
+module LanguageModelV3ToolResultOutput =
+    module Cases =
+        module Content =
+            module Value =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    /// <param name="text">Text content.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="data">Base-64 encoded media data.</param>
+                    /// <param name="mediaType">
+                    /// IANA media type.
+                    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+                    /// </param>
+                    /// <param name="filename">Optional filename of the file.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("file-data")>] FileData of data: string * mediaType: string * filename: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="url">URL of the file.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("file-url")>] FileUrl of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="fileId">
+                    /// ID of the file.
+                    /// <br /><br />
+                    /// If you use multiple providers, you need to
+                    /// specify the provider specific ids using
+                    /// the Record option. The key is the provider
+                    /// name, e.g. 'openai' or 'anthropic'.
+                    /// </param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("file-id")>] FileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="data">Base-64 encoded image data.</param>
+                    /// <param name="mediaType">
+                    /// IANA media type.
+                    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+                    /// </param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("image-data")>] ImageData of data: string * mediaType: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="url">URL of the image.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("image-url")>] ImageUrl of url: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="fileId">
+                    /// Image that is referenced using a provider file id.
+                    /// <br /><br />
+                    /// If you use multiple providers, you need to
+                    /// specify the provider specific ids using
+                    /// the Record option. The key is the provider
+                    /// name, e.g. 'openai' or 'anthropic'.
+                    /// </param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("image-file-id")>] ImageFileId of fileId: U2<string, JS.Record<string, string>> * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("custom")>] Custom of providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+                    static member CreateText (text: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'file-data', ...$0 })")>]
+                    static member CreateFileData (data: string, mediaType: string, ?filename: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'file-url', ...$0 })")>]
+                    static member CreateFileUrl (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'file-id', ...$0 })")>]
+                    static member CreateFileId (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'image-data', ...$0 })")>]
+                    static member CreateImageData (data: string, mediaType: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'image-url', ...$0 })")>]
+                    static member CreateImageUrl (url: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'image-file-id', ...$0 })")>]
+                    static member CreateImageFileId (fileId: U2<string, JS.Record<string, string>>, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+                    static member CreateCustom (?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
 
 module LanguageModelV3Usage =
     [<Interface>]
@@ -12878,7 +11383,7 @@ module LanguageModelV4CallOptions =
         /// <summary>
         /// JSON schema that the generated output should conform to.
         /// </summary>
-        abstract schema: JSONSchema7 option with get, set
+        abstract schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7 option with get, set
         /// <summary>
         /// Name of output that should be generated. Used by some providers for additional LLM guidance.
         /// </summary>
@@ -12888,7 +11393,7 @@ module LanguageModelV4CallOptions =
         /// </summary>
         abstract description: string option with get, set
         [<ParamObject; Emit("({ type: 'json', ...$0 })")>]
-        static member Create (?schema: JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
+        static member Create (?schema: FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, ?name: string, ?description: string) : ResponseFormat2 = jsNative
 
     module ResponseFormat2 =
         /// <remarks>TypeScript type: <c>"json"</c></remarks>
@@ -12898,8 +11403,8 @@ module LanguageModelV4CallOptions =
     module Tools =
         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
         type Item =
-            | [<CompiledName("function")>] Function of name: string * description: string option * inputSchema: JSONSchema7 * inputExamples: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4FunctionTool.InputExamples.Item[] option * strict: bool option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
-            | [<CompiledName("provider")>] Provider of id: string * name: string * args: JS.Record<string, obj>
+            | [<CompiledName("function"); Fickl.Core.InlineInterface>] Function of LanguageModelV4FunctionTool
+            | [<CompiledName("provider"); Fickl.Core.InlineInterface>] Provider of LanguageModelV4ProviderTool
 
 module LanguageModelV4FinishReason =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -12935,6 +11440,34 @@ module LanguageModelV4GenerateResult =
         [<ParamObject; Emit("$0")>]
         static member Create (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string, ?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers, ?body: obj) : Response = jsNative
 
+module LanguageModelV4Message =
+    module Cases =
+        module Assistant =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of LanguageModelV4CustomPart
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV4FilePart
+                    | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of LanguageModelV4ReasoningFilePart
+                    | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of LanguageModelV4ReasoningPart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV4TextPart
+                    | [<CompiledName("tool-call"); Fickl.Core.InlineInterface>] ToolCall of LanguageModelV4ToolCallPart
+                    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV4ToolResultPart
+
+        module Tool =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of LanguageModelV4ToolApprovalResponsePart
+                    | [<CompiledName("tool-result"); Fickl.Core.InlineInterface>] ToolResult of LanguageModelV4ToolResultPart
+
+        module User =
+            module Content =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of LanguageModelV4FilePart
+                    | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of LanguageModelV4TextPart
+
 module LanguageModelV4StreamResult =
     [<Interface>]
     type Request =
@@ -12953,6 +11486,46 @@ module LanguageModelV4StreamResult =
         abstract headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?headers: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2Headers) : Response = jsNative
+
+module LanguageModelV4ToolResultOutput =
+    module Cases =
+        module Content =
+            module Value =
+                [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
+                type Item =
+                    /// <param name="text">Text content.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("text")>] Text of text: string * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="data">
+                    /// File data as a tagged discriminated union:
+                    /// <br /><br />
+                    /// - <c>{ type: 'data', data }</c>: raw bytes (Uint8Array) or base64-encoded string.
+                    /// - <c>{ type: 'url', url }</c>: a URL that points to the file.
+                    /// - <c>{ type: 'reference', reference }</c>: a provider reference (<c>{ [provider]: id }</c>).
+                    /// - <c>{ type: 'text', text }</c>: inline text content (e.g. an inline text document).
+                    /// </param>
+                    /// <param name="mediaType">
+                    /// Either a full IANA media type (<c>type/subtype</c>, e.g. <c>image/png</c>) or just
+                    /// the top-level IANA segment (e.g. <c>image</c>, <c>audio</c>, <c>video</c>, <c>text</c>).
+                    /// <br /><br />
+                    /// <c>*</c>-subtype wildcards (e.g. <c>image/*</c>) are normalized as equivalent to the
+                    /// top-level segment alone (e.g. <c>image</c>). Providers can use the helpers in
+                    /// <c>@ai-sdk/provider-utils</c> (<c>isFullMediaType</c>, <c>getTopLevelMediaType</c>,
+                    /// <c>detectMediaType</c>) to resolve the field according to their API
+                    /// requirements.
+                    /// @see https://www.iana.org/assignments/media-types/media-types.xhtml
+                    /// </param>
+                    /// <param name="filename">Optional filename of the file.</param>
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("file")>] File of data: SharedV4FileData * mediaType: string * filename: string option * providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    /// <param name="providerOptions">Provider-specific options.</param>
+                    | [<CompiledName("custom")>] Custom of providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
+                    [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
+                    static member CreateText (text: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+                    static member CreateFile (data: SharedV4FileData, mediaType: string, ?filename: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
+                    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+                    static member CreateCustom (?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item = jsNative
 
 module LanguageModelV4Usage =
     [<Interface>]
@@ -13067,7 +11640,7 @@ module ProviderV2 =
                     /// <summary>
                     /// Abort signal for cancelling the operation.
                     /// </summary>
-                    abstract abortSignal: obj option with get, set
+                    abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                     /// <summary>
                     /// Additional provider-specific options. They are passed through
                     /// to the provider from the AI SDK and enable provider-specific
@@ -13080,7 +11653,7 @@ module ProviderV2 =
                     /// </summary>
                     abstract headers: JS.Record<string, string option> option with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (values: string[], ?abortSignal: obj, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?headers: JS.Record<string, string option>) : Options = jsNative
+                    static member Create (values: string[], ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV2ProviderMetadata, ?headers: JS.Record<string, string option>) : Options = jsNative
 
 module RerankingModelV3CallOptions =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
@@ -13088,63 +11661,11 @@ module RerankingModelV3CallOptions =
         | [<CompiledName("text")>] Text of values: string[]
         | [<CompiledName("object")>] Object of values: JSONObject[]
 
-    [<Interface>]
-    type Documents2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract values: string[] with get, set
-        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-        static member Create (values: string[]) : Documents2 = jsNative
-
-    module Documents2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        [<Literal>]
-        let ``type`` = "text"
-
-    [<Interface>]
-    type Documents3 =
-        /// <remarks>TypeScript type: <c>"object"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract values: JSONObject[] with get, set
-        [<ParamObject; Emit("({ type: 'object', ...$0 })")>]
-        static member Create (values: JSONObject[]) : Documents3 = jsNative
-
-    module Documents3 =
-        /// <remarks>TypeScript type: <c>"object"</c></remarks>
-        [<Literal>]
-        let ``type`` = "object"
-
 module RerankingModelV4CallOptions =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Documents =
         | [<CompiledName("text")>] Text of values: string[]
         | [<CompiledName("object")>] Object of values: JSONObject[]
-
-    [<Interface>]
-    type Documents2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract values: string[] with get, set
-        [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-        static member Create (values: string[]) : Documents2 = jsNative
-
-    module Documents2 =
-        /// <remarks>TypeScript type: <c>"text"</c></remarks>
-        [<Literal>]
-        let ``type`` = "text"
-
-    [<Interface>]
-    type Documents3 =
-        /// <remarks>TypeScript type: <c>"object"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract values: JSONObject[] with get, set
-        [<ParamObject; Emit("({ type: 'object', ...$0 })")>]
-        static member Create (values: JSONObject[]) : Documents3 = jsNative
-
-    module Documents3 =
-        /// <remarks>TypeScript type: <c>"object"</c></remarks>
-        [<Literal>]
-        let ``type`` = "object"
 
 module RerankingModelV4Result =
     [<Interface>]
@@ -13189,8 +11710,23 @@ module RerankingModelV4Result =
 module SkillsV4File =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Data =
-        | [<CompiledName("data")>] Data of data: U2<string, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>
-        | [<CompiledName("text")>] Text of text: string
+        | [<CompiledName("data"); Fickl.Core.InlineInterface>] Data of SharedV4FileDataData
+        | [<CompiledName("text"); Fickl.Core.InlineInterface>] Text of SharedV4FileDataText
+
+module SpeechModelV2CallWarning =
+    module Cases =
+        module UnsupportedSetting =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Setting =
+                | [<CompiledName("abortSignal")>] AbortSignal
+                | [<CompiledName("headers")>] Headers
+                | [<CompiledName("instructions")>] Instructions
+                | [<CompiledName("language")>] Language
+                | [<CompiledName("outputFormat")>] OutputFormat
+                | [<CompiledName("providerOptions")>] ProviderOptions
+                | [<CompiledName("speed")>] Speed
+                | [<CompiledName("text")>] Text
+                | [<CompiledName("voice")>] Voice
 
 module SpeechModelV4Result =
     [<Interface>]
@@ -13232,6 +11768,17 @@ module TooManyEmbeddingValuesForCallError =
         abstract values: obj[] with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (provider: string, modelId: string, maxEmbeddingsPerCall: float, values: obj[]) : Options = jsNative
+
+module TranscriptionModelV2CallWarning =
+    module Cases =
+        module UnsupportedSetting =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Setting =
+                | [<CompiledName("abortSignal")>] AbortSignal
+                | [<CompiledName("audio")>] Audio
+                | [<CompiledName("headers")>] Headers
+                | [<CompiledName("mediaType")>] MediaType
+                | [<CompiledName("providerOptions")>] ProviderOptions
 
 module TranscriptionModelV4Result =
     [<Interface>]
@@ -13309,6 +11856,64 @@ type AISDKErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
     /// Custom error class for AI SDK related errors.
     /// </summary>
     /// <remarks>@extends Error</remarks>
@@ -13325,6 +11930,64 @@ type APICallErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: APICallError0 -> APICallError
 
@@ -13338,6 +12001,64 @@ type EmptyResponseBodyErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: ?__0: EmptyResponseBodyError0 -> EmptyResponseBodyError
 
@@ -13354,6 +12075,64 @@ type InvalidArgumentErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     /// <summary>
     /// A function argument is invalid.
     /// </summary>
@@ -13374,6 +12153,64 @@ type InvalidPromptErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     /// <summary>
     /// A prompt is invalid. This error should be thrown by providers when they cannot
     /// process a prompt.
@@ -13396,6 +12233,64 @@ type InvalidResponseDataErrorConstructor =
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
     /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
     /// Server returned a response with invalid data content.
     /// This should be thrown by providers when they cannot parse the response from the API.
     /// </summary>
@@ -13412,6 +12307,64 @@ type JSONParseErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: JSONParseError0 -> JSONParseError
 
@@ -13425,6 +12378,64 @@ type LoadAPIKeyErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: LoadAPIKeyError0 -> LoadAPIKeyError
 
@@ -13438,6 +12449,64 @@ type LoadSettingErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: LoadSettingError0 -> LoadSettingError
 
@@ -13455,6 +12524,64 @@ type NoContentGeneratedErrorConstructor =
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
     /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
     /// Thrown when the AI provider fails to generate any content.
     /// </summary>
     [<EmitConstructor>]
@@ -13470,6 +12597,64 @@ type NoSuchModelErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: NoSuchModelError0 -> NoSuchModelError
 
@@ -13488,6 +12673,64 @@ type NoSuchProviderReferenceErrorConstructor =
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
     /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
     /// Thrown when a provider reference cannot be resolved because the specified
     /// provider is not found in the provider reference mapping.
     /// </summary>
@@ -13504,6 +12747,64 @@ type TooManyEmbeddingValuesForCallErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: options: TooManyEmbeddingValuesForCallError.Options -> TooManyEmbeddingValuesForCallError
 
@@ -13525,6 +12826,64 @@ type TypeValidationErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: TypeValidationError0 -> TypeValidationError
 
@@ -13538,6 +12897,64 @@ type UnsupportedFunctionalityErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     abstract hasMarker: error: obj * marker: string -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     [<EmitConstructor>]
     abstract Create: __0: UnsupportedFunctionalityError0 -> UnsupportedFunctionalityError
 

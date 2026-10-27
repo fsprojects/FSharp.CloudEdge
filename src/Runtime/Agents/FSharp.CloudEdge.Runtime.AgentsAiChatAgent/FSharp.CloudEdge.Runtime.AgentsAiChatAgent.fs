@@ -10,6 +10,11 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+[<Fickl.Core.CallableInterface>]
+type RunWithCodeVerifierState =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'T>: state: string * callback: (unit -> JS.Promise<'T>) -> JS.Promise<'T>
+
 [<Interface>]
 type CORSOptions =
     abstract origin: string option with get, set
@@ -26,25 +31,9 @@ type PerRequestResponseMode =
     | [<CompiledName("json")>] Json
     | [<CompiledName("sse")>] Sse
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
+type LegacyCallToolResultSchema = U2<FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>, FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>)>>
 
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
-
-type LegacyCallToolResultSchema = obj
+type CompatibleMcpClient = obj
 
 [<Interface>]
 type RetryOptions =
@@ -67,6 +56,10 @@ type RetryOptions =
 type LifecycleCapability<'Props> =
     abstract capabilityId: string
     /// <summary>
+    /// How this capability claims traffic; see DurableObjectCapability.claims.
+    /// </summary>
+    abstract claims: Schedules.Scheduler.Claims
+    /// <summary>
     /// Default startup hook; capabilities override when they own startup work.
     /// </summary>
     abstract onStart: _context: LifecycleCapability.OnStart.Context<'Props> -> unit
@@ -79,34 +72,60 @@ type LifecycleCapability<'Props> =
     /// </summary>
     abstract lifecycle: Schedules.Scheduler.LifecycleServices
     [<ParamObject; Emit("$0")>]
-    static member Create (capabilityId: string, onStart: (LifecycleCapability.OnStart.Context<'Props> -> unit), lifecycle: Schedules.Scheduler.LifecycleServices, ?lifecycleServices: Schedules.Scheduler.LifecycleServices) : LifecycleCapability<'Props> = jsNative
+    static member Create (capabilityId: string, claims: Schedules.Scheduler.Claims, onStart: (LifecycleCapability.OnStart.Context<'Props> -> unit), lifecycle: Schedules.Scheduler.LifecycleServices, ?lifecycleServices: Schedules.Scheduler.LifecycleServices) : LifecycleCapability<'Props> = jsNative
 
-[<Interface>]
-type MessageType =
-    abstract CF_AGENT_MCP_SERVERS: string
-    abstract CF_MCP_AGENT_EVENT: string
-    abstract CF_AGENT_STATE: string
-    abstract CF_AGENT_STATE_ERROR: string
-    abstract CF_AGENT_IDENTITY: string
-    abstract CF_AGENT_SESSION: string
-    abstract CF_AGENT_SESSION_ERROR: string
-    abstract RPC: string
-    [<ParamObject; Emit("$0")>]
-    static member Create (CF_AGENT_MCP_SERVERS: string, CF_MCP_AGENT_EVENT: string, CF_AGENT_STATE: string, CF_AGENT_STATE_ERROR: string, CF_AGENT_IDENTITY: string, CF_AGENT_SESSION: string, CF_AGENT_SESSION_ERROR: string, RPC: string) : MessageType = jsNative
+[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+type LifecycleStatus =
+    | [<CompiledName("started")>] Started
+    | [<CompiledName("starting")>] Starting
+    | [<CompiledName("zero")>] Zero
+
+module CompatibleMcpClient =
+    [<Interface>]
+    type Item =
+        abstract ``method``: string with get, set
+        abstract ``params``: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.CompatibleMcpClient.Item3 option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (``method``: string, ?``params``: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.CompatibleMcpClient.Item3) : Item = jsNative
+
+    type Item3 =
+        /// <summary>
+        /// See <a href="https://github.com/modelcontextprotocol/modelcontextprotocol/blob/47339c03c143bb4ec01a26e721a1b8fe66634ebe/docs/specification/draft/basic/index.mdx#general-fields">MCP specification</a>
+        /// for notes on _meta usage.
+        /// </summary>
+        abstract _meta: CompatibleMcpClient.Item3.Meta option with get, set
+        [<EmitIndexer>]
+        abstract Item: string -> obj with get, set
+
+    module Item3 =
+        type Meta =
+            /// <summary>
+            /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
+            /// </summary>
+            abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
+            /// <summary>
+            /// If specified, this request is related to the provided task.
+            /// </summary>
+            abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.CompatibleMcpClient.Item3.MetaIoModelcontextprotocolRelatedTask option with get, set
+            [<EmitIndexer>]
+            abstract Item: string -> obj with get, set
+
+        [<Interface>]
+        type MetaIoModelcontextprotocolRelatedTask =
+            abstract taskId: string with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (taskId: string) : MetaIoModelcontextprotocolRelatedTask = jsNative
 
 /// <summary>agents/email</summary>
 module Email =
-    /// <summary>
-    /// Cloudflare Email Service binding.
-    /// </summary>
-    type EmailSendBinding = obj
+    type EmailSendBinding = FSharp.CloudEdge.Runtime.Workers.SendEmail
 
     /// <summary>
     /// Options for sending an outbound email from an Agent.
     /// </summary>
     [<Interface>]
     type SendEmailOptions =
-        abstract binding: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailSendBinding with get, set
+        abstract binding: FSharp.CloudEdge.Runtime.Workers.SendEmail with get, set
         abstract ``to``: U2<string, string[]> with get, set
         abstract from: U2<string, Email.SendEmailOptions.From> with get, set
         abstract subject: string with get, set
@@ -119,7 +138,7 @@ module Email =
         abstract headers: JS.Record<string, string> option with get, set
         abstract secret: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (binding: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailSendBinding, ``to``: U2<string, string[]>, from: U2<string, Email.SendEmailOptions.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, Email.SendEmailOptions.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: JS.Record<string, string>, ?secret: string) : SendEmailOptions = jsNative
+        static member Create (binding: FSharp.CloudEdge.Runtime.Workers.SendEmail, ``to``: U2<string, string[]>, from: U2<string, Email.SendEmailOptions.From>, subject: string, ?text: string, ?html: string, ?replyTo: U2<string, Email.SendEmailOptions.ReplyTo>, ?cc: U2<string, string[]>, ?bcc: U2<string, string[]>, ?inReplyTo: string, ?headers: JS.Record<string, string>, ?secret: string) : SendEmailOptions = jsNative
 
     /// <summary>
     /// Header object as returned by postal-mime and similar email parsing libraries.
@@ -145,7 +164,7 @@ module Email =
         [<ParamObject; Emit("$0")>]
         static member Create (agentName: string, agentId: string, ?_secureRouted: bool) : EmailResolverResult2 = jsNative
 
-    type EmailResolver<'Env> = delegate of email: obj * env: 'Env -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>
+    type EmailResolver<'Env> = delegate of email: FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage * env: 'Env -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>
 
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
     type SignatureFailureReason =
@@ -178,14 +197,14 @@ module Email =
         abstract from: string with get, set
         abstract ``to``: string with get, set
         abstract getRaw: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>) with get, set
-        abstract headers: obj with get, set
+        abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
         abstract rawSize: float with get, set
         abstract setReject: (string -> unit) with get, set
         abstract forward: Email.AgentEmail.Forward with get, set
-        abstract reply: (Email.AgentEmail.Reply.Options -> JS.Promise<obj>) with get, set
+        abstract reply: (Email.AgentEmail.Reply.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>) with get, set
         abstract _secureRouted: bool option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (from: string, ``to``: string, getRaw: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), headers: obj, rawSize: float, setReject: (string -> unit), forward: Email.AgentEmail.Forward, reply: (Email.AgentEmail.Reply.Options -> JS.Promise<obj>), ?_secureRouted: bool) : AgentEmail = jsNative
+        static member Create (from: string, ``to``: string, getRaw: (unit -> JS.Promise<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>), headers: FSharp.CloudEdge.Runtime.Workers.Headers, rawSize: float, setReject: (string -> unit), forward: Email.AgentEmail.Forward, reply: (Email.AgentEmail.Reply.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>), ?_secureRouted: bool) : AgentEmail = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -236,7 +255,7 @@ module Email =
         /// <remarks>@deprecated REMOVED due to security vulnerability (IDOR via spoofed headers).</remarks>
         /// <remarks>@throws Always throws an error with migration guidance.</remarks>
         [<Import("createHeaderBasedEmailResolver", "agents/email")>]
-        static member createHeaderBasedEmailResolver<'Env> () : Func<obj, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
+        static member createHeaderBasedEmailResolver<'Env> () : Func<FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
         /// <summary>
         /// Create a resolver for routing email replies with signature verification.
         /// This resolver verifies that replies contain a valid HMAC signature, preventing
@@ -271,14 +290,14 @@ module Email =
         /// </code>
         /// </example>
         [<Import("createSecureReplyEmailResolver", "agents/email")>]
-        static member createSecureReplyEmailResolver<'Env> (secret: string, ?options: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.SecureReplyResolverOptions) : Func<obj, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
+        static member createSecureReplyEmailResolver<'Env> (secret: string, ?options: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.SecureReplyResolverOptions) : Func<FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
         /// <summary>
         /// Create a resolver that uses the email address to determine the agent to route the email to
         /// </summary>
         /// <param name="defaultAgentName">The default agent name to use if the email address does not contain a sub-address</param>
         /// <returns>A function that resolves the agent to route the email to</returns>
         [<Import("createAddressBasedEmailResolver", "agents/email")>]
-        static member createAddressBasedEmailResolver<'Env> (defaultAgentName: string) : Func<obj, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
+        static member createAddressBasedEmailResolver<'Env> (defaultAgentName: string) : Func<FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
         /// <summary>
         /// Create a resolver that uses the agentName and agentId to determine the agent to route the email to
         /// </summary>
@@ -286,10 +305,10 @@ module Email =
         /// <param name="agentId">The id of the agent to route the email to</param>
         /// <returns>A function that resolves the agent to route the email to</returns>
         [<Import("createCatchAllEmailResolver", "agents/email")>]
-        static member createCatchAllEmailResolver<'Env> (agentName: string, agentId: string) : Func<obj, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
+        static member createCatchAllEmailResolver<'Env> (agentName: string, agentId: string) : Func<FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage, 'Env, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.EmailResolverResult2 option>> = jsNative
 
     module AgentEmail =
-        type Forward = delegate of rcptTo: string * headers: obj option -> JS.Promise<obj>
+        type Forward = delegate of rcptTo: string * headers: FSharp.CloudEdge.Runtime.Workers.Headers option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.EmailSendResult>
 
         module Reply =
             [<Interface>]
@@ -301,7 +320,7 @@ module Email =
                 static member Create (from: string, ``to``: string, raw: string) : Options = jsNative
 
     module SecureReplyResolverOptions =
-        type OnInvalidSignature = delegate of email: obj * reason: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.SignatureFailureReason -> unit
+        type OnInvalidSignature = delegate of email: FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage * reason: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Email.SignatureFailureReason -> unit
 
     module SendEmailOptions =
         [<Interface>]
@@ -321,12 +340,12 @@ module Email =
 module LegacyCallToolResultSchema =
     [<Interface>]
     type Item =
-        abstract _meta: obj with get, set
-        abstract content: obj with get, set
-        abstract structuredContent: obj with get, set
-        abstract isError: obj with get, set
+        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+        abstract content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>> with get, set
+        abstract structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+        abstract isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (_meta: obj, content: obj, structuredContent: obj, isError: obj) : Item = jsNative
+        static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>>, structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean>) : Item = jsNative
 
     module Item =
         module Content =
@@ -336,67 +355,67 @@ module LegacyCallToolResultSchema =
                         module Item =
                             [<Interface>]
                             type Item =
-                                abstract ``type``: obj with get, set
-                                abstract text: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, text: obj, annotations: obj, _meta: obj) : Item = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item = jsNative
 
                             [<Interface>]
                             type Item2 =
-                                abstract ``type``: obj with get, set
-                                abstract data: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item2 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item2 = jsNative
 
                             [<Interface>]
                             type Item3 =
-                                abstract ``type``: obj with get, set
-                                abstract data: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item3 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item3 = jsNative
 
                             [<Interface>]
                             type Item4 =
-                                abstract uri: obj with get, set
-                                abstract description: obj with get, set
-                                abstract mimeType: obj with get, set
-                                abstract size: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
-                                abstract icons: obj with get, set
-                                abstract name: obj with get, set
-                                abstract title: obj with get, set
-                                abstract ``type``: obj with get, set
+                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                                abstract icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>> with get, set
+                                abstract name: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                abstract title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (uri: obj, description: obj, mimeType: obj, size: obj, annotations: obj, _meta: obj, icons: obj, name: obj, title: obj, ``type``: obj) : Item4 = jsNative
+                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>>, name: FSharp.CloudEdge.Support.Zod.V4.ZodString, title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
                             [<Interface>]
                             type Item5 =
-                                abstract ``type``: obj with get, set
-                                abstract resource: obj with get, set
-                                abstract annotations: obj with get, set
-                                abstract _meta: obj with get, set
+                                abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                abstract resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)> with get, set
+                                abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                 [<ParamObject; Emit("$0")>]
-                                static member Create (``type``: obj, resource: obj, annotations: obj, _meta: obj) : Item5 = jsNative
+                                static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item5 = jsNative
 
                             module Item =
                                 module Annotations =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -424,11 +443,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -456,11 +475,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -488,11 +507,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -520,12 +539,12 @@ module LegacyCallToolResultSchema =
                                         module Item =
                                             [<Interface>]
                                             type Item =
-                                                abstract src: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract sizes: obj with get, set
-                                                abstract theme: obj with get, set
+                                                abstract src: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>> with get, set
+                                                abstract theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>> with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (src: obj, mimeType: obj, sizes: obj, theme: obj) : Item = jsNative
+                                                static member Create (src: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>>, theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>>) : Item = jsNative
 
                                             module Item =
                                                 module Theme =
@@ -552,11 +571,11 @@ module LegacyCallToolResultSchema =
                                     module Item =
                                         [<Interface>]
                                         type Item =
-                                            abstract audience: obj with get, set
-                                            abstract priority: obj with get, set
-                                            abstract lastModified: obj with get, set
+                                            abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                            abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                            abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                             [<ParamObject; Emit("$0")>]
-                                            static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                            static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                         module Item =
                                             module Audience =
@@ -584,38 +603,38 @@ module LegacyCallToolResultSchema =
                                         module Item =
                                             [<Interface>]
                                             type Item =
-                                                abstract uri: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract _meta: obj with get, set
-                                                abstract text: obj with get, set
+                                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (uri: obj, mimeType: obj, _meta: obj, text: obj) : Item = jsNative
+                                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                                             [<Interface>]
                                             type Item2 =
-                                                abstract uri: obj with get, set
-                                                abstract mimeType: obj with get, set
-                                                abstract _meta: obj with get, set
-                                                abstract blob: obj with get, set
+                                                abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                abstract blob: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                 [<ParamObject; Emit("$0")>]
-                                                static member Create (uri: obj, mimeType: obj, _meta: obj, blob: obj) : Item2 = jsNative
+                                                static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, blob: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item2 = jsNative
 
         module Item =
             [<Interface>]
             type Item =
-                abstract _meta: obj with get, set
-                abstract content: obj with get, set
-                abstract structuredContent: obj with get, set
-                abstract isError: obj with get, set
+                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                abstract content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>> with get, set
+                abstract structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                abstract isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean> with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (_meta: obj, content: obj, structuredContent: obj, isError: obj) : Item = jsNative
+                static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, content: FSharp.CloudEdge.Support.Zod.V4.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>>>, structuredContent: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, isError: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodBoolean>) : Item = jsNative
 
             [<Interface>]
             type Item2 =
-                abstract _meta: obj with get, set
-                abstract toolResult: obj with get, set
+                abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                abstract toolResult: FSharp.CloudEdge.Support.Zod.V4.ZodUnknown with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (_meta: obj, toolResult: obj) : Item2 = jsNative
+                static member Create (_meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, toolResult: FSharp.CloudEdge.Support.Zod.V4.ZodUnknown) : Item2 = jsNative
 
             module Item =
                 module Content =
@@ -625,67 +644,67 @@ module LegacyCallToolResultSchema =
                                 module Item =
                                     [<Interface>]
                                     type Item =
-                                        abstract ``type``: obj with get, set
-                                        abstract text: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, text: obj, annotations: obj, _meta: obj) : Item = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item = jsNative
 
                                     [<Interface>]
                                     type Item2 =
-                                        abstract ``type``: obj with get, set
-                                        abstract data: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item2 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item2 = jsNative
 
                                     [<Interface>]
                                     type Item3 =
-                                        abstract ``type``: obj with get, set
-                                        abstract data: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract data: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, data: obj, mimeType: obj, annotations: obj, _meta: obj) : Item3 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, data: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodString, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item3 = jsNative
 
                                     [<Interface>]
                                     type Item4 =
-                                        abstract uri: obj with get, set
-                                        abstract description: obj with get, set
-                                        abstract mimeType: obj with get, set
-                                        abstract size: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
-                                        abstract icons: obj with get, set
-                                        abstract name: obj with get, set
-                                        abstract title: obj with get, set
-                                        abstract ``type``: obj with get, set
+                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>> with get, set
+                                        abstract icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>> with get, set
+                                        abstract name: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                        abstract title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (uri: obj, description: obj, mimeType: obj, size: obj, annotations: obj, _meta: obj, icons: obj, name: obj, title: obj, ``type``: obj) : Item4 = jsNative
+                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, description: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, size: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Loose>>, icons: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>>, name: FSharp.CloudEdge.Support.Zod.V4.ZodString, title: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
                                     [<Interface>]
                                     type Item5 =
-                                        abstract ``type``: obj with get, set
-                                        abstract resource: obj with get, set
-                                        abstract annotations: obj with get, set
-                                        abstract _meta: obj with get, set
+                                        abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                                        abstract resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)> with get, set
+                                        abstract annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
+                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
                                         [<ParamObject; Emit("$0")>]
-                                        static member Create (``type``: obj, resource: obj, annotations: obj, _meta: obj) : Item5 = jsNative
+                                        static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, resource: FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Resource.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>)>, annotations: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>) : Item5 = jsNative
 
                                     module Item =
                                         module Annotations =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -713,11 +732,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item2.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -745,11 +764,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item3.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -777,11 +796,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -809,12 +828,12 @@ module LegacyCallToolResultSchema =
                                                 module Item =
                                                     [<Interface>]
                                                     type Item =
-                                                        abstract src: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract sizes: obj with get, set
-                                                        abstract theme: obj with get, set
+                                                        abstract src: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>> with get, set
+                                                        abstract theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>> with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (src: obj, mimeType: obj, sizes: obj, theme: obj) : Item = jsNative
+                                                        static member Create (src: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, sizes: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodString>>, theme: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item4.Icons.Item.Item.Item.Theme.Item.Item>>) : Item = jsNative
 
                                                     module Item =
                                                         module Theme =
@@ -841,11 +860,11 @@ module LegacyCallToolResultSchema =
                                             module Item =
                                                 [<Interface>]
                                                 type Item =
-                                                    abstract audience: obj with get, set
-                                                    abstract priority: obj with get, set
-                                                    abstract lastModified: obj with get, set
+                                                    abstract audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>> with get, set
+                                                    abstract priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber> with get, set
+                                                    abstract lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime> with get, set
                                                     [<ParamObject; Emit("$0")>]
-                                                    static member Create (audience: obj, priority: obj, lastModified: obj) : Item = jsNative
+                                                    static member Create (audience: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodArray<FSharp.CloudEdge.Support.Zod.V4.ZodEnum<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Content.Item.Item.Item.Item.Item5.Annotations.Item.Item.Audience.Item.Item.Item>>>, priority: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodNumber>, lastModified: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodISODateTime>) : Item = jsNative
 
                                                 module Item =
                                                     module Audience =
@@ -873,21 +892,21 @@ module LegacyCallToolResultSchema =
                                                 module Item =
                                                     [<Interface>]
                                                     type Item =
-                                                        abstract uri: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract _meta: obj with get, set
-                                                        abstract text: obj with get, set
+                                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                        abstract text: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (uri: obj, mimeType: obj, _meta: obj, text: obj) : Item = jsNative
+                                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, text: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                                                     [<Interface>]
                                                     type Item2 =
-                                                        abstract uri: obj with get, set
-                                                        abstract mimeType: obj with get, set
-                                                        abstract _meta: obj with get, set
-                                                        abstract blob: obj with get, set
+                                                        abstract uri: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+                                                        abstract mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString> with get, set
+                                                        abstract _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>> with get, set
+                                                        abstract blob: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                                                         [<ParamObject; Emit("$0")>]
-                                                        static member Create (uri: obj, mimeType: obj, _meta: obj, blob: obj) : Item2 = jsNative
+                                                        static member Create (uri: FSharp.CloudEdge.Support.Zod.V4.ZodString, mimeType: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodString>, _meta: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodRecord<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<U3<string, float, Fable.Core.TS.Es.Symbol>, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<U3<string, float, Fable.Core.TS.Es.Symbol>, obj>>, FSharp.CloudEdge.Support.Zod.V4.ZodUnknown>>, blob: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item2 = jsNative
 
                 module Meta =
                     module Item =
@@ -896,19 +915,19 @@ module LegacyCallToolResultSchema =
                             /// <summary>
                             /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                             /// </summary>
-                            abstract progressToken: obj with get, set
+                            abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                             /// <summary>
                             /// If specified, this request is related to the provided task.
                             /// </summary>
-                            abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                            abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                            static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                         [<Interface>]
                         type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                            abstract taskId: obj with get, set
+                            abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                            static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
             module Item2 =
                 module Meta =
@@ -918,19 +937,19 @@ module LegacyCallToolResultSchema =
                             /// <summary>
                             /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                             /// </summary>
-                            abstract progressToken: obj with get, set
+                            abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                             /// <summary>
                             /// If specified, this request is related to the provided task.
                             /// </summary>
-                            abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                            abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                            static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Item.Item2.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                         [<Interface>]
                         type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                            abstract taskId: obj with get, set
+                            abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                            static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
         module Meta =
             module Item =
@@ -939,19 +958,19 @@ module LegacyCallToolResultSchema =
                     /// <summary>
                     /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                     /// </summary>
-                    abstract progressToken: obj with get, set
+                    abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>> with get, set
                     /// <summary>
                     /// If specified, this request is related to the provided task.
                     /// </summary>
-                    abstract ``io.modelcontextprotocol/related-task``: obj with get, set
+                    abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>> with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (progressToken: obj, ``io.modelcontextprotocol/related-task``: obj) : Item = jsNative
+                    static member Create (progressToken: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodString * FSharp.CloudEdge.Support.Zod.V4.ZodNumber)>>, ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Support.Zod.V4.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.LegacyCallToolResultSchema.Item.Meta.Item.ItemIoModelcontextprotocolRelatedTaskItemItem, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>>) : Item = jsNative
 
                 [<Interface>]
                 type ItemIoModelcontextprotocolRelatedTaskItemItem =
-                    abstract taskId: obj with get, set
+                    abstract taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                     [<ParamObject; Emit("$0")>]
-                    static member Create (taskId: obj) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
+                    static member Create (taskId: FSharp.CloudEdge.Support.Zod.V4.ZodString) : ItemIoModelcontextprotocolRelatedTaskItemItem = jsNative
 
 module LifecycleCapability =
     module OnStart =
@@ -974,14 +993,14 @@ module Mcp =
             abstract serverId: string option with get, set
             abstract checkState: state: string -> JS.Promise<Mcp.DoOauthClientProvider.AgentMcpOAuthProvider.CheckState.Result.Item>
             abstract consumeState: state: string -> JS.Promise<unit>
-            abstract runWithCodeVerifierState: Func<string, (unit -> JS.Promise<obj>), JS.Promise<obj>> option with get, set
+            abstract runWithCodeVerifierState: RunWithCodeVerifierState option with get, set
             abstract deleteCodeVerifier: unit -> JS.Promise<unit>
             /// <summary>
             /// The URL to redirect the user agent to after authorization.
             /// Return <c>undefined</c> for non-interactive flows that don't require user interaction
             /// (e.g., <c>client_credentials</c>, <c>jwt-bearer</c>).
             /// </summary>
-            abstract redirectUrl: obj option
+            abstract redirectUrl: U2<string, FSharp.CloudEdge.Runtime.Workers.URL> option
             /// <summary>
             /// External URL the server should use to fetch client metadata document
             /// </summary>
@@ -1045,7 +1064,7 @@ module Mcp =
             /// <summary>
             /// Invoked to redirect the user agent to the given URL to begin the authorization flow.
             /// </summary>
-            abstract redirectToAuthorization: authorizationUrl: obj -> JS.Promise<unit> option
+            abstract redirectToAuthorization: authorizationUrl: FSharp.CloudEdge.Runtime.Workers.URL -> JS.Promise<unit> option
             /// <summary>
             /// Saves a PKCE code verifier for the current session, before redirecting to
             /// the authorization flow.
@@ -1075,13 +1094,34 @@ module Mcp =
             /// <param name="metadata">- Optional OAuth metadata for the server, which may include supported authentication methods</param>
             abstract addClientAuthentication: obj option with get, set
             /// <summary>
+            /// Enables DPoP (RFC 9449 / SEP-1932) sender-constrained tokens when implemented. When this
+            /// resolves to a DpopSession, auth signs a DPoP proof into the token
+            /// request, and the transports (and withOAuth) present a resulting <c>token_type: DPoP</c>
+            /// access token with the <c>DPoP</c> Authorization scheme plus a fresh per-request proof instead of
+            /// <c>Bearer</c>, by wrapping their resource-server <c>fetch</c> with withDpopFromProvider.
+            /// <br /><br />
+            /// Return the <i>same</i> session across calls — the AS/RS nonce state and signing key it holds are
+            /// meant to persist for the life of this client registration. A minimal implementation:
+            /// <code lang="typescript">
+            /// class MyProvider implements OAuthClientProvider {
+            ///     private _dpop = DpopSession.create();
+            ///     dpop() { return this._dpop; }
+            ///     // ...
+            /// }
+            /// </code>
+            /// <br /><br />
+            /// Left undefined (the default), the provider behaves exactly as before this option existed:
+            /// plain Bearer tokens throughout.
+            /// </summary>
+            abstract dpop: (unit -> obj option) option with get, set
+            /// <summary>
             /// If defined, overrides the selection and validation of the
             /// RFC 8707 Resource Indicator. If left undefined, default
             /// validation behavior will be used.
             /// <br /><br />
             /// Implementations must verify the returned resource matches the MCP server.
             /// </summary>
-            abstract validateResourceURL: Func<obj, string option, JS.Promise<obj option>> option with get, set
+            abstract validateResourceURL: Func<U2<string, FSharp.CloudEdge.Runtime.Workers.URL>, string option, JS.Promise<FSharp.CloudEdge.Runtime.Workers.URL option>> option with get, set
             /// <summary>
             /// If implemented, provides a way for the client to invalidate (e.g. delete) the specified
             /// credentials, in the case where the server has indicated that they are no longer valid.
@@ -1127,7 +1167,7 @@ module Mcp =
             /// }
             /// </code>
             /// </example>
-            abstract prepareTokenRequest: (string option -> obj option) option with get, set
+            abstract prepareTokenRequest: (string option -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.URLSearchParams option>, FSharp.CloudEdge.Runtime.Workers.URLSearchParams> option) option with get, set
             /// <summary>
             /// Saves the resolved authorization-server <b>issuer</b>. Called after a successful
             /// token exchange (timing changed in v2: was post-discovery, now post-<c>saveTokens</c>).
@@ -1204,12 +1244,9 @@ module Mcp =
 
         type DurableObjectOAuthClientProvider =
             inherit FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.DoOauthClientProvider.AgentMcpOAuthProvider
-            abstract storage: obj with get, set
+            abstract storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage with get, set
             abstract clientName: string with get, set
             abstract baseRedirectUrl: string with get, set
-            abstract _authUrl_: obj with get, set
-            abstract _serverId_: obj with get, set
-            abstract _clientId_: obj with get, set
             abstract clientUri: string
             abstract redirectUrl: string
             abstract clientId: string with get, set
@@ -1228,8 +1265,14 @@ module Mcp =
             abstract stateKey: nonce: string -> string
             abstract state: unit -> JS.Promise<string>
             abstract checkState: state: string -> JS.Promise<Mcp.DoOauthClientProvider.DurableObjectOAuthClientProvider.CheckState.Result.Item>
-            abstract redirectToAuthorization: authUrl: obj -> JS.Promise<unit>
+            abstract redirectToAuthorization: authUrl: FSharp.CloudEdge.Runtime.Workers.URL -> JS.Promise<unit>
             abstract invalidateCredentials: scope: Mcp.DoOauthClientProvider.AgentMcpOAuthProvider.InvalidateCredentials.Scope -> JS.Promise<unit>
+            /// <summary>
+            /// Delete every key this provider stores for its server: tokens and client
+            /// info for any client ID, verifiers, pending states and discovery state.
+            /// Used when the server is removed. Other servers' keys are untouched.
+            /// </summary>
+            abstract clearServerStorage: unit -> JS.Promise<unit>
             abstract codeVerifierKey: clientId: string -> string
             abstract stateCodeVerifierPrefix: clientId: string -> string
             abstract stateCodeVerifierKey: clientId: string * nonce: string -> string
@@ -1237,16 +1280,14 @@ module Mcp =
             abstract challengeCodeVerifierKey: clientId: string * codeChallenge: string -> string
             abstract codeVerifierKeys: clientId: string * ?options: Mcp.DoOauthClientProvider.DurableObjectOAuthClientProvider.CodeVerifierKeys.Options -> JS.Promise<string[]>
             abstract saveCodeVerifier: verifier: string -> JS.Promise<unit>
-            abstract deleteExpiredChallengeCodeVerifiers: obj with get, set
             abstract codeVerifier: unit -> JS.Promise<string>
-            abstract codeVerifierForState: obj with get, set
             abstract runWithCodeVerifierState<'T>: state: string * callback: (unit -> JS.Promise<'T>) -> JS.Promise<'T>
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
         type Exports =
             [<Import("DurableObjectOAuthClientProvider", "agents/mcp/do-oauth-client-provider"); EmitConstructor>]
-            static member DurableObjectOAuthClientProvider (storage: obj, clientName: string, baseRedirectUrl: string) : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.DoOauthClientProvider.DurableObjectOAuthClientProvider = jsNative
+            static member DurableObjectOAuthClientProvider (storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage, clientName: string, baseRedirectUrl: string) : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.DoOauthClientProvider.DurableObjectOAuthClientProvider = jsNative
 
         module AgentMcpOAuthProvider =
             [<Interface>]
@@ -1369,9 +1410,11 @@ module Mcp =
             [<ParamObject; Emit("$0")>]
             static member Create (props: JS.Record<string, obj>) : McpAuthContext = jsNative
 
+        type CreateMcpHandlerOptions = FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateStatelessMcpHandlerOptions
+
         [<Interface>]
-        type CreateMcpHandlerOptions =
-            inherit Mcp.Server.CreateMcpHandlerOptions.Base
+        type CreateStatelessMcpHandlerOptions =
+            inherit Mcp.Server.CreateStatelessMcpHandlerOptions.Base
             /// <summary>
             /// Exact pathname handled by this Worker wrapper.
             /// </summary>
@@ -1400,18 +1443,13 @@ module Mcp =
             /// </summary>
             abstract authContext: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.McpAuthContext option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?route: string, ?corsOptions: U2<bool, CORSOptions>, ?allowedHostnames: string[], ?allowedOriginHostnames: U2<string, string[]>, ?authContext: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.McpAuthContext, ?legacy: Mcp.Server.CreateMcpHandlerOptions.Legacy, ?onerror: (exn -> unit), ?responseMode: PerRequestResponseMode, ?maxSubscriptions: float, ?keepAliveMs: float) : CreateMcpHandlerOptions = jsNative
+            static member Create (?route: string, ?corsOptions: U2<bool, CORSOptions>, ?allowedHostnames: string[], ?allowedOriginHostnames: U2<string, string[]>, ?authContext: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.McpAuthContext, ?legacy: Mcp.Server.CreateStatelessMcpHandlerOptions.Legacy, ?onerror: (exn -> unit), ?responseMode: PerRequestResponseMode, ?maxSubscriptions: float, ?keepAliveMs: float, ?maxRequestBodySize: float) : CreateStatelessMcpHandlerOptions = jsNative
 
-        type CreateStatelessMcpHandlerOptions = FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateMcpHandlerOptions
-
-        [<Interface>]
         type StatelessMcpHandler =
-            abstract fetch: request: obj * ?options: obj -> JS.Promise<obj>
+            abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * ?options: obj -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
             abstract notify: obj with get, set
             [<Emit("$0($1...)")>]
-            abstract Invoke: request: obj * env: obj * ctx: obj -> JS.Promise<obj>
-            [<ParamObject; Emit("$0")>]
-            static member Create (fetch: Func<obj, obj option, JS.Promise<obj>>, notify: obj) : StatelessMcpHandler = jsNative
+            abstract Invoke: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: obj * ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
 
         type StatelessMcpServerInput = obj
 
@@ -1421,9 +1459,9 @@ module Mcp =
             [<Import("getMcpAuthContext", "agents/mcp/server")>]
             static member getMcpAuthContext () : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.McpAuthContext option = jsNative
             [<Import("createMcpHandler", "agents/mcp/server")>]
-            static member createMcpHandler (factory: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.StatelessMcpServerInput, ?options: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateMcpHandlerOptions) : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.StatelessMcpHandler = jsNative
+            static member createMcpHandler (factory: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.StatelessMcpServerInput, ?options: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateStatelessMcpHandlerOptions) : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.StatelessMcpHandler = jsNative
 
-        module CreateMcpHandlerOptions =
+        module CreateStatelessMcpHandlerOptions =
             [<Interface>]
             type Base =
                 /// <summary>
@@ -1448,7 +1486,7 @@ module Mcp =
                 /// in front of a <c>legacy: 'reject'</c> handler — see that predicate's
                 /// documentation for the pattern.
                 /// </summary>
-                abstract legacy: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateMcpHandlerOptions.Legacy option with get, set
+                abstract legacy: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateStatelessMcpHandlerOptions.Legacy option with get, set
                 /// <summary>
                 /// Callback for out-of-band errors and rejected requests (reporting only; it never alters the response).
                 /// </summary>
@@ -1479,468 +1517,23 @@ module Mcp =
                 /// </summary>
                 /// <defaultValue>15000</defaultValue>
                 abstract keepAliveMs: float option with get, set
+                /// <summary>
+                /// Upper bound, in bytes, on a POST body the handler reads itself (the
+                /// classification step and the stateless legacy leg). A body over the bound
+                /// is answered <c>413</c> before anything is parsed or any server instance is
+                /// created. Not applied to a body supplied as <c>parsedBody</c>. Must be a
+                /// positive number. Hand-wired compositions routing on
+                /// isLegacyRequest pass the same value to the predicate.
+                /// </summary>
+                /// <defaultValue>4194304 (4 MiB)</defaultValue>
+                abstract maxRequestBodySize: float option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?legacy: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateMcpHandlerOptions.Legacy, ?onerror: (exn -> unit), ?responseMode: PerRequestResponseMode, ?maxSubscriptions: float, ?keepAliveMs: float) : Base = jsNative
+                static member Create (?legacy: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Mcp.Server.CreateStatelessMcpHandlerOptions.Legacy, ?onerror: (exn -> unit), ?responseMode: PerRequestResponseMode, ?maxSubscriptions: float, ?keepAliveMs: float, ?maxRequestBodySize: float) : Base = jsNative
 
             [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
             type Legacy =
                 | [<CompiledName("reject")>] Reject
                 | [<CompiledName("stateless")>] Stateless
-
-        module StatelessMcpHandler =
-            module Fetch =
-                module Request =
-                    type Item<'HostMetadata> =
-                        /// <summary>
-                        /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-                        /// </summary>
-                        /// <example><c>395747</c></example>
-                        abstract asn: float option with get, set
-                        /// <summary>
-                        /// The organization which owns the ASN of the incoming request.
-                        /// </summary>
-                        /// <example><c>"Google Cloud"</c></example>
-                        abstract asOrganization: string option with get, set
-                        /// <summary>
-                        /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-                        /// </summary>
-                        /// <example><c>"gzip, deflate, br"</c></example>
-                        abstract clientAcceptEncoding: string option with get, set
-                        /// <summary>
-                        /// The number of milliseconds it took for the request to reach your worker.
-                        /// </summary>
-                        /// <example><c>22</c></example>
-                        abstract clientTcpRtt: float option with get, set
-                        /// <summary>
-                        /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-                        /// airport code of the data center that the request hit.
-                        /// </summary>
-                        /// <example><c>"DFW"</c></example>
-                        abstract colo: string with get, set
-                        /// <summary>
-                        /// Represents the upstream's response to a
-                        /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-                        /// from cloudflare.
-                        /// <br /><br />
-                        /// For workers with no upstream, this will always be <c>1</c>.
-                        /// </summary>
-                        /// <example><c>3</c></example>
-                        abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-                        /// <summary>
-                        /// The HTTP Protocol the request used.
-                        /// </summary>
-                        /// <example><c>"HTTP/2"</c></example>
-                        abstract httpProtocol: string with get, set
-                        /// <summary>
-                        /// The browser-requested prioritization information in the request object.
-                        /// <br /><br />
-                        /// If no information was set, defaults to the empty string <c>""</c>
-                        /// </summary>
-                        /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-                        /// <defaultValue>""</defaultValue>
-                        abstract requestPriority: string with get, set
-                        /// <summary>
-                        /// The TLS version of the connection to Cloudflare.
-                        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                        /// </summary>
-                        /// <example><c>"TLSv1.3"</c></example>
-                        abstract tlsVersion: string with get, set
-                        /// <summary>
-                        /// The cipher for the connection to Cloudflare.
-                        /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                        /// </summary>
-                        /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-                        abstract tlsCipher: string with get, set
-                        /// <summary>
-                        /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-                        /// <br /><br />
-                        /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-                        /// </summary>
-                        abstract tlsExportedAuthenticator: obj option with get, set
-                        /// <summary>
-                        /// Results of Cloudflare's Bot Management analysis
-                        /// </summary>
-                        abstract botManagement: Mcp.Server.StatelessMcpHandler.Fetch.Request.Item.BotManagement with get, set
-                        /// <summary>
-                        /// Duplicate of <c>botManagement.score</c>.
-                        /// </summary>
-                        /// <remarks>@deprecated</remarks>
-                        abstract clientTrustScore: float with get, set
-                        /// <summary>
-                        /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-                        /// <br /><br />
-                        /// This field is only present if you have Cloudflare for SaaS enabled on your account
-                        /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-                        /// </summary>
-                        abstract hostMetadata: 'HostMetadata option with get, set
-                        /// <summary>
-                        /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-                        /// <br /><br />
-                        /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-                        /// <br /><br />
-                        /// If Cloudflare is unable to determine where the request originated this property is omitted.
-                        /// <br /><br />
-                        /// The country code <c>"T1"</c> is used for requests originating on TOR.
-                        /// </summary>
-                        /// <example><c>"GB"</c></example>
-                        abstract country: Mcp.Server.StatelessMcpHandler.Fetch.Request.Item.Country option with get, set
-                        /// <summary>
-                        /// If present, this property indicates that the request originated in the EU
-                        /// </summary>
-                        /// <example><c>"1"</c></example>
-                        abstract isEUCountry: string option with get, set
-                        /// <summary>
-                        /// A two-letter code indicating the continent the request originated from.
-                        /// </summary>
-                        /// <example><c>"AN"</c></example>
-                        abstract continent: ContinentCode option with get, set
-                        /// <summary>
-                        /// The city the request originated from
-                        /// </summary>
-                        /// <example><c>"Austin"</c></example>
-                        abstract city: string option with get, set
-                        /// <summary>
-                        /// Postal code of the incoming request
-                        /// </summary>
-                        /// <example><c>"78701"</c></example>
-                        abstract postalCode: string option with get, set
-                        /// <summary>
-                        /// Latitude of the incoming request
-                        /// </summary>
-                        /// <example><c>"30.27130"</c></example>
-                        abstract latitude: string option with get, set
-                        /// <summary>
-                        /// Longitude of the incoming request
-                        /// </summary>
-                        /// <example><c>"-97.74260"</c></example>
-                        abstract longitude: string option with get, set
-                        /// <summary>
-                        /// Timezone of the incoming request
-                        /// </summary>
-                        /// <example><c>"America/Chicago"</c></example>
-                        abstract timezone: string option with get, set
-                        /// <summary>
-                        /// If known, the ISO 3166-2 name for the first level region associated with
-                        /// the IP address of the incoming request
-                        /// </summary>
-                        /// <example><c>"Texas"</c></example>
-                        abstract region: string option with get, set
-                        /// <summary>
-                        /// If known, the ISO 3166-2 code for the first-level region associated with
-                        /// the IP address of the incoming request
-                        /// </summary>
-                        /// <example><c>"TX"</c></example>
-                        abstract regionCode: string option with get, set
-                        /// <summary>
-                        /// Metro code (DMA) of the incoming request
-                        /// </summary>
-                        /// <example><c>"635"</c></example>
-                        abstract metroCode: string option with get, set
-                        /// <summary>
-                        /// Information about the client certificate presented to Cloudflare.
-                        /// <br /><br />
-                        /// This is populated when the incoming request is served over TLS using
-                        /// either Cloudflare Access or API Shield (mTLS)
-                        /// and the presented SSL certificate has a valid
-                        /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-                        /// (i.e., not <c>null</c> or <c>""</c>).
-                        /// <br /><br />
-                        /// Otherwise, a set of placeholder values are used.
-                        /// <br /><br />
-                        /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-                        /// the object is populated (i.e. the above conditions were met).
-                        /// </summary>
-                        abstract tlsClientAuth: obj with get, set
-                        [<EmitIndexer>]
-                        abstract Item: string -> obj with get, set
-
-                    module Item =
-                        [<Interface>]
-                        type BotManagement =
-                            /// <summary>
-                            /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                            /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                            /// </summary>
-                            /// <example><c>54</c></example>
-                            abstract score: float with get, set
-                            /// <summary>
-                            /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                            /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                            /// </summary>
-                            abstract verifiedBot: bool with get, set
-                            /// <summary>
-                            /// A boolean value that is true if the request originates from a
-                            /// Cloudflare-verified proxy service.
-                            /// </summary>
-                            abstract corporateProxy: bool with get, set
-                            /// <summary>
-                            /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                            /// </summary>
-                            abstract staticResource: bool with get, set
-                            /// <summary>
-                            /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                            /// </summary>
-                            abstract detectionIds: float[] with get, set
-                            /// <summary>
-                            /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                            /// across different destination IPs, Ports, and X509 certificates.
-                            /// </summary>
-                            abstract ja3Hash: string with get, set
-                            [<ParamObject; Emit("$0")>]
-                            static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-                        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                        type Country =
-                            | AD
-                            | AE
-                            | AF
-                            | AG
-                            | AI
-                            | AL
-                            | AM
-                            | AO
-                            | AQ
-                            | AR
-                            | AS
-                            | AT
-                            | AU
-                            | AW
-                            | AX
-                            | AZ
-                            | BA
-                            | BB
-                            | BD
-                            | BE
-                            | BF
-                            | BG
-                            | BH
-                            | BI
-                            | BJ
-                            | BL
-                            | BM
-                            | BN
-                            | BO
-                            | BQ
-                            | BR
-                            | BS
-                            | BT
-                            | BV
-                            | BW
-                            | BY
-                            | BZ
-                            | CA
-                            | CC
-                            | CD
-                            | CF
-                            | CG
-                            | CH
-                            | CI
-                            | CK
-                            | CL
-                            | CM
-                            | CN
-                            | CO
-                            | CR
-                            | CU
-                            | CV
-                            | CW
-                            | CX
-                            | CY
-                            | CZ
-                            | DE
-                            | DJ
-                            | DK
-                            | DM
-                            | DO
-                            | DZ
-                            | EC
-                            | EE
-                            | EG
-                            | EH
-                            | ER
-                            | ES
-                            | ET
-                            | FI
-                            | FJ
-                            | FK
-                            | FM
-                            | FO
-                            | FR
-                            | GA
-                            | GB
-                            | GD
-                            | GE
-                            | GF
-                            | GG
-                            | GH
-                            | GI
-                            | GL
-                            | GM
-                            | GN
-                            | GP
-                            | GQ
-                            | GR
-                            | GS
-                            | GT
-                            | GU
-                            | GW
-                            | GY
-                            | HK
-                            | HM
-                            | HN
-                            | HR
-                            | HT
-                            | HU
-                            | ID
-                            | IE
-                            | IL
-                            | IM
-                            | IN
-                            | IO
-                            | IQ
-                            | IR
-                            | IS
-                            | IT
-                            | JE
-                            | JM
-                            | JO
-                            | JP
-                            | KE
-                            | KG
-                            | KH
-                            | KI
-                            | KM
-                            | KN
-                            | KP
-                            | KR
-                            | KW
-                            | KY
-                            | KZ
-                            | LA
-                            | LB
-                            | LC
-                            | LI
-                            | LK
-                            | LR
-                            | LS
-                            | LT
-                            | LU
-                            | LV
-                            | LY
-                            | MA
-                            | MC
-                            | MD
-                            | ME
-                            | MF
-                            | MG
-                            | MH
-                            | MK
-                            | ML
-                            | MM
-                            | MN
-                            | MO
-                            | MP
-                            | MQ
-                            | MR
-                            | MS
-                            | MT
-                            | MU
-                            | MV
-                            | MW
-                            | MX
-                            | MY
-                            | MZ
-                            | NA
-                            | NC
-                            | NE
-                            | NF
-                            | NG
-                            | NI
-                            | NL
-                            | NO
-                            | NP
-                            | NR
-                            | NU
-                            | NZ
-                            | OM
-                            | PA
-                            | PE
-                            | PF
-                            | PG
-                            | PH
-                            | PK
-                            | PL
-                            | PM
-                            | PN
-                            | PR
-                            | PS
-                            | PT
-                            | PW
-                            | PY
-                            | QA
-                            | RE
-                            | RO
-                            | RS
-                            | RU
-                            | RW
-                            | SA
-                            | SB
-                            | SC
-                            | SD
-                            | SE
-                            | SG
-                            | SH
-                            | SI
-                            | SJ
-                            | SK
-                            | SL
-                            | SM
-                            | SN
-                            | SO
-                            | SR
-                            | SS
-                            | ST
-                            | SV
-                            | SX
-                            | SY
-                            | SZ
-                            | T1
-                            | TC
-                            | TD
-                            | TF
-                            | TG
-                            | TH
-                            | TJ
-                            | TK
-                            | TL
-                            | TM
-                            | TN
-                            | TO
-                            | TR
-                            | TT
-                            | TV
-                            | TW
-                            | TZ
-                            | UA
-                            | UG
-                            | UM
-                            | US
-                            | UY
-                            | UZ
-                            | VA
-                            | VC
-                            | VE
-                            | VG
-                            | VI
-                            | VN
-                            | VU
-                            | WF
-                            | WS
-                            | YE
-                            | YT
-                            | ZA
-                            | ZM
-                            | ZW
 
 module Observability =
     /// <summary>agents/observability/ai</summary>
@@ -2005,7 +1598,7 @@ module Schedule =
         /// <remarks>@deprecated this has been renamed to scheduleSchema, and unstable_scheduleSchema will be removed in the next major version</remarks>
         /// <returns>The schedule schema</returns>
         [<Import("unstable_scheduleSchema", "agents/schedule")>]
-        static member unstable_scheduleSchema: obj = jsNative
+        static member unstable_scheduleSchema: FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> = jsNative
         /// <summary>
         /// Get the schedule prompt for a given event
         /// </summary>
@@ -2043,7 +1636,7 @@ module Schedule =
         /// with OpenAI's strict structured outputs mode.
         /// </remarks>
         [<Import("scheduleSchema", "agents/schedule")>]
-        static member scheduleSchema: obj = jsNative
+        static member scheduleSchema: FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> = jsNative
 
     module GetSchedulePrompt =
         [<Interface>]
@@ -2060,64 +1653,13 @@ module Schedule =
             | [<CompiledName("cron")>] Cron of cron: string
             | [<CompiledName("no-schedule")>] NoSchedule
 
-        [<Interface>]
-        type When2 =
-            /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract date: string with get, set
-            [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
-            static member Create (date: string) : When2 = jsNative
-
-        module When2 =
-            /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-            [<Literal>]
-            let ``type`` = "scheduled"
-
-        [<Interface>]
-        type When3 =
-            /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract delayInSeconds: float with get, set
-            [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
-            static member Create (delayInSeconds: float) : When3 = jsNative
-
-        module When3 =
-            /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-            [<Literal>]
-            let ``type`` = "delayed"
-
-        [<Interface>]
-        type When4 =
-            /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-            abstract ``type``: string with get, set
-            abstract cron: string with get, set
-            [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
-            static member Create (cron: string) : When4 = jsNative
-
-        module When4 =
-            /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-            [<Literal>]
-            let ``type`` = "cron"
-
-        [<Interface>]
-        type When5 =
-            /// <remarks>TypeScript type: <c>"no-schedule"</c></remarks>
-            abstract ``type``: string with get, set
-            [<Emit("({ type: 'no-schedule' })")>]
-            static member Create () : When5 = jsNative
-
-        module When5 =
-            /// <remarks>TypeScript type: <c>"no-schedule"</c></remarks>
-            [<Literal>]
-            let ``type`` = "no-schedule"
-
     module ScheduleSchema =
         [<Interface>]
         type Item =
-            abstract description: obj with get, set
-            abstract ``when``: obj with get, set
+            abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+            abstract ``when``: FSharp.CloudEdge.Support.Zod.V4.ZodDiscriminatedUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedule.ScheduleSchema.Item.When.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>), string> with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (description: obj, ``when``: obj) : Item = jsNative
+            static member Create (description: FSharp.CloudEdge.Support.Zod.V4.ZodString, ``when``: FSharp.CloudEdge.Support.Zod.V4.ZodDiscriminatedUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedule.ScheduleSchema.Item.When.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item.When.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>), string>) : Item = jsNative
 
         module Item =
             module When =
@@ -2125,30 +1667,30 @@ module Schedule =
                     module Item =
                         [<Interface>]
                         type Item =
-                            abstract ``type``: obj with get, set
-                            abstract date: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract date: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, date: obj) : Item = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, date: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                         [<Interface>]
                         type Item2 =
-                            abstract ``type``: obj with get, set
-                            abstract delayInSeconds: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract delayInSeconds: FSharp.CloudEdge.Support.Zod.V4.ZodNumber with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, delayInSeconds: obj) : Item2 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, delayInSeconds: FSharp.CloudEdge.Support.Zod.V4.ZodNumber) : Item2 = jsNative
 
                         [<Interface>]
                         type Item3 =
-                            abstract ``type``: obj with get, set
-                            abstract cron: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract cron: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, cron: obj) : Item3 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, cron: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item3 = jsNative
 
                         [<Interface>]
                         type Item4 =
-                            abstract ``type``: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj) : Item4 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
     module UnstableGetSchedulePrompt =
         [<Interface>]
@@ -2160,10 +1702,10 @@ module Schedule =
     module UnstableScheduleSchema =
         [<Interface>]
         type Item =
-            abstract description: obj with get, set
-            abstract ``when``: obj with get, set
+            abstract description: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
+            abstract ``when``: FSharp.CloudEdge.Support.Zod.V4.ZodDiscriminatedUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>), string> with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (description: obj, ``when``: obj) : Item = jsNative
+            static member Create (description: FSharp.CloudEdge.Support.Zod.V4.ZodString, ``when``: FSharp.CloudEdge.Support.Zod.V4.ZodDiscriminatedUnion<(FSharp.CloudEdge.Support.Zod.V4.ZodObject<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item2, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item3, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> * FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.UnstableScheduleSchema.Item.When.Item.Item.Item4, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip>), string>) : Item = jsNative
 
         module Item =
             module When =
@@ -2171,152 +1713,79 @@ module Schedule =
                     module Item =
                         [<Interface>]
                         type Item =
-                            abstract ``type``: obj with get, set
-                            abstract date: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract date: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, date: obj) : Item = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, date: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item = jsNative
 
                         [<Interface>]
                         type Item2 =
-                            abstract ``type``: obj with get, set
-                            abstract delayInSeconds: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract delayInSeconds: FSharp.CloudEdge.Support.Zod.V4.ZodNumber with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, delayInSeconds: obj) : Item2 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, delayInSeconds: FSharp.CloudEdge.Support.Zod.V4.ZodNumber) : Item2 = jsNative
 
                         [<Interface>]
                         type Item3 =
-                            abstract ``type``: obj with get, set
-                            abstract cron: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
+                            abstract cron: FSharp.CloudEdge.Support.Zod.V4.ZodString with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj, cron: obj) : Item3 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>, cron: FSharp.CloudEdge.Support.Zod.V4.ZodString) : Item3 = jsNative
 
                         [<Interface>]
                         type Item4 =
-                            abstract ``type``: obj with get, set
+                            abstract ``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string> with get, set
                             [<ParamObject; Emit("$0")>]
-                            static member Create (``type``: obj) : Item4 = jsNative
+                            static member Create (``type``: FSharp.CloudEdge.Support.Zod.V4.ZodLiteral<string>) : Item4 = jsNative
 
 /// <summary>agents/schedules</summary>
 module Schedules =
+    /// <summary>
+    /// A persisted task scheduled by an Agent.
+    /// </summary>
+    /// <remarks>@template T Type of the callback payload.</remarks>
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Schedule<'T> =
+        /// <param name="id">Unique schedule identifier.</param>
+        /// <param name="callback"></param>
+        /// <param name="payload"></param>
+        /// <param name="retry"></param>
+        /// <param name="time"></param>
         | [<CompiledName("scheduled")>] Scheduled of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float
+        /// <param name="id">Unique schedule identifier.</param>
+        /// <param name="callback"></param>
+        /// <param name="payload"></param>
+        /// <param name="retry"></param>
+        /// <param name="time"></param>
+        /// <param name="delayInSeconds"></param>
         | [<CompiledName("delayed")>] Delayed of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * delayInSeconds: float
+        /// <param name="id">Unique schedule identifier.</param>
+        /// <param name="callback"></param>
+        /// <param name="payload"></param>
+        /// <param name="retry"></param>
+        /// <param name="time"></param>
+        /// <param name="cron"></param>
         | [<CompiledName("cron")>] Cron of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * cron: string
+        /// <param name="id">Unique schedule identifier.</param>
+        /// <param name="callback"></param>
+        /// <param name="payload"></param>
+        /// <param name="retry"></param>
+        /// <param name="time"></param>
+        /// <param name="intervalSeconds"></param>
         | [<CompiledName("interval")>] Interval of id: string * callback: string * payload: 'T * retry: RetryOptions option * time: float * intervalSeconds: float
-
-    [<Interface>]
-    type Schedule2<'T> =
-        /// <summary>
-        /// Unique schedule identifier.
-        /// </summary>
-        abstract id: string with get, set
-        abstract callback: string with get, set
-        abstract payload: 'T with get, set
-        abstract retry: RetryOptions option with get, set
-        /// <summary>
-        /// One-time execution at a specific date.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract time: float with get, set
         [<ParamObject; Emit("({ type: 'scheduled', ...$0 })")>]
-        static member Create (id: string, callback: string, payload: 'T, time: float, ?retry: RetryOptions) : Schedule2<'T> = jsNative
-
-    module Schedule2 =
-        /// <summary>
-        /// One-time execution at a specific date.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"scheduled"</c></remarks>
-        [<Literal>]
-        let ``type`` = "scheduled"
-
-    [<Interface>]
-    type Schedule3<'T> =
-        /// <summary>
-        /// Unique schedule identifier.
-        /// </summary>
-        abstract id: string with get, set
-        abstract callback: string with get, set
-        abstract payload: 'T with get, set
-        abstract retry: RetryOptions option with get, set
-        /// <summary>
-        /// One-time execution after a relative delay.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract time: float with get, set
-        abstract delayInSeconds: float with get, set
+        static member CreateScheduled (id: string, callback: string, payload: 'T, time: float, ?retry: RetryOptions) : Schedule<'T> = jsNative
         [<ParamObject; Emit("({ type: 'delayed', ...$0 })")>]
-        static member Create (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: RetryOptions) : Schedule3<'T> = jsNative
-
-    module Schedule3 =
-        /// <summary>
-        /// One-time execution after a relative delay.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"delayed"</c></remarks>
-        [<Literal>]
-        let ``type`` = "delayed"
-
-    [<Interface>]
-    type Schedule4<'T> =
-        /// <summary>
-        /// Unique schedule identifier.
-        /// </summary>
-        abstract id: string with get, set
-        abstract callback: string with get, set
-        abstract payload: 'T with get, set
-        abstract retry: RetryOptions option with get, set
-        /// <summary>
-        /// Recurring execution from a cron expression.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract time: float with get, set
-        abstract cron: string with get, set
+        static member CreateDelayed (id: string, callback: string, payload: 'T, time: float, delayInSeconds: float, ?retry: RetryOptions) : Schedule<'T> = jsNative
         [<ParamObject; Emit("({ type: 'cron', ...$0 })")>]
-        static member Create (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: RetryOptions) : Schedule4<'T> = jsNative
-
-    module Schedule4 =
-        /// <summary>
-        /// Recurring execution from a cron expression.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"cron"</c></remarks>
-        [<Literal>]
-        let ``type`` = "cron"
-
-    [<Interface>]
-    type Schedule5<'T> =
-        /// <summary>
-        /// Unique schedule identifier.
-        /// </summary>
-        abstract id: string with get, set
-        abstract callback: string with get, set
-        abstract payload: 'T with get, set
-        abstract retry: RetryOptions option with get, set
-        /// <summary>
-        /// Recurring execution at a fixed interval.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"interval"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract time: float with get, set
-        abstract intervalSeconds: float with get, set
+        static member CreateCron (id: string, callback: string, payload: 'T, time: float, cron: string, ?retry: RetryOptions) : Schedule<'T> = jsNative
         [<ParamObject; Emit("({ type: 'interval', ...$0 })")>]
-        static member Create (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: RetryOptions) : Schedule5<'T> = jsNative
-
-    module Schedule5 =
-        /// <summary>
-        /// Recurring execution at a fixed interval.
-        /// </summary>
-        /// <remarks>TypeScript type: <c>"interval"</c></remarks>
-        [<Literal>]
-        let ``type`` = "interval"
+        static member CreateInterval (id: string, callback: string, payload: 'T, time: float, intervalSeconds: float, ?retry: RetryOptions) : Schedule<'T> = jsNative
 
     /// <summary>
     /// Constraint for a Scheduler's registered callback map: named handlers
     /// receiving the parsed payload and the schedule that fired.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     type SchedulerHandlers = JS.Record<string, Schedules.SchedulerHandlers.Item>
 
     /// <summary>
@@ -2326,15 +1795,13 @@ module Schedules =
     /// aperture behind Agent's name-based scheduling API); a bare Scheduler
     /// rejects it otherwise.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     type SchedulerCallbacks = JS.Record<string, Schedules.SchedulerCallbacks.Item>
 
     /// <summary>
     /// The payload type a registered scheduler callback accepts.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     [<Erase>]
-    type SchedulerPayload<'Handler> = private SchedulerPayload__ of obj
+    type SchedulerPayload<'Handler> = private Phantom_SchedulerPayload__ of obj
 
     /// <summary>
     /// Options accepted when creating one schedule.
@@ -2377,7 +1844,6 @@ module Schedules =
     /// <summary>
     /// Optional callbacks and policy for a Scheduler capability.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     [<Interface>]
     type SchedulerOptions<'Handlers> =
         /// <summary>
@@ -2407,32 +1873,29 @@ module Schedules =
     /// Persistent task scheduling for a Lifecycle Object.
     /// <br /><br />
     /// Register callbacks in the constructor and install the instance with
-    /// <c>Lifecycle.use()</c>. Scheduler owns its SQL schema, task CRUD, callback
-    /// retries, and due-row processing. It contributes its next wake time while
-    /// Lifecycle owns the physical alarm, and it runs registered callbacks
-    /// through Lifecycle's host invocation boundary.
+    /// <c>Lifecycle.use()</c>. Scheduler validates schedules and pushes them into the
+    /// Lifecycle job queue; Lifecycle owns the physical alarm and the alarm
+    /// event loop, and Scheduler runs registered callbacks through Lifecycle's
+    /// host invocation boundary when its jobs come due.
     /// </summary>
-    /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
-    [<Interface>]
     type Scheduler<'Handlers> =
         inherit LifecycleCapability<obj>
-        abstract ``__#1@#private``: obj with get, set
         /// <summary>
-        /// Initialize and migrate schedule storage during Lifecycle startup.
+        /// Migrate legacy schedule storage into the Lifecycle job queue.
         /// </summary>
         abstract onStart: unit -> JS.Promise<unit>
         /// <summary>
-        /// Execute due schedule rows during the Lifecycle alarm phase.
+        /// Drive one due schedule job dispatched by the Lifecycle event loop.
         /// </summary>
-        abstract onAlarm: unit -> JS.Promise<unit>
+        abstract onJob: context: Schedules.Scheduler.OnJob.Context -> JS.Promise<U2<string, Schedules.Scheduler.OnJob.Result.Item> option>
+        /// <summary>
+        /// Observe one schedule's terminal application failure.
+        /// </summary>
+        abstract onJobError: context: Schedules.Scheduler.OnJob.Context * error: obj -> JS.Promise<U2<string, Schedules.Scheduler.OnJob.Result.Item> option>
         /// <summary>
         /// Handle Scheduler protocol messages routed by another Lifecycle.
         /// </summary>
         abstract onRoute: context: Schedules.Scheduler.OnRoute.Context -> JS.Promise<obj>
-        /// <summary>
-        /// Contribute the earliest pending schedule to Lifecycle alarm selection.
-        /// </summary>
-        abstract getNextAlarm: unit -> float option
         /// <summary>
         /// Set a delayed, dated, or cron schedule for a registered callback.
         /// </summary>
@@ -2469,12 +1932,8 @@ module Schedules =
         /// Durable Object boundaries and throws inside routed sub-agents.
         /// </remarks>
         abstract __DO_NOT_USE_WILL_REMOVE__getSchedules<'T>: ?criteria: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.ScheduleCriteria -> FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<'T>[]
-        /// <remarks>@internal Remove rows owned by one routed Lifecycle subtree.</remarks>
-        abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> unit
-        /// <remarks>@internal Apply Agent's outer alarm memory-limit policy to Scheduler rows.</remarks>
-        abstract __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: options: Schedules.Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit
-        [<ParamObject; Emit("$0")>]
-        static member Create (``__#1@#private``: obj, onStart: (unit -> JS.Promise<unit>), onAlarm: (unit -> JS.Promise<unit>), onRoute: (Schedules.Scheduler.OnRoute.Context -> JS.Promise<obj>), getNextAlarm: (unit -> float option), set: Func<U3<string, float, Fable.Core.TS.Es.Date>, 'Name, obj option, FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.ScheduleOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<obj>>>, every: Func<float, 'Name, obj option, FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.ScheduleOptions option, JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<obj>>>, get: (string -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<obj> option>), list: (FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.ScheduleCriteria option -> JS.Promise<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<obj>[]>), cancel: (string -> JS.Promise<bool>), __DO_NOT_USE_WILL_REMOVE__getSchedule: (string -> FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<'T> option), __DO_NOT_USE_WILL_REMOVE__getSchedules: (FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.ScheduleCriteria option -> FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Schedule<'T>[]), __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: (string -> unit), __DO_NOT_USE_WILL_BREAK__handleAlarmMemoryLimit: (Schedules.Scheduler.DONOTUSEWILLBREAKHandleAlarmMemoryLimit.Options -> unit), capabilityId: string, lifecycle: Schedules.Scheduler.LifecycleServices, ?lifecycleServices: Schedules.Scheduler.LifecycleServices) : Scheduler<'Handlers> = jsNative
+        /// <remarks>@internal Remove schedules owned by one routed Lifecycle subtree.</remarks>
+        abstract __DO_NOT_USE_WILL_BREAK__cleanupRoutePrefix: prefix: string -> JS.Promise<unit>
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
@@ -2483,12 +1942,11 @@ module Schedules =
         /// Persistent task scheduling for a Lifecycle Object.
         /// <br /><br />
         /// Register callbacks in the constructor and install the instance with
-        /// <c>Lifecycle.use()</c>. Scheduler owns its SQL schema, task CRUD, callback
-        /// retries, and due-row processing. It contributes its next wake time while
-        /// Lifecycle owns the physical alarm, and it runs registered callbacks
-        /// through Lifecycle's host invocation boundary.
+        /// <c>Lifecycle.use()</c>. Scheduler validates schedules and pushes them into the
+        /// Lifecycle job queue; Lifecycle owns the physical alarm and the alarm
+        /// event loop, and Scheduler runs registered callbacks through Lifecycle's
+        /// host invocation boundary when its jobs come due.
         /// </summary>
-        /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
         [<Import("Scheduler", "agents/schedules"); EmitConstructor>]
         static member Scheduler<'Handlers> (?options: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.SchedulerOptions<'Handlers>) : FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Schedules.Scheduler<'Handlers> = jsNative
 
@@ -2534,7 +1992,7 @@ module Schedules =
             /// with OpenAI's strict structured outputs mode.
             /// </remarks>
             [<Import("scheduleSchema", "agents/schedules/parser")>]
-            static member scheduleSchema: obj = jsNative
+            static member scheduleSchema: FSharp.CloudEdge.Support.Zod.V4.ZodObject<Schedule.ScheduleSchema.Item, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Strip> = jsNative
 
     module ScheduleCriteria =
         [<Interface>]
@@ -2552,48 +2010,66 @@ module Schedules =
             | [<CompiledName("scheduled")>] Scheduled
 
     module Scheduler =
+        [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+        type Claims =
+            | [<CompiledName("catch-all")>] CatchAll
+            | [<CompiledName("selective")>] Selective
+
         [<Interface>]
         type LifecycleServices =
-            abstract storage: obj
+            /// <summary>
+            /// The host's Durable Object name; see <c>Lifecycle.name</c>.
+            /// </summary>
+            abstract name: string
+            abstract className: string
+            abstract storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage
+            abstract sockets: Schedules.Scheduler.LifecycleServices.Sockets
+            /// <summary>
+            /// Resolve once Lifecycle startup has finished, starting it if needed, and
+            /// reject if that startup fails. Calls made from inside startup resolve
+            /// immediately.
+            /// <br /><br />
+            /// Await it first in any operation that can run before startup and starts
+            /// work <c>onStart</c> also awaits, such as lazily opening a store. Native RPC
+            /// bypasses the automatic startup on fetch, alarm and WebSocket events, so
+            /// such an operation can begin that work outside startup. <c>onStart</c> then
+            /// awaits it while startup holds the input gate (<c>blockConcurrencyWhile</c>),
+            /// which holds back the work's timers and I/O, and startup times out after
+            /// 30 seconds and resets the object.
+            /// </summary>
             abstract ready: (unit -> JS.Promise<unit>)
-            abstract starting: (unit -> bool)
-            abstract alarms: Schedules.Scheduler.LifecycleServices.Alarms
+            /// <summary>
+            /// Startup state: <c>"zero"</c> before startup, <c>"starting"</c> while capability
+            /// and host startup hooks run, <c>"started"</c> once <c>ready()</c> resolves without
+            /// waiting.
+            /// </summary>
+            abstract status: (unit -> LifecycleStatus)
+            /// <summary>
+            /// This capability's scoped access to the Lifecycle-owned work queue.
+            /// Pushed items are dispatched to <c>onJob</c> when due; every queue mutation
+            /// re-arms the physical alarm automatically.
+            /// </summary>
+            abstract jobs: Schedules.Scheduler.LifecycleServices.Jobs
+            /// <summary>
+            /// Keep work this capability hands off at a bounded <c>onJob</c> return inside
+            /// the current alarm's memory-limit breaker domain (#1825). Returns false,
+            /// tracking nothing, outside an alarm invocation.
+            /// </summary>
+            abstract trackAlarmWork: (JS.Promise<obj> -> bool)
             /// <summary>
             /// Run a capability-held user callback inside the host invocation context.
             /// Capability hooks run outside host context; this is the one boundary for
             /// entering it, and a host composition root may substitute its own wrapper
-            /// (Agent adds tracing span scope).
+            /// (Agent adds tracing span scope). Pass <c>scope</c> to make a live
+            /// connection or request ambient for the callback.
             /// </summary>
-            abstract runInHostContext: ((unit -> obj) -> JS.Promise<obj>)
+            abstract runInHostContext: Schedules.Scheduler.LifecycleServices.RunInHostContext
             abstract events: Schedules.Scheduler.LifecycleServices.Events
             abstract routes: Schedules.Scheduler.LifecycleServices.Routes
             [<ParamObject; Emit("$0")>]
-            static member Create (storage: obj, ready: (unit -> JS.Promise<unit>), starting: (unit -> bool), alarms: Schedules.Scheduler.LifecycleServices.Alarms, runInHostContext: ((unit -> obj) -> JS.Promise<obj>), events: Schedules.Scheduler.LifecycleServices.Events, routes: Schedules.Scheduler.LifecycleServices.Routes) : LifecycleServices = jsNative
-
-        module DONOTUSEWILLBREAKHandleAlarmMemoryLimit =
-            [<Interface>]
-            type Options =
-                abstract callbacks: string[]
-                abstract ``sealed``: bool
-                abstract nextTime: float option
-                [<ParamObject; Emit("$0")>]
-                static member Create (callbacks: string[], ``sealed``: bool, ?nextTime: float) : Options = jsNative
+            static member Create (name: string, className: string, storage: FSharp.CloudEdge.Runtime.Workers.DurableObjectStorage, sockets: Schedules.Scheduler.LifecycleServices.Sockets, ready: (unit -> JS.Promise<unit>), status: (unit -> LifecycleStatus), jobs: Schedules.Scheduler.LifecycleServices.Jobs, trackAlarmWork: (JS.Promise<obj> -> bool), runInHostContext: Schedules.Scheduler.LifecycleServices.RunInHostContext, events: Schedules.Scheduler.LifecycleServices.Events, routes: Schedules.Scheduler.LifecycleServices.Routes) : LifecycleServices = jsNative
 
         module LifecycleServices =
-            [<Interface>]
-            type Alarms =
-                /// <summary>
-                /// Recompute the physical alarm from installed capability state.
-                /// </summary>
-                abstract rearm: (unit -> JS.Promise<unit>)
-                /// <summary>
-                /// True once explicit host teardown permanently disabled alarm arming.
-                /// Capabilities stop dispatching durable work when this reports true.
-                /// </summary>
-                abstract disabled: (unit -> bool)
-                [<ParamObject; Emit("$0")>]
-                static member Create (rearm: (unit -> JS.Promise<unit>), disabled: (unit -> bool)) : Alarms = jsNative
-
             [<Interface>]
             type Events =
                 /// <summary>
@@ -2602,6 +2078,27 @@ module Schedules =
                 abstract emit: Schedules.Scheduler.LifecycleServices.Events.Emit
                 [<ParamObject; Emit("$0")>]
                 static member Create (emit: Schedules.Scheduler.LifecycleServices.Events.Emit) : Events = jsNative
+
+            [<Interface>]
+            type Jobs =
+                /// <summary>
+                /// Push one job. A push with an existing id replaces that job — ids are
+                /// scoped to their owner, so replacing (or colliding with) another
+                /// owner's job is impossible; a cross-owner id collision throws instead.
+                /// </summary>
+                abstract push: (Schedules.Scheduler.LifecycleServices.Jobs.Push.Options -> JS.Promise<Schedules.Scheduler.OnJob.Context.Job>)
+                abstract cancel: (string -> JS.Promise<bool>)
+                abstract reschedule: Schedules.Scheduler.LifecycleServices.Jobs.Reschedule
+                abstract get: (string -> Schedules.Scheduler.OnJob.Context.Job option)
+                abstract list: (unit -> Schedules.Scheduler.OnJob.Context.Job[])
+                /// <summary>
+                /// Recompute the physical alarm from queue state without mutating it.
+                /// Mutations re-arm automatically; use this only to recover a lost alarm
+                /// for existing jobs (e.g. an idempotent push that deduplicated).
+                /// </summary>
+                abstract rearm: (unit -> JS.Promise<unit>)
+                [<ParamObject; Emit("$0")>]
+                static member Create (push: (Schedules.Scheduler.LifecycleServices.Jobs.Push.Options -> JS.Promise<Schedules.Scheduler.OnJob.Context.Job>), cancel: (string -> JS.Promise<bool>), reschedule: Schedules.Scheduler.LifecycleServices.Jobs.Reschedule, get: (string -> Schedules.Scheduler.OnJob.Context.Job option), list: (unit -> Schedules.Scheduler.OnJob.Context.Job[]), rearm: (unit -> JS.Promise<unit>)) : Jobs = jsNative
 
             [<Interface>]
             type Routes =
@@ -2614,11 +2111,152 @@ module Schedules =
                 [<ParamObject; Emit("$0")>]
                 static member Create (toRoot: (obj -> JS.Promise<obj>), ``to``: Schedules.Scheduler.LifecycleServices.Routes.To, ?source: Schedules.Scheduler.OnRoute.Context.Source) : Routes = jsNative
 
+            type RunInHostContext = delegate of fn: (unit -> obj) * scope: Schedules.Scheduler.LifecycleServices.RunInHostContext.Scope option -> JS.Promise<obj>
+
+            [<Interface>]
+            type Sockets =
+                /// <summary>
+                /// Accept a socket into hibernation under the given tags.
+                /// </summary>
+                abstract accept: Schedules.Scheduler.LifecycleServices.Sockets.Accept
+                abstract get: (string option -> FSharp.CloudEdge.Runtime.Workers.WebSocket[])
+                [<ParamObject; Emit("$0")>]
+                static member Create (accept: Schedules.Scheduler.LifecycleServices.Sockets.Accept, get: (string option -> FSharp.CloudEdge.Runtime.Workers.WebSocket[])) : Sockets = jsNative
+
             module Events =
                 type Emit = delegate of ``type``: string * payload: obj -> unit
 
+            module Jobs =
+                type Reschedule = delegate of id: string * time: float -> JS.Promise<bool>
+
+                module Push =
+                    [<Interface>]
+                    type Options =
+                        /// <summary>
+                        /// Serialisable function name the owner dispatches on.
+                        /// </summary>
+                        abstract fn: string
+                        abstract time: float
+                        abstract payload: obj option
+                        /// <summary>
+                        /// Stable job id. A push with an existing id replaces that job.
+                        /// Omitted ids are generated.
+                        /// </summary>
+                        abstract id: string option
+                        abstract retry: RetryOptions option
+                        abstract singleflight: bool option
+                        /// <summary>
+                        /// Seconds before an in-flight single-flight run is treated as hung, and
+                        /// before any long dispatch triggers the slow-dispatch warning. Default: 30.
+                        /// </summary>
+                        abstract hungTimeoutSeconds: float option
+                        abstract exclusive: bool option
+                        /// <summary>
+                        /// Mark this job as part of a recovery loop that can deterministically
+                        /// exhaust memory. On an alarm memory-limit strike the circuit breaker
+                        /// (#1825) backs off every pending flagged job to the strike's backoff
+                        /// time, and purges them all when it seals at the strike budget — so a
+                        /// doomed loop cannot re-trigger through a sibling row while unrelated
+                        /// jobs stay untouched.
+                        /// </summary>
+                        abstract recoveryLoop: bool option
+                        [<ParamObject; Emit("$0")>]
+                        static member Create (fn: string, time: float, ?payload: obj, ?id: string, ?retry: RetryOptions, ?singleflight: bool, ?hungTimeoutSeconds: float, ?exclusive: bool, ?recoveryLoop: bool) : Options = jsNative
+
             module Routes =
                 type To = delegate of target: Schedules.Scheduler.OnRoute.Context.Source * payload: obj -> JS.Promise<obj>
+
+            module RunInHostContext =
+                [<Interface>]
+                type Scope =
+                    /// <summary>
+                    /// The connection the callback runs on behalf of, when there is one.
+                    /// </summary>
+                    abstract connection: Schedules.Scheduler.LifecycleServices.RunInHostContext.Scope.Connection<obj> option
+                    abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (?connection: Schedules.Scheduler.LifecycleServices.RunInHostContext.Scope.Connection<obj>, ?request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Scope = jsNative
+
+                module Scope =
+                    [<Interface>]
+                    type Connection<'TState> =
+                        inherit FSharp.CloudEdge.Runtime.Workers.WebSocket
+                        /// <summary>
+                        /// Connection identifier
+                        /// </summary>
+                        abstract id: string with get, set
+                        /// <summary>
+                        /// The URL of the original WebSocket upgrade request.
+                        /// Persisted in the WebSocket attachment so it survives hibernation.
+                        /// </summary>
+                        abstract uri: string option with get, set
+                        /// <summary>
+                        /// Arbitrary state associated with this connection.
+                        /// Read-only — use Connection.setState to update.
+                        /// <br /><br />
+                        /// This property is configurable, meaning it can be redefined via
+                        /// <c>Object.defineProperty</c> by downstream consumers (e.g. the Cloudflare
+                        /// Agents SDK) to namespace or wrap internal state storage.
+                        /// </summary>
+                        abstract state: obj option with get, set
+                        /// <summary>
+                        /// Update the state associated with this connection.
+                        /// <br /><br />
+                        /// Accepts either a new state value or an updater function that receives
+                        /// the previous state and returns the next state.
+                        /// <br /><br />
+                        /// This property is configurable, meaning it can be redefined via
+                        /// <c>Object.defineProperty</c> by downstream consumers that provide their own
+                        /// state projection.
+                        /// </summary>
+                        abstract setState: ?state: U2<'TState, (obj option -> 'TState)> -> obj option
+                        /// <summary>
+                        /// Tags returned by the owning Durable Object's <c>getConnectionTags</c> callback.
+                        /// Always includes the connection id as the first tag.
+                        /// </summary>
+                        abstract tags: string[] with get, set
+                        [<ParamObject; Emit("(o => ({...o, \"url\": o[\"url\"] ?? null, \"protocol\": o[\"protocol\"] ?? null, \"extensions\": o[\"extensions\"] ?? null, \"uri\": o[\"uri\"] ?? null, \"state\": o[\"state\"] ?? null}))($0)")>]
+                        static member Create (accept: (FSharp.CloudEdge.Runtime.Workers.WebSocketAcceptOptions option -> unit), send: (U3<string, Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.ArrayBufferView<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> -> unit), close: Action<float option, string option>, serializeAttachment: (obj -> unit), deserializeAttachment: (unit -> obj), readyState: float, binaryType: FSharp.CloudEdge.Runtime.Workers.WebSocket.BinaryType, addEventListener: Action<'Type, U2<(U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.MessageEvent, FSharp.CloudEdge.Runtime.Workers.Event> -> unit), FSharp.CloudEdge.Runtime.Workers.EventListenerObject<FSharp.CloudEdge.Runtime.Workers.Event>>, U2<bool, FSharp.CloudEdge.Runtime.Workers.EventTargetAddEventListenerOptions> option>, removeEventListener: Action<'Type, U2<(U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.MessageEvent, FSharp.CloudEdge.Runtime.Workers.Event> -> unit), FSharp.CloudEdge.Runtime.Workers.EventListenerObject<FSharp.CloudEdge.Runtime.Workers.Event>>, U2<bool, FSharp.CloudEdge.Runtime.Workers.EventTargetEventListenerOptions> option>, dispatchEvent: (U4<FSharp.CloudEdge.Runtime.Workers.CloseEvent, FSharp.CloudEdge.Runtime.Workers.ErrorEvent, FSharp.CloudEdge.Runtime.Workers.Event, FSharp.CloudEdge.Runtime.Workers.MessageEvent> -> bool), id: string, setState: (U2<'TState, (obj option -> 'TState)> option -> obj option), tags: string[], ?url: string, ?protocol: string, ?extensions: string, ?uri: string, ?state: obj) : Connection<'TState> = jsNative
+
+            module Sockets =
+                type Accept = delegate of ws: FSharp.CloudEdge.Runtime.Workers.WebSocket * tags: string[] -> unit
+
+        module OnJob =
+            [<Interface>]
+            type Context =
+                /// <summary>
+                /// The due job being executed.
+                /// </summary>
+                abstract job: Schedules.Scheduler.OnJob.Context.Job
+                abstract attempt: float
+                [<ParamObject; Emit("$0")>]
+                static member Create (job: Schedules.Scheduler.OnJob.Context.Job, attempt: float) : Context = jsNative
+
+            module Context =
+                [<Interface>]
+                type Job =
+                    /// <summary>
+                    /// Unique job id. Stable across reschedules.
+                    /// </summary>
+                    abstract id: string
+                    abstract capability: string
+                    abstract fn: string
+                    abstract time: float
+                    abstract payload: obj
+                    abstract retry: RetryOptions option
+                    abstract singleflight: bool
+                    abstract exclusive: bool
+                    abstract recoveryLoop: bool
+                    abstract createdAt: float
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (id: string, capability: string, fn: string, time: float, payload: obj, singleflight: bool, exclusive: bool, recoveryLoop: bool, createdAt: float, ?retry: RetryOptions) : Job = jsNative
+
+            module Result =
+                [<Interface>]
+                type Item =
+                    abstract rescheduleAt: float
+                    [<ParamObject; Emit("$0")>]
+                    static member Create (rescheduleAt: float) : Item = jsNative
 
         module OnRoute =
             [<Interface>]
@@ -2707,6 +2345,19 @@ module Types =
         | [<CompiledName("cf_agent_session_error")>] CFAGENTSESSIONERROR
         | [<CompiledName("rpc")>] RPC
 
+    [<Interface>]
+    type MessageTypeEnum =
+        abstract CF_AGENT_MCP_SERVERS: string
+        abstract CF_MCP_AGENT_EVENT: string
+        abstract CF_AGENT_STATE: string
+        abstract CF_AGENT_STATE_ERROR: string
+        abstract CF_AGENT_IDENTITY: string
+        abstract CF_AGENT_SESSION: string
+        abstract CF_AGENT_SESSION_ERROR: string
+        abstract RPC: string
+        [<ParamObject; Emit("$0")>]
+        static member Create (CF_AGENT_MCP_SERVERS: string, CF_MCP_AGENT_EVENT: string, CF_AGENT_STATE: string, CF_AGENT_STATE_ERROR: string, CF_AGENT_IDENTITY: string, CF_AGENT_SESSION: string, CF_AGENT_SESSION_ERROR: string, RPC: string) : MessageTypeEnum = jsNative
+
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
@@ -2714,7 +2365,7 @@ module Types =
         /// Enum for message types to improve type safety and maintainability
         /// </summary>
         [<Import("MessageType", "agents/types")>]
-        static member MessageType: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.MessageType = jsNative
+        static member MessageType: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.Types.MessageTypeEnum = jsNative
 
 /// <summary>agents/x402</summary>
 module X402 =
@@ -2731,11 +2382,18 @@ module X402 =
         [<ParamObject; Emit("$0")>]
         static member Create (network: string, recipient: string, ?facilitator: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.FacilitatorConfig, ?version: float) : X402Config = jsNative
 
+    /// <summary>
+    /// The tool body passed to <c>paidTool</c>. On an SDK v1 server it is the v1
+    /// <c>ToolCallback</c>; on an SDK v2 server it receives the v2 <c>ServerContext</c>.
+    /// </summary>
+    [<Erase>]
+    type PaidToolCallback<'Args, 'Server> = private Phantom_PaidToolCallback__ of obj
+
     [<Interface>]
-    type X402AugmentedServer =
-        abstract paidTool<'Args>: name: string * description: string * priceUSD: float * paramsSchema: 'Args * annotations: X402.X402AugmentedServer.PaidTool.Annotations * cb: Func<JS.Record<string, obj>, obj, U2<JS.Promise<X402.X402AugmentedClient.CallTool.Result.Item>, X402.X402AugmentedClient.CallTool.Result.Item>> -> obj
+    type X402AugmentedServer<'Server> =
+        abstract paidTool<'Args>: name: string * description: string * priceUSD: float * paramsSchema: 'Args * annotations: X402.X402AugmentedServer.PaidTool.Annotations * cb: obj -> obj
         [<ParamObject; Emit("$0")>]
-        static member Create (paidTool: Func<string, string, float, 'Args, X402.X402AugmentedServer.PaidTool.Annotations, Func<JS.Record<string, obj>, obj, U2<JS.Promise<X402.X402AugmentedClient.CallTool.Result.Item>, X402.X402AugmentedClient.CallTool.Result.Item>>, obj>) : X402AugmentedServer = jsNative
+        static member Create (paidTool: Func<string, string, float, 'Args, X402.X402AugmentedServer.PaidTool.Annotations, obj, obj>) : X402AugmentedServer<'Server> = jsNative
 
     type X402AugmentedClient =
         abstract callTool: x402ConfirmationCallback: (FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.PaymentRequirements[] -> JS.Promise<bool>) option * ``params``: X402.X402AugmentedClient.CallTool.Params * ?options: X402.X402AugmentedClient.CallTool.Options -> JS.Promise<X402.X402AugmentedClient.CallTool.Result.Item>
@@ -2795,10 +2453,15 @@ module X402 =
         /// </summary>
         [<Import("normalizeNetwork", "agents/x402")>]
         static member normalizeNetwork (network: string) : string = jsNative
+        /// <summary>
+        /// Add <c>paidTool</c> to an MCP server. Accepts an SDK v1 <c>McpServer</c>
+        /// (<c>@modelcontextprotocol/sdk</c>) or an SDK v2 <c>McpServer</c>
+        /// (<c>@modelcontextprotocol/server</c>).
+        /// </summary>
         [<Import("withX402", "agents/x402")>]
-        static member withX402<'T> (server: 'T, cfg: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402Config) : obj = jsNative
+        static member withX402<'T> (server: 'T, cfg: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402Config) : JS.Intersect<'T, FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedServer<obj>> = jsNative
         [<Import("withX402Client", "agents/x402")>]
-        static member withX402Client<'T> (client: 'T, x402Config: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402ClientConfig) : obj = jsNative
+        static member withX402Client<'T> (client: 'T, x402Config: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402ClientConfig) : JS.Intersect<FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient, 'T> = jsNative
 
     module X402AugmentedClient =
         module CallTool =
@@ -2811,7 +2474,7 @@ module X402 =
                 /// <summary>
                 /// Can be used to cancel an in-flight request. This will cause an <c>AbortError</c> to be raised from request().
                 /// </summary>
-                abstract signal: obj option with get, set
+                abstract signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                 /// <summary>
                 /// A timeout (in milliseconds) for this request. If exceeded, an SdkError with code SdkErrorCode.RequestTimeout will be raised from request().
                 /// <br /><br />
@@ -2851,7 +2514,7 @@ module X402 =
                 /// <summary>
                 /// If present, <c>relatedRequestId</c> is used to indicate to the transport which incoming request to associate this outgoing message with.
                 /// </summary>
-                abstract relatedRequestId: U2<string, float> option with get, set
+                abstract relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                 /// <summary>
                 /// The resumption token used to continue long-running requests that were interrupted.
                 /// <br /><br />
@@ -2872,7 +2535,7 @@ module X402 =
                 /// transport. Transports that share a single channel (stdio, in-memory)
                 /// ignore it.
                 /// </summary>
-                abstract requestSignal: obj option with get, set
+                abstract requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
                 /// <summary>
                 /// Fired by transports that open a per-request stream (the Streamable HTTP
                 /// transport's POST-per-request SSE response) when that stream ends or
@@ -2903,7 +2566,7 @@ module X402 =
                 /// </summary>
                 abstract toolDefinition: X402.X402AugmentedClient.CallTool.Options.ToolDefinition option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?onprogress: obj, ?signal: obj, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: U2<string, float>, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: obj, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?toolDefinition: X402.X402AugmentedClient.CallTool.Options.ToolDefinition) : Options = jsNative
+                static member Create (?onprogress: obj, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?timeout: float, ?resetTimeoutOnProgress: bool, ?maxTotalTimeout: float, ?allowInputRequired: bool, ?relatedRequestId: FSharp.CloudEdge.Support.Zod.V4.EnumValue, ?resumptionToken: string, ?onresumptiontoken: (string -> unit), ?requestSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?onRequestStreamEnd: (unit -> unit), ?headers: JS.ReadonlyRecord<string, string>, ?toolDefinition: X402.X402AugmentedClient.CallTool.Options.ToolDefinition) : Options = jsNative
 
             [<Interface>]
             type Params =
@@ -2997,7 +2660,7 @@ module X402 =
                     /// <summary>
                     /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
                     /// </summary>
-                    abstract progressToken: U2<string, float> option with get, set
+                    abstract progressToken: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
                     /// <summary>
                     /// If specified, this request is related to the provided task.
                     /// </summary>
@@ -3019,7 +2682,7 @@ module X402 =
 
             module Result =
                 type Item =
-                    abstract _meta: X402.X402AugmentedClient.CallTool.Result.Item.Meta option with get, set
+                    abstract _meta: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.CompatibleMcpClient.Item3.Meta option with get, set
                     abstract content: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item[] with get, set
                     abstract structuredContent: JS.Record<string, obj> option with get, set
                     abstract isError: bool option with get, set
@@ -3027,158 +2690,65 @@ module X402 =
                     abstract Item: string -> obj with get, set
 
                 module Item =
-                    type Meta =
-                        /// <summary>
-                        /// If specified, the caller is requesting out-of-band progress notifications for this request (as represented by notifications/progress). The value of this parameter is an opaque token that will be attached to any subsequent notifications. The receiver is not obligated to provide these notifications.
-                        /// </summary>
-                        abstract progressToken: U2<string, float> option with get, set
-                        /// <summary>
-                        /// If specified, this request is related to the provided task.
-                        /// </summary>
-                        abstract ``io.modelcontextprotocol/related-task``: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.MetaIoModelcontextprotocolRelatedTask option with get, set
-                        [<EmitIndexer>]
-                        abstract Item: string -> obj with get, set
-
-                    [<Interface>]
-                    type MetaIoModelcontextprotocolRelatedTask =
-                        abstract taskId: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (taskId: string) : MetaIoModelcontextprotocolRelatedTask = jsNative
-
                     module Content =
                         [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                         type Item =
-                            | [<CompiledName("text")>] Text of text: string * annotations: X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option * _meta: JS.Record<string, obj> option
-                            | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option * _meta: JS.Record<string, obj> option
-                            | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option * _meta: JS.Record<string, obj> option
-                            | [<CompiledName("resource_link")>] ResourceLink of uri: string * description: string option * mimeType: string option * size: float option * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item5.Icons.Item[] option * name: string * title: string option
-                            | [<CompiledName("resource")>] Resource of resource: U2<X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource, X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource2> * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option * _meta: JS.Record<string, obj> option
-
-                        [<Interface>]
-                        type Item2 =
-                            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract text: string with get, set
-                            abstract annotations: X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option with get, set
-                            abstract _meta: JS.Record<string, obj> option with get, set
+                            | [<CompiledName("text")>] Text of text: string * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("image")>] Image of data: string * mimeType: string * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("audio")>] Audio of data: string * mimeType: string * annotations: X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option
+                            | [<CompiledName("resource_link")>] ResourceLink of uri: string * description: string option * mimeType: string option * size: float option * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option * icons: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.ResourceLink.Icons.Item[] option * name: string * title: string option
+                            | [<CompiledName("resource")>] Resource of resource: U2<X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Resource.Resource, X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Resource.Resource2> * annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations option * _meta: JS.Record<string, obj> option
                             [<ParamObject; Emit("({ type: 'text', ...$0 })")>]
-                            static member Create (text: string, ?annotations: X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations, ?_meta: JS.Record<string, obj>) : Item2 = jsNative
-
-                        module Item2 =
-                            /// <remarks>TypeScript type: <c>"text"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "text"
-
-                            [<Interface>]
-                            type Annotations =
-                                abstract audience: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations.Audience.Item[] option with get, set
-                                abstract priority: float option with get, set
-                                abstract lastModified: string option with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (?audience: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations.Audience.Item[], ?priority: float, ?lastModified: string) : Annotations = jsNative
-
-                            module Annotations =
-                                module Audience =
-                                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                                    type Item =
-                                        | [<CompiledName("assistant")>] Assistant
-                                        | [<CompiledName("user")>] User
-
-                        [<Interface>]
-                        type Item3 =
-                            /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract data: string with get, set
-                            abstract mimeType: string with get, set
-                            abstract annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option with get, set
-                            abstract _meta: JS.Record<string, obj> option with get, set
+                            static member CreateText (text: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                             [<ParamObject; Emit("({ type: 'image', ...$0 })")>]
-                            static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations, ?_meta: JS.Record<string, obj>) : Item3 = jsNative
-
-                        module Item3 =
-                            /// <remarks>TypeScript type: <c>"image"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "image"
-
-                        [<Interface>]
-                        type Item4 =
-                            /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract data: string with get, set
-                            abstract mimeType: string with get, set
-                            abstract annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option with get, set
-                            abstract _meta: JS.Record<string, obj> option with get, set
+                            static member CreateImage (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                             [<ParamObject; Emit("({ type: 'audio', ...$0 })")>]
-                            static member Create (data: string, mimeType: string, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations, ?_meta: JS.Record<string, obj>) : Item4 = jsNative
-
-                        module Item4 =
-                            /// <remarks>TypeScript type: <c>"audio"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "audio"
-
-                        [<Interface>]
-                        type Item5 =
-                            abstract uri: string with get, set
-                            abstract description: string option with get, set
-                            abstract mimeType: string option with get, set
-                            abstract size: float option with get, set
-                            abstract annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option with get, set
-                            abstract _meta: JS.Record<string, obj> option with get, set
-                            abstract icons: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item5.Icons.Item[] option with get, set
-                            abstract name: string with get, set
-                            abstract title: string option with get, set
-                            /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                            abstract ``type``: string with get, set
+                            static member CreateAudio (data: string, mimeType: string, ?annotations: X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
                             [<ParamObject; Emit("({ type: 'resource_link', ...$0 })")>]
-                            static member Create (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item5.Icons.Item[], ?title: string) : Item5 = jsNative
-
-                        module Item5 =
-                            /// <remarks>TypeScript type: <c>"resource_link"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "resource_link"
-
-                            module Icons =
-                                [<Interface>]
-                                type Item =
-                                    abstract src: string with get, set
-                                    abstract mimeType: string option with get, set
-                                    abstract sizes: string[] option with get, set
-                                    abstract theme: X402.X402AugmentedClient.CallTool.Options.ToolDefinition.Icons.Item.Theme option with get, set
-                                    [<ParamObject; Emit("$0")>]
-                                    static member Create (src: string, ?mimeType: string, ?sizes: string[], ?theme: X402.X402AugmentedClient.CallTool.Options.ToolDefinition.Icons.Item.Theme) : Item = jsNative
-
-                        [<Interface>]
-                        type Item6 =
-                            /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract resource: U2<X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource, X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource2> with get, set
-                            abstract annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations option with get, set
-                            abstract _meta: JS.Record<string, obj> option with get, set
+                            static member CreateResourceLink (uri: string, name: string, ?description: string, ?mimeType: string, ?size: float, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>, ?icons: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.ResourceLink.Icons.Item[], ?title: string) : Item = jsNative
                             [<ParamObject; Emit("({ type: 'resource', ...$0 })")>]
-                            static member Create (resource: U2<X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource, X402.X402AugmentedClient.CallTool.Result.Item.Content.Item6.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item2.Annotations, ?_meta: JS.Record<string, obj>) : Item6 = jsNative
+                            static member CreateResource (resource: U2<X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Resource.Resource, X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Resource.Resource2>, ?annotations: FSharp.CloudEdge.Runtime.AgentsAiChatAgent.X402.X402AugmentedClient.CallTool.Result.Item.Content.Item.Cases.Audio.Annotations, ?_meta: JS.Record<string, obj>) : Item = jsNative
 
-                        module Item6 =
-                            /// <remarks>TypeScript type: <c>"resource"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "resource"
+                        module Item =
+                            module Cases =
+                                module Audio =
+                                    [<Interface>]
+                                    type Annotations =
+                                        abstract audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[] option with get, set
+                                        abstract priority: float option with get, set
+                                        abstract lastModified: string option with get, set
+                                        [<ParamObject; Emit("$0")>]
+                                        static member Create (?audience: FSharp.CloudEdge.Runtime.Workers.Ai_Cf_Meta_Llama_Guard_3_8B_Input.Messages.Item.Role[], ?priority: float, ?lastModified: string) : Annotations = jsNative
 
-                            [<Interface>]
-                            type Resource =
-                                abstract uri: string with get, set
-                                abstract mimeType: string option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
-                                abstract text: string with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
+                                module Resource =
+                                    [<Interface>]
+                                    type Resource =
+                                        abstract uri: string with get, set
+                                        abstract mimeType: string option with get, set
+                                        abstract _meta: JS.Record<string, obj> option with get, set
+                                        abstract text: string with get, set
+                                        [<ParamObject; Emit("$0")>]
+                                        static member Create (uri: string, text: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource = jsNative
 
-                            [<Interface>]
-                            type Resource2 =
-                                abstract uri: string with get, set
-                                abstract mimeType: string option with get, set
-                                abstract _meta: JS.Record<string, obj> option with get, set
-                                abstract blob: string with get, set
-                                [<ParamObject; Emit("$0")>]
-                                static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
+                                    [<Interface>]
+                                    type Resource2 =
+                                        abstract uri: string with get, set
+                                        abstract mimeType: string option with get, set
+                                        abstract _meta: JS.Record<string, obj> option with get, set
+                                        abstract blob: string with get, set
+                                        [<ParamObject; Emit("$0")>]
+                                        static member Create (uri: string, blob: string, ?mimeType: string, ?_meta: JS.Record<string, obj>) : Resource2 = jsNative
+
+                                module ResourceLink =
+                                    module Icons =
+                                        [<Interface>]
+                                        type Item =
+                                            abstract src: string with get, set
+                                            abstract mimeType: string option with get, set
+                                            abstract sizes: string[] option with get, set
+                                            abstract theme: X402.X402AugmentedClient.CallTool.Options.ToolDefinition.Icons.Item.Theme option with get, set
+                                            [<ParamObject; Emit("$0")>]
+                                            static member Create (src: string, ?mimeType: string, ?sizes: string[], ?theme: X402.X402AugmentedClient.CallTool.Options.ToolDefinition.Icons.Item.Theme) : Item = jsNative
 
     module X402AugmentedServer =
         module PaidTool =
