@@ -27,7 +27,7 @@ The **0.1.0** release is a foundation for community testing, especially across t
 Every generated line in this repository is output from one of two community generators: Xantham, which reads Cloudflare's TypeScript declarations, and Hawaii, which reads Cloudflare's OpenAPI document. The configuration and scripts here pin those inputs by version and hash, and check the generated output before it is installed.
 
 ```mermaid
-flowchart LR
+flowchart TD
     npm["Cloudflare npm packages<br/>pinned TypeScript declarations"] -->|Xantham| runtime["31 runtime libraries<br/>3 shared AI contract libraries"]
     runtime -->|Fable| worker["Worker module<br/>JavaScript"]
     openapi["Cloudflare OpenAPI document<br/>pinned commit and SHA-256"] -->|Hawaii| clients["11 .NET clients<br/>3,437 operations"]
