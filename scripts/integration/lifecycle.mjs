@@ -45,8 +45,13 @@ function persist(file, journal, create = false) {
     writeFileSync(fd, JSON.stringify(journal, null, 2) + "\n");
     fsyncSync(fd); closeSync(fd); fd = undefined;
     renameSync(temporary, file);
-    const directoryFd = openSync(directory, "r");
-    try { fsyncSync(directoryFd); } finally { closeSync(directoryFd); }
+    // Node cannot flush a Windows directory handle (FlushFileBuffers returns
+    // EPERM). The journal file is still flushed before the atomic rename;
+    // POSIX additionally flushes the directory entry for crash durability.
+    if (process.platform !== "win32") {
+      const directoryFd = openSync(directory, "r");
+      try { fsyncSync(directoryFd); } finally { closeSync(directoryFd); }
+    }
   } finally {
     if (fd !== undefined) closeSync(fd);
     rmSync(temporary, { force: true });

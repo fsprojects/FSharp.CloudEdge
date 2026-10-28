@@ -14,8 +14,13 @@ export function packCompilerSupport({ root, source, version, supportVersion, dot
   const staging = path.join(root, "artifacts/tools/compiler-support-pack");
   mkdirSync(staging, { recursive: true });
   const stage = mkdtempSync(path.join(staging, "stage-"));
-  for (const file of [...files, "README.md"]) copyFileSync(path.join(directory, file), path.join(stage, file));
-  project = project.replace(/<Version>[^<]+<\/Version>/, `<Version>${version}</Version>`)
+  // The catalogue and its input stamp travel with the sources: Xantham's catalogue targets
+  // authenticate them against the staged bindings before packing.
+  const catalogue = ["declarations.json", "catalogue-inputs.json"].filter((file) => existsSync(path.join(directory, file)));
+  for (const file of [...files, "README.md", ...catalogue]) copyFileSync(path.join(directory, file), path.join(stage, file));
+  const catalogueTool = path.join(source, "tools/package-core-ts-catalog.fsx");
+  project = project.replaceAll("$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx", catalogueTool)
+    .replace(/<Version>[^<]+<\/Version>/, `<Version>${version}</Version>`)
     .replace(/<ProjectReference Include="[^\"]+"\s*\/>/, `<PackageReference Include="Xantham.Fable.Core" Version="${supportVersion}" />`)
     .replace("</Project>", `  <ItemGroup><Content Include="${[...files, projectName].join(";")}" Pack="true" PackagePath="fable/" /></ItemGroup>\n</Project>`);
   writeFileSync(path.join(stage, projectName), project);

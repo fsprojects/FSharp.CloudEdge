@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/voice": "0.4.0",
-    "@cloudflare/workers-types": "5.20260906.1",
+    "@cloudflare/voice": "0.5.0",
+    "@cloudflare/workers-types": "5.20261025.1",
     "@types/json-schema": "7.0.15",
-    "@types/node": "22.20.1",
-    "ai": "7.0.93"
+    "@types/node": "26.4.1",
+    "ai": "7.0.93",
+    "zod": "4.6.7"
   }
 }

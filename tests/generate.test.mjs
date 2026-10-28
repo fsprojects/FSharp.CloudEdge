@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { executableScript } from "./fake-executable.mjs";
 import test from "node:test";
 import { generate } from "../scripts/generate.mjs";
 
@@ -11,7 +12,9 @@ const json = (file) => JSON.parse(readFileSync(file, "utf8"));
 const hash = (text) => createHash("sha256").update(text).digest("hex");
 
 function fixture(t) {
-  const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-generation-"));
+  const scratch = new URL("./.scratch/generation-tooling/", import.meta.url);
+  mkdirSync(scratch, { recursive: true });
+  const root = mkdtempSync(path.join(fileURLToPath(scratch), "cloudedge-generation-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const write = (name, value) => {
     const file = path.join(root, name);
@@ -22,7 +25,7 @@ function fixture(t) {
   write("package.json", { type: "module", devDependencies: { typescript: compilerVersion } });
   write("package-lock.json", { packages: { "": { devDependencies: { typescript: compilerVersion } }, "node_modules/typescript": { version: compilerVersion } } });
   write("node_modules/typescript/package.json", { name: "typescript", version: compilerVersion, type: "module" });
-  write("node_modules/typescript/lib/getExePath.js", 'export default () => new URL("../../@typescript/typescript-linux-x64/lib/tsc", import.meta.url).pathname;');
+  write("node_modules/typescript/lib/getExePath.js", 'import { fileURLToPath } from "node:url"; export default () => fileURLToPath(new URL("../../@typescript/typescript-linux-x64/lib/tsc", import.meta.url));');
   write("node_modules/@typescript/typescript-linux-x64/package.json", { version: compilerVersion });
   write("node_modules/@typescript/typescript-linux-x64/lib/tsc", "compiler");
   write("profiles/sdk/package.json", { devDependencies: { sdk: "1.2.3" } });
@@ -38,6 +41,7 @@ function fixture(t) {
 import { appendFileSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 const args = process.argv.slice(2);
+if (process.env.FAKE_ARGUMENTS_LOG) appendFileSync(process.env.FAKE_ARGUMENTS_LOG, JSON.stringify(args) + "\\n");
 const config = JSON.parse(readFileSync(args[args.indexOf("--config") + 1], "utf8"));
 appendFileSync(process.env.FAKE_CALLS, config.module + "\\n");
 if (process.env.FAKE_FAIL === config.module) process.exit(4);
@@ -47,6 +51,7 @@ writeFileSync(path.join(output, config.module + ".fs"), "module " + config.modul
 if (process.env.FAKE_EXTRA) writeFileSync(path.join(output, "Unexpected.fs"), "module Unexpected");
 writeFileSync(path.join(output, "manifest.json"), JSON.stringify({ package: "sdk", module: config.module, counts: { exact: 1 } }));
 writeFileSync(path.join(output, "symbols.jsonl"), "{}\\n");
+if (args.includes("--projection")) writeFileSync(path.join(output, "customization.json"), "{}");
 if (config.declarationCatalog) writeFileSync(path.join(output, "declarations.json"), JSON.stringify({ schemaVersion: 1, owner: config.module, owners: [{ name: config.module, dependencies: [] }], declarations: [] }));
 if (process.env.FAKE_MUTATE) writeFileSync(process.env.FAKE_TOOL_FILE, "changed generator");
 if (process.env.FAKE_MUTATE_REFERENCE) writeFileSync(config.declarationReferences[0], "changed reference");
@@ -54,7 +59,7 @@ if (process.env.FAKE_PACKAGE_LOG) writeFileSync(process.env.FAKE_PACKAGE_LOG, ar
 if (process.env.FAKE_MUTATE_FILE) writeFileSync(process.env.FAKE_MUTATE_FILE, "{}");
 if (process.env.FAKE_MUTATE_SNAPSHOT) writeFileSync(path.join(args[args.indexOf("generate") + 1], "index.d.ts"), "changed snapshot");
 `);
-  chmodSync(dotnet, 0o755);
+  executableScript(t, dotnet);
   const target = (id, dependencies = []) => ({ id, package: "sdk", version: "1.2.3", profile: "sdk", dependencies,
     outputDirectory: `src/${id}`, files: [`${id}.fs`], generator: { module: id } });
   const config = { schemaVersion: 2, toolchain: { typescript: compilerVersion },
@@ -64,7 +69,7 @@ if (process.env.FAKE_MUTATE_SNAPSHOT) writeFileSync(path.join(args[args.indexOf(
   const save = () => write("config/targets.json", config);
   save();
   const env = { ...process.env, CLOUDEDGE_DOTNET: dotnet, FAKE_TOOL_FILE: toolFile, FAKE_CALLS: path.join(root, "calls.txt") };
-  const run = (args = ["owner"], extraEnv = {}) => generate({ root, args, env: { ...env, ...extraEnv }, toolResolver });
+  const run = (args = ["owner"], extraEnv = {}, options = {}) => generate({ root, args, env: { ...env, ...extraEnv }, toolResolver, ...options });
   const calls = () => existsSync(env.FAKE_CALLS) ? readFileSync(env.FAKE_CALLS, "utf8").trim().split("\n") : [];
   return { root, write, config, save, run, calls };
 }
@@ -235,7 +240,9 @@ test("candidate catalogs schedule the selected prefix and record absolute inputs
   const reference = path.join(f.root, "artifacts/owner/declarations.json");
   assert.deepEqual(receipt.catalogCandidates, ["owner"]);
   assert.deepEqual(receipt.effectiveGenerator.declarationReferences, [reference]);
-  assert.deepEqual(receipt.declarationReferenceSha256, { "../../../../artifacts/owner/declarations.json": hash(readFileSync(reference)) });
+  assert.deepEqual(receipt.declarationReferenceSha256, {
+    [path.relative(path.join(f.root, "profiles/sdk/node_modules/sdk"), reference)]: hash(readFileSync(reference)),
+  });
 });
 
 test("an unused candidate is still a scheduling prerequisite and failure blocks its successors", async (t) => {
@@ -257,4 +264,64 @@ test("resume invalidates changed candidate scheduling policy and missing candida
   delete receipt.catalogCandidates;
   f.write("artifacts/owner/generation.json", receipt);
   assert.equal((await f.run(["--resume", "owner"]))[0].status, "generated");
+});
+
+test("projected generation authenticates its adapter and invalidates changed selections", async (t) => {
+  const f = fixture(t);
+  const projection = { project: "generators/xantham/Adapter.fsproj", xanthamRevision: "0".repeat(40), selections: [{ methodName: "submit" }] };
+  f.config.targets[0].projection = projection;
+  f.save();
+  const options = { projectionToolResolver: () => ({ args: [], fingerprint: { kind: "source-projection", payloadSha256: { "Adapter.dll": "fixed" } } }) };
+  assert.equal((await f.run(["owner"], {}, options))[0].status, "generated");
+  const receipt = json(path.join(f.root, "artifacts/owner/generation.json"));
+  assert.deepEqual(receipt.projection, projection);
+  assert.equal(receipt.generatorTool.kind, "source-projection");
+  assert.equal(receipt.projectionManifestSha256, hash(readFileSync(path.join(f.root, "artifacts/owner/manifest.json"))));
+  assert.equal((await f.run(["--resume", "owner"], {}, options))[0].status, "current");
+  f.config.targets[0].projection.selections[0].methodName = "prompt";
+  f.save();
+  assert.equal((await f.run(["--resume", "owner"], {}, options))[0].status, "generated");
+});
+
+test("projected generation rejects a changed adapter payload before accepting output", async (t) => {
+  const f = fixture(t);
+  f.config.targets[0].projection = { project: "generators/xantham/Adapter.fsproj", xanthamRevision: "0".repeat(40), selections: [{}] };
+  f.save();
+  let calls = 0;
+  const options = { projectionToolResolver: () => ({ args: [], fingerprint: { payload: ++calls } }) };
+  await assert.rejects(f.run(["owner"], {}, options), /generator or compiler changed during generation/);
+  assert.ok(!existsSync(path.join(f.root, "artifacts/owner/generation.json")));
+});
+
+test("a shared source adapter generates ordinary and projected targets with one frozen build", async t => {
+  const f = fixture(t);
+  f.config.xantham.source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  f.config.targets[1].projection = { selections: [{ methodName: "submit" }] };
+  f.save();
+  const builds = [];
+  const options = { toolResolver: () => assert.fail("source delivery used the packaged tool"), sourceToolResolver: (_root, source, _env, build) => {
+    if (build) builds.push(source);
+    return { args: ["source-adapter.dll"], fingerprint: { source, payload: "frozen" } };
+  } };
+  const argumentsFile = path.join(f.root, "arguments.jsonl");
+  assert.deepEqual((await f.run(["adapter"], { FAKE_ARGUMENTS_LOG: argumentsFile }, options)).map(result => result.status), ["generated", "generated"]);
+  assert.equal(builds.length, 1);
+  const calls = readFileSync(argumentsFile, "utf8").trim().split("\n").map(JSON.parse);
+  assert.ok(calls.every(args => args[0] === "source-adapter.dll" && args.includes("--workspace")));
+  assert.equal(calls[0].includes("--projection"), false);
+  assert.equal(calls[1].includes("--projection"), true);
+  for (const id of ["owner", "adapter"]) assert.deepEqual(json(path.join(f.root, `artifacts/${id}/generation.json`)).sourceTool, f.config.xantham.source);
+  assert.deepEqual((await f.run(["--resume", "--no-build", "adapter"], {}, options)).map(result => result.status), ["current", "current"]);
+  assert.equal(builds.length, 1);
+  f.config.xantham.source.xanthamRevision = "1".repeat(40); f.save();
+  assert.deepEqual((await f.run(["--resume", "adapter"], {}, options)).map(result => result.status), ["generated", "generated"]);
+});
+
+test("ordinary source generation rejects payload drift before accepting output", async t => {
+  const f = fixture(t);
+  f.config.xantham.source = { project: "generators/adapter/Adapter.fsproj", xanthamRevision: "0".repeat(40) };
+  f.save();
+  let reads = 0;
+  await assert.rejects(f.run(["owner"], {}, { sourceToolResolver: () => ({ args: [], fingerprint: { payload: ++reads } }) }), /generator or compiler changed during generation/);
+  assert.ok(!existsSync(path.join(f.root, "artifacts/owner/generation.json")));
 });

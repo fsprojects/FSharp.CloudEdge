@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import { scratchDirectory } from "./scratch.mjs";
 import path from "node:path";
 import test from "node:test";
 import { archiveSdkOutput, planSdkArchive } from "../scripts/archive-sdk-output.mjs";
@@ -9,7 +9,7 @@ import { planProjects } from "../scripts/projects.mjs";
 
 const hash = bytes => createHash("sha256").update(bytes).digest("hex");
 function fixture(t, names) {
-  const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-sdk-archive-"));
+  const root = mkdtempSync(path.join(scratchDirectory(), "cloudedge-sdk-archive-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const write = (file, content) => {
     const absolute = path.join(root, file);
@@ -52,7 +52,7 @@ test("archive moves verified retired output and its build contents while retaini
   symlinkSync(path.join(f.root, "outside.txt"), path.join(f.root, directory("linked"), "linked.fs"));
   const historical = f.projects.get("history").content + "<!-- Earlier generated reference plan. -->\n";
   f.write(path.relative(f.root, f.projects.get("history").file), historical);
-  f.write("artifacts/projects/previous.json", { checked: [{ project: path.relative(f.root, f.projects.get("history").file), projectSha256: hash(historical) }] });
+  f.write("artifacts/projects/previous.json", { checked: [{ project: path.relative(f.root, f.projects.get("history").file).split(path.sep).join("/"), projectSha256: hash(historical) }] });
   f.write(path.relative(f.root, f.projects.get("projectedited").file), "<!-- User project -->\n");
   const beforeConfig = readFileSync(path.join(f.root, "config/targets.json"), "utf8");
   const planned = archiveSdkOutput({ root: f.root, dryRun: true });

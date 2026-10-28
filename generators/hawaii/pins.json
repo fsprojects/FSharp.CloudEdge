@@ -14,7 +14,8 @@
     "generators/hawaii/tests/check_grouped_clients.py",
     "tests/HawaiiApi/HawaiiApi.fsproj",
     "tests/HawaiiApi/Program.fs",
-    "scripts/tool-packages.mjs"
+    "scripts/tool-packages.mjs",
+    ".gitattributes"
   ],
   "overlays": [
     "overlays/upload-security-schemes.json",

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import { scratchDirectory } from "./scratch.mjs";
 import path from "node:path";
 import { generationOrder, declarationReferences } from "../scripts/catalogs.mjs";
 import { planSdk, scheduleCatalogs } from "../scripts/plan-sdk.mjs";
@@ -56,13 +56,16 @@ for (const [name, change, error] of [
 });
 
 test("derived catalog paths use the original package directory and deduplicate explicit references", () => {
+  const root = path.resolve("/repo");
   const entry = target("consumer", { declarationReferences: ["../../../../artifacts/root/declarations.json"] });
   entry.catalogCandidates = ["root"];
-  assert.deepEqual(declarationReferences(entry, "/repo", "/repo/profiles/sdk/node_modules/sdk"), [{ key: "../../../../artifacts/root/declarations.json", file: "/repo/artifacts/root/declarations.json" }]);
+  assert.deepEqual(declarationReferences(entry, root, path.join(root, "profiles/sdk/node_modules/sdk")), [
+    { key: "../../../../artifacts/root/declarations.json", file: path.join(root, "artifacts/root/declarations.json") },
+  ]);
 });
 
 test("SDK planning preserves explicit profiles, ambient choices and dependencies when a package has multiple installations", (t) => {
-  const root = mkdtempSync(path.join(os.tmpdir(), "cloudedge-sdk-plan-"));
+  const root = mkdtempSync(path.join(scratchDirectory(), "cloudedge-sdk-plan-"));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const profiles = ["workers", "browser"].map((id) => ({ id, directory: `profiles/${id}` }));
   for (const profile of profiles) {

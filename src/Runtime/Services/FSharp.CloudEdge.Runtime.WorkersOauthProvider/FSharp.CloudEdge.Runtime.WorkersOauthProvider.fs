@@ -10,6 +10,223 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
+/// <summary>
+/// The internal reason behind an error response, forwarded to the <c>onError</c> hook and never
+/// placed on the wire. <c>category</c> is a stable kebab-case subsystem (<c>client-authentication</c>,
+/// <c>authorization-code-grant</c>, <c>refresh-token-grant</c>, <c>token-exchange-grant</c>,
+/// <c>token-endpoint-request</c>, <c>token-revocation</c>, <c>token-issuance</c>, <c>resource-indicator</c>,
+/// <c>client-registration</c>, <c>client-id-metadata-document</c>, <c>protected-resource</c>,
+/// <c>enterprise-managed-authorization</c>, <c>token-exchange-callback</c>); <c>reason</c> is a stable
+/// snake_case slug naming the exact check that failed. Treat both like enum members in semver.
+/// <c>detail</c> may carry structured context such as a caught error; it is never a secret.
+/// </summary>
+[<Interface>]
+type OAuthErrorInternal =
+    /// <summary>
+    /// Stable kebab-case subsystem that produced the error.
+    /// </summary>
+    abstract category: string with get, set
+    /// <summary>
+    /// Stable snake_case slug naming the failed check, often more specific than the wire description.
+    /// </summary>
+    abstract reason: string with get, set
+    /// <summary>
+    /// Optional structured context, e.g. the caught error or the offending parameter.
+    /// </summary>
+    abstract detail: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (category: string, reason: string, ?detail: obj) : OAuthErrorInternal = jsNative
+
+/// <summary>
+/// Options accepted by the OAuthError constructor.
+/// </summary>
+[<Interface>]
+type OAuthErrorOptions =
+    /// <summary>
+    /// Human-readable text returned in the <c>error_description</c> field.
+    /// </summary>
+    abstract description: string with get, set
+    /// <summary>
+    /// HTTP status code for the error response. Defaults to <c>400</c>.
+    /// </summary>
+    abstract statusCode: float option with get, set
+    /// <summary>
+    /// Additional response headers.
+    /// <br /><br />
+    /// For transient failures (e.g. upstream rate limits), set
+    /// <c>Retry-After</c> here so well-behaved clients back off instead of
+    /// retry-storming. Per RFC 7231 §7.1.3 the value may be either a
+    /// number of seconds or an HTTP-date.
+    /// </summary>
+    abstract headers: JS.Record<string, string> option with get, set
+    /// <summary>
+    /// Internal reason forwarded to the <c>onError</c> hook and never sent on the wire. The library
+    /// sets it on every error it originates; a <c>tokenExchangeCallback</c> may set its own. An
+    /// <c>OAuthError</c> thrown without one reaches <c>onError</c> as
+    /// <c>{ category: 'token-exchange-callback', reason: 'callback_error', detail: error }</c>.
+    /// </summary>
+    abstract ``internal``: OAuthErrorInternal option with get, set
+    /// <summary>
+    /// For <c>insufficient_scope</c> from an <c>OAuthResourceServer</c>'s <c>validateToken</c>: every scope the
+    /// operation needs, named in the <c>403</c> challenge. Defaults to the resource's <c>requiredScopes</c>.
+    /// </summary>
+    abstract requiredScopes: string[] option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (description: string, ?statusCode: float, ?headers: JS.Record<string, string>, ?``internal``: OAuthErrorInternal, ?requiredScopes: string[]) : OAuthErrorOptions = jsNative
+
+/// <summary>
+/// The OAuth error your code throws to the library, to answer with a standard OAuth error instead
+/// of a generic failure. It is honoured in two places:
+/// <br /><br />
+/// - <b><c>tokenExchangeCallback</c></b> (token endpoint): the response is <c>{ error, error_description }</c>
+///   with <c>statusCode</c> (default <c>400</c>) and <c>headers</c>. <c>invalid_grant</c> also revokes the grant.
+///   Anything else thrown is a <c>500</c>.
+/// - <b><c>OAuthResourceServer</c>'s <c>validateToken</c></b>: <c>invalid_token</c> is a <c>401</c> and
+///   <c>insufficient_scope</c> a <c>403</c>, each with a Bearer challenge (the latter naming
+///   <c>requiredScopes</c>); any other code keeps <c>statusCode</c> and <c>headers</c>, such as <c>429</c> with
+///   <c>Retry-After</c>. Anything else thrown is a <c>503</c>.
+/// <br /><br />
+/// Unexpected failures stay visible that way: the library doesn't catch everything and return 400.
+/// (<c>OAuthProvider</c>'s <c>resolveExternalToken</c> uses <c>ExternalTokenError</c> instead.)
+/// </summary>
+/// <example>
+/// <code>
+/// ```ts
+/// import { OAuthError } from '@cloudflare/workers-oauth-provider';
+///
+/// tokenExchangeCallback: async (options) =&gt; {
+///   if (options.grantType === 'refresh_token') {
+///     // refreshUpstream() may throw OAuthError from any depth
+///     return { newProps: await refreshUpstream(options.props) };
+///   }
+/// }
+///
+/// async function refreshUpstream(props) {
+///   const res = await fetch(...);
+///   if (res.status === 401) {
+///     // invalid_grant can never recover: the provider also revokes this grant and its tokens.
+///     throw new OAuthError('invalid_grant', { description: 'upstream refresh token is invalid' });
+///   }
+///   if (res.status === 429) {
+///     // Mirror upstream's Retry-After if present, otherwise pick a default.
+///     throw new OAuthError('temporarily_unavailable', {
+///       description: 'upstream rate limited',
+///       statusCode: 429,
+///       headers: { 'Retry-After': res.headers.get('retry-after') ?? '60' },
+///     });
+///   }
+///   return await res.json();
+/// }
+/// </code>
+/// <code>
+/// </code>
+/// </example>
+[<Interface>]
+[<Import("OAuthError", "@cloudflare/workers-oauth-provider")>]
+type OAuthError =
+    /// <summary>
+    /// OAuth 2.0 error code.
+    /// </summary>
+    abstract code: string
+    /// <summary>
+    /// Options controlling the OAuth error response.
+    /// </summary>
+    abstract options: OAuthError.Options
+    /// <summary>
+    /// Human-readable description sent in the <c>error_description</c> field.
+    /// </summary>
+    abstract description: string
+    /// <summary>
+    /// HTTP status code for the error response.
+    /// </summary>
+    abstract statusCode: float
+    /// <summary>
+    /// Additional response headers.
+    /// </summary>
+    abstract headers: JS.Record<string, string> option
+    /// <summary>
+    /// Scopes an <c>insufficient_scope</c> challenge names.
+    /// </summary>
+    abstract requiredScopes: string[] option
+    abstract name: string with get, set
+    abstract message: string with get, set
+    abstract stack: string option with get, set
+    abstract cause: obj option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (code: string, options: OAuthError.Options, description: string, statusCode: float, name: string, message: string, ?headers: JS.Record<string, string>, ?requiredScopes: string[], ?stack: string, ?cause: obj) : OAuthError = jsNative
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    [<Import("OAuthError.isError", "@cloudflare/workers-oauth-provider")>]
+    static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("OAuthError.captureStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("OAuthError.prepareStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
+
+/// <summary>
+/// Tagged union of every validation failure that can occur on the EMA token
+/// endpoint path. Extend by adding a new arm; the exhaustive <c>switch</c> in
+/// <c>emaErrorToWire</c> will surface unhandled cases at compile time.
+/// </summary>
 [<RequireQualifiedAccess; TypeScriptTaggedUnion("reason", CaseRules.None)>]
 type EmaValidationError =
     | [<CompiledName("assertion_missing")>] AssertionMissing
@@ -23,7 +240,7 @@ type EmaValidationError =
     | [<CompiledName("jwks_fetch_failed")>] JwksFetchFailed of status: float option
     | [<CompiledName("invalid_claim")>] InvalidClaim of claim: string
     | [<CompiledName("aud_mismatch")>] AudMismatch of expected: string * got: U2<string, string[]>
-    | [<CompiledName("unsupported_claim")>] UnsupportedClaim of claim: EmaValidationError13.Claim
+    | [<CompiledName("unsupported_claim")>] UnsupportedClaim of claim: EmaValidationError.Cases.UnsupportedClaim.Claim
     | [<CompiledName("expired")>] Expired of exp: float * now: float
     | [<CompiledName("iat_in_future")>] IatInFuture of iat: float * now: float * skew: float
     | [<CompiledName("nbf_in_future")>] NbfInFuture of nbf: float * now: float * skew: float
@@ -40,201 +257,14 @@ type EmaValidationError =
     | [<CompiledName("mapper_denied")>] MapperDenied
     | [<CompiledName("mapper_threw")>] MapperThrew
     | [<CompiledName("assertion_expired_after_processing")>] AssertionExpiredAfterProcessing
-
-[<Interface>]
-type EmaValidationError10 =
-    abstract reason: string with get, set
-    abstract status: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?status: float) : EmaValidationError10 = jsNative
-
-[<Interface>]
-type EmaValidationError11 =
-    abstract reason: string with get, set
-    abstract claim: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, claim: string) : EmaValidationError11 = jsNative
-
-[<Interface>]
-type EmaValidationError12 =
-    abstract reason: string with get, set
-    abstract expected: string with get, set
-    abstract got: U2<string, string[]> with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: U2<string, string[]>) : EmaValidationError12 = jsNative
-
-[<Interface>]
-type EmaValidationError13 =
-    abstract reason: string with get, set
-    abstract claim: EmaValidationError13.Claim with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, claim: EmaValidationError13.Claim) : EmaValidationError13 = jsNative
-
-[<Interface>]
-type EmaValidationError14 =
-    abstract reason: string with get, set
-    abstract exp: float with get, set
-    abstract now: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, exp: float, now: float) : EmaValidationError14 = jsNative
-
-[<Interface>]
-type EmaValidationError15 =
-    abstract reason: string with get, set
-    abstract iat: float with get, set
-    abstract now: float with get, set
-    abstract skew: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, iat: float, now: float, skew: float) : EmaValidationError15 = jsNative
-
-[<Interface>]
-type EmaValidationError16 =
-    abstract reason: string with get, set
-    abstract nbf: float with get, set
-    abstract now: float with get, set
-    abstract skew: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, nbf: float, now: float, skew: float) : EmaValidationError16 = jsNative
-
-[<Interface>]
-type EmaValidationError17 =
-    abstract reason: string with get, set
-    abstract lifetime: float with get, set
-    abstract max: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, lifetime: float, max: float) : EmaValidationError17 = jsNative
-
-[<Interface>]
-type EmaValidationError18 =
-    abstract reason: string with get, set
-    abstract jti: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, jti: string) : EmaValidationError18 = jsNative
-
-[<Interface>]
-type EmaValidationError19 =
-    abstract reason: string with get, set
-    abstract expected: string with get, set
-    abstract got: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: string) : EmaValidationError19 = jsNative
-
-[<Interface>]
-type EmaValidationError2 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError2 = jsNative
-
-[<Interface>]
-type EmaValidationError20 =
-    abstract reason: string with get, set
-    abstract resource: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, resource: string) : EmaValidationError20 = jsNative
-
-[<Interface>]
-type EmaValidationError21 =
-    abstract reason: string with get, set
-    abstract expected: string with get, set
-    abstract got: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, expected: string, got: string) : EmaValidationError21 = jsNative
-
-[<Interface>]
-type EmaValidationError22 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError22 = jsNative
-
-[<Interface>]
-type EmaValidationError23 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError23 = jsNative
-
-[<Interface>]
-type EmaValidationError24 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError24 = jsNative
-
-[<Interface>]
-type EmaValidationError25 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError25 = jsNative
-
-[<Interface>]
-type EmaValidationError26 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError26 = jsNative
-
-[<Interface>]
-type EmaValidationError27 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError27 = jsNative
-
-[<Interface>]
-type EmaValidationError28 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError28 = jsNative
-
-[<Interface>]
-type EmaValidationError29 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError29 = jsNative
-
-[<Interface>]
-type EmaValidationError3 =
-    abstract reason: string with get, set
-    abstract size: float with get, set
-    abstract max: float with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, size: float, max: float) : EmaValidationError3 = jsNative
-
-[<Interface>]
-type EmaValidationError4 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError4 = jsNative
-
-[<Interface>]
-type EmaValidationError5 =
-    abstract reason: string with get, set
-    abstract got: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?got: obj) : EmaValidationError5 = jsNative
-
-[<Interface>]
-type EmaValidationError6 =
-    abstract reason: string with get, set
-    abstract got: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?got: obj) : EmaValidationError6 = jsNative
-
-[<Interface>]
-type EmaValidationError7 =
-    abstract reason: string with get, set
-    abstract iss: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, iss: string) : EmaValidationError7 = jsNative
-
-[<Interface>]
-type EmaValidationError8 =
-    abstract reason: string with get, set
-    abstract kid: string option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, ?kid: string) : EmaValidationError8 = jsNative
-
-[<Interface>]
-type EmaValidationError9 =
-    abstract reason: string with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string) : EmaValidationError9 = jsNative
+    [<ParamObject; Emit("({ reason: 'invalid_typ', ...$0 })")>]
+    static member CreateInvalidTyp (?got: obj) : EmaValidationError = jsNative
+    [<ParamObject; Emit("({ reason: 'invalid_alg', ...$0 })")>]
+    static member CreateInvalidAlg (?got: obj) : EmaValidationError = jsNative
+    [<ParamObject; Emit("({ reason: 'no_matching_key', ...$0 })")>]
+    static member CreateNoMatchingKey (?kid: string) : EmaValidationError = jsNative
+    [<ParamObject; Emit("({ reason: 'jwks_fetch_failed', ...$0 })")>]
+    static member CreateJwksFetchFailed (?status: float) : EmaValidationError = jsNative
 
 /// <summary>
 /// Claims expected in an MCP Enterprise-Managed Authorization ID-JAG assertion.
@@ -301,7 +331,11 @@ type EmaTrustedIssuer =
     /// </summary>
     abstract jwksUri: string with get, set
     /// <summary>
-    /// Allowed JWT signing algorithms for this issuer. Defaults to <c>['RS256']</c>.
+    /// Allowed JWT signing algorithms for this issuer: <c>RS256</c>, <c>ES256</c>, or both.
+    /// Defaults to <c>['RS256']</c>, so an IdP that signs ID-JAGs with <c>ES256</c> must list it.
+    /// Use the algorithm the IdP signs ID-JAGs with, which its documentation or a
+    /// sample assertion's <c>alg</c> header shows. <c>id_token_signing_alg_values_supported</c>
+    /// describes ID tokens and may differ.
     /// </summary>
     abstract algorithms: string[] option with get, set
     /// <summary>
@@ -310,16 +344,6 @@ type EmaTrustedIssuer =
     abstract audience: string option with get, set
     [<ParamObject; Emit("$0")>]
     static member Create (issuer: string, jwksUri: string, ?algorithms: string[], ?audience: string) : EmaTrustedIssuer = jsNative
-
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
 
 /// <summary>
 /// Input passed to <c>enterpriseManagedAuthorization.mapClaims</c> after ID-JAG validation.
@@ -346,21 +370,13 @@ type EmaClaimsMapperInput<'Env> =
     /// <summary>
     /// The original HTTP token request, e.g. for inspecting Host header in multi-tenant routing.
     /// </summary>
-    abstract request: obj with get, set
+    abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
     /// <summary>
     /// Cloudflare Worker environment variables.
     /// </summary>
     abstract env: 'Env with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (claims: EmaIdJagClaims, clientInfo: ClientInfo, resource: string, requestedScope: string[], request: obj, env: 'Env) : EmaClaimsMapperInput<'Env> = jsNative
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
+    static member Create (claims: EmaIdJagClaims, clientInfo: ClientInfo, resource: string, requestedScope: string[], request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, env: 'Env) : EmaClaimsMapperInput<'Env> = jsNative
 
 /// <summary>
 /// Result returned by <c>enterpriseManagedAuthorization.mapClaims</c>.
@@ -429,13 +445,13 @@ type EmaTrustedIssuerResolverInput<'Env> =
     /// <summary>
     /// The original HTTP request, e.g. for inspecting the Host header in multi-tenant routing.
     /// </summary>
-    abstract request: obj with get, set
+    abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
     /// <summary>
     /// Authenticated OAuth client that presented the assertion.
     /// </summary>
     abstract clientInfo: ClientInfo with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (iss: string, env: 'Env, request: obj, clientInfo: ClientInfo) : EmaTrustedIssuerResolverInput<'Env> = jsNative
+    static member Create (iss: string, env: 'Env, request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, clientInfo: ClientInfo) : EmaTrustedIssuerResolverInput<'Env> = jsNative
 
 type EmaTrustedIssuerResolver<'Env> = (EmaTrustedIssuerResolverInput<'Env> -> JS.Promise<EmaTrustedIssuer option>)
 
@@ -489,7 +505,7 @@ type EmaOptions<'Env> =
     /// Set to <c>true</c> to also accept public clients on this grant — for example
     /// clients registered via a Client ID Metadata Document (CIMD), which are
     /// always public (<c>none</c>) and therefore cannot present a client secret. The
-    /// security trade-off is documented in the README: the trust then rests on
+    /// security trade-off is documented in docs/advanced-configuration.md: the trust then rests on
     /// the IdP-issued, signature-verified, short-lived, single-use ID-JAG
     /// assertion (audience- and client-bound), together with the provider's
     /// configured resource pinning, rather than on a separately presented client
@@ -536,23 +552,390 @@ type AuthorizationErrorOptions =
 /// means a caller MUST render locally and MUST NOT redirect.
 /// </summary>
 [<Interface>]
+[<Import("AuthorizationError", "@cloudflare/workers-oauth-provider")>]
 type AuthorizationError =
     abstract code: AuthorizationErrorCode
     abstract description: string
     abstract redirectUri: string option
     abstract state: string option
     abstract issuer: string option
+    /// <summary>
+    /// The ready-made error redirect back to the client, set only when a redirect is safe
+    /// (<c>redirectUri</c> was validated). Without it, render the error locally.
+    /// </summary>
+    abstract redirectTo: string option
     abstract name: string with get, set
     abstract message: string with get, set
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (code: AuthorizationErrorCode, description: string, name: string, message: string, ?redirectUri: string, ?state: string, ?issuer: string, ?stack: string, ?cause: obj) : AuthorizationError = jsNative
+    static member Create (code: AuthorizationErrorCode, description: string, name: string, message: string, ?redirectUri: string, ?state: string, ?issuer: string, ?redirectTo: string, ?stack: string, ?cause: obj) : AuthorizationError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     [<Import("AuthorizationError.isError", "@cloudflare/workers-oauth-provider")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("AuthorizationError.captureStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("AuthorizationError.prepareStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
+
+/// <summary>
+/// RFC 9728 metadata published by a standalone OAuth resource server.
+/// </summary>
+[<Interface>]
+type OAuthResourceMetadata =
+    /// <summary>
+    /// The one canonical HTTPS identifier for this protected resource.
+    /// </summary>
+    abstract resource: string with get, set
+    /// <summary>
+    /// Authorization server issuers that can issue tokens for this resource.
+    /// </summary>
+    abstract authorization_servers: string[] with get, set
+    /// <summary>
+    /// Minimal scopes used to access the protected resource.
+    /// </summary>
+    /// <remarks>@deprecated Use <c>requiredScopes</c>, which this becomes on the wire. Setting both is refused.</remarks>
+    abstract scopes_supported: string[] option with get, set
+    /// <summary>
+    /// Bearer-token presentation methods. This implementation supports only <c>header</c>.
+    /// </summary>
+    abstract bearer_methods_supported: string[] option with get, set
+    /// <summary>
+    /// Human-readable protected-resource name.
+    /// </summary>
+    abstract resource_name: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (resource: string, authorization_servers: string[], ?scopes_supported: string[], ?bearer_methods_supported: string[], ?resource_name: string) : OAuthResourceMetadata = jsNative
+
+/// <summary>
+/// Successful result returned by the application's token validator.
+/// </summary>
+[<Interface>]
+type OAuthResourceTokenValidation<'Props> =
+    /// <summary>
+    /// Application data exposed to the protected handler as <c>ctx.props</c>.
+    /// </summary>
+    abstract props: 'Props with get, set
+    /// <summary>
+    /// Canonical audience to which the token is bound.
+    /// </summary>
+    abstract audience: string with get, set
+    /// <summary>
+    /// Optional absolute expiry as seconds since the Unix epoch.
+    /// </summary>
+    abstract expiresAt: float option with get, set
+    /// <summary>
+    /// Scopes the token carries. <c>OAuthAuthorizationServer.validateToken()</c> always reports them;
+    /// a handler needs them to answer with insufficientScope.
+    /// </summary>
+    abstract scope: string[] option with get, set
+    /// <summary>
+    /// Subject the token was issued for.
+    /// </summary>
+    abstract userId: string option with get, set
+    /// <summary>
+    /// Client the token was issued to.
+    /// </summary>
+    abstract clientId: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (props: 'Props, audience: string, ?expiresAt: float, ?scope: string[], ?userId: string, ?clientId: string) : OAuthResourceTokenValidation<'Props> = jsNative
+
+/// <summary>
+/// What the host verified about the bearer token before calling the handler, exposed as
+/// <c>ctx.auth</c> beside the application's <c>ctx.props</c>. Both hosts set it: <c>OAuthResourceServer</c>
+/// from the validator's result, <c>OAuthProvider</c> from its own token record.
+/// </summary>
+[<Interface>]
+type OAuthResourceAuth =
+    /// <summary>
+    /// The token as presented. It is already in the request's <c>Authorization</c> header; never log it.
+    /// </summary>
+    abstract token: string with get, set
+    /// <summary>
+    /// Canonical resource the token was accepted for.
+    /// </summary>
+    abstract audience: string with get, set
+    /// <summary>
+    /// Absolute expiry as seconds since the Unix epoch, when known.
+    /// </summary>
+    abstract expiresAt: float option with get, set
+    /// <summary>
+    /// Scopes the token carries; empty when the validator reported none.
+    /// </summary>
+    abstract scope: string[] with get, set
+    /// <summary>
+    /// Subject the token was issued for, when known.
+    /// </summary>
+    abstract userId: string option with get, set
+    /// <summary>
+    /// Client the token was issued to, when known.
+    /// </summary>
+    abstract clientId: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (token: string, audience: string, scope: string[], ?expiresAt: float, ?userId: string, ?clientId: string) : OAuthResourceAuth = jsNative
+
+/// <summary>
+/// The execution context a protected handler receives: <c>props</c> from the validator, <c>auth</c> from the host.
+/// </summary>
+[<Interface>]
+type OAuthResourceContext<'Props> =
+    inherit FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>
+    abstract auth: OAuthResourceAuth
+    [<ParamObject; Emit("$0")>]
+    static member Create (waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), exports: obj, props: 'Props, mapVirtualHost: Func<FSharp.CloudEdge.Runtime.Workers.Request.Fetcher, float, string>, tracing: FSharp.CloudEdge.Runtime.Workers.Tracing, abort: (obj option -> unit), auth: OAuthResourceAuth, ?cache: FSharp.CloudEdge.Runtime.Workers.CacheContext, ?access: FSharp.CloudEdge.Runtime.Workers.CloudflareAccessContext) : OAuthResourceContext<'Props> = jsNative
+
+type OAuthResourceTokenValidator<'Props> = delegate of resource: string * token: string -> JS.Promise<OAuthResourceTokenValidation<'Props> option>
+
+/// <summary>
+/// Protected application handler called after successful token validation: an object with
+/// <c>fetch</c>, or a <c>WorkerEntrypoint</c> subclass instantiated per request with <c>(ctx, env)</c>. Either
+/// way <c>ctx.props</c> carries what the validator returned and <c>ctx.auth</c> what the host verified.
+/// </summary>
+type OAuthResourceHandler<'Env, 'Props> = U2<OAuthResourceHandler2<'Env, 'Props>, OAuthResourceHandler.ResultConstructor<'Props, 'Env>>
+
+[<Interface>]
+type OAuthResourceHandler2<'Env, 'Props> =
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'Env * ctx: OAuthResourceContext<'Props> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
+    [<ParamObject; Emit("$0")>]
+    static member Create (fetch: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, 'Env, OAuthResourceContext<'Props>, U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>>) : OAuthResourceHandler2<'Env, 'Props> = jsNative
+
+/// <summary>
+/// Configuration for OAuthResourceServer.
+/// </summary>
+[<Interface>]
+type OAuthResourceServerOptions<'Env, 'Props> =
+    /// <summary>
+    /// RFC 9728 metadata, including this server's one canonical resource.
+    /// </summary>
+    abstract resourceMetadata: OAuthResourceMetadata with get, set
+    /// <summary>
+    /// The scopes required for accessing this resource (MCP: the minimal set for basic use). Published
+    /// as its protected resource metadata's <c>scopes_supported</c> and named in the <c>401</c> challenge, so
+    /// clients request them first; not the authorization server's catalogue, <c>scopesSupported</c>.
+    /// Operations that need more ask for it with <c>insufficientScope()</c> (step-up). <c>offline_access</c> is
+    /// removed automatically. Leave unset when your consent page picks the scopes.
+    /// <br /><br />
+    /// Advertised, not enforced: the handler decides whether a token is sufficient (<c>ctx.auth.scope</c>),
+    /// because only it knows the deployment's scope hierarchy (a broader scope implying a narrower
+    /// one), which MCP requires servers to honour.
+    /// </summary>
+    abstract requiredScopes: string[] option with get, set
+    /// <summary>
+    /// Application handler for the canonical resource URL and its path descendants.
+    /// </summary>
+    abstract handler: U2<OAuthResourceHandler2<'Env, 'Props>, FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthResourceHandler.ResultConstructor<'Props, 'Env>> with get, set
+    /// <summary>
+    /// The validator for a request. The host calls what you return with this server's
+    /// canonical resource and the bearer token, so neither is repeated here.
+    /// <br /><br />
+    /// - The authorization server in another Worker, over a Service Binding to a
+    ///   <c>WorkerEntrypoint</c> that exposes <c>OAuthAuthorizationServer.validateToken()</c>:
+    ///   <c>(env) =&gt; env.AUTH_SERVER.validateToken</c>
+    /// - The authorization server in this Worker:
+    ///   <c>(env) =&gt; (resource, token) =&gt; authorizationServer.validateToken(resource, token, env)</c>
+    /// - Anything else, at your own risk: a function that validates the token for <c>resource</c>,
+    ///   such as one that recognises an upstream API's credentials and validates them itself
+    ///   before falling back to the authorization server.
+    /// <br /><br />
+    /// Return <c>null</c> for a token that isn't valid here (a <c>401</c> challenge). Throw an <c>OAuthError</c>
+    /// for a specific answer: <c>temporarily_unavailable</c> with <c>statusCode: 429</c> and a <c>Retry-After</c>
+    /// header, <c>insufficient_scope</c> with <c>requiredScopes</c>, or <c>invalid_token</c> with a description.
+    /// Anything else thrown is a validator failure (<c>503</c>). An <c>OAuthError</c> thrown in another
+    /// Worker arrives over RPC as a plain <c>Error</c>, so throw it in this Worker's validator.
+    /// </summary>
+    abstract validateToken: env: 'Env * request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> Func<string, string, JS.Promise<OAuthResourceTokenValidation<'Props> option>>
+    [<ParamObject; Emit("$0")>]
+    static member Create (resourceMetadata: OAuthResourceMetadata, handler: U2<OAuthResourceHandler2<'Env, 'Props>, FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthResourceHandler.ResultConstructor<'Props, 'Env>>, validateToken: Func<'Env, FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, Func<string, string, JS.Promise<OAuthResourceTokenValidation<'Props> option>>>, ?requiredScopes: string[]) : OAuthResourceServerOptions<'Env, 'Props> = jsNative
+
+/// <summary>
+/// One OAuth protected resource, in the authorization server's Worker or its own. Publishes
+/// RFC 9728 metadata, challenges unauthenticated requests, validates the bearer token through
+/// the configured <c>validateToken</c>, enforces audience and expiry on what it returns, and routes
+/// only the canonical resource and its descendants to the application handler.
+/// <br /><br />
+/// <c>export default new OAuthResourceServer({ … })</c>, or dispatch to <c>fetch()</c> from your own
+/// router, exactly as with <c>OAuthAuthorizationServer</c>.
+/// </summary>
+type OAuthResourceServer<'Env, 'Props> =
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'Env * ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
+
+/// <summary>
+/// Remember an approval so the consent page can be skipped for requests it already covers.
+/// </summary>
+[<Interface>]
+type RememberConsentOptions =
+    /// <summary>
+    /// HMAC key for the approvals cookie: at least 32 characters, from a Worker secret.
+    /// </summary>
+    abstract secret: string with get, set
+    /// <summary>
+    /// How long an approval is remembered. Defaults to 30 days.
+    /// </summary>
+    abstract maxAgeSeconds: float option with get, set
+    /// <summary>
+    /// The signed-in user, when you know them before consent (your own sign-in). The approval is then
+    /// bound to them as well, so another account on the same browser is asked again. Without it an
+    /// approval belongs to the browser, which suits a proxy server that only learns the user from the
+    /// third party after consent.
+    /// </summary>
+    abstract subject: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (secret: string, ?maxAgeSeconds: float, ?subject: string) : RememberConsentOptions = jsNative
+
+/// <summary>
+/// What a consent page must show, per the MCP authorization spec and security best practices.
+/// Every string here may come from the client (dynamic registration or a CIMD document), so
+/// escape all of it before rendering.
+/// </summary>
+[<Interface>]
+type ConsentDescription =
+    abstract clientId: string with get, set
+    /// <summary>
+    /// The client's name, or its client ID when it gave none. Self-asserted unless <c>clientDomain</c> is set.
+    /// </summary>
+    abstract clientName: string with get, set
+    /// <summary>
+    /// For a Client ID Metadata Document client: the hostname of its HTTPS client ID, a domain the
+    /// client controls. Show it prominently. Absent for registered clients, whose names are unverified.
+    /// </summary>
+    abstract clientDomain: string option with get, set
+    abstract clientUri: string option with get, set
+    abstract logoUri: string option with get, set
+    /// <summary>
+    /// Where the tokens will be sent.
+    /// </summary>
+    abstract redirectUri: string with get, set
+    /// <summary>
+    /// The redirect URI's hostname, which the page MUST display. A native app's private-use URI
+    /// (<c>com.example.app:/callback</c>) has no host, so it's the whole URI instead.
+    /// </summary>
+    abstract redirectHost: string with get, set
+    /// <summary>
+    /// The redirect goes to a local app (<c>localhost</c>, <c>127.0.0.0/8</c>, <c>::1</c>). The page SHOULD warn:
+    /// any local process could be listening, whatever name the client claims.
+    /// </summary>
+    abstract redirectIsLoopback: bool with get, set
+    /// <summary>
+    /// The scopes being requested.
+    /// </summary>
+    abstract scope: string[] with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (clientId: string, clientName: string, redirectUri: string, redirectHost: string, redirectIsLoopback: bool, scope: string[], ?clientDomain: string, ?clientUri: string, ?logoUri: string) : ConsentDescription = jsNative
+
+/// <summary>
+/// A consent page to render: post <c>handle</c> back to approveConsent; send <c>headers</c> with the page.
+/// </summary>
+[<Interface>]
+type ConsentTransaction =
+    abstract handle: string with get, set
+    abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (handle: string, headers: FSharp.CloudEdge.Runtime.Workers.Headers) : ConsentTransaction = jsNative
+
+/// <summary>
+/// The approved authorization request, with the cookies to set on the next response.
+/// </summary>
+[<Interface>]
+type ApprovedConsent =
+    abstract request: AuthRequest with get, set
+    abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (request: AuthRequest, headers: FSharp.CloudEdge.Runtime.Workers.Headers) : ApprovedConsent = jsNative
+
+/// <summary>
+/// Where to send the browser after the user declined, with the cookies to set on that redirect.
+/// </summary>
+[<Interface>]
+type DeniedConsent =
+    abstract request: AuthRequest with get, set
+    /// <summary>
+    /// The client's redirect URI with <c>error=access_denied</c>, its <c>state</c>, and <c>iss</c> (RFC 9207).
+    /// </summary>
+    abstract redirectTo: string with get, set
+    abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (request: AuthRequest, redirectTo: string, headers: FSharp.CloudEdge.Runtime.Workers.Headers) : DeniedConsent = jsNative
+
+/// <summary>
+/// The <c>state</c> to send to the third-party provider, with the binding cookie to set on the redirect.
+/// </summary>
+[<Interface>]
+type UpstreamTransaction =
+    abstract state: string with get, set
+    abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (state: string, headers: FSharp.CloudEdge.Runtime.Workers.Headers) : UpstreamTransaction = jsNative
+
+/// <summary>
+/// The authorization request and data saved by <c>beginUpstream()</c>, recovered at the callback.
+/// </summary>
+[<Interface>]
+type ResumedUpstream<'Data> =
+    abstract request: AuthRequest with get, set
+    abstract data: 'Data with get, set
+    abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (request: AuthRequest, data: 'Data, headers: FSharp.CloudEdge.Runtime.Workers.Headers) : ResumedUpstream<'Data> = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type GrantType =
@@ -562,13 +945,13 @@ type GrantType =
     | [<CompiledName("urn:ietf:params:oauth:grant-type:jwt-bearer")>] JWTBEARER
 
 [<Interface>]
-type GrantType2 =
+type GrantTypeEnum =
     abstract AUTHORIZATION_CODE: string
     abstract REFRESH_TOKEN: string
     abstract TOKEN_EXCHANGE: string
     abstract JWT_BEARER: string
     [<ParamObject; Emit("$0")>]
-    static member Create (AUTHORIZATION_CODE: string, REFRESH_TOKEN: string, TOKEN_EXCHANGE: string, JWT_BEARER: string) : GrantType2 = jsNative
+    static member Create (AUTHORIZATION_CODE: string, REFRESH_TOKEN: string, TOKEN_EXCHANGE: string, JWT_BEARER: string) : GrantTypeEnum = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type OAuthTokenErrorCode =
@@ -611,34 +994,62 @@ type TokenExchangeCallbackResult =
     /// </summary>
     abstract accessTokenTTL: float option with get, set
     /// <summary>
-    /// Override the default refresh token TTL (time-to-live) for this specific grant.
-    /// Value should be in seconds.
-    /// Note: This is only honored during authorization code exchange. If returned during
-    /// refresh token exchange, it will be ignored.
+    /// Override the default refresh token TTL (time-to-live) for this specific grant, in seconds:
+    /// <c>0</c> issues no refresh token, anything else must be an integer of at least 60. <c>undefined</c>
+    /// keeps the provider's <c>refreshTokenTTL</c>; it never means "no expiry".
+    /// Applies at authorization code exchange only and is ignored for other grant types, so one
+    /// callback can return it for every grant; to extend a grant on refresh, return
+    /// <c>refreshTokenIdleTTL</c>.
     /// </summary>
     abstract refreshTokenTTL: float option with get, set
+    /// <summary>
+    /// Idle lifetime for this grant's refresh token, in seconds from this refresh. The
+    /// grant then expires that long after this refresh unless it is refreshed again. Applies to
+    /// refresh token exchange only and is ignored for other grant types. Overrides the provider's
+    /// <c>refreshTokenIdleTTL</c> for this refresh.
+    /// <br /><br />
+    /// Useful when the Worker is itself an OAuth client and has just rotated an upstream
+    /// refresh token: return the upstream lifetime and the grant lives exactly as long as
+    /// the credentials it proxies. Must be an integer of at least 60 seconds.
+    /// </summary>
+    abstract refreshTokenIdleTTL: float option with get, set
     /// <summary>
     /// Optional scopes for the new access token. Values outside the scope ceiling
     /// for the current grant flow are ignored. If omitted, the effective requested
     /// scopes are used.
     /// </summary>
     abstract accessTokenScope: string[] option with get, set
+    /// <summary>
+    /// Permit a token exchange whose authenticated client differs from the client the
+    /// subject token's grant was issued to. Cross-client exchange is rejected with
+    /// <c>invalid_request</c> unless the callback returns <c>true</c> here, so impersonation
+    /// across clients is always a deliberate policy decision.
+    /// </summary>
+    abstract allowCrossClientExchange: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?accessTokenProps: obj, ?newProps: obj, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?accessTokenScope: string[]) : TokenExchangeCallbackResult = jsNative
+    static member Create (?accessTokenProps: obj, ?newProps: obj, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?refreshTokenIdleTTL: float, ?accessTokenScope: string[], ?allowCrossClientExchange: bool) : TokenExchangeCallbackResult = jsNative
 
 /// <summary>
 /// Options for token exchange callback functions
 /// </summary>
 [<Interface>]
-type TokenExchangeCallbackOptions =
+type TokenExchangeCallbackOptions<'Env> =
     /// <summary>
     /// The type of grant being processed.
     /// </summary>
     abstract grantType: GrantType with get, set
     /// <summary>
-    /// Client that received this grant
+    /// Client authenticated on this token request. For <c>authorization_code</c> and
+    /// <c>refresh_token</c> it is always the grant's client. For token exchange it is the
+    /// exchanging client, which may differ from subjectClientId.
     /// </summary>
     abstract clientId: string with get, set
+    /// <summary>
+    /// Client the underlying grant was issued to. Equal to <c>clientId</c> except during a
+    /// cross-client token exchange, which the callback must explicitly allow with
+    /// TokenExchangeCallbackResult.allowCrossClientExchange.
+    /// </summary>
+    abstract subjectClientId: string with get, set
     /// <summary>
     /// User who authorized this grant
     /// </summary>
@@ -660,11 +1071,20 @@ type TokenExchangeCallbackOptions =
     /// </summary>
     abstract requestedScope: string[] with get, set
     /// <summary>
+    /// Canonical protected resource selected for this grant and token.
+    /// </summary>
+    abstract resource: string with get, set
+    /// <summary>
     /// Application-specific properties currently associated with this grant
     /// </summary>
     abstract props: obj with get, set
+    /// <summary>
+    /// The Worker's environment for this request, so the callback can reach secrets and bindings
+    /// (an upstream provider's client secret, say) without the provider being rebuilt per request.
+    /// </summary>
+    abstract env: 'Env with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (grantType: GrantType, clientId: string, userId: string, grantId: string, scope: string[], requestedScope: string[], props: obj) : TokenExchangeCallbackOptions = jsNative
+    static member Create (grantType: GrantType, clientId: string, subjectClientId: string, userId: string, grantId: string, scope: string[], requestedScope: string[], resource: string, props: obj, env: 'Env) : TokenExchangeCallbackOptions<'Env> = jsNative
 
 /// <summary>
 /// Options for the client registration callback (RFC 7591).
@@ -678,15 +1098,15 @@ type ClientRegistrationCallbackOptions =
     /// are NOT currently merged in by the library — if <c>software_statement</c> is present
     /// the callback is responsible for verifying the JWT and applying its claims.
     /// </summary>
-    abstract clientMetadata: Record<string, obj> with get, set
+    abstract clientMetadata: JS.Record<string, obj> with get, set
     /// <summary>
     /// A clone of the registration HTTP request. The body has not been consumed,
     /// so the callback may call <c>request.text()</c> / <c>request.json()</c> if needed
     /// (e.g. to validate a signature over the raw body).
     /// </summary>
-    abstract request: obj with get, set
+    abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (clientMetadata: Record<string, obj>, request: obj) : ClientRegistrationCallbackOptions = jsNative
+    static member Create (clientMetadata: JS.Record<string, obj>, request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : ClientRegistrationCallbackOptions = jsNative
 
 /// <summary>
 /// Result of the client registration callback.
@@ -728,13 +1148,13 @@ type ResolveExternalTokenInput<'Env> =
     /// <summary>
     /// The original HTTP request
     /// </summary>
-    abstract request: obj with get, set
+    abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> with get, set
     /// <summary>
     /// Cloudflare Worker environment variables
     /// </summary>
     abstract env: 'Env with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (token: string, request: obj, env: 'Env) : ResolveExternalTokenInput<'Env> = jsNative
+    static member Create (token: string, request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, env: 'Env) : ResolveExternalTokenInput<'Env> = jsNative
 
 /// <summary>
 /// Result returned from the resolveExternalToken callback function
@@ -752,13 +1172,54 @@ type ResolveExternalTokenResult =
     /// <br /><br />
     /// A JWT may carry this value as an <c>aud</c> claim. For an opaque API token or
     /// PAT, the callback can supply the local resource URI as policy after
-    /// successful validation. When <c>resourceMetadata.resource</c> is configured,
-    /// this value is required and must match it exactly.
+    /// successful validation. This value is required and must identify the
+    /// configured canonical <c>resourceMetadata.resource</c>: ASCII case in the scheme
+    /// and host is folded and an empty path equals <c>/</c>, while port, path, query,
+    /// and trailing slash are compared exactly.
     /// </summary>
-    abstract audience: U2<string, string[]> option with get, set
+    abstract audience: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (props: obj, ?audience: U2<string, string[]>) : ResolveExternalTokenResult = jsNative
+    static member Create (props: obj, audience: string) : ResolveExternalTokenResult = jsNative
 
+/// <summary>
+/// RFC 9728 metadata owned by one protected resource server.
+/// </summary>
+[<Interface>]
+type OAuthProtectedResourceMetadata =
+    /// <summary>
+    /// The protected resource identifier HTTPS URL (RFC 9728 <c>resource</c> field).
+    /// Configure an RFC 3986-safe HTTPS producer URL with lowercase scheme/host
+    /// and no userinfo, default port, fragment, or dot segments.
+    /// </summary>
+    abstract resource: string with get, set
+    /// <summary>
+    /// Authorization server issuers that can issue tokens for this resource.
+    /// In the legacy combined configuration this defaults to the token endpoint
+    /// origin. In the role-based configuration it defaults to the configured AS
+    /// issuer.
+    /// </summary>
+    abstract authorization_servers: string[] option with get, set
+    /// <summary>
+    /// Minimal scopes required for basic protected-resource functionality.
+    /// </summary>
+    /// <remarks>@deprecated Use <c>requiredScopes</c>, which this becomes on the wire. Setting both is refused.</remarks>
+    abstract scopes_supported: string[] option with get, set
+    /// <summary>
+    /// Methods by which bearer tokens can be presented. Defaults to <c>["header"]</c>.
+    /// </summary>
+    abstract bearer_methods_supported: string[] option with get, set
+    /// <summary>
+    /// Human-readable name for this resource.
+    /// </summary>
+    abstract resource_name: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (resource: string, ?authorization_servers: string[], ?scopes_supported: string[], ?bearer_methods_supported: string[], ?resource_name: string) : OAuthProtectedResourceMetadata = jsNative
+
+/// <summary>
+/// Existing combined authorization-server and protected-resource configuration.
+/// This shape remains supported in 1.0 and is normalized to a one-resource
+/// role-based provider internally.
+/// </summary>
 [<Interface>]
 type OAuthProviderOptions<'Env> =
     /// <summary>
@@ -778,7 +1239,7 @@ type OAuthProviderOptions<'Env> =
     /// Used with <c>apiRoute</c> for the single-handler configuration. This is incompatible with
     /// the <c>apiHandlers</c> property. You must use either <c>apiRoute</c> + <c>apiHandler</c> OR <c>apiHandlers</c>, not both.
     /// </summary>
-    abstract apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env>> option with get, set
+    abstract apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env, obj>> option with get, set
     /// <summary>
     /// Map of API routes to their corresponding handlers for the multi-handler configuration.
     /// The keys are the API routes (strings only, not arrays), and the values are the handlers.
@@ -789,12 +1250,12 @@ type OAuthProviderOptions<'Env> =
     /// <c>apiRoute</c> + <c>apiHandler</c> (single-handler configuration) OR <c>apiHandlers</c> (multi-handler
     /// configuration), not both.
     /// </summary>
-    abstract apiHandlers: Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>> option with get, set
+    abstract apiHandlers: JS.Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env, obj>>> option with get, set
     /// <summary>
     /// Handler for all non-API requests or API requests without a valid token.
     /// Can be either an ExportedHandler object with a fetch method or a class extending WorkerEntrypoint.
     /// </summary>
-    abstract defaultHandler: obj with get, set
+    abstract defaultHandler: U2<FSharp.CloudEdge.Runtime.Workers.ExportedHandler<'Env, obj, obj, obj>, OAuthProviderOptions.ApiHandler.ResultConstructor3<'Env>> with get, set
     /// <summary>
     /// URL of the OAuth authorization endpoint where users can grant permissions.
     /// This URL is used in OAuth metadata and is not handled by the provider itself.
@@ -820,35 +1281,37 @@ type OAuthProviderOptions<'Env> =
     /// Defaults to 30 days (2,592,000 seconds).
     /// Set to 0 to disable refresh tokens entirely.
     /// Set to <c>undefined</c> explicitly for refresh tokens that never expire.
+    /// Anything else must be an integer of at least 60 seconds (Cloudflare KV's minimum expiration window).
     /// For example: 3600 = 1 hour, 2592000 = 30 days
     /// </summary>
     abstract refreshTokenTTL: float option with get, set
+    /// <summary>
+    /// Idle lifetime for refresh tokens in seconds. When set, every successful refresh
+    /// moves the grant's expiry to this many seconds after the refresh, so a grant lives
+    /// for as long as the client keeps using it and expires once it has been idle for
+    /// this long. <c>refreshTokenTTL</c> still sets the lifetime of a new grant, and
+    /// <c>tokenExchangeCallback</c> can override the idle lifetime per refresh by returning
+    /// <c>refreshTokenIdleTTL</c>. Must be an integer of at least 60 seconds.
+    /// <br /><br />
+    /// Leave unset for a fixed lifetime, where a grant expires <c>refreshTokenTTL</c> seconds
+    /// after the code exchange however often it is refreshed.
+    /// </summary>
+    abstract refreshTokenIdleTTL: float option with get, set
     /// <summary>
     /// Time-to-live for dynamically registered clients in seconds.
     /// Defaults to 90 days (7,776,000 seconds).
     /// Clients created via the DCR endpoint will automatically expire after this duration.
     /// Clients created via <c>OAuthHelpers.createClient()</c> are not affected by this setting.
-    /// Set to <c>undefined</c> explicitly for clients that never expire.
+    /// Set to <c>undefined</c> explicitly for clients that never expire; otherwise an integer of at
+    /// least 60 seconds (Cloudflare KV's minimum expiration window).
     /// </summary>
     abstract clientRegistrationTTL: float option with get, set
     /// <summary>
     /// Scopes supported by the authorization server.
-    /// These are advertised only in authorization server metadata; configure
-    /// <c>resourceMetadata.scopes_supported</c> separately for protected resource requirements.
+    /// These are advertised only in authorization server metadata; configure a resource's
+    /// required scopes separately, with <c>requiredScopes</c>.
     /// </summary>
     abstract scopesSupported: string[] option with get, set
-    /// <summary>
-    /// Controls whether the OAuth implicit flow is allowed.
-    /// This flow is discouraged in OAuth 2.1 due to security concerns.
-    /// Defaults to false.
-    /// </summary>
-    abstract allowImplicitFlow: bool option with get, set
-    /// <summary>
-    /// Controls whether the legacy plain PKCE method is allowed.
-    /// Defaults to false so PKCE challenges use S256 exclusively.
-    /// Set to true only for compatibility with clients that cannot use S256.
-    /// </summary>
-    abstract allowPlainPKCE: bool option with get, set
     /// <summary>
     /// Controls whether OAuth 2.0 Token Exchange (RFC 8693) is allowed.
     /// When false, the token exchange grant type will not be advertised in metadata
@@ -886,7 +1349,7 @@ type OAuthProviderOptions<'Env> =
     /// The callback can return new props values that will be stored with the token or grant.
     /// If the callback returns nothing or undefined for a props field, the original props will be used.
     /// </summary>
-    abstract tokenExchangeCallback: (TokenExchangeCallbackOptions -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option) option with get, set
+    abstract tokenExchangeCallback: (TokenExchangeCallbackOptions<'Env> -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option) option with get, set
     /// <summary>
     /// Optional callback called when a provided bearer credential was not found
     /// in the internal KV. It can validate an external OAuth access token, opaque
@@ -906,17 +1369,25 @@ type OAuthProviderOptions<'Env> =
     /// <br /><br />
     /// If the function returns a Response, that will be used in place of the OAuthProvider's default one.
     /// <br /><br />
-    /// <c>internal</c> (when present) carries a tagged, server-side-only reason that the library
-    /// deliberately did NOT put on the wire — used for richer diagnostics where the public
-    /// response must stay generic (e.g. JWT validation failures on the EMA path). Backwards
-    /// compatible: existing callbacks ignoring this field continue to work unchanged.
+    /// <c>internal</c> carries the stable, server-side-only reason for the error — often more
+    /// specific than what the wire deliberately reveals (RFC 6749 §5.2), e.g. which refresh-token
+    /// check failed or which EMA validation fired. It is never placed on the wire. See
+    /// OAuthErrorInternal.
     /// <br /><br />
     /// <c>request</c> (when present) is the HTTP request that produced the error response, so the
     /// callback can correlate the error with per-request state such as request-keyed telemetry.
     /// Currently populated for CIMD metadata fetch failures at the token endpoint. Backwards
     /// compatible in the same way as <c>internal</c>.
     /// </summary>
-    abstract onError: (OAuthProviderOptions.OnError.Error -> obj option) option with get, set
+    abstract onError: (OAuthProviderOptions.OnError.Error -> FSharp.CloudEdge.Runtime.Workers.Response option) option with get, set
+    /// <summary>
+    /// Let authorization requests use RFC 8252 private-use URI scheme redirect URIs (for example
+    /// <c>com.example.app:/oauth</c>), for native apps. By default a request's redirect URI must use
+    /// <c>https</c>, or <c>http</c> on a loopback host, as MCP and OAuth 2.1 require; remote <c>http</c> is never
+    /// accepted. Without this option a client can still register private-use URIs next to a compliant
+    /// one (Cursor does), but no request can use them.
+    /// </summary>
+    abstract allowPrivateUseRedirectUris: bool option with get, set
     /// <summary>
     /// Explicitly enable Client ID Metadata Document (CIMD) support.
     /// When true, URL-formatted client_ids will be fetched as metadata documents.
@@ -925,30 +1396,99 @@ type OAuthProviderOptions<'Env> =
     /// </summary>
     abstract clientIdMetadataDocumentEnabled: bool option with get, set
     /// <summary>
-    /// When true, requested-vs-granted resource validation compares origins only
-    /// (scheme + host + port) instead of exact URIs. This allows an origin-only
-    /// grant such as <c>https://server.com</c> to accept <c>https://server.com/mcp</c>, but
-    /// also ignores path and query differences. Configured canonical resources
-    /// always use exact matching.
-    /// <br /><br />
-    /// Defaults to false (strict exact matching per RFC 8707).
+    /// Prefix for the cookies the consent and upstream helpers set (<c>&lt;prefix&gt;consent</c>,
+    /// <c>&lt;prefix&gt;upstream</c>, <c>&lt;prefix&gt;approvals</c>). Must start with <c>__Host-</c>, which keeps them
+    /// <c>Secure</c>, host-only and <c>Path=/</c>. Defaults to <c>__Host-oauth-</c>.
     /// </summary>
-    /// <remarks>
-    /// @deprecated
-    /// This comparison is unsafe for shared-origin multi-path or
-    /// multi-tenant deployments. Prefer configuring <c>resourceMetadata.resource</c>.
-    /// </remarks>
-    abstract resourceMatchOriginOnly: bool option with get, set
+    abstract cookiePrefix: string option with get, set
     /// <summary>
-    /// Optional metadata for RFC 9728 OAuth 2.0 Protected Resource Metadata.
+    /// Metadata for RFC 9728 OAuth 2.0 Protected Resource Metadata.
     /// Controls the response served at /.well-known/oauth-protected-resource.
-    /// <br /><br />
-    /// If not provided, the endpoint will be automatically generated using the request origin
-    /// as the resource identifier, and the token endpoint's origin as the authorization server.
     /// </summary>
-    abstract resourceMetadata: OAuthProviderOptions.ResourceMetadata option with get, set
+    abstract resourceMetadata: OAuthProtectedResourceMetadata with get, set
+    /// <summary>
+    /// The scopes required for accessing this resource (MCP: the minimal set for basic use). Published
+    /// as its protected resource metadata's <c>scopes_supported</c> and named in the <c>401</c> challenge, so
+    /// clients request them first; not the authorization server's catalogue, <c>scopesSupported</c>.
+    /// Operations that need more ask for it with <c>insufficientScope()</c> (step-up). <c>offline_access</c> is
+    /// removed automatically. Leave unset when your consent page picks the scopes.
+    /// <br /><br />
+    /// Advertised, not enforced: the handler decides whether a token is sufficient (<c>ctx.auth.scope</c>),
+    /// because only it knows the deployment's scope hierarchy (a broader scope implying a narrower
+    /// one), which MCP requires servers to honour.
+    /// </summary>
+    abstract requiredScopes: string[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (defaultHandler: obj, authorizeEndpoint: string, tokenEndpoint: string, ?apiRoute: U2<string, string[]>, ?apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env>>, ?apiHandlers: Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env>>>, ?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowImplicitFlow: bool, ?allowPlainPKCE: bool, ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?resolveExternalToken: (ResolveExternalTokenInput<'Env> -> JS.Promise<ResolveExternalTokenResult option>), ?onError: (OAuthProviderOptions.OnError.Error -> obj option), ?clientIdMetadataDocumentEnabled: bool, ?resourceMatchOriginOnly: bool, ?resourceMetadata: OAuthProviderOptions.ResourceMetadata) : OAuthProviderOptions<'Env> = jsNative
+    static member Create (defaultHandler: U2<FSharp.CloudEdge.Runtime.Workers.ExportedHandler<'Env, obj, obj, obj>, OAuthProviderOptions.ApiHandler.ResultConstructor3<'Env>>, authorizeEndpoint: string, tokenEndpoint: string, resourceMetadata: OAuthProtectedResourceMetadata, ?apiRoute: U2<string, string[]>, ?apiHandler: U2<OAuthProviderOptions.ApiHandler.ResultConstructor<'Env>, OAuthProviderOptions.ApiHandler<'Env, obj>>, ?apiHandlers: JS.Record<string, U2<OAuthProviderOptions.ApiHandler.ResultConstructor2<'Env>, OAuthProviderOptions.ApiHandler<'Env, obj>>>, ?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?refreshTokenIdleTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions<'Env> -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?resolveExternalToken: (ResolveExternalTokenInput<'Env> -> JS.Promise<ResolveExternalTokenResult option>), ?onError: (OAuthProviderOptions.OnError.Error -> FSharp.CloudEdge.Runtime.Workers.Response option), ?allowPrivateUseRedirectUris: bool, ?clientIdMetadataDocumentEnabled: bool, ?cookiePrefix: string, ?requiredScopes: string[]) : OAuthProviderOptions<'Env> = jsNative
+
+/// <summary>
+/// Functional authorization-server surface for the role-based API.
+/// The application owns the interactive authorization route and uses
+/// <c>getOAuthApi()</c> to parse and complete it; <c>fetch()</c> serves protocol-owned AS
+/// endpoints such as metadata, token, revocation, and optional registration.
+/// </summary>
+[<Interface>]
+type OAuthAuthorizationServerOptions<'Env> =
+    inherit OAuthAuthorizationServerOptions.Base<'Env>
+    /// <summary>
+    /// Canonical RFC 8414 issuer.
+    /// </summary>
+    abstract issuer: string with get, set
+    /// <summary>
+    /// Your authorization endpoint, advertised in metadata. Route it before calling <c>fetch()</c>;
+    /// <c>parseAuthRequest()</c> rejects requests that arrive anywhere else, so a mismatch fails on the
+    /// first request. Defaults to <c>${issuer}/authorize</c>. A path is on the issuer's origin.
+    /// </summary>
+    abstract authorizeEndpoint: string option with get, set
+    /// <summary>
+    /// The token endpoint, which also handles revocation, served by <c>fetch()</c> and advertised in
+    /// metadata. Defaults to <c>${issuer}/oauth/token</c>. A path is on the issuer's origin.
+    /// </summary>
+    abstract tokenEndpoint: string option with get, set
+    /// <summary>
+    /// Canonical identifiers of every protected resource this authorization server issues
+    /// tokens for, whether hosted in this Worker through <c>OAuthResourceServer</c> or by another
+    /// Worker or service. At least one is required. The registry is fixed at construction,
+    /// so <c>defaultResource</c> and <c>legacyGrantResource</c> are checked before the first request,
+    /// and <c>validateToken()</c> rejects for a resource that is not listed.
+    /// </summary>
+    abstract resources: string[] with get, set
+    /// <summary>
+    /// Resource selected for a new authorization request that omits <c>resource</c>.
+    /// </summary>
+    abstract defaultResource: string option with get, set
+    /// <summary>
+    /// Migration destination for pre-resource grants and access tokens. Changing it
+    /// re-targets every surviving unbound record, so keep it fixed for the migration window.
+    /// </summary>
+    abstract legacyGrantResource: string option with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (issuer: string, resources: string[], ?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?refreshTokenIdleTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions<'Env> -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?onError: (OAuthProviderOptions.OnError.Error -> FSharp.CloudEdge.Runtime.Workers.Response option), ?allowPrivateUseRedirectUris: bool, ?clientIdMetadataDocumentEnabled: bool, ?cookiePrefix: string, ?authorizeEndpoint: string, ?tokenEndpoint: string, ?defaultResource: string, ?legacyGrantResource: string) : OAuthAuthorizationServerOptions<'Env> = jsNative
+
+/// <summary>
+/// Audience-checked token context suitable for a private Service Binding.
+/// </summary>
+[<Interface>]
+type ValidatedAccessToken<'T> =
+    abstract props: 'T with get, set
+    abstract audience: string with get, set
+    abstract expiresAt: float with get, set
+    abstract scope: string[] with get, set
+    abstract userId: string with get, set
+    abstract clientId: string with get, set
+    [<ParamObject; Emit("$0")>]
+    static member Create (props: 'T, audience: string, expiresAt: float, scope: string[], userId: string, clientId: string) : ValidatedAccessToken<'T> = jsNative
+
+/// <summary>
+/// The RPC surface a <c>WorkerEntrypoint</c> exposes around OAuthAuthorizationServer.validateToken,
+/// as a resource Worker sees it through a Service Binding. Hand a resource server the bound
+/// method as its validator: <c>validateToken: (env) =&gt; env.AUTH_SERVER.validateToken</c>.
+/// </summary>
+[<Interface>]
+type AuthorizationServerBinding<'Props> =
+    abstract validateToken: resource: string * token: string -> JS.Promise<ValidatedAccessToken<'Props> option>
+    [<ParamObject; Emit("$0")>]
+    static member Create (validateToken: Func<string, string, JS.Promise<ValidatedAccessToken<'Props> option>>) : AuthorizationServerBinding<'Props> = jsNative
 
 /// <summary>
 /// Helper methods for OAuth operations provided to handler functions
@@ -963,7 +1503,7 @@ type OAuthHelpers =
     /// <remarks>@throws Error when the response type is missing, unsupported, or not registered for the client</remarks>
     /// <remarks>@throws {</remarks>
     /// <remarks>@link CimdFetchError} when the client ID is a CIMD URL whose document cannot be resolved</remarks>
-    abstract parseAuthRequest: request: obj -> JS.Promise<AuthRequest>
+    abstract parseAuthRequest: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<AuthRequest>
     /// <summary>
     /// Looks up a client by its client ID
     /// </summary>
@@ -982,6 +1522,52 @@ type OAuthHelpers =
     /// <remarks>@link CimdFetchError} when the client ID is a CIMD URL whose document cannot be resolved</remarks>
     abstract completeAuthorization: options: CompleteAuthorizationOptions -> JS.Promise<OAuthHelpers.CompleteAuthorization.Result.Item>
     /// <summary>
+    /// The facts a consent page must show for a request: the client's name (and, for a Client ID
+    /// Metadata Document client, its verified domain), the redirect URI's hostname, whether it goes
+    /// to a local app, and the scopes. Every string may come from the client: escape it.
+    /// </summary>
+    /// <remarks>@throws CimdFetchError when the client's metadata document cannot be resolved</remarks>
+    abstract describeConsent: authRequest: AuthRequest -> JS.Promise<ConsentDescription>
+    /// <summary>
+    /// Whether an approval remembered by <c>approveConsent(…, { remember })</c> covers this request: the
+    /// same client, redirect URI and resource, asking for a subset of the approved scopes. Pass the
+    /// same <c>secret</c>, and the same <c>subject</c> if the approval was bound to a user. Don't call it to ask
+    /// on every authorization.
+    /// </summary>
+    abstract isConsentRemembered: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * authRequest: AuthRequest * remember: OAuthHelpers.IsConsentRemembered.Remember -> JS.Promise<bool>
+    /// <summary>
+    /// Start a consent page for a request. Render your page with <c>handle</c> in the form and send
+    /// <c>headers</c> with it: they bind the handle to this browser and forbid framing the page.
+    /// </summary>
+    abstract beginConsent: authRequest: AuthRequest -> JS.Promise<ConsentTransaction>
+    /// <summary>
+    /// Accept the consent form. <c>handle</c> is the value your form posted; the browser's binding cookie
+    /// must match it, and it works once. <c>scope</c> is what the user approved: fewer or more than the
+    /// client requested, each one in <c>scopesSupported</c>. <c>remember</c> stores the approval in a signed
+    /// cookie for <c>isConsentRemembered()</c>. Send the returned <c>headers</c> on the next response.
+    /// </summary>
+    /// <remarks>@throws AuthorizationError when the handle is missing, unbound, expired, or already used</remarks>
+    abstract approveConsent: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * handle: string * ?options: OAuthHelpers.ApproveConsent.Options -> JS.Promise<ApprovedConsent>
+    /// <summary>
+    /// Decline the consent form: consumes the handle like <c>approveConsent()</c> and returns the redirect
+    /// back to the client with <c>error=access_denied</c>, its <c>state</c> and <c>iss</c>. Send <c>headers</c> with the
+    /// redirect (they include <c>Location</c>).
+    /// </summary>
+    /// <remarks>@throws AuthorizationError when the handle is missing, unbound, expired, or already used</remarks>
+    abstract denyConsent: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * handle: string * ?options: OAuthHelpers.DenyConsent.Options -> JS.Promise<DeniedConsent>
+    /// <summary>
+    /// Save an approved request before redirecting to a third-party provider, and get the <c>state</c>
+    /// to send it. Call only after consent. <c>data</c> is returned at the callback, e.g. a PKCE verifier.
+    /// Pass <c>headers</c> to add the binding cookie to headers you are already sending.
+    /// </summary>
+    abstract beginUpstream: authRequest: AuthRequest * ?options: OAuthHelpers.BeginUpstream.Options -> JS.Promise<UpstreamTransaction>
+    /// <summary>
+    /// At the third-party provider's callback, recover the approved request and your <c>data</c> from the
+    /// <c>state</c> parameter. The browser's binding cookie must match, and it works once.
+    /// </summary>
+    /// <remarks>@throws AuthorizationError when <c>state</c> is missing, unbound, expired, or already used</remarks>
+    abstract finishUpstream<'Data>: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<ResumedUpstream<'Data>>
+    /// <summary>
     /// Creates a new OAuth client
     /// </summary>
     /// <param name="clientInfo">- Partial client information to create the client with</param>
@@ -994,17 +1580,29 @@ type OAuthHelpers =
     /// <returns>A Promise resolving to the list result with items and optional cursor</returns>
     abstract listClients: ?options: ListOptions -> JS.Promise<ListResult<ClientInfo>>
     /// <summary>
-    /// Updates an existing OAuth client
+    /// Updates an existing OAuth client. Redirect URIs, grant types and response types are held to
+    /// the same rules as registration. Client ID Metadata Document clients can't be updated here:
+    /// their document owns their metadata.
     /// </summary>
     /// <param name="clientId">- The ID of the client to update</param>
     /// <param name="updates">- Partial client information with fields to update</param>
     /// <returns>A Promise resolving to the updated client info, or null if not found</returns>
+    /// <remarks>@throws Error when an update breaks the redirect URI policy or names an unsupported grant or response type</remarks>
+    /// <remarks>@throws TypeError for a Client ID Metadata Document client while CIMD is enabled</remarks>
     abstract updateClient: clientId: string * updates: OAuthHelpers.CreateClient.ClientInfo -> JS.Promise<ClientInfo option>
     /// <summary>
-    /// Deletes an OAuth client
+    /// Deletes an OAuth client, then revokes its grants and tokens across all users. The client
+    /// can no longer authenticate, authorize or refresh as soon as the call starts. Access tokens
+    /// it already holds stay valid until revocation reaches them or they expire (<c>accessTokenTTL</c>):
+    /// validating an access token reads only the token record, never the client. If revocation is
+    /// cut short (for example by a subrequest limit on a very large namespace), the call throws;
+    /// call it again to continue, and <c>purgeExpiredData()</c> also removes the leftovers, which are
+    /// orphaned grants by then.
+    /// For a Client ID Metadata Document client there is no stored record: this revokes its grants,
+    /// and the client can authorize again as long as its document resolves.
     /// </summary>
     /// <param name="clientId">- The ID of the client to delete</param>
-    /// <returns>A Promise resolving when the deletion is confirmed.</returns>
+    /// <returns>A Promise resolving when the client and all its grants are gone.</returns>
     abstract deleteClient: clientId: string -> JS.Promise<unit>
     /// <summary>
     /// Lists all authorization grants for a specific user with pagination support
@@ -1052,11 +1650,12 @@ type OAuthHelpers =
     /// <returns>Statistics about what was checked and purged, and whether the full scan completed</returns>
     abstract purgeExpiredData: ?options: PurgeOptions -> JS.Promise<PurgeResult>
     [<ParamObject; Emit("$0")>]
-    static member Create (parseAuthRequest: (obj -> JS.Promise<AuthRequest>), lookupClient: (string -> JS.Promise<ClientInfo option>), completeAuthorization: (CompleteAuthorizationOptions -> JS.Promise<OAuthHelpers.CompleteAuthorization.Result.Item>), createClient: (OAuthHelpers.CreateClient.ClientInfo -> JS.Promise<ClientInfo>), listClients: (ListOptions option -> JS.Promise<ListResult<ClientInfo>>), updateClient: Func<string, OAuthHelpers.CreateClient.ClientInfo, JS.Promise<ClientInfo option>>, deleteClient: (string -> JS.Promise<unit>), listUserGrants: Func<string, ListOptions option, JS.Promise<ListResult<GrantSummary>>>, revokeGrant: Func<string, string, JS.Promise<unit>>, unwrapToken: (string -> JS.Promise<TokenSummary<'T> option>), exchangeToken: (ExchangeTokenOptions -> JS.Promise<TokenResponse>), purgeExpiredData: (PurgeOptions option -> JS.Promise<PurgeResult>)) : OAuthHelpers = jsNative
+    static member Create (parseAuthRequest: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<AuthRequest>), lookupClient: (string -> JS.Promise<ClientInfo option>), completeAuthorization: (CompleteAuthorizationOptions -> JS.Promise<OAuthHelpers.CompleteAuthorization.Result.Item>), describeConsent: (AuthRequest -> JS.Promise<ConsentDescription>), isConsentRemembered: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, AuthRequest, OAuthHelpers.IsConsentRemembered.Remember, JS.Promise<bool>>, beginConsent: (AuthRequest -> JS.Promise<ConsentTransaction>), approveConsent: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, string, OAuthHelpers.ApproveConsent.Options option, JS.Promise<ApprovedConsent>>, denyConsent: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, string, OAuthHelpers.DenyConsent.Options option, JS.Promise<DeniedConsent>>, beginUpstream: Func<AuthRequest, OAuthHelpers.BeginUpstream.Options option, JS.Promise<UpstreamTransaction>>, finishUpstream: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<ResumedUpstream<'Data>>), createClient: (OAuthHelpers.CreateClient.ClientInfo -> JS.Promise<ClientInfo>), listClients: (ListOptions option -> JS.Promise<ListResult<ClientInfo>>), updateClient: Func<string, OAuthHelpers.CreateClient.ClientInfo, JS.Promise<ClientInfo option>>, deleteClient: (string -> JS.Promise<unit>), listUserGrants: Func<string, ListOptions option, JS.Promise<ListResult<GrantSummary>>>, revokeGrant: Func<string, string, JS.Promise<unit>>, unwrapToken: (string -> JS.Promise<TokenSummary<'T> option>), exchangeToken: (ExchangeTokenOptions -> JS.Promise<TokenResponse>), purgeExpiredData: (PurgeOptions option -> JS.Promise<PurgeResult>)) : OAuthHelpers = jsNative
 
 [<Interface>]
 type TokenResponse =
     abstract access_token: string with get, set
+    /// <remarks>TypeScript type: <c>"bearer"</c></remarks>
     abstract token_type: string with get, set
     abstract expires_in: float with get, set
     abstract refresh_token: string option with get, set
@@ -1065,9 +1664,14 @@ type TokenResponse =
     /// Resource indicator(s) for the issued access token (RFC 8707 Section 2.2)
     /// SHOULD be included to indicate the resource server(s) for which the token is valid
     /// </summary>
-    abstract resource: U2<string, string[]> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (access_token: string, token_type: string, expires_in: float, scope: string, ?refresh_token: string, ?resource: U2<string, string[]>) : TokenResponse = jsNative
+    abstract resource: string with get, set
+    [<ParamObject; Emit("({ token_type: 'bearer', ...$0 })")>]
+    static member Create (access_token: string, expires_in: float, scope: string, resource: string, ?refresh_token: string) : TokenResponse = jsNative
+
+module TokenResponse =
+    /// <remarks>TypeScript type: <c>"bearer"</c></remarks>
+    [<Literal>]
+    let token_type = "bearer"
 
 /// <summary>
 /// Options for token exchange operations (RFC 8693)
@@ -1083,15 +1687,17 @@ type ExchangeTokenOptions =
     /// </summary>
     abstract scope: string[] option with get, set
     /// <summary>
-    /// Optional target audience/resource for the new token (maps to resource parameter per RFC 8707)
+    /// Optional canonical target audience/resource for the new token (maps to the
+    /// resource parameter per RFC 8707). When present, it must match the
+    /// provider's configured resource.
     /// </summary>
-    abstract aud: U2<string, string[]> option with get, set
+    abstract aud: string option with get, set
     /// <summary>
     /// Optional TTL override for the new token in seconds (must not exceed subject token's remaining lifetime)
     /// </summary>
     abstract expiresIn: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (subjectToken: string, ?scope: string[], ?aud: U2<string, string[]>, ?expiresIn: float) : ExchangeTokenOptions = jsNative
+    static member Create (subjectToken: string, ?scope: string[], ?aud: string, ?expiresIn: float) : ExchangeTokenOptions = jsNative
 
 /// <summary>
 /// Parsed OAuth authorization request parameters
@@ -1127,16 +1733,17 @@ type AuthRequest =
     /// </summary>
     abstract codeChallengeMethod: string option with get, set
     /// <summary>
-    /// Resource parameter indicating target resource(s) (RFC 8707)
+    /// Canonical target resource (RFC 8707). Parsed authorization requests
+    /// always contain the provider's configured resource.
     /// </summary>
-    abstract resource: U2<string, string[]> option with get, set
+    abstract resource: string option with get, set
     /// <summary>
     /// Authorization server issuer recorded while parsing this request.
     /// Include it as <c>iss</c> in successful and error authorization responses.
     /// </summary>
     abstract issuer: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (responseType: string, clientId: string, redirectUri: string, scope: string[], state: string, ?codeChallenge: string, ?codeChallengeMethod: string, ?resource: U2<string, string[]>, ?issuer: string) : AuthRequest = jsNative
+    static member Create (responseType: string, clientId: string, redirectUri: string, scope: string[], state: string, ?codeChallenge: string, ?codeChallengeMethod: string, ?resource: string, ?issuer: string) : AuthRequest = jsNative
 
 /// <summary>
 /// OAuth client registration information
@@ -1191,7 +1798,7 @@ type ClientInfo =
     /// fields above; this map holds only the locale-specific variants so that
     /// consumers can perform their own locale selection.
     /// </summary>
-    abstract i18n: Record<string, string> option with get, set
+    abstract i18n: JS.Record<string, string> option with get, set
     /// <summary>
     /// List of email addresses for contacting the client developers
     /// </summary>
@@ -1219,7 +1826,7 @@ type ClientInfo =
     /// </summary>
     abstract tokenEndpointAuthMethod: string with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (clientId: string, redirectUris: string[], tokenEndpointAuthMethod: string, ?clientSecret: string, ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float) : ClientInfo = jsNative
+    static member Create (clientId: string, redirectUris: string[], tokenEndpointAuthMethod: string, ?clientSecret: string, ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: JS.Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float) : ClientInfo = jsNative
 
 /// <summary>
 /// Options for completing an authorization request
@@ -1231,7 +1838,9 @@ type CompleteAuthorizationOptions =
     /// </summary>
     abstract request: AuthRequest with get, set
     /// <summary>
-    /// Identifier for the user granting the authorization
+    /// Identifier for the user granting the authorization. Must be non-empty and must not contain
+    /// <c>:</c>, which separates the parts of issued tokens and storage keys; encode namespaced or
+    /// composite IDs first (for example <c>encodeURIComponent('tenant:user')</c>).
     /// </summary>
     abstract userId: string with get, set
     /// <summary>
@@ -1254,15 +1863,8 @@ type CompleteAuthorizationOptions =
     /// Set to false to allow multiple concurrent grants per user+client.
     /// </summary>
     abstract revokeExistingGrants: bool option with get, set
-    /// <summary>
-    /// Maximum number of grants to fetch per page when revoking existing
-    /// grants. Only used when revokeExistingGrants is not false.
-    /// Must be a positive integer. Values above Cloudflare KV's 1000-key page
-    /// limit are clamped to 1000. Defaults to 50.
-    /// </summary>
-    abstract revokeExistingGrantsBatchSize: float option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: AuthRequest, userId: string, metadata: obj, scope: string[], props: obj, ?revokeExistingGrants: bool, ?revokeExistingGrantsBatchSize: float) : CompleteAuthorizationOptions = jsNative
+    static member Create (request: AuthRequest, userId: string, metadata: obj, scope: string[], props: obj, ?revokeExistingGrants: bool) : CompleteAuthorizationOptions = jsNative
 
 /// <summary>
 /// Authorization grant record
@@ -1493,8 +2095,14 @@ type PurgeOptions =
     /// Defaults to true.
     /// </summary>
     abstract purgeOrphanedTokens: bool option with get, set
+    /// <summary>
+    /// Where to resume: the <c>cursor</c> from the previous invocation's result. Omit it to start
+    /// a new sweep. Persist the returned cursor between invocations (for example in KV), or
+    /// every invocation re-checks the same first <c>batchSize</c> records.
+    /// </summary>
+    abstract cursor: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?batchSize: float, ?purgeOrphanedGrants: bool, ?purgeExpiredGrants: bool, ?purgeOrphanedTokens: bool) : PurgeOptions = jsNative
+    static member Create (?batchSize: float, ?purgeOrphanedGrants: bool, ?purgeExpiredGrants: bool, ?purgeOrphanedTokens: bool, ?cursor: string) : PurgeOptions = jsNative
 
 /// <summary>
 /// Result of a purgeExpiredData garbage collection invocation
@@ -1518,11 +2126,15 @@ type PurgeResult =
     /// </summary>
     abstract tokensPurged: float with get, set
     /// <summary>
-    /// True if the full key space was scanned in this invocation (both grants and tokens)
+    /// True once the sweep has covered both key spaces; there is no <c>cursor</c> then.
     /// </summary>
     abstract ``done``: bool with get, set
+    /// <summary>
+    /// Pass as <c>PurgeOptions.cursor</c> to the next invocation to continue this sweep. Absent when <c>done</c>.
+    /// </summary>
+    abstract cursor: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (grantsChecked: float, grantsPurged: float, tokensChecked: float, tokensPurged: float, ``done``: bool) : PurgeResult = jsNative
+    static member Create (grantsChecked: float, grantsPurged: float, tokensChecked: float, tokensPurged: float, ``done``: bool, ?cursor: string) : PurgeResult = jsNative
 
 /// <summary>
 /// Public representation of a grant, with sensitive data removed
@@ -1565,17 +2177,19 @@ type GrantSummary =
     /// grants created before this field was introduced.
     /// </summary>
     abstract redirectUri: string option with get, set
+    /// <summary>
+    /// Canonical protected resource, absent only on a pre-resource legacy grant.
+    /// </summary>
+    abstract resource: U2<string, string[]> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, clientId: string, userId: string, scope: string[], metadata: obj, createdAt: float, ?expiresAt: float, ?redirectUri: string) : GrantSummary = jsNative
+    static member Create (id: string, clientId: string, userId: string, scope: string[], metadata: obj, createdAt: float, ?expiresAt: float, ?redirectUri: string, ?resource: U2<string, string[]>) : GrantSummary = jsNative
 
 /// <summary>
 /// OAuth 2.0 Provider implementation for Cloudflare Workers
 /// Implements authorization code flow with support for refresh tokens
 /// and dynamic client registration.
 /// </summary>
-[<Interface>]
 type OAuthProvider<'Env> =
-    abstract ``__#1@#private``: obj with get, set
     /// <summary>
     /// Main fetch handler for the Worker
     /// Routes requests to the appropriate handler based on the URL
@@ -1584,7 +2198,7 @@ type OAuthProvider<'Env> =
     /// <param name="env">- Cloudflare Worker environment variables</param>
     /// <param name="ctx">- Cloudflare Worker execution context</param>
     /// <returns>A Promise resolving to an HTTP Response</returns>
-    abstract fetch: request: obj * env: 'Env * ctx: obj -> JS.Promise<obj>
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'Env * ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
     /// <summary>
     /// Purges expired and orphaned data from the KV namespace.
     /// Can be called directly from a scheduled handler without needing a request context.
@@ -1593,109 +2207,44 @@ type OAuthProvider<'Env> =
     /// <param name="options">- Optional configuration for batch size and which purge types to enable</param>
     /// <returns>Statistics about what was checked and purged</returns>
     abstract purgeExpiredData: env: 'Env * ?options: PurgeOptions -> JS.Promise<PurgeResult>
-    [<ParamObject; Emit("$0")>]
-    static member Create (``__#1@#private``: obj, fetch: Func<obj, 'Env, obj, JS.Promise<obj>>, purgeExpiredData: Func<'Env, PurgeOptions option, JS.Promise<PurgeResult>>) : OAuthProvider<'Env> = jsNative
 
 /// <summary>
-/// Options accepted by the OAuthError constructor.
+/// The authorization-server role on its own. It serves discovery, token, revocation and
+/// registration endpoints from <c>fetch()</c>, exposes the interactive authorization flow through
+/// <c>getOAuthApi()</c>, and validates its access tokens for any declared resource through
+/// <c>validateToken()</c>. Resources are hosted, in this Worker or another, by
+/// <c>OAuthResourceServer</c>, whose <c>validateToken</c> points back here.
 /// </summary>
-[<Interface>]
-type OAuthErrorOptions =
+type OAuthAuthorizationServer<'Env> =
     /// <summary>
-    /// Human-readable text returned in the <c>error_description</c> field.
-    /// </summary>
-    abstract description: string with get, set
-    /// <summary>
-    /// HTTP status code for the error response. Defaults to <c>400</c>.
-    /// </summary>
-    abstract statusCode: float option with get, set
-    /// <summary>
-    /// Additional response headers.
+    /// Validate an access token for one declared resource: the token's KV record is loaded, its
+    /// audience checked against <c>resource</c>, and its props decrypted. Resolves <c>null</c> for a token
+    /// that is not valid for that resource, and rejects for a resource this server does not
+    /// declare.
     /// <br /><br />
-    /// For transient failures (e.g. upstream rate limits), set
-    /// <c>Retry-After</c> here so well-behaved clients back off instead of
-    /// retry-storming. Per RFC 7231 §7.1.3 the value may be either a
-    /// number of seconds or an HTTP-date.
+    /// This is what a resource server calls, whether it shares this Worker or reaches it over a
+    /// Service Binding. For the latter, expose it from a <c>WorkerEntrypoint</c>:
+    /// <code lang="ts">
+    /// export default class AuthServer extends WorkerEntrypoint&lt;Env&gt; {
+    ///   fetch(request: Request) {
+    ///     return authorizationServer.fetch(request, this.env, this.ctx);
+    ///   }
+    ///   validateToken(resource: string, token: string) {
+    ///     return authorizationServer.validateToken(resource, token, this.env);
+    ///   }
+    /// }
+    /// </code>
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (description: string, ?statusCode: float, ?headers: Record<string, string>) : OAuthErrorOptions = jsNative
-
-/// <summary>
-/// Structured OAuth 2.0 token-endpoint error.
-/// <br /><br />
-/// Throw from a <c>tokenExchangeCallback</c> or any code it calls to surface a
-/// standard OAuth token response (<c>{ error, error_description }</c>) instead of a
-/// generic <c>500 Internal Server Error</c>.
-/// <br /><br />
-/// Anything thrown that is <b>not</b> an <c>OAuthError</c> continues to surface as
-/// a 500 so unexpected failures remain visible — the provider does not
-/// catch-everything-and-return-400.
-/// </summary>
-/// <example>
-/// <code>
-/// ```ts
-/// import { OAuthError } from '@cloudflare/workers-oauth-provider';
-///
-/// tokenExchangeCallback: async (options) =&gt; {
-///   if (options.grantType === 'refresh_token') {
-///     // refreshUpstream() may throw OAuthError from any depth
-///     return { newProps: await refreshUpstream(options.props) };
-///   }
-/// }
-///
-/// async function refreshUpstream(props) {
-///   const res = await fetch(...);
-///   if (res.status === 401) {
-///     throw new OAuthError('invalid_grant', { description: 'upstream refresh token is invalid' });
-///   }
-///   if (res.status === 429) {
-///     // Mirror upstream's Retry-After if present, otherwise pick a default.
-///     throw new OAuthError('temporarily_unavailable', {
-///       description: 'upstream rate limited',
-///       statusCode: 429,
-///       headers: { 'Retry-After': res.headers.get('retry-after') ?? '60' },
-///     });
-///   }
-///   return await res.json();
-/// }
-/// </code>
-/// <code>
-/// </code>
-/// </example>
-[<Interface>]
-type OAuthError =
+    abstract validateToken<'T>: resource: string * token: string * env: 'Env -> JS.Promise<ValidatedAccessToken<'T> option>
     /// <summary>
-    /// OAuth 2.0 error code.
+    /// Serve protocol-owned authorization-server endpoints, excluding the application authorization UI.
     /// </summary>
-    abstract code: string
+    abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'Env * ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
     /// <summary>
-    /// Options controlling the OAuth error response.
+    /// Obtain helpers for scheduled jobs or custom code outside a fetch dispatch.
     /// </summary>
-    abstract options: OAuthError.Options
-    /// <summary>
-    /// Human-readable description sent in the <c>error_description</c> field.
-    /// </summary>
-    abstract description: string
-    /// <summary>
-    /// HTTP status code for the error response.
-    /// </summary>
-    abstract statusCode: float
-    /// <summary>
-    /// Additional response headers.
-    /// </summary>
-    abstract headers: Record<string, string> option
-    abstract name: string with get, set
-    abstract message: string with get, set
-    abstract stack: string option with get, set
-    abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (code: string, options: OAuthError.Options, description: string, statusCode: float, name: string, message: string, ?headers: Record<string, string>, ?stack: string, ?cause: obj) : OAuthError = jsNative
-    /// <summary>
-    /// Indicates whether the argument provided is a built-in Error instance or not.
-    /// </summary>
-    [<Import("OAuthError.isError", "@cloudflare/workers-oauth-provider")>]
-    static member isError (error: obj) : bool = jsNative
+    abstract getOAuthApi: env: 'Env -> OAuthHelpers
+    abstract purgeExpiredData: env: 'Env * ?options: PurgeOptions -> JS.Promise<PurgeResult>
 
 /// <summary>
 /// Options accepted by the ExternalTokenError constructor.
@@ -1714,7 +2263,7 @@ type ExternalTokenErrorOptions =
     /// <summary>
     /// Additional public response headers, such as <c>Retry-After</c>.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     /// <summary>
     /// Minimum scopes needed for the protected-resource operation.
     /// <br /><br />
@@ -1724,7 +2273,7 @@ type ExternalTokenErrorOptions =
     /// </summary>
     abstract requiredScopes: string[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (description: string, statusCode: float, ?headers: Record<string, string>, ?requiredScopes: string[]) : ExternalTokenErrorOptions = jsNative
+    static member Create (description: string, statusCode: float, ?headers: JS.Record<string, string>, ?requiredScopes: string[]) : ExternalTokenErrorOptions = jsNative
 
 /// <summary>
 /// Intentional public error from an external bearer-token validator.
@@ -1735,6 +2284,7 @@ type ExternalTokenErrorOptions =
 /// unexpected failures.
 /// </summary>
 [<Interface>]
+[<Import("ExternalTokenError", "@cloudflare/workers-oauth-provider")>]
 type ExternalTokenError =
     /// <summary>
     /// OAuth error code returned in the response body and, when applicable, challenge.
@@ -1751,7 +2301,7 @@ type ExternalTokenError =
     /// <summary>
     /// Additional public response headers.
     /// </summary>
-    abstract headers: Record<string, string> option
+    abstract headers: JS.Record<string, string> option
     /// <summary>
     /// Minimum scopes for an <c>insufficient_scope</c> challenge.
     /// </summary>
@@ -1761,12 +2311,74 @@ type ExternalTokenError =
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (code: OAuthTokenErrorCode, description: string, statusCode: float, name: string, message: string, ?headers: Record<string, string>, ?requiredScopes: string[], ?stack: string, ?cause: obj) : ExternalTokenError = jsNative
+    static member Create (code: OAuthTokenErrorCode, description: string, statusCode: float, name: string, message: string, ?headers: JS.Record<string, string>, ?requiredScopes: string[], ?stack: string, ?cause: obj) : ExternalTokenError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     [<Import("ExternalTokenError.isError", "@cloudflare/workers-oauth-provider")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("ExternalTokenError.captureStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("ExternalTokenError.prepareStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
 
 /// <summary>
 /// Thrown when fetching a Client ID Metadata Document (CIMD) fails — the
@@ -1785,10 +2397,12 @@ type ExternalTokenError =
 /// failures should catch it to preserve their error contract.
 /// </summary>
 [<Interface>]
+[<Import("CimdFetchError", "@cloudflare/workers-oauth-provider")>]
 type CimdFetchError =
     /// <summary>
     /// Stable reason slug suitable for telemetry and control flow.
     /// </summary>
+    /// <remarks>TypeScript type: <c>"metadata_resolution_failed"</c></remarks>
     abstract reason: string
     /// <summary>
     /// The CIMD URL whose fetch or validation failed.
@@ -1802,55 +2416,101 @@ type CimdFetchError =
     abstract message: string with get, set
     abstract stack: string option with get, set
     abstract cause: obj option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (reason: string, metadataUrl: string, detail: string, name: string, message: string, ?stack: string, ?cause: obj) : CimdFetchError = jsNative
+    [<ParamObject; Emit("({ reason: 'metadata_resolution_failed', ...$0 })")>]
+    static member Create (metadataUrl: string, detail: string, name: string, message: string, ?stack: string, ?cause: obj) : CimdFetchError = jsNative
     /// <summary>
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     [<Import("CimdFetchError.isError", "@cloudflare/workers-oauth-provider")>]
     static member isError (error: obj) : bool = jsNative
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    [<Import("CimdFetchError.captureStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    [<Import("CimdFetchError.prepareStackTrace", "@cloudflare/workers-oauth-provider")>]
+    static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    static member stackTraceLimit
+        with get (): float = jsNative
+        and set (_: float): unit = jsNative
+
+module CimdFetchError =
+    /// <summary>
+    /// Stable reason slug suitable for telemetry and control flow.
+    /// </summary>
+    /// <remarks>TypeScript type: <c>"metadata_resolution_failed"</c></remarks>
+    [<Literal>]
+    let reason = "metadata_resolution_failed"
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
 type Exports =
     /// <summary>
-    /// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
-    /// means a caller MUST render locally and MUST NOT redirect.
-    /// </summary>
-    [<Import("AuthorizationError", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
-    static member AuthorizationError (code: AuthorizationErrorCode, options: AuthorizationErrorOptions) : AuthorizationError = jsNative
-    [<Import("isValidOAuthScopeToken", "@cloudflare/workers-oauth-provider")>]
-    static member isValidOAuthScopeToken (scopeToken: string) : bool = jsNative
-    /// <summary>
-    /// Enum representing OAuth grant types
-    /// </summary>
-    [<Import("GrantType", "@cloudflare/workers-oauth-provider")>]
-    static member GrantType: GrantType2 = jsNative
-    /// <summary>
-    /// OAuth 2.0 Provider implementation for Cloudflare Workers
-    /// Implements authorization code flow with support for refresh tokens
-    /// and dynamic client registration.
-    /// </summary>
-    [<Import("OAuthProvider", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
-    static member OAuthProvider<'Env> (options: OAuthProviderOptions<'Env>) : OAuthProvider<'Env> = jsNative
-    /// <summary>
-    /// Gets OAuthHelpers for the given environment
-    /// </summary>
-    /// <param name="options">- Configuration options for the OAuth provider</param>
-    /// <param name="env">- Cloudflare Worker environment variables</param>
-    /// <returns>An instance of OAuthHelpers</returns>
-    [<Import("getOAuthApi", "@cloudflare/workers-oauth-provider")>]
-    static member getOAuthApi<'Env> (options: OAuthProviderOptions<'Env>, env: 'Env) : OAuthHelpers = jsNative
-    /// <summary>
-    /// Structured OAuth 2.0 token-endpoint error.
+    /// The OAuth error your code throws to the library, to answer with a standard OAuth error instead
+    /// of a generic failure. It is honoured in two places:
     /// <br /><br />
-    /// Throw from a <c>tokenExchangeCallback</c> or any code it calls to surface a
-    /// standard OAuth token response (<c>{ error, error_description }</c>) instead of a
-    /// generic <c>500 Internal Server Error</c>.
+    /// - <b><c>tokenExchangeCallback</c></b> (token endpoint): the response is <c>{ error, error_description }</c>
+    ///   with <c>statusCode</c> (default <c>400</c>) and <c>headers</c>. <c>invalid_grant</c> also revokes the grant.
+    ///   Anything else thrown is a <c>500</c>.
+    /// - <b><c>OAuthResourceServer</c>'s <c>validateToken</c></b>: <c>invalid_token</c> is a <c>401</c> and
+    ///   <c>insufficient_scope</c> a <c>403</c>, each with a Bearer challenge (the latter naming
+    ///   <c>requiredScopes</c>); any other code keeps <c>statusCode</c> and <c>headers</c>, such as <c>429</c> with
+    ///   <c>Retry-After</c>. Anything else thrown is a <c>503</c>.
     /// <br /><br />
-    /// Anything thrown that is <b>not</b> an <c>OAuthError</c> continues to surface as
-    /// a 500 so unexpected failures remain visible — the provider does not
-    /// catch-everything-and-return-400.
+    /// Unexpected failures stay visible that way: the library doesn't catch everything and return 400.
+    /// (<c>OAuthProvider</c>'s <c>resolveExternalToken</c> uses <c>ExternalTokenError</c> instead.)
     /// </summary>
     /// <example>
     /// <code>
@@ -1867,6 +2527,7 @@ type Exports =
     /// async function refreshUpstream(props) {
     ///   const res = await fetch(...);
     ///   if (res.status === 401) {
+    ///     // invalid_grant can never recover: the provider also revokes this grant and its tokens.
     ///     throw new OAuthError('invalid_grant', { description: 'upstream refresh token is invalid' });
     ///   }
     ///   if (res.status === 429) {
@@ -1885,6 +2546,76 @@ type Exports =
     /// </example>
     [<Import("OAuthError", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
     static member OAuthError (code: string, options: OAuthErrorOptions) : OAuthError = jsNative
+    /// <summary>
+    /// The OAuth error redirect back to a client (RFC 6749 §4.1.2.1): <c>error</c>, an optional
+    /// <c>error_description</c>, the client's <c>state</c>, and <c>iss</c> (RFC 9207). Pass only a request the
+    /// library validated, from <c>parseAuthRequest()</c>, <c>finishUpstream()</c> or <c>approveConsent()</c>,
+    /// never one rebuilt from user input.
+    /// <code lang="ts">
+    /// if (new URL(req.url).searchParams.get('error')) {
+    ///   return Response.redirect(authorizationErrorRedirect(original, 'access_denied'), 302);
+    /// }
+    /// </code>
+    /// </summary>
+    [<Import("authorizationErrorRedirect", "@cloudflare/workers-oauth-provider")>]
+    static member authorizationErrorRedirect (request: AuthorizationErrorRedirect.Request, code: AuthorizationErrorCode, ?description: string) : string = jsNative
+    /// <summary>
+    /// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
+    /// means a caller MUST render locally and MUST NOT redirect.
+    /// </summary>
+    [<Import("AuthorizationError", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
+    static member AuthorizationError (code: AuthorizationErrorCode, options: AuthorizationErrorOptions) : AuthorizationError = jsNative
+    /// <summary>
+    /// The response for a valid token that lacks the scopes an operation needs (RFC 6750 §3.1,
+    /// MCP scope challenge handling): <c>403</c> with <c>WWW-Authenticate: Bearer error="insufficient_scope"</c>,
+    /// the <c>scope</c> the operation requires and the <c>resource_metadata</c> URL the client already knows.
+    /// Name every scope the operation needs in one response; clients treat the list as complete.
+    /// <code lang="ts">
+    /// if (!ctx.auth.scope.includes('calendar:write')) return insufficientScope(ctx.auth, ['calendar:write']);
+    /// </code>
+    /// </summary>
+    [<Import("insufficientScope", "@cloudflare/workers-oauth-provider")>]
+    static member insufficientScope (auth: OAuthResourceAuth, scope: string[], ?description: string) : FSharp.CloudEdge.Runtime.Workers.Response = jsNative
+    /// <summary>
+    /// One OAuth protected resource, in the authorization server's Worker or its own. Publishes
+    /// RFC 9728 metadata, challenges unauthenticated requests, validates the bearer token through
+    /// the configured <c>validateToken</c>, enforces audience and expiry on what it returns, and routes
+    /// only the canonical resource and its descendants to the application handler.
+    /// <br /><br />
+    /// <c>export default new OAuthResourceServer({ … })</c>, or dispatch to <c>fetch()</c> from your own
+    /// router, exactly as with <c>OAuthAuthorizationServer</c>.
+    /// </summary>
+    [<Import("OAuthResourceServer", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
+    static member OAuthResourceServer<'Env, 'Props> (options: OAuthResourceServerOptions<'Env, 'Props>) : OAuthResourceServer<'Env, 'Props> = jsNative
+    /// <summary>
+    /// Enum representing OAuth grant types
+    /// </summary>
+    [<Import("GrantType", "@cloudflare/workers-oauth-provider")>]
+    static member GrantType: GrantTypeEnum = jsNative
+    /// <summary>
+    /// OAuth 2.0 Provider implementation for Cloudflare Workers
+    /// Implements authorization code flow with support for refresh tokens
+    /// and dynamic client registration.
+    /// </summary>
+    [<Import("OAuthProvider", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
+    static member OAuthProvider<'Env> (options: OAuthProviderOptions<'Env>) : OAuthProvider<'Env> = jsNative
+    /// <summary>
+    /// The authorization-server role on its own. It serves discovery, token, revocation and
+    /// registration endpoints from <c>fetch()</c>, exposes the interactive authorization flow through
+    /// <c>getOAuthApi()</c>, and validates its access tokens for any declared resource through
+    /// <c>validateToken()</c>. Resources are hosted, in this Worker or another, by
+    /// <c>OAuthResourceServer</c>, whose <c>validateToken</c> points back here.
+    /// </summary>
+    [<Import("OAuthAuthorizationServer", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
+    static member OAuthAuthorizationServer<'Env> (options: OAuthAuthorizationServerOptions<'Env>) : OAuthAuthorizationServer<'Env> = jsNative
+    /// <summary>
+    /// Gets OAuthHelpers for the given environment
+    /// </summary>
+    /// <param name="options">- Configuration options for the OAuth provider</param>
+    /// <param name="env">- Cloudflare Worker environment variables</param>
+    /// <returns>An instance of OAuthHelpers</returns>
+    [<Import("getOAuthApi", "@cloudflare/workers-oauth-provider")>]
+    static member getOAuthApi<'Env> (options: OAuthProviderOptions<'Env>, env: 'Env) : OAuthHelpers = jsNative
     /// <summary>
     /// Intentional public error from an external bearer-token validator.
     /// <br /><br />
@@ -1913,503 +2644,151 @@ type Exports =
     /// </summary>
     [<Import("CimdFetchError", "@cloudflare/workers-oauth-provider"); EmitConstructor>]
     static member CimdFetchError (metadataUrl: string, cause: obj) : CimdFetchError = jsNative
-    /// <summary>
-    /// Validates a resource URI per RFC 8707 Section 2
-    /// </summary>
-    /// <param name="uri">- The URI string to validate</param>
-    /// <returns>true if valid, false otherwise</returns>
-    [<Import("validateResourceUri", "@cloudflare/workers-oauth-provider")>]
-    static member validateResourceUri (uri: string) : bool = jsNative
-    /// <summary>
-    /// Checks if a requested resource matches a granted resource.
-    /// When originOnly is true, compares only the origin (scheme + host + port),
-    /// allowing path-aware resources to match origin-only grants.
-    /// </summary>
-    [<Import("resourceMatches", "@cloudflare/workers-oauth-provider")>]
-    static member resourceMatches (requested: string, granted: string, originOnly: bool) : bool = jsNative
-    /// <summary>
-    /// Decodes a base64url-encoded string to bytes.
-    /// </summary>
-    [<Import("base64UrlToBytes", "@cloudflare/workers-oauth-provider")>]
-    static member base64UrlToBytes (base64Url: string) : JS.Uint8Array = jsNative
-    /// <summary>
-    /// Parses a base64url-encoded JWT JSON part into an object.
-    /// </summary>
-    [<Import("parseJwtJsonPart", "@cloudflare/workers-oauth-provider")>]
-    static member parseJwtJsonPart (encoded: string) : Record<string, obj> = jsNative
-    /// <summary>
-    /// Gets WebCrypto import and verify parameters for supported JOSE algorithms.
-    /// </summary>
-    [<Import("getJwtCryptoAlgorithms", "@cloudflare/workers-oauth-provider")>]
-    static member getJwtCryptoAlgorithms (alg: string) : GetJwtCryptoAlgorithms.Result = jsNative
 
-module EmaClaimsMapperInput =
-    module Request =
-        type Item<'HostMetadata> =
-            /// <summary>
-            /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-            /// </summary>
-            /// <example><c>395747</c></example>
-            abstract asn: float option with get, set
-            /// <summary>
-            /// The organization which owns the ASN of the incoming request.
-            /// </summary>
-            /// <example><c>"Google Cloud"</c></example>
-            abstract asOrganization: string option with get, set
-            /// <summary>
-            /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-            /// </summary>
-            /// <example><c>"gzip, deflate, br"</c></example>
-            abstract clientAcceptEncoding: string option with get, set
-            /// <summary>
-            /// The number of milliseconds it took for the request to reach your worker.
-            /// </summary>
-            /// <example><c>22</c></example>
-            abstract clientTcpRtt: float option with get, set
-            /// <summary>
-            /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-            /// airport code of the data center that the request hit.
-            /// </summary>
-            /// <example><c>"DFW"</c></example>
-            abstract colo: string with get, set
-            /// <summary>
-            /// Represents the upstream's response to a
-            /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-            /// from cloudflare.
-            /// <br /><br />
-            /// For workers with no upstream, this will always be <c>1</c>.
-            /// </summary>
-            /// <example><c>3</c></example>
-            abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-            /// <summary>
-            /// The HTTP Protocol the request used.
-            /// </summary>
-            /// <example><c>"HTTP/2"</c></example>
-            abstract httpProtocol: string with get, set
-            /// <summary>
-            /// The browser-requested prioritization information in the request object.
-            /// <br /><br />
-            /// If no information was set, defaults to the empty string <c>""</c>
-            /// </summary>
-            /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-            /// <defaultValue>""</defaultValue>
-            abstract requestPriority: string with get, set
-            /// <summary>
-            /// The TLS version of the connection to Cloudflare.
-            /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-            /// </summary>
-            /// <example><c>"TLSv1.3"</c></example>
-            abstract tlsVersion: string with get, set
-            /// <summary>
-            /// The cipher for the connection to Cloudflare.
-            /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-            /// </summary>
-            /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-            abstract tlsCipher: string with get, set
-            /// <summary>
-            /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-            /// <br /><br />
-            /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-            /// </summary>
-            abstract tlsExportedAuthenticator: obj option with get, set
-            /// <summary>
-            /// Results of Cloudflare's Bot Management analysis
-            /// </summary>
-            abstract botManagement: EmaClaimsMapperInput.Request.Item.BotManagement with get, set
-            /// <summary>
-            /// Duplicate of <c>botManagement.score</c>.
-            /// </summary>
-            /// <remarks>@deprecated</remarks>
-            abstract clientTrustScore: float with get, set
-            /// <summary>
-            /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-            /// <br /><br />
-            /// This field is only present if you have Cloudflare for SaaS enabled on your account
-            /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-            /// </summary>
-            abstract hostMetadata: 'HostMetadata option with get, set
-            /// <summary>
-            /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-            /// <br /><br />
-            /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-            /// <br /><br />
-            /// If Cloudflare is unable to determine where the request originated this property is omitted.
-            /// <br /><br />
-            /// The country code <c>"T1"</c> is used for requests originating on TOR.
-            /// </summary>
-            /// <example><c>"GB"</c></example>
-            abstract country: EmaClaimsMapperInput.Request.Item.Country option with get, set
-            /// <summary>
-            /// If present, this property indicates that the request originated in the EU
-            /// </summary>
-            /// <example><c>"1"</c></example>
-            abstract isEUCountry: string option with get, set
-            /// <summary>
-            /// A two-letter code indicating the continent the request originated from.
-            /// </summary>
-            /// <example><c>"AN"</c></example>
-            abstract continent: ContinentCode option with get, set
-            /// <summary>
-            /// The city the request originated from
-            /// </summary>
-            /// <example><c>"Austin"</c></example>
-            abstract city: string option with get, set
-            /// <summary>
-            /// Postal code of the incoming request
-            /// </summary>
-            /// <example><c>"78701"</c></example>
-            abstract postalCode: string option with get, set
-            /// <summary>
-            /// Latitude of the incoming request
-            /// </summary>
-            /// <example><c>"30.27130"</c></example>
-            abstract latitude: string option with get, set
-            /// <summary>
-            /// Longitude of the incoming request
-            /// </summary>
-            /// <example><c>"-97.74260"</c></example>
-            abstract longitude: string option with get, set
-            /// <summary>
-            /// Timezone of the incoming request
-            /// </summary>
-            /// <example><c>"America/Chicago"</c></example>
-            abstract timezone: string option with get, set
-            /// <summary>
-            /// If known, the ISO 3166-2 name for the first level region associated with
-            /// the IP address of the incoming request
-            /// </summary>
-            /// <example><c>"Texas"</c></example>
-            abstract region: string option with get, set
-            /// <summary>
-            /// If known, the ISO 3166-2 code for the first-level region associated with
-            /// the IP address of the incoming request
-            /// </summary>
-            /// <example><c>"TX"</c></example>
-            abstract regionCode: string option with get, set
-            /// <summary>
-            /// Metro code (DMA) of the incoming request
-            /// </summary>
-            /// <example><c>"635"</c></example>
-            abstract metroCode: string option with get, set
-            /// <summary>
-            /// Information about the client certificate presented to Cloudflare.
-            /// <br /><br />
-            /// This is populated when the incoming request is served over TLS using
-            /// either Cloudflare Access or API Shield (mTLS)
-            /// and the presented SSL certificate has a valid
-            /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-            /// (i.e., not <c>null</c> or <c>""</c>).
-            /// <br /><br />
-            /// Otherwise, a set of placeholder values are used.
-            /// <br /><br />
-            /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-            /// the object is populated (i.e. the above conditions were met).
-            /// </summary>
-            abstract tlsClientAuth: obj with get, set
-            [<EmitIndexer>]
-            abstract Item: string -> obj with get, set
-
-        module Item =
-            [<Interface>]
-            type BotManagement =
-                /// <summary>
-                /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                /// </summary>
-                /// <example><c>54</c></example>
-                abstract score: float with get, set
-                /// <summary>
-                /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                /// </summary>
-                abstract verifiedBot: bool with get, set
-                /// <summary>
-                /// A boolean value that is true if the request originates from a
-                /// Cloudflare-verified proxy service.
-                /// </summary>
-                abstract corporateProxy: bool with get, set
-                /// <summary>
-                /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                /// </summary>
-                abstract staticResource: bool with get, set
-                /// <summary>
-                /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                /// </summary>
-                abstract detectionIds: float[] with get, set
-                /// <summary>
-                /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                /// across different destination IPs, Ports, and X509 certificates.
-                /// </summary>
-                abstract ja3Hash: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-            type Country =
-                | AD
-                | AE
-                | AF
-                | AG
-                | AI
-                | AL
-                | AM
-                | AO
-                | AQ
-                | AR
-                | AS
-                | AT
-                | AU
-                | AW
-                | AX
-                | AZ
-                | BA
-                | BB
-                | BD
-                | BE
-                | BF
-                | BG
-                | BH
-                | BI
-                | BJ
-                | BL
-                | BM
-                | BN
-                | BO
-                | BQ
-                | BR
-                | BS
-                | BT
-                | BV
-                | BW
-                | BY
-                | BZ
-                | CA
-                | CC
-                | CD
-                | CF
-                | CG
-                | CH
-                | CI
-                | CK
-                | CL
-                | CM
-                | CN
-                | CO
-                | CR
-                | CU
-                | CV
-                | CW
-                | CX
-                | CY
-                | CZ
-                | DE
-                | DJ
-                | DK
-                | DM
-                | DO
-                | DZ
-                | EC
-                | EE
-                | EG
-                | EH
-                | ER
-                | ES
-                | ET
-                | FI
-                | FJ
-                | FK
-                | FM
-                | FO
-                | FR
-                | GA
-                | GB
-                | GD
-                | GE
-                | GF
-                | GG
-                | GH
-                | GI
-                | GL
-                | GM
-                | GN
-                | GP
-                | GQ
-                | GR
-                | GS
-                | GT
-                | GU
-                | GW
-                | GY
-                | HK
-                | HM
-                | HN
-                | HR
-                | HT
-                | HU
-                | ID
-                | IE
-                | IL
-                | IM
-                | IN
-                | IO
-                | IQ
-                | IR
-                | IS
-                | IT
-                | JE
-                | JM
-                | JO
-                | JP
-                | KE
-                | KG
-                | KH
-                | KI
-                | KM
-                | KN
-                | KP
-                | KR
-                | KW
-                | KY
-                | KZ
-                | LA
-                | LB
-                | LC
-                | LI
-                | LK
-                | LR
-                | LS
-                | LT
-                | LU
-                | LV
-                | LY
-                | MA
-                | MC
-                | MD
-                | ME
-                | MF
-                | MG
-                | MH
-                | MK
-                | ML
-                | MM
-                | MN
-                | MO
-                | MP
-                | MQ
-                | MR
-                | MS
-                | MT
-                | MU
-                | MV
-                | MW
-                | MX
-                | MY
-                | MZ
-                | NA
-                | NC
-                | NE
-                | NF
-                | NG
-                | NI
-                | NL
-                | NO
-                | NP
-                | NR
-                | NU
-                | NZ
-                | OM
-                | PA
-                | PE
-                | PF
-                | PG
-                | PH
-                | PK
-                | PL
-                | PM
-                | PN
-                | PR
-                | PS
-                | PT
-                | PW
-                | PY
-                | QA
-                | RE
-                | RO
-                | RS
-                | RU
-                | RW
-                | SA
-                | SB
-                | SC
-                | SD
-                | SE
-                | SG
-                | SH
-                | SI
-                | SJ
-                | SK
-                | SL
-                | SM
-                | SN
-                | SO
-                | SR
-                | SS
-                | ST
-                | SV
-                | SX
-                | SY
-                | SZ
-                | T1
-                | TC
-                | TD
-                | TF
-                | TG
-                | TH
-                | TJ
-                | TK
-                | TL
-                | TM
-                | TN
-                | TO
-                | TR
-                | TT
-                | TV
-                | TW
-                | TZ
-                | UA
-                | UG
-                | UM
-                | US
-                | UY
-                | UZ
-                | VA
-                | VC
-                | VE
-                | VG
-                | VI
-                | VN
-                | VU
-                | WF
-                | WS
-                | YE
-                | YT
-                | ZA
-                | ZM
-                | ZW
-
-module EmaValidationError13 =
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type Claim =
-        | [<CompiledName("authorization_details")>] AuthorizationDetails
-        | [<CompiledName("cnf")>] Cnf
-
-module GetJwtCryptoAlgorithms =
+module AuthorizationErrorRedirect =
     [<Interface>]
-    type Result =
-        abstract importAlgorithm: obj with get, set
-        abstract verifyAlgorithm: obj with get, set
+    type Request =
+        abstract redirectUri: string with get, set
+        abstract state: string option with get, set
+        abstract issuer: string option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (importAlgorithm: obj, verifyAlgorithm: obj) : Result = jsNative
+        static member Create (redirectUri: string, ?state: string, ?issuer: string) : Request = jsNative
+
+module EmaValidationError =
+    module Cases =
+        module UnsupportedClaim =
+            [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+            type Claim =
+                | [<CompiledName("authorization_details")>] AuthorizationDetails
+                | [<CompiledName("cnf")>] Cnf
+
+module OAuthAuthorizationServerOptions =
+    [<Interface>]
+    type Base<'Env> =
+        /// <summary>
+        /// Optional URL for the client registration endpoint.
+        /// If provided, the provider will implement dynamic client registration.
+        /// </summary>
+        abstract clientRegistrationEndpoint: string option with get, set
+        /// <summary>
+        /// Time-to-live for access tokens in seconds.
+        /// Defaults to 1 hour (3600 seconds) if not specified.
+        /// </summary>
+        abstract accessTokenTTL: float option with get, set
+        /// <summary>
+        /// Time-to-live for refresh tokens in seconds.
+        /// Defaults to 30 days (2,592,000 seconds).
+        /// Set to 0 to disable refresh tokens entirely.
+        /// Set to <c>undefined</c> explicitly for refresh tokens that never expire.
+        /// Anything else must be an integer of at least 60 seconds (Cloudflare KV's minimum expiration window).
+        /// For example: 3600 = 1 hour, 2592000 = 30 days
+        /// </summary>
+        abstract refreshTokenTTL: float option with get, set
+        /// <summary>
+        /// Idle lifetime for refresh tokens in seconds. When set, every successful refresh
+        /// moves the grant's expiry to this many seconds after the refresh, so a grant lives
+        /// for as long as the client keeps using it and expires once it has been idle for
+        /// this long. <c>refreshTokenTTL</c> still sets the lifetime of a new grant, and
+        /// <c>tokenExchangeCallback</c> can override the idle lifetime per refresh by returning
+        /// <c>refreshTokenIdleTTL</c>. Must be an integer of at least 60 seconds.
+        /// <br /><br />
+        /// Leave unset for a fixed lifetime, where a grant expires <c>refreshTokenTTL</c> seconds
+        /// after the code exchange however often it is refreshed.
+        /// </summary>
+        abstract refreshTokenIdleTTL: float option with get, set
+        /// <summary>
+        /// Time-to-live for dynamically registered clients in seconds.
+        /// Defaults to 90 days (7,776,000 seconds).
+        /// Clients created via the DCR endpoint will automatically expire after this duration.
+        /// Clients created via <c>OAuthHelpers.createClient()</c> are not affected by this setting.
+        /// Set to <c>undefined</c> explicitly for clients that never expire; otherwise an integer of at
+        /// least 60 seconds (Cloudflare KV's minimum expiration window).
+        /// </summary>
+        abstract clientRegistrationTTL: float option with get, set
+        /// <summary>
+        /// Scopes supported by the authorization server.
+        /// These are advertised only in authorization server metadata; configure a resource's
+        /// required scopes separately, with <c>requiredScopes</c>.
+        /// </summary>
+        abstract scopesSupported: string[] option with get, set
+        /// <summary>
+        /// Controls whether OAuth 2.0 Token Exchange (RFC 8693) is allowed.
+        /// When false, the token exchange grant type will not be advertised in metadata
+        /// and token exchange requests will be rejected.
+        /// Defaults to false.
+        /// </summary>
+        abstract allowTokenExchangeGrant: bool option with get, set
+        /// <summary>
+        /// Experimental support for the MCP Enterprise-Managed Authorization extension.
+        /// When enabled, the token endpoint accepts ID-JAG assertions using the JWT bearer
+        /// grant type (<c>urn:ietf:params:oauth:grant-type:jwt-bearer</c>).
+        /// <br /><br />
+        /// This feature is opt-in because the MCP extension and underlying OAuth drafts are
+        /// still evolving. Trusted issuers and a claim mapper are required.
+        /// </summary>
+        abstract enterpriseManagedAuthorization: EmaOptions<'Env> option with get, set
+        /// <summary>
+        /// Controls whether public clients (clients without a secret, like SPAs) can register via the
+        /// dynamic client registration endpoint. When true, only confidential clients can register.
+        /// Note: Creating public clients via the OAuthHelpers.createClient() method is always allowed.
+        /// Defaults to false.
+        /// </summary>
+        abstract disallowPublicClientRegistration: bool option with get, set
+        /// <summary>
+        /// Called during DCR (RFC 7591) before the client is stored. Return void/undefined
+        /// to allow registration, or return an object to reject it.
+        /// </summary>
+        abstract clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option) option with get, set
+        /// <summary>
+        /// Optional callback function that is called during token exchange.
+        /// This allows updating the props stored in both the access token and the grant.
+        /// For example, if the application itself is also a client to some other OAuth API,
+        /// it may want to perform the equivalent upstream token exchange, and store the result in the props.
+        /// <br /><br />
+        /// The callback can return new props values that will be stored with the token or grant.
+        /// If the callback returns nothing or undefined for a props field, the original props will be used.
+        /// </summary>
+        abstract tokenExchangeCallback: (TokenExchangeCallbackOptions<'Env> -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option) option with get, set
+        /// <summary>
+        /// Optional callback function that is called whenever the OAuthProvider returns an error response.
+        /// This allows the client to emit notifications or perform other actions when an error occurs.
+        /// <br /><br />
+        /// If the function returns a Response, that will be used in place of the OAuthProvider's default one.
+        /// <br /><br />
+        /// <c>internal</c> carries the stable, server-side-only reason for the error — often more
+        /// specific than what the wire deliberately reveals (RFC 6749 §5.2), e.g. which refresh-token
+        /// check failed or which EMA validation fired. It is never placed on the wire. See
+        /// OAuthErrorInternal.
+        /// <br /><br />
+        /// <c>request</c> (when present) is the HTTP request that produced the error response, so the
+        /// callback can correlate the error with per-request state such as request-keyed telemetry.
+        /// Currently populated for CIMD metadata fetch failures at the token endpoint. Backwards
+        /// compatible in the same way as <c>internal</c>.
+        /// </summary>
+        abstract onError: (OAuthProviderOptions.OnError.Error -> FSharp.CloudEdge.Runtime.Workers.Response option) option with get, set
+        /// <summary>
+        /// Let authorization requests use RFC 8252 private-use URI scheme redirect URIs (for example
+        /// <c>com.example.app:/oauth</c>), for native apps. By default a request's redirect URI must use
+        /// <c>https</c>, or <c>http</c> on a loopback host, as MCP and OAuth 2.1 require; remote <c>http</c> is never
+        /// accepted. Without this option a client can still register private-use URIs next to a compliant
+        /// one (Cursor does), but no request can use them.
+        /// </summary>
+        abstract allowPrivateUseRedirectUris: bool option with get, set
+        /// <summary>
+        /// Explicitly enable Client ID Metadata Document (CIMD) support.
+        /// When true, URL-formatted client_ids will be fetched as metadata documents.
+        /// Requires the 'global_fetch_strictly_public' compatibility flag.
+        /// Defaults to false.
+        /// </summary>
+        abstract clientIdMetadataDocumentEnabled: bool option with get, set
+        /// <summary>
+        /// Prefix for the cookies the consent and upstream helpers set (<c>&lt;prefix&gt;consent</c>,
+        /// <c>&lt;prefix&gt;upstream</c>, <c>&lt;prefix&gt;approvals</c>). Must start with <c>__Host-</c>, which keeps them
+        /// <c>Secure</c>, host-only and <c>Path=/</c>. Defaults to <c>__Host-oauth-</c>.
+        /// </summary>
+        abstract cookiePrefix: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (?clientRegistrationEndpoint: string, ?accessTokenTTL: float, ?refreshTokenTTL: float, ?refreshTokenIdleTTL: float, ?clientRegistrationTTL: float, ?scopesSupported: string[], ?allowTokenExchangeGrant: bool, ?enterpriseManagedAuthorization: EmaOptions<'Env>, ?disallowPublicClientRegistration: bool, ?clientRegistrationCallback: (ClientRegistrationCallbackOptions -> U2<ClientRegistrationCallbackResult, JS.Promise<ClientRegistrationCallbackResult option>> option), ?tokenExchangeCallback: (TokenExchangeCallbackOptions<'Env> -> U2<JS.Promise<TokenExchangeCallbackResult option>, TokenExchangeCallbackResult> option), ?onError: (OAuthProviderOptions.OnError.Error -> FSharp.CloudEdge.Runtime.Workers.Response option), ?allowPrivateUseRedirectUris: bool, ?clientIdMetadataDocumentEnabled: bool, ?cookiePrefix: string) : Base<'Env> = jsNative
 
 module OAuthError =
     [<Interface>]
@@ -2420,9 +2799,25 @@ module OAuthError =
         /// </summary>
         abstract statusCode: float with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (description: string, statusCode: float, ?headers: Record<string, string>) : Options = jsNative
+        static member Create (description: string, statusCode: float, ?headers: JS.Record<string, string>, ?``internal``: OAuthErrorInternal, ?requiredScopes: string[]) : Options = jsNative
 
 module OAuthHelpers =
+    module ApproveConsent =
+        [<Interface>]
+        type Options =
+            abstract scope: string[] option with get, set
+            abstract remember: RememberConsentOptions option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?scope: string[], ?remember: RememberConsentOptions) : Options = jsNative
+
+    module BeginUpstream =
+        [<Interface>]
+        type Options =
+            abstract data: obj option with get, set
+            abstract headers: FSharp.CloudEdge.Runtime.Workers.Headers option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?data: obj, ?headers: FSharp.CloudEdge.Runtime.Workers.Headers) : Options = jsNative
+
     module CompleteAuthorization =
         module Result =
             [<Interface>]
@@ -2482,7 +2877,7 @@ module OAuthHelpers =
             /// fields above; this map holds only the locale-specific variants so that
             /// consumers can perform their own locale selection.
             /// </summary>
-            abstract i18n: Record<string, string> option with get, set
+            abstract i18n: JS.Record<string, string> option with get, set
             /// <summary>
             /// List of email addresses for contacting the client developers
             /// </summary>
@@ -2510,89 +2905,75 @@ module OAuthHelpers =
             /// </summary>
             abstract tokenEndpointAuthMethod: string option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?clientId: string, ?clientSecret: string, ?redirectUris: string[], ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float, ?tokenEndpointAuthMethod: string) : ClientInfo = jsNative
+            static member Create (?clientId: string, ?clientSecret: string, ?redirectUris: string[], ?clientName: string, ?logoUri: string, ?clientUri: string, ?policyUri: string, ?tosUri: string, ?jwksUri: string, ?i18n: JS.Record<string, string>, ?contacts: string[], ?grantTypes: string[], ?responseTypes: string[], ?registrationDate: float, ?tokenEndpointAuthMethod: string) : ClientInfo = jsNative
+
+    module DenyConsent =
+        [<Interface>]
+        type Options =
+            abstract description: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?description: string) : Options = jsNative
+
+    module IsConsentRemembered =
+        [<Interface>]
+        type Remember =
+            /// <summary>
+            /// HMAC key for the approvals cookie: at least 32 characters, from a Worker secret.
+            /// </summary>
+            abstract secret: string with get, set
+            /// <summary>
+            /// The signed-in user, when you know them before consent (your own sign-in). The approval is then
+            /// bound to them as well, so another account on the same browser is asked again. Without it an
+            /// approval belongs to the browser, which suits a proxy server that only learns the user from the
+            /// third party after consent.
+            /// </summary>
+            abstract subject: string option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (secret: string, ?subject: string) : Remember = jsNative
 
 module OAuthProviderOptions =
     [<Interface>]
-    type ApiHandler<'Env> =
-        abstract fetch: obj with get, set
-        abstract connect: obj option with get, set
-        abstract tail: obj option with get, set
-        abstract trace: obj option with get, set
-        abstract tailStream: obj option with get, set
-        abstract scheduled: obj option with get, set
-        abstract test: obj option with get, set
-        abstract email: obj option with get, set
-        abstract queue: obj option with get, set
+    type ApiHandler<'Env, 'Props> =
+        inherit FSharp.CloudEdge.Runtime.Workers.ExportedHandler<'Env, obj, obj, 'Props>
+        inherit OAuthProviderOptions.ApiHandler.Base<'Env, 'Props>
         [<ParamObject; Emit("$0")>]
-        static member Create (fetch: obj, ?connect: obj, ?tail: obj, ?trace: obj, ?tailStream: obj, ?scheduled: obj, ?test: obj, ?email: obj, ?queue: obj) : ApiHandler<'Env> = jsNative
-
-    [<Interface>]
-    type ResourceMetadata =
-        /// <summary>
-        /// The protected resource identifier URL (RFC 9728 <c>resource</c> field).
-        /// <br /><br />
-        /// Configuring this value pins grants and access-token audiences to this
-        /// exact resource. An omitted authorization resource defaults to this value,
-        /// and an omitted token-request resource inherits it from the grant. Without
-        /// configuration, explicit RFC 8707 resource indicators are accepted and
-        /// omission remains unbound for backwards compatibility.
-        /// </summary>
-        abstract resource: string option with get, set
-        /// <summary>
-        /// List of authorization server issuer URLs that can issue tokens for this resource.
-        /// If not set, defaults to the token endpoint's origin (consistent with the issuer
-        /// in authorization server metadata).
-        /// </summary>
-        abstract authorization_servers: string[] option with get, set
-        /// <summary>
-        /// Minimal scopes required for basic protected resource functionality.
-        /// These scopes are advertised in Protected Resource Metadata and used as
-        /// baseline bearer challenge guidance. <c>offline_access</c> is omitted because
-        /// refresh-token issuance is an authorization server capability.
-        /// </summary>
-        abstract scopes_supported: string[] option with get, set
-        /// <summary>
-        /// Methods by which bearer tokens can be presented to this resource.
-        /// Defaults to ["header"].
-        /// </summary>
-        abstract bearer_methods_supported: string[] option with get, set
-        /// <summary>
-        /// Human-readable name for this resource.
-        /// </summary>
-        abstract resource_name: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?resource: string, ?authorization_servers: string[], ?scopes_supported: string[], ?bearer_methods_supported: string[], ?resource_name: string) : ResourceMetadata = jsNative
+        static member Create (fetch: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>>, ?connect: Func<FSharp.CloudEdge.Runtime.Workers.Socket, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?tail: Func<FSharp.CloudEdge.Runtime.Workers.TraceItem[], 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?trace: Func<FSharp.CloudEdge.Runtime.Workers.TraceItem[], 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?tailStream: Func<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.Onset>, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerType option>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerObject> option>, ?scheduled: Func<FSharp.CloudEdge.Runtime.Workers.ScheduledController, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?test: Func<obj, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?email: Func<FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>, ?queue: Func<FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj>, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, JS.Promise<unit> option>) : ApiHandler<'Env, 'Props> = jsNative
 
     module ApiHandler =
         [<Interface>]
-        type Result<'Env> =
-            abstract __WORKER_ENTRYPOINT_BRAND: unit
-            abstract ctx: obj with get, set
-            abstract env: 'Env with get, set
-            abstract email: (obj -> JS.Promise<unit> option) option with get, set
-            abstract fetch: (obj -> obj) with get, set
-            abstract connect: (obj -> JS.Promise<unit> option) option with get, set
-            abstract queue: (obj -> JS.Promise<unit> option) option with get, set
-            abstract scheduled: (obj -> JS.Promise<unit> option) option with get, set
-            abstract tail: (obj[] -> JS.Promise<unit> option) option with get, set
-            abstract tailStream: (obj -> obj) option with get, set
-            abstract test: (obj -> JS.Promise<unit> option) option with get, set
-            abstract trace: (obj[] -> JS.Promise<unit> option) option with get, set
+        type Base<'Env, 'Props> =
+            abstract fetch: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>> with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (ctx: obj, env: 'Env, fetch: (obj -> obj), ?email: (obj -> JS.Promise<unit> option), ?connect: (obj -> JS.Promise<unit> option), ?queue: (obj -> JS.Promise<unit> option), ?scheduled: (obj -> JS.Promise<unit> option), ?tail: (obj[] -> JS.Promise<unit> option), ?tailStream: (obj -> obj), ?test: (obj -> JS.Promise<unit> option), ?trace: (obj[] -> JS.Promise<unit> option)) : Result<'Env> = jsNative
+            static member Create (fetch: Func<FSharp.CloudEdge.Runtime.Workers.Request<obj, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>, 'Env, FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>>) : Base<'Env, 'Props> = jsNative
+
+        [<Interface>]
+        type Result<'Env, 'Props> =
+            abstract __WORKER_ENTRYPOINT_BRAND: unit
+            abstract ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props> with get, set
+            abstract env: 'Env with get, set
+            abstract email: (FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage -> JS.Promise<unit> option) option with get, set
+            abstract fetch: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>) with get, set
+            abstract connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option) option with get, set
+            abstract queue: (FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj> -> JS.Promise<unit> option) option with get, set
+            abstract scheduled: (FSharp.CloudEdge.Runtime.Workers.ScheduledController -> JS.Promise<unit> option) option with get, set
+            abstract tail: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option) option with get, set
+            abstract tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerType option>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerObject> option) option with get, set
+            abstract test: (obj -> JS.Promise<unit> option) option with get, set
+            abstract trace: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<'Props>, env: 'Env, fetch: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>), ?email: (FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage -> JS.Promise<unit> option), ?connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option), ?queue: (FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj> -> JS.Promise<unit> option), ?scheduled: (FSharp.CloudEdge.Runtime.Workers.ScheduledController -> JS.Promise<unit> option), ?tail: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option), ?tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerType option>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerObject> option), ?test: (obj -> JS.Promise<unit> option), ?trace: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option)) : Result<'Env, 'Props> = jsNative
 
         type ResultConstructor<'Env> =
             [<EmitConstructor>]
-            abstract Create: ctx: obj * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env>
+            abstract Create: ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env, obj>
 
         type ResultConstructor2<'Env> =
             [<EmitConstructor>]
-            abstract Create: ctx: obj * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env>
+            abstract Create: ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env, obj>
 
         type ResultConstructor3<'Env> =
             [<EmitConstructor>]
-            abstract Create: ctx: obj * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env>
+            abstract Create: ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<obj> * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthProviderOptions.ApiHandler.Result<'Env, obj>
 
     module OnError =
         [<Interface>]
@@ -2600,26 +2981,29 @@ module OAuthProviderOptions =
             abstract code: string with get, set
             abstract description: string with get, set
             abstract status: float with get, set
-            abstract headers: Record<string, string> with get, set
-            abstract ``internal``: OAuthProviderOptions.OnError.Error.Internal option with get, set
-            abstract request: obj option with get, set
+            abstract headers: JS.Record<string, string> with get, set
+            abstract ``internal``: OAuthErrorInternal with get, set
+            abstract request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (code: string, description: string, status: float, headers: Record<string, string>, ?``internal``: OAuthProviderOptions.OnError.Error.Internal, ?request: obj) : Error = jsNative
+            static member Create (code: string, description: string, status: float, headers: JS.Record<string, string>, ``internal``: OAuthErrorInternal, ?request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>) : Error = jsNative
 
-        module Error =
-            [<Interface>]
-            type Internal =
-                abstract category: string with get, set
-                abstract reason: string with get, set
-                abstract detail: obj option with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (category: string, reason: string, ?detail: obj) : Internal = jsNative
+module OAuthResourceHandler =
+    [<Interface>]
+    type Result =
+        abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
+        [<ParamObject; Emit("$0")>]
+        static member Create (fetch: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>)) : Result = jsNative
+
+    type ResultConstructor<'Props, 'Env> =
+        [<EmitConstructor>]
+        abstract Create: ctx: OAuthResourceContext<'Props> * env: 'Env -> FSharp.CloudEdge.Runtime.WorkersOauthProvider.OAuthResourceHandler.Result
 
 module Token =
     [<Interface>]
     type Grant =
         /// <summary>
-        /// Client that received this grant
+        /// Client this token was issued to: the grant's client, or, for a token from an allowed
+        /// cross-client token exchange, the client that requested it (RFC 8693).
         /// </summary>
         abstract clientId: string with get, set
         /// <summary>
@@ -2637,7 +3021,8 @@ module TokenSummary =
     [<Interface>]
     type Grant<'T> =
         /// <summary>
-        /// Client that received this grant
+        /// Client this token was issued to: the grant's client, or, for a token from an allowed
+        /// cross-client token exchange, the client that requested it (RFC 8693).
         /// </summary>
         abstract clientId: string with get, set
         /// <summary>
@@ -2652,31 +3037,19 @@ module TokenSummary =
         static member Create (clientId: string, scope: string[], props: 'T) : Grant<'T> = jsNative
 
 /// <summary>
-/// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
-/// means a caller MUST render locally and MUST NOT redirect.
-/// </summary>
-type AuthorizationErrorConstructor =
-    /// <summary>
-    /// Indicates whether the argument provided is a built-in Error instance or not.
-    /// </summary>
-    abstract isError: error: obj -> bool
-    /// <summary>
-    /// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
-    /// means a caller MUST render locally and MUST NOT redirect.
-    /// </summary>
-    [<EmitConstructor>]
-    abstract Create: code: AuthorizationErrorCode * options: AuthorizationErrorOptions -> AuthorizationError
-
-/// <summary>
-/// Structured OAuth 2.0 token-endpoint error.
+/// The OAuth error your code throws to the library, to answer with a standard OAuth error instead
+/// of a generic failure. It is honoured in two places:
 /// <br /><br />
-/// Throw from a <c>tokenExchangeCallback</c> or any code it calls to surface a
-/// standard OAuth token response (<c>{ error, error_description }</c>) instead of a
-/// generic <c>500 Internal Server Error</c>.
+/// - <b><c>tokenExchangeCallback</c></b> (token endpoint): the response is <c>{ error, error_description }</c>
+///   with <c>statusCode</c> (default <c>400</c>) and <c>headers</c>. <c>invalid_grant</c> also revokes the grant.
+///   Anything else thrown is a <c>500</c>.
+/// - <b><c>OAuthResourceServer</c>'s <c>validateToken</c></b>: <c>invalid_token</c> is a <c>401</c> and
+///   <c>insufficient_scope</c> a <c>403</c>, each with a Bearer challenge (the latter naming
+///   <c>requiredScopes</c>); any other code keeps <c>statusCode</c> and <c>headers</c>, such as <c>429</c> with
+///   <c>Retry-After</c>. Anything else thrown is a <c>503</c>.
 /// <br /><br />
-/// Anything thrown that is <b>not</b> an <c>OAuthError</c> continues to surface as
-/// a 500 so unexpected failures remain visible — the provider does not
-/// catch-everything-and-return-400.
+/// Unexpected failures stay visible that way: the library doesn't catch everything and return 400.
+/// (<c>OAuthProvider</c>'s <c>resolveExternalToken</c> uses <c>ExternalTokenError</c> instead.)
 /// </summary>
 /// <example>
 /// <code>
@@ -2693,6 +3066,7 @@ type AuthorizationErrorConstructor =
 /// async function refreshUpstream(props) {
 ///   const res = await fetch(...);
 ///   if (res.status === 401) {
+///     // invalid_grant can never recover: the provider also revokes this grant and its tokens.
 ///     throw new OAuthError('invalid_grant', { description: 'upstream refresh token is invalid' });
 ///   }
 ///   if (res.status === 429) {
@@ -2715,15 +3089,77 @@ type OAuthErrorConstructor =
     /// </summary>
     abstract isError: error: obj -> bool
     /// <summary>
-    /// Structured OAuth 2.0 token-endpoint error.
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
     /// <br /><br />
-    /// Throw from a <c>tokenExchangeCallback</c> or any code it calls to surface a
-    /// standard OAuth token response (<c>{ error, error_description }</c>) instead of a
-    /// generic <c>500 Internal Server Error</c>.
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
     /// <br /><br />
-    /// Anything thrown that is <b>not</b> an <c>OAuthError</c> continues to surface as
-    /// a 500 so unexpected failures remain visible — the provider does not
-    /// catch-everything-and-return-400.
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
+    /// The OAuth error your code throws to the library, to answer with a standard OAuth error instead
+    /// of a generic failure. It is honoured in two places:
+    /// <br /><br />
+    /// - <b><c>tokenExchangeCallback</c></b> (token endpoint): the response is <c>{ error, error_description }</c>
+    ///   with <c>statusCode</c> (default <c>400</c>) and <c>headers</c>. <c>invalid_grant</c> also revokes the grant.
+    ///   Anything else thrown is a <c>500</c>.
+    /// - <b><c>OAuthResourceServer</c>'s <c>validateToken</c></b>: <c>invalid_token</c> is a <c>401</c> and
+    ///   <c>insufficient_scope</c> a <c>403</c>, each with a Bearer challenge (the latter naming
+    ///   <c>requiredScopes</c>); any other code keeps <c>statusCode</c> and <c>headers</c>, such as <c>429</c> with
+    ///   <c>Retry-After</c>. Anything else thrown is a <c>503</c>.
+    /// <br /><br />
+    /// Unexpected failures stay visible that way: the library doesn't catch everything and return 400.
+    /// (<c>OAuthProvider</c>'s <c>resolveExternalToken</c> uses <c>ExternalTokenError</c> instead.)
     /// </summary>
     /// <example>
     /// <code>
@@ -2740,6 +3176,7 @@ type OAuthErrorConstructor =
     /// async function refreshUpstream(props) {
     ///   const res = await fetch(...);
     ///   if (res.status === 401) {
+    ///     // invalid_grant can never recover: the provider also revokes this grant and its tokens.
     ///     throw new OAuthError('invalid_grant', { description: 'upstream refresh token is invalid' });
     ///   }
     ///   if (res.status === 429) {
@@ -2760,6 +3197,80 @@ type OAuthErrorConstructor =
     abstract Create: code: string * options: OAuthErrorOptions -> OAuthError
 
 /// <summary>
+/// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
+/// means a caller MUST render locally and MUST NOT redirect.
+/// </summary>
+type AuthorizationErrorConstructor =
+    /// <summary>
+    /// Indicates whether the argument provided is a built-in Error instance or not.
+    /// </summary>
+    abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
+    /// <summary>
+    /// Expected authorization-request validation failure. Absence of <c>redirectUri</c>
+    /// means a caller MUST render locally and MUST NOT redirect.
+    /// </summary>
+    [<EmitConstructor>]
+    abstract Create: code: AuthorizationErrorCode * options: AuthorizationErrorOptions -> AuthorizationError
+
+/// <summary>
 /// Intentional public error from an external bearer-token validator.
 /// <br /><br />
 /// Throw only from <c>resolveExternalToken</c> when an expected validation outcome
@@ -2772,6 +3283,64 @@ type ExternalTokenErrorConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     /// <summary>
     /// Intentional public error from an external bearer-token validator.
     /// <br /><br />
@@ -2804,6 +3373,64 @@ type CimdFetchErrorConstructor =
     /// Indicates whether the argument provided is a built-in Error instance or not.
     /// </summary>
     abstract isError: error: obj -> bool
+    /// <summary>
+    /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+    /// a string representing the location in the code at which
+    /// <c>Error.captureStackTrace()</c> was called.
+    /// <code lang="js">
+    /// const myObject = {};
+    /// Error.captureStackTrace(myObject);
+    /// myObject.stack;  // Similar to `new Error().stack`
+    /// </code>
+    /// <br /><br />
+    /// The first line of the trace will be prefixed with
+    /// <c>${myObject.name}: ${myObject.message}</c>.
+    /// <br /><br />
+    /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+    /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+    /// generated stack trace.
+    /// <br /><br />
+    /// The <c>constructorOpt</c> argument is useful for hiding implementation
+    /// details of error generation from the user. For instance:
+    /// <code lang="js">
+    /// function a() {
+    ///   b();
+    /// }
+    ///
+    /// function b() {
+    ///   c();
+    /// }
+    ///
+    /// function c() {
+    ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+    ///   const { stackTraceLimit } = Error;
+    ///   Error.stackTraceLimit = 0;
+    ///   const error = new Error();
+    ///   Error.stackTraceLimit = stackTraceLimit;
+    ///
+    ///   // Capture the stack trace above function b
+    ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+    ///   throw error;
+    /// }
+    ///
+    /// a();
+    /// </code>
+    /// </summary>
+    abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+    /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+    abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+    /// <summary>
+    /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+    /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+    /// <c>Error.captureStackTrace(obj)</c>).
+    /// <br /><br />
+    /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+    /// will affect any stack trace captured _after_ the value has been changed.
+    /// <br /><br />
+    /// If set to a non-number value, or set to a negative number, stack traces will
+    /// not capture any frames.
+    /// </summary>
+    abstract stackTraceLimit: float with get, set
     /// <summary>
     /// Thrown when fetching a Client ID Metadata Document (CIMD) fails — the
     /// server-to-server fetch errored, timed out, or returned an invalid document.

@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/computer": "0.2.1",
-    "@cloudflare/workers-types": "5.20260906.1",
+    "@cloudflare/computer": "0.7.0",
+    "@cloudflare/workers-types": "5.20261025.1",
     "@types/json-schema": "7.0.15",
-    "@types/node": "22.19.19",
+    "@types/node": "26.4.1",
     "ai": "7.0.93",
-    "zod": "4.5.4"
+    "just-bash": "3.6.0",
+    "zod": "4.6.7"
   }
 }

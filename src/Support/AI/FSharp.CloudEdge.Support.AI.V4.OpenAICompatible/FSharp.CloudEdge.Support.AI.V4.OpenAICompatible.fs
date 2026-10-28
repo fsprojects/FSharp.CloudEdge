@@ -18,11 +18,11 @@ type OpenAICompatibleErrorData =
 
 [<Interface>]
 type ProviderErrorStructure<'T> =
-    abstract errorSchema: obj with get, set
+    abstract errorSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>> with get, set
     abstract errorToMessage: ('T -> string) with get, set
     abstract isRetryable: ProviderErrorStructure.IsRetryable<'T> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (errorSchema: obj, errorToMessage: ('T -> string), ?isRetryable: ProviderErrorStructure.IsRetryable<'T>) : ProviderErrorStructure<'T> = jsNative
+    static member Create (errorSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, errorToMessage: ('T -> string), ?isRetryable: ProviderErrorStructure.IsRetryable<'T>) : ProviderErrorStructure<'T> = jsNative
 
 type OpenAICompatibleChatModelId = string
 
@@ -52,7 +52,7 @@ type MetadataExtractor =
     /// Provider-specific metadata or undefined if no metadata is available.
     /// The metadata should be under a key indicating the provider id.
     /// </returns>
-    abstract extractMetadata: (MetadataExtractor.ExtractMetadata0 -> JS.Promise<Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option>) with get, set
+    abstract extractMetadata: (MetadataExtractor.ExtractMetadata0 -> JS.Promise<JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option>) with get, set
     /// <summary>
     /// Creates an extractor for handling streaming responses. The returned object provides
     /// methods to process individual chunks and build the final metadata from the accumulated
@@ -61,67 +61,32 @@ type MetadataExtractor =
     /// <returns>An object with methods to process chunks and build metadata from a stream</returns>
     abstract createStreamExtractor: (unit -> MetadataExtractor.CreateStreamExtractor.Result) with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (extractMetadata: (MetadataExtractor.ExtractMetadata0 -> JS.Promise<Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option>), createStreamExtractor: (unit -> MetadataExtractor.CreateStreamExtractor.Result)) : MetadataExtractor = jsNative
+    static member Create (extractMetadata: (MetadataExtractor.ExtractMetadata0 -> JS.Promise<JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option>), createStreamExtractor: (unit -> MetadataExtractor.CreateStreamExtractor.Result)) : MetadataExtractor = jsNative
 
-[<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-type ContinentCode =
-    | AF
-    | AN
-    | AS
-    | EU
-    | NA
-    | OC
-    | SA
-
-type IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus =
-    | N0 = 0
-    | N1 = 1
-    | N2 = 2
-    | N3 = 3
-    | N4 = 4
-    | N5 = 5
-
-[<Interface>]
 type OpenAICompatibleChatLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
     abstract supportsStructuredOutputs: bool
     abstract config: OpenAICompatibleChatLanguageModel.Config
-    abstract failedResponseHandler: obj
-    abstract chunkSchema: obj
-    abstract providerOptionsName: obj
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
-    abstract transformRequestBody: obj with get, set
-    abstract convertUsage: obj with get, set
-    abstract getArgs: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, supportsStructuredOutputs: bool, modelId: string, config: OpenAICompatibleChatLanguageModel.Config, failedResponseHandler: obj, chunkSchema: obj, provider: string, providerOptionsName: obj, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, transformRequestBody: obj, convertUsage: obj, getArgs: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : OpenAICompatibleChatLanguageModel = jsNative
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
 
-type OpenAICompatibleCompletionModelId = OpenAICompatibleChatModelId
+type OpenAICompatibleCompletionModelId = string
+
+type OpenAICompatibleCompletionProviderOptions = OpenAICompatibleLanguageModelCompletionOptions
 
 [<Interface>]
-type OpenAICompatibleCompletionProviderOptions =
+type OpenAICompatibleLanguageModelCompletionOptions =
     abstract echo: bool option with get, set
-    abstract logitBias: Record<string, float> option with get, set
+    abstract logitBias: JS.Record<string, float> option with get, set
     abstract suffix: string option with get, set
     abstract user: string option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?echo: bool, ?logitBias: Record<string, float>, ?suffix: string, ?user: string) : OpenAICompatibleCompletionProviderOptions = jsNative
+    static member Create (?echo: bool, ?logitBias: JS.Record<string, float>, ?suffix: string, ?user: string) : OpenAICompatibleLanguageModelCompletionOptions = jsNative
 
-type OpenAICompatibleLanguageModelCompletionOptions = OpenAICompatibleCompletionProviderOptions
-
-[<Interface>]
 type OpenAICompatibleCompletionLanguageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
-    abstract config: obj
-    abstract failedResponseHandler: obj
-    abstract chunkSchema: obj
-    abstract providerOptionsName: obj
-    abstract supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>
-    abstract getArgs: obj with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, modelId: string, config: obj, failedResponseHandler: obj, chunkSchema: obj, provider: string, providerOptionsName: obj, supportedUrls: U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>, getArgs: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4GenerateResult>), doStream: (FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4StreamResult>)) : OpenAICompatibleCompletionLanguageModel = jsNative
+    abstract supportedUrls: U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>
 
-type OpenAICompatibleEmbeddingModelId = OpenAICompatibleChatModelId
+type OpenAICompatibleEmbeddingModelId = string
 
 [<Interface>]
 type OpenAICompatibleEmbeddingModelOptions =
@@ -132,30 +97,48 @@ type OpenAICompatibleEmbeddingModelOptions =
 
 type OpenAICompatibleEmbeddingProviderOptions = OpenAICompatibleEmbeddingModelOptions
 
-[<Interface>]
 type OpenAICompatibleEmbeddingModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4
-    abstract config: obj
     abstract maxEmbeddingsPerCall: float
     abstract supportsParallelCalls: bool
-    abstract providerOptionsName: obj
     abstract doEmbed: __0: FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4Result>
-    [<ParamObject; Emit("$0")>]
-    static member Create (specificationVersion: string, modelId: string, config: obj, provider: string, maxEmbeddingsPerCall: float, supportsParallelCalls: bool, providerOptionsName: obj, doEmbed: (FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4Result>)) : OpenAICompatibleEmbeddingModel = jsNative
 
-[<Interface>]
 type OpenAICompatibleImageModel =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4
-    abstract config: obj
+    /// <remarks>TypeScript type: <c>10</c></remarks>
     abstract maxImagesPerCall: float
-    /// <summary>
-    /// The provider options key used to extract provider-specific options.
-    /// </summary>
-    abstract providerOptionsKey: obj
-    abstract getArgs: obj with get, set
     abstract doGenerate: __0: FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4Result>
-    [<ParamObject; Emit("$0")>]
-    static member Create (modelId: string, config: obj, specificationVersion: string, maxImagesPerCall: float, provider: string, providerOptionsKey: obj, getArgs: obj, doGenerate: (FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4CallOptions -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4Result>)) : OpenAICompatibleImageModel = jsNative
+
+module OpenAICompatibleImageModel =
+    /// <remarks>TypeScript type: <c>10</c></remarks>
+    [<Literal>]
+    let maxImagesPerCall = 10.0
+
+    [<Interface>]
+    type Config =
+        abstract provider: string with get, set
+        abstract headers: (unit -> JS.Record<string, string option>) option with get, set
+        abstract url: (OpenAICompatibleImageModel.Config.Url.Options -> string) with get, set
+        abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
+        abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
+        abstract _internal: OpenAICompatibleImageModel.Config.Internal option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (provider: string, url: (OpenAICompatibleImageModel.Config.Url.Options -> string), ?headers: (unit -> JS.Record<string, string option>), ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?_internal: OpenAICompatibleImageModel.Config.Internal) : Config = jsNative
+
+    module Config =
+        [<Interface>]
+        type Internal =
+            abstract currentDate: (unit -> Fable.Core.TS.Es.Date) option with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (?currentDate: (unit -> Fable.Core.TS.Es.Date)) : Internal = jsNative
+
+        module Url =
+            [<Interface>]
+            type Options =
+                abstract modelId: string with get, set
+                abstract path: string with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (modelId: string, path: string) : Options = jsNative
 
 type OpenAICompatibleImageModelOptions =
     /// <summary>
@@ -189,7 +172,6 @@ type OpenAICompatibleImageModelOptions =
     [<EmitIndexer>]
     abstract Item: string -> obj with get, set
 
-[<Interface>]
 type OpenAICompatibleProvider<'CHAT_MODEL_IDS, 'COMPLETION_MODEL_IDS, 'EMBEDDING_MODEL_IDS, 'IMAGE_MODEL_IDS> =
     inherit FSharp.CloudEdge.Support.AI.V4.Provider.ProviderV4
     /// <summary>
@@ -213,8 +195,6 @@ type OpenAICompatibleProvider<'CHAT_MODEL_IDS, 'COMPLETION_MODEL_IDS, 'EMBEDDING
     abstract imageModel: modelId: 'IMAGE_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4
     [<Emit("$0($1...)")>]
     abstract Invoke: modelId: 'CHAT_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4
-    [<ParamObject; Emit("$0")>]
-    static member Create (languageModel: Func<'CHAT_MODEL_IDS, OpenAICompatibleProvider.LanguageModel.Config option, FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4>, chatModel: ('CHAT_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4), completionModel: ('COMPLETION_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4), embeddingModel: ('EMBEDDING_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4), textEmbeddingModel: ('EMBEDDING_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.EmbeddingModelV4), imageModel: ('IMAGE_MODEL_IDS -> FSharp.CloudEdge.Support.AI.V4.Provider.ImageModelV4), specificationVersion: string, ?transcriptionModel: (string -> FSharp.CloudEdge.Support.AI.V4.Provider.TranscriptionModelV4), ?speechModel: (string -> FSharp.CloudEdge.Support.AI.V4.Provider.SpeechModelV4), ?rerankingModel: (string -> FSharp.CloudEdge.Support.AI.V4.Provider.RerankingModelV4), ?files: (unit -> FSharp.CloudEdge.Support.AI.V4.Provider.FilesV4), ?skills: (unit -> FSharp.CloudEdge.Support.AI.V4.Provider.SkillsV4)) : OpenAICompatibleProvider<'CHAT_MODEL_IDS, 'COMPLETION_MODEL_IDS, 'EMBEDDING_MODEL_IDS, 'IMAGE_MODEL_IDS> = jsNative
 
 [<Interface>]
 type OpenAICompatibleProviderSettings =
@@ -236,16 +216,16 @@ type OpenAICompatibleProviderSettings =
     /// Optional custom headers to include in requests. These will be added to request headers
     /// after any headers potentially added by use of the <c>apiKey</c> option.
     /// </summary>
-    abstract headers: Record<string, string> option with get, set
+    abstract headers: JS.Record<string, string> option with get, set
     /// <summary>
     /// Optional custom url query parameters to include in request urls.
     /// </summary>
-    abstract queryParams: Record<string, string> option with get, set
+    abstract queryParams: JS.Record<string, string> option with get, set
     /// <summary>
     /// Custom fetch implementation. You can use it as a middleware to intercept requests,
     /// or to provide a custom fetch implementation for e.g. testing.
     /// </summary>
-    abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+    abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
     /// <summary>
     /// Include usage information in streaming responses.
     /// </summary>
@@ -259,7 +239,7 @@ type OpenAICompatibleProviderSettings =
     /// This is useful for proxy providers that may require a different request format
     /// than the official OpenAI API.
     /// </summary>
-    abstract transformRequestBody: (Record<string, obj> -> Record<string, obj>) option with get, set
+    abstract transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>) option with get, set
     /// <summary>
     /// Optional metadata extractor to capture provider-specific metadata from API responses.
     /// This is useful for extracting non-standard fields, experimental features,
@@ -269,14 +249,14 @@ type OpenAICompatibleProviderSettings =
     /// <summary>
     /// The supported URLs for chat models.
     /// </summary>
-    abstract supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>) option with get, set
+    abstract supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>) option with get, set
     /// <summary>
     /// Optional usage converter for providers with token accounting semantics that
     /// differ from the default OpenAI-compatible shape.
     /// </summary>
     abstract convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (baseURL: string, name: string, ?apiKey: string, ?headers: Record<string, string>, ?queryParams: Record<string, string>, ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?includeUsage: bool, ?supportsStructuredOutputs: bool, ?transformRequestBody: (Record<string, obj> -> Record<string, obj>), ?metadataExtractor: MetadataExtractor, ?supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : OpenAICompatibleProviderSettings = jsNative
+    static member Create (baseURL: string, name: string, ?apiKey: string, ?headers: JS.Record<string, string>, ?queryParams: JS.Record<string, string>, ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?includeUsage: bool, ?supportsStructuredOutputs: bool, ?transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>), ?metadataExtractor: MetadataExtractor, ?supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : OpenAICompatibleProviderSettings = jsNative
 
 /// <summary>The package's value exports, each bound to its import.</summary>
 [<Erase>]
@@ -321,17 +301,17 @@ module MetadataExtractor =
             /// Provider-specific metadata or undefined if no metadata is available.
             /// The metadata should be under a key indicating the provider id.
             /// </returns>
-            abstract buildMetadata: unit -> Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option
+            abstract buildMetadata: unit -> JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option
             [<ParamObject; Emit("$0")>]
-            static member Create (processChunk: (obj -> unit), buildMetadata: (unit -> Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option)) : Result = jsNative
+            static member Create (processChunk: (obj -> unit), buildMetadata: (unit -> JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option)) : Result = jsNative
 
 module OpenAICompatibleChatLanguageModel =
     [<Interface>]
     type Config =
         abstract provider: string with get, set
-        abstract headers: (unit -> Record<string, string option>) option with get, set
+        abstract headers: (unit -> JS.Record<string, string option>) option with get, set
         abstract url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string) with get, set
-        abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+        abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
         abstract includeUsage: bool option with get, set
         abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
         abstract metadataExtractor: MetadataExtractor option with get, set
@@ -342,29 +322,29 @@ module OpenAICompatibleChatLanguageModel =
         /// <summary>
         /// The supported URLs for the model.
         /// </summary>
-        abstract supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>) option with get, set
+        abstract supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>) option with get, set
         /// <summary>
         /// Optional function to transform the request body before sending it to the API.
         /// This is useful for proxy providers that may require a different request format
         /// than the official OpenAI API.
         /// </summary>
-        abstract transformRequestBody: (Record<string, obj> -> Record<string, obj>) option with get, set
+        abstract transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>) option with get, set
         /// <summary>
         /// Optional usage converter for OpenAI-compatible providers with different
         /// token accounting semantics.
         /// </summary>
         abstract convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string), ?headers: (unit -> Record<string, string option>), ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?includeUsage: bool, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?metadataExtractor: MetadataExtractor, ?supportsStructuredOutputs: bool, ?supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>), ?transformRequestBody: (Record<string, obj> -> Record<string, obj>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Config = jsNative
+        static member Create (provider: string, url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string), ?headers: (unit -> JS.Record<string, string option>), ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?includeUsage: bool, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?metadataExtractor: MetadataExtractor, ?supportsStructuredOutputs: bool, ?supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>), ?transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Config = jsNative
 
     module Config =
         [<Interface>]
         type ErrorStructure =
-            abstract errorSchema: obj with get, set
+            abstract errorSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>> with get, set
             abstract errorToMessage: (obj -> string) with get, set
             abstract isRetryable: OpenAICompatibleChatLanguageModel.Config.ErrorStructure.IsRetryable option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (errorSchema: obj, errorToMessage: (obj -> string), ?isRetryable: OpenAICompatibleChatLanguageModel.Config.ErrorStructure.IsRetryable) : ErrorStructure = jsNative
+            static member Create (errorSchema: FSharp.CloudEdge.Support.Zod.V4.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, errorToMessage: (obj -> string), ?isRetryable: OpenAICompatibleChatLanguageModel.Config.ErrorStructure.IsRetryable) : ErrorStructure = jsNative
 
         module ConvertUsage =
             type Usage =
@@ -390,461 +370,7 @@ module OpenAICompatibleChatLanguageModel =
                     abstract Item: string -> obj with get, set
 
         module ErrorStructure =
-            type IsRetryable = delegate of response: obj * error: obj option -> bool
-
-        module Fetch =
-            module Input =
-                type Item<'HostMetadata> =
-                    /// <summary>
-                    /// <a href="https://www.iana.org/assignments/as-numbers/as-numbers.xhtml">ASN</a> of the incoming request.
-                    /// </summary>
-                    /// <example><c>395747</c></example>
-                    abstract asn: float option with get, set
-                    /// <summary>
-                    /// The organization which owns the ASN of the incoming request.
-                    /// </summary>
-                    /// <example><c>"Google Cloud"</c></example>
-                    abstract asOrganization: string option with get, set
-                    /// <summary>
-                    /// The original value of the <c>Accept-Encoding</c> header if Cloudflare modified it.
-                    /// </summary>
-                    /// <example><c>"gzip, deflate, br"</c></example>
-                    abstract clientAcceptEncoding: string option with get, set
-                    /// <summary>
-                    /// The number of milliseconds it took for the request to reach your worker.
-                    /// </summary>
-                    /// <example><c>22</c></example>
-                    abstract clientTcpRtt: float option with get, set
-                    /// <summary>
-                    /// The three-letter <a href="https://en.wikipedia.org/wiki/IATA_airport_code">IATA</a>
-                    /// airport code of the data center that the request hit.
-                    /// </summary>
-                    /// <example><c>"DFW"</c></example>
-                    abstract colo: string with get, set
-                    /// <summary>
-                    /// Represents the upstream's response to a
-                    /// <a href="https://tldp.org/HOWTO/TCP-Keepalive-HOWTO/overview.html">TCP <c>keepalive</c> message</a>
-                    /// from cloudflare.
-                    /// <br /><br />
-                    /// For workers with no upstream, this will always be <c>1</c>.
-                    /// </summary>
-                    /// <example><c>3</c></example>
-                    abstract edgeRequestKeepAliveStatus: IncomingRequestCfPropertiesEdgeRequestKeepAliveStatus with get, set
-                    /// <summary>
-                    /// The HTTP Protocol the request used.
-                    /// </summary>
-                    /// <example><c>"HTTP/2"</c></example>
-                    abstract httpProtocol: string with get, set
-                    /// <summary>
-                    /// The browser-requested prioritization information in the request object.
-                    /// <br /><br />
-                    /// If no information was set, defaults to the empty string <c>""</c>
-                    /// </summary>
-                    /// <example><c>"weight=192;exclusive=0;group=3;group-weight=127"</c></example>
-                    /// <defaultValue>""</defaultValue>
-                    abstract requestPriority: string with get, set
-                    /// <summary>
-                    /// The TLS version of the connection to Cloudflare.
-                    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                    /// </summary>
-                    /// <example><c>"TLSv1.3"</c></example>
-                    abstract tlsVersion: string with get, set
-                    /// <summary>
-                    /// The cipher for the connection to Cloudflare.
-                    /// In requests served over plaintext (without TLS), this property is the empty string <c>""</c>.
-                    /// </summary>
-                    /// <example><c>"AEAD-AES128-GCM-SHA256"</c></example>
-                    abstract tlsCipher: string with get, set
-                    /// <summary>
-                    /// Metadata containing the <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.1.2"><c>HELLO</c></a> and <a href="https://www.rfc-editor.org/rfc/rfc5246#section-7.4.9"><c>FINISHED</c></a> messages from this request's TLS handshake.
-                    /// <br /><br />
-                    /// If the incoming request was served over plaintext (without TLS) this field is undefined.
-                    /// </summary>
-                    abstract tlsExportedAuthenticator: obj option with get, set
-                    /// <summary>
-                    /// Results of Cloudflare's Bot Management analysis
-                    /// </summary>
-                    abstract botManagement: OpenAICompatibleChatLanguageModel.Config.Fetch.Input.Item.BotManagement with get, set
-                    /// <summary>
-                    /// Duplicate of <c>botManagement.score</c>.
-                    /// </summary>
-                    /// <remarks>@deprecated</remarks>
-                    abstract clientTrustScore: float with get, set
-                    /// <summary>
-                    /// Custom metadata set per-host in <a href="https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/">Cloudflare for SaaS</a>.
-                    /// <br /><br />
-                    /// This field is only present if you have Cloudflare for SaaS enabled on your account
-                    /// and you have followed the <a href="(https://developers.cloudflare.com/cloudflare-for-platforms/cloudflare-for-saas/domain-support/custom-metadata/">required steps to enable it</a>).
-                    /// </summary>
-                    abstract hostMetadata: 'HostMetadata option with get, set
-                    /// <summary>
-                    /// The <a href="https://www.iso.org/iso-3166-country-codes.html">ISO 3166-1 Alpha 2</a> country code the request originated from.
-                    /// <br /><br />
-                    /// If your worker is <a href="https://support.cloudflare.com/hc/en-us/articles/203306930-Understanding-Cloudflare-Tor-support-and-Onion-Routing">configured to accept TOR connections</a>, this may also be <c>"T1"</c>, indicating a request that originated over TOR.
-                    /// <br /><br />
-                    /// If Cloudflare is unable to determine where the request originated this property is omitted.
-                    /// <br /><br />
-                    /// The country code <c>"T1"</c> is used for requests originating on TOR.
-                    /// </summary>
-                    /// <example><c>"GB"</c></example>
-                    abstract country: OpenAICompatibleChatLanguageModel.Config.Fetch.Input.Item.Country option with get, set
-                    /// <summary>
-                    /// If present, this property indicates that the request originated in the EU
-                    /// </summary>
-                    /// <example><c>"1"</c></example>
-                    abstract isEUCountry: string option with get, set
-                    /// <summary>
-                    /// A two-letter code indicating the continent the request originated from.
-                    /// </summary>
-                    /// <example><c>"AN"</c></example>
-                    abstract continent: ContinentCode option with get, set
-                    /// <summary>
-                    /// The city the request originated from
-                    /// </summary>
-                    /// <example><c>"Austin"</c></example>
-                    abstract city: string option with get, set
-                    /// <summary>
-                    /// Postal code of the incoming request
-                    /// </summary>
-                    /// <example><c>"78701"</c></example>
-                    abstract postalCode: string option with get, set
-                    /// <summary>
-                    /// Latitude of the incoming request
-                    /// </summary>
-                    /// <example><c>"30.27130"</c></example>
-                    abstract latitude: string option with get, set
-                    /// <summary>
-                    /// Longitude of the incoming request
-                    /// </summary>
-                    /// <example><c>"-97.74260"</c></example>
-                    abstract longitude: string option with get, set
-                    /// <summary>
-                    /// Timezone of the incoming request
-                    /// </summary>
-                    /// <example><c>"America/Chicago"</c></example>
-                    abstract timezone: string option with get, set
-                    /// <summary>
-                    /// If known, the ISO 3166-2 name for the first level region associated with
-                    /// the IP address of the incoming request
-                    /// </summary>
-                    /// <example><c>"Texas"</c></example>
-                    abstract region: string option with get, set
-                    /// <summary>
-                    /// If known, the ISO 3166-2 code for the first-level region associated with
-                    /// the IP address of the incoming request
-                    /// </summary>
-                    /// <example><c>"TX"</c></example>
-                    abstract regionCode: string option with get, set
-                    /// <summary>
-                    /// Metro code (DMA) of the incoming request
-                    /// </summary>
-                    /// <example><c>"635"</c></example>
-                    abstract metroCode: string option with get, set
-                    /// <summary>
-                    /// Information about the client certificate presented to Cloudflare.
-                    /// <br /><br />
-                    /// This is populated when the incoming request is served over TLS using
-                    /// either Cloudflare Access or API Shield (mTLS)
-                    /// and the presented SSL certificate has a valid
-                    /// <a href="https://ldapwiki.com/wiki/Certificate%20Serial%20Number">Certificate Serial Number</a>
-                    /// (i.e., not <c>null</c> or <c>""</c>).
-                    /// <br /><br />
-                    /// Otherwise, a set of placeholder values are used.
-                    /// <br /><br />
-                    /// The property <c>certPresented</c> will be set to <c>"1"</c> when
-                    /// the object is populated (i.e. the above conditions were met).
-                    /// </summary>
-                    abstract tlsClientAuth: obj with get, set
-                    [<EmitIndexer>]
-                    abstract Item: string -> obj with get, set
-
-                module Item =
-                    [<Interface>]
-                    type BotManagement =
-                        /// <summary>
-                        /// Cloudflare’s <a href="https://developers.cloudflare.com/bots/concepts/bot-score/">level of certainty</a> that a request comes from a bot,
-                        /// represented as an integer percentage between <c>1</c> (almost certainly a bot) and <c>99</c> (almost certainly human).
-                        /// </summary>
-                        /// <example><c>54</c></example>
-                        abstract score: float with get, set
-                        /// <summary>
-                        /// A boolean value that is true if the request comes from a good bot, like Google or Bing.
-                        /// Most customers choose to allow this traffic. For more details, see <a href="https://developers.cloudflare.com/firewall/known-issues-and-faq/#how-does-firewall-rules-handle-traffic-from-known-bots">Traffic from known bots</a>.
-                        /// </summary>
-                        abstract verifiedBot: bool with get, set
-                        /// <summary>
-                        /// A boolean value that is true if the request originates from a
-                        /// Cloudflare-verified proxy service.
-                        /// </summary>
-                        abstract corporateProxy: bool with get, set
-                        /// <summary>
-                        /// A boolean value that's true if the request matches <a href="https://developers.cloudflare.com/bots/reference/static-resources/">file extensions</a> for many types of static resources.
-                        /// </summary>
-                        abstract staticResource: bool with get, set
-                        /// <summary>
-                        /// List of IDs that correlate to the Bot Management heuristic detections made on a request (you can have multiple heuristic detections on the same request).
-                        /// </summary>
-                        abstract detectionIds: float[] with get, set
-                        /// <summary>
-                        /// A <a href="https://developers.cloudflare.com/bots/concepts/ja3-fingerprint/">JA3 Fingerprint</a> to help profile specific SSL/TLS clients
-                        /// across different destination IPs, Ports, and X509 certificates.
-                        /// </summary>
-                        abstract ja3Hash: string with get, set
-                        [<ParamObject; Emit("$0")>]
-                        static member Create (score: float, verifiedBot: bool, corporateProxy: bool, staticResource: bool, detectionIds: float[], ja3Hash: string) : BotManagement = jsNative
-
-                    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-                    type Country =
-                        | AD
-                        | AE
-                        | AF
-                        | AG
-                        | AI
-                        | AL
-                        | AM
-                        | AO
-                        | AQ
-                        | AR
-                        | AS
-                        | AT
-                        | AU
-                        | AW
-                        | AX
-                        | AZ
-                        | BA
-                        | BB
-                        | BD
-                        | BE
-                        | BF
-                        | BG
-                        | BH
-                        | BI
-                        | BJ
-                        | BL
-                        | BM
-                        | BN
-                        | BO
-                        | BQ
-                        | BR
-                        | BS
-                        | BT
-                        | BV
-                        | BW
-                        | BY
-                        | BZ
-                        | CA
-                        | CC
-                        | CD
-                        | CF
-                        | CG
-                        | CH
-                        | CI
-                        | CK
-                        | CL
-                        | CM
-                        | CN
-                        | CO
-                        | CR
-                        | CU
-                        | CV
-                        | CW
-                        | CX
-                        | CY
-                        | CZ
-                        | DE
-                        | DJ
-                        | DK
-                        | DM
-                        | DO
-                        | DZ
-                        | EC
-                        | EE
-                        | EG
-                        | EH
-                        | ER
-                        | ES
-                        | ET
-                        | FI
-                        | FJ
-                        | FK
-                        | FM
-                        | FO
-                        | FR
-                        | GA
-                        | GB
-                        | GD
-                        | GE
-                        | GF
-                        | GG
-                        | GH
-                        | GI
-                        | GL
-                        | GM
-                        | GN
-                        | GP
-                        | GQ
-                        | GR
-                        | GS
-                        | GT
-                        | GU
-                        | GW
-                        | GY
-                        | HK
-                        | HM
-                        | HN
-                        | HR
-                        | HT
-                        | HU
-                        | ID
-                        | IE
-                        | IL
-                        | IM
-                        | IN
-                        | IO
-                        | IQ
-                        | IR
-                        | IS
-                        | IT
-                        | JE
-                        | JM
-                        | JO
-                        | JP
-                        | KE
-                        | KG
-                        | KH
-                        | KI
-                        | KM
-                        | KN
-                        | KP
-                        | KR
-                        | KW
-                        | KY
-                        | KZ
-                        | LA
-                        | LB
-                        | LC
-                        | LI
-                        | LK
-                        | LR
-                        | LS
-                        | LT
-                        | LU
-                        | LV
-                        | LY
-                        | MA
-                        | MC
-                        | MD
-                        | ME
-                        | MF
-                        | MG
-                        | MH
-                        | MK
-                        | ML
-                        | MM
-                        | MN
-                        | MO
-                        | MP
-                        | MQ
-                        | MR
-                        | MS
-                        | MT
-                        | MU
-                        | MV
-                        | MW
-                        | MX
-                        | MY
-                        | MZ
-                        | NA
-                        | NC
-                        | NE
-                        | NF
-                        | NG
-                        | NI
-                        | NL
-                        | NO
-                        | NP
-                        | NR
-                        | NU
-                        | NZ
-                        | OM
-                        | PA
-                        | PE
-                        | PF
-                        | PG
-                        | PH
-                        | PK
-                        | PL
-                        | PM
-                        | PN
-                        | PR
-                        | PS
-                        | PT
-                        | PW
-                        | PY
-                        | QA
-                        | RE
-                        | RO
-                        | RS
-                        | RU
-                        | RW
-                        | SA
-                        | SB
-                        | SC
-                        | SD
-                        | SE
-                        | SG
-                        | SH
-                        | SI
-                        | SJ
-                        | SK
-                        | SL
-                        | SM
-                        | SN
-                        | SO
-                        | SR
-                        | SS
-                        | ST
-                        | SV
-                        | SX
-                        | SY
-                        | SZ
-                        | T1
-                        | TC
-                        | TD
-                        | TF
-                        | TG
-                        | TH
-                        | TJ
-                        | TK
-                        | TL
-                        | TM
-                        | TN
-                        | TO
-                        | TR
-                        | TT
-                        | TV
-                        | TW
-                        | TZ
-                        | UA
-                        | UG
-                        | UM
-                        | US
-                        | UY
-                        | UZ
-                        | VA
-                        | VC
-                        | VE
-                        | VG
-                        | VI
-                        | VN
-                        | VU
-                        | WF
-                        | WS
-                        | YE
-                        | YT
-                        | ZA
-                        | ZM
-                        | ZW
+            type IsRetryable = delegate of response: FSharp.CloudEdge.Runtime.Workers.Response * error: obj option -> bool
 
         module Url =
             [<Interface>]
@@ -859,16 +385,16 @@ module OpenAICompatibleCompletionLanguageModel =
     type Config =
         abstract provider: string with get, set
         abstract includeUsage: bool option with get, set
-        abstract headers: (unit -> Record<string, string option>) option with get, set
+        abstract headers: (unit -> JS.Record<string, string option>) option with get, set
         abstract url: (OpenAICompatibleCompletionLanguageModel.Config.Url.Options -> string) with get, set
-        abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+        abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
         abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
         /// <summary>
         /// The supported URLs for the model.
         /// </summary>
-        abstract supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>) option with get, set
+        abstract supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, url: (OpenAICompatibleCompletionLanguageModel.Config.Url.Options -> string), ?includeUsage: bool, ?headers: (unit -> Record<string, string option>), ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>)) : Config = jsNative
+        static member Create (provider: string, url: (OpenAICompatibleCompletionLanguageModel.Config.Url.Options -> string), ?includeUsage: bool, ?headers: (unit -> JS.Record<string, string option>), ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>)) : Config = jsNative
 
     module Config =
         module Url =
@@ -892,11 +418,11 @@ module OpenAICompatibleEmbeddingModel =
         abstract supportsParallelCalls: bool option with get, set
         abstract provider: string with get, set
         abstract url: (OpenAICompatibleEmbeddingModel.Config.Url.Options -> string) with get, set
-        abstract headers: (unit -> Record<string, string option>) option with get, set
-        abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+        abstract headers: (unit -> JS.Record<string, string option>) option with get, set
+        abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
         abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, url: (OpenAICompatibleEmbeddingModel.Config.Url.Options -> string), ?maxEmbeddingsPerCall: float, ?supportsParallelCalls: bool, ?headers: (unit -> Record<string, string option>), ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure) : Config = jsNative
+        static member Create (provider: string, url: (OpenAICompatibleEmbeddingModel.Config.Url.Options -> string), ?maxEmbeddingsPerCall: float, ?supportsParallelCalls: bool, ?headers: (unit -> JS.Record<string, string option>), ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure) : Config = jsNative
 
     module Config =
         module Url =
@@ -913,45 +439,18 @@ module OpenAICompatibleErrorData =
         abstract message: string with get, set
         abstract ``type``: string option with get, set
         abstract param: obj option with get, set
-        abstract code: U2<string, float> option with get, set
+        abstract code: FSharp.CloudEdge.Support.Zod.V4.EnumValue option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (message: string, ?``type``: string, ?param: obj, ?code: U2<string, float>) : Error = jsNative
-
-module OpenAICompatibleImageModel =
-    [<Interface>]
-    type Config =
-        abstract provider: string with get, set
-        abstract headers: (unit -> Record<string, string option>) option with get, set
-        abstract url: (OpenAICompatibleImageModel.Config.Url.Options -> string) with get, set
-        abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
-        abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
-        abstract _internal: OpenAICompatibleImageModel.Config.Internal option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (provider: string, url: (OpenAICompatibleImageModel.Config.Url.Options -> string), ?headers: (unit -> Record<string, string option>), ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?_internal: OpenAICompatibleImageModel.Config.Internal) : Config = jsNative
-
-    module Config =
-        [<Interface>]
-        type Internal =
-            abstract currentDate: (unit -> JS.Date) option with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (?currentDate: (unit -> JS.Date)) : Internal = jsNative
-
-        module Url =
-            [<Interface>]
-            type Options =
-                abstract modelId: string with get, set
-                abstract path: string with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (modelId: string, path: string) : Options = jsNative
+        static member Create (message: string, ?``type``: string, ?param: obj, ?code: FSharp.CloudEdge.Support.Zod.V4.EnumValue) : Error = jsNative
 
 module OpenAICompatibleProvider =
     module LanguageModel =
         [<Interface>]
         type Config =
             abstract provider: string option with get, set
-            abstract headers: (unit -> Record<string, string option>) option with get, set
+            abstract headers: (unit -> JS.Record<string, string option>) option with get, set
             abstract url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string) option with get, set
-            abstract fetch: Func<obj, obj option, JS.Promise<obj>> option with get, set
+            abstract fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction option with get, set
             abstract includeUsage: bool option with get, set
             abstract errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure option with get, set
             abstract metadataExtractor: MetadataExtractor option with get, set
@@ -962,20 +461,20 @@ module OpenAICompatibleProvider =
             /// <summary>
             /// The supported URLs for the model.
             /// </summary>
-            abstract supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>) option with get, set
+            abstract supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>) option with get, set
             /// <summary>
             /// Optional function to transform the request body before sending it to the API.
             /// This is useful for proxy providers that may require a different request format
             /// than the official OpenAI API.
             /// </summary>
-            abstract transformRequestBody: (Record<string, obj> -> Record<string, obj>) option with get, set
+            abstract transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>) option with get, set
             /// <summary>
             /// Optional usage converter for OpenAI-compatible providers with different
             /// token accounting semantics.
             /// </summary>
             abstract convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage) option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?provider: string, ?headers: (unit -> Record<string, string option>), ?url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string), ?fetch: Func<obj, obj option, JS.Promise<obj>>, ?includeUsage: bool, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?metadataExtractor: MetadataExtractor, ?supportsStructuredOutputs: bool, ?supportedUrls: (unit -> U2<JS.Promise<Record<string, obj[]>>, Record<string, obj[]>>), ?transformRequestBody: (Record<string, obj> -> Record<string, obj>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Config = jsNative
+            static member Create (?provider: string, ?headers: (unit -> JS.Record<string, string option>), ?url: (OpenAICompatibleChatLanguageModel.Config.Url.Options -> string), ?fetch: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FetchFunction, ?includeUsage: bool, ?errorStructure: OpenAICompatibleChatLanguageModel.Config.ErrorStructure, ?metadataExtractor: MetadataExtractor, ?supportsStructuredOutputs: bool, ?supportedUrls: (unit -> U2<JS.Promise<JS.Record<string, Fable.Core.TS.Es.RegExp[]>>, JS.Record<string, Fable.Core.TS.Es.RegExp[]>>), ?transformRequestBody: (JS.Record<string, obj> -> JS.Record<string, obj>), ?convertUsage: (OpenAICompatibleChatLanguageModel.Config.ConvertUsage.Usage option -> FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Usage)) : Config = jsNative
 
 module ProviderErrorStructure =
-    type IsRetryable<'T> = delegate of response: obj * error: 'T option -> bool
+    type IsRetryable<'T> = delegate of response: FSharp.CloudEdge.Runtime.Workers.Response * error: 'T option -> bool

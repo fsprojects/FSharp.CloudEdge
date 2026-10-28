@@ -1,8 +1,11 @@
 # Local generator tools
 
-Contributors regenerate bindings with pinned Xantham and Hawaii .NET tools. Their source
-checkouts are used by the bootstrap step to build the local versions recorded in
-`.config/dotnet-tools.json` and `config/tool-packages.json`.
+Contributors regenerate bindings with pinned Xantham and Hawaii .NET tools, recorded in
+`.config/dotnet-tools.json` and `config/tool-packages.json`. The current contributor setup
+packs Xantham and its matching support libraries from a reviewed source checkout, and
+Hawaii from its reviewed branch. [`NuGet.Config`](../NuGet.Config) lists the ignored local
+feed and nuget.org. The public Fickl tool and transitive Fickl.Core support dependency
+are pinned independently of the local generator packages.
 
 Applications consuming [CloudEdge packages](https://www.nuget.org/packages?q=FSharp.CloudEdge)
 use the released Xantham support packages selected in
@@ -11,15 +14,22 @@ checkouts or the contributor bootstrap process.
 
 ## First setup
 
-Use the reviewed Xantham and Hawaii branches beside FSharp.CloudEdge. The bootstrap script accepts alternate locations when your checkout layout differs:
+Use the reviewed Xantham revision and Hawaii branch beside FSharp.CloudEdge. The bootstrap script accepts explicit locations when your checkout layout differs:
 
 ```sh
 npm ci
-npm run tools:bootstrap -- --xantham-source ../Xantham --hawaii-source ../Hawaii
+npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
+npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
 npm run tools:restore
 npm run tools:check
-npm run test:support-package
 ```
+
+`npm run test:support-package` smoke-tests the exact local `Xantham.Fable.Core` archive
+selected in the configuration. An alternate verified feed can be supplied with
+`npm run test:support-package -- --feed <directory>`.
+
+The Xantham bootstrap records immutable `-local.<digest>` package versions for the selected
+source and build recipe. Review the recorded source revision before accepting generated output.
 
 Bootstrap runs `dotnet pack` on each generator project in Release configuration, writes the packages to the ignored `artifacts/tool-feed/` directory, and installs them into this repository's local tool manifest. The normal calls are:
 
@@ -30,11 +40,15 @@ dotnet tool run hawaii-unofficial -- --version
 
 The manifest at `.config/dotnet-tools.json` pins the versions. `config/tool-packages.json` records package and installed payload hashes, which the generation runners check before and after invoking a tool. Source and build receipts remain under `artifacts/tools/bootstrap/`. The pinned TypeScript compiler still comes from the root npm installation; Xantham's tool package does not embed it.
 
-Local package versions include a digest of the source and build recipe. Updating a generator checkout has no effect on routine generation until you explicitly bootstrap that tool again:
+Local package versions include a digest of the source and build recipe. Hawaii and ordinary
+SDK generation run the authenticated installed tools, so changing a source checkout has no
+effect until bootstrap runs again. The optional Agents Pi operation projection additionally
+builds `generators/xantham` against its exact configured source revision. Set
+`CLOUDEDGE_XANTHAM_ROOT` to that checkout when using an alternate layout. The support
+packages and projected source adapter must describe the same accepted generator revision:
 
 ```sh
 npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham
-npm run tools:bootstrap -- --only hawaii --hawaii-source ../Hawaii
 ```
 
 Review the resulting manifest, package lock and generated-source changes together. Keep existing package versions immutable. Bootstrap refuses a cached archive that disagrees with its build receipt.
@@ -49,13 +63,13 @@ Their temporary projects live under `artifacts/`. Generated SDK projects referen
 package versions rather than peer source projects.
 
 `NuGet.Config` includes the local feed and nuget.org. `npm run test:support-package` checks
-package-only .NET compilation and Fable key-value properties and indexers.
+package-only .NET compilation and Fickl-compiled key-value properties and indexers.
 `npm run repro:upstream-support-helpers` exercises the corrected helper functions in the
 bootstrapped package; the regression is described in [upstream issues](upstream-issues.md).
 
 ## Routine generation
 
-After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). They resolve installed tools through the local manifest. They do not compile the generator repositories or run a sibling DLL.
+After bootstrap, use the generation and build commands in the root README and the [Hawaii pipeline](../generators/hawaii/README.md). Ordinary generation resolves the installed tools through the local manifest. Only explicitly projected SDK targets compile and run the source adapter against their pinned Xantham checkout.
 
 `npm run tools:restore` restores the versions already in the manifest. It requires access to the local archives until those versions are available from a package feed. A fresh contributor therefore needs either the matching reviewed archives or the source bootstrap step. Locally rebuilding a package can change archive bytes; review the new package lock and rerun validation before treating its output as equivalent.
 

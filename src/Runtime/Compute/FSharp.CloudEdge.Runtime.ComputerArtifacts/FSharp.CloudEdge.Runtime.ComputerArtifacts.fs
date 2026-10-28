@@ -24,9 +24,9 @@ type WorkspaceObserver =
     /// (or its promise) unchanged so the wrapping is invisible to the
     /// caller. Errors thrown by <c>run</c> must propagate.
     /// </summary>
-    abstract span<'T>: name: string * attributes: ReadonlyRecord<string, WorkspaceAttributeValue option> * run: (WorkspaceSpan -> JS.Promise<'T>) -> JS.Promise<'T>
+    abstract span<'T>: name: string * attributes: JS.ReadonlyRecord<string, WorkspaceAttributeValue option> * run: (WorkspaceSpan -> JS.Promise<'T>) -> JS.Promise<'T>
     [<ParamObject; Emit("$0")>]
-    static member Create (span: Func<string, ReadonlyRecord<string, WorkspaceAttributeValue option>, (WorkspaceSpan -> JS.Promise<'T>), JS.Promise<'T>>) : WorkspaceObserver = jsNative
+    static member Create (span: Func<string, JS.ReadonlyRecord<string, WorkspaceAttributeValue option>, (WorkspaceSpan -> JS.Promise<'T>), JS.Promise<'T>>) : WorkspaceObserver = jsNative
 
 [<Interface>]
 type WorkspaceSpan =
@@ -77,78 +77,37 @@ module Artifacts =
         [<ParamObject; Emit("$0")>]
         static member Create (?description: string, ?readOnly: bool) : ArtifactImportOptions = jsNative
 
-    /// <summary>
-    /// A repo summary as returned by <c>list</c>: the binding's
-    /// <c>ArtifactsRepoInfo</c> without the <c>remote</c> field, with the <c>name</c>
-    /// rewritten to its local (unscoped) form.
-    /// </summary>
-    [<Interface>]
-    type ArtifactRepoSummary =
-        /// <summary>
-        /// Unique repository ID.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// Repository name.
-        /// </summary>
-        abstract name: string with get, set
-        /// <summary>
-        /// Repository description, or null if not set.
-        /// </summary>
-        abstract description: string option with get, set
-        /// <summary>
-        /// Default branch name (e.g. "main").
-        /// </summary>
-        abstract defaultBranch: string with get, set
-        /// <summary>
-        /// ISO 8601 creation timestamp.
-        /// </summary>
-        abstract createdAt: string with get, set
-        /// <summary>
-        /// ISO 8601 last-updated timestamp.
-        /// </summary>
-        abstract updatedAt: string with get, set
-        /// <summary>
-        /// ISO 8601 timestamp of the last push, or null if never pushed.
-        /// </summary>
-        abstract lastPushAt: string option with get, set
-        /// <summary>
-        /// Fork source (e.g. "github:owner/repo", "artifacts:namespace/repo"), or null if not a fork.
-        /// </summary>
-        abstract source: string option with get, set
-        /// <summary>
-        /// Whether the repository is read-only.
-        /// </summary>
-        abstract readOnly: bool with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (id: string, name: string, defaultBranch: string, createdAt: string, updatedAt: string, readOnly: bool, ?description: string, ?lastPushAt: string, ?source: string) : ArtifactRepoSummary = jsNative
+    type ArtifactRepoSummary = FSharp.CloudEdge.Runtime.Workers.ArtifactsRepoListResult.Repos.Item
 
     /// <summary>
-    /// The session-scoped client.
+    /// The client, session-scoped or namespace-wide.
     /// </summary>
     [<Interface>]
     type ArtifactClient =
         /// <summary>
-        /// The session id every operation is scoped under.
+        /// The session id every operation is scoped under, or undefined
+        /// when the client spans the whole namespace.
         /// </summary>
-        abstract sessionId: string
+        abstract sessionId: string option
         /// <summary>
         /// Create a repo. The returned <c>name</c> is local (unscoped).
         /// </summary>
-        abstract create: name: string * ?opts: Artifacts.ArtifactClient.Create.Opts -> JS.Promise<obj>
+        abstract create: name: string * ?opts: Artifacts.ArtifactClient.Create.Opts -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateRepoResult>
         /// <summary>
         /// Resolve repository metadata. The returned <c>name</c> is local.
         /// Throws <c>ArtifactsError</c> (code <c>NOT_FOUND</c>) if it does not exist.
         /// </summary>
-        abstract get: name: string -> JS.Promise<obj>
+        abstract get: name: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsRepoInfo>
         /// <summary>
         /// List the session's repos, walking every page. Names are local.
+        /// Without a session id this is every repo in the namespace, each
+        /// under its stored name.
         /// </summary>
-        abstract list: unit -> JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactRepoSummary[]>
+        abstract list: unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsRepoListResult.Repos.Item[]>
         /// <summary>
         /// Import an external git remote into a session repo.
         /// </summary>
-        abstract import: name: string * source: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportSource * ?opts: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportOptions -> JS.Promise<obj>
+        abstract import: name: string * source: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportSource * ?opts: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateRepoResult>
         /// <summary>
         /// Delete a repo. Returns false when it does not exist.
         /// </summary>
@@ -156,17 +115,17 @@ module Artifacts =
         /// <summary>
         /// Mint a git token for a session repo.
         /// </summary>
-        abstract createToken: name: string * ?scope: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactScope * ?ttl: float -> JS.Promise<obj>
+        abstract createToken: name: string * ?scope: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactScope * ?ttl: float -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateTokenResult>
         /// <summary>
         /// List a session repo's token page (metadata only — no plaintext).
         /// </summary>
-        abstract listTokens: name: string -> JS.Promise<obj>
+        abstract listTokens: name: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsTokenListResult>
         /// <summary>
         /// Get a single token's metadata by id. The binding has no direct
         /// accessor and no token-list cursor, so this filters the page
         /// returned by <c>listTokens()</c> and throws <c>NotFoundError</c> on a miss.
         /// </summary>
-        abstract getToken: name: string * id: string -> JS.Promise<obj>
+        abstract getToken: name: string * id: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsTokenInfo>
         /// <summary>
         /// Revoke a token by id or plaintext. Returns false on a miss.
         /// </summary>
@@ -178,7 +137,7 @@ module Artifacts =
         /// </summary>
         abstract cli: input: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIInput -> JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIResult>
         [<ParamObject; Emit("$0")>]
-        static member Create (sessionId: string, create: Func<string, Artifacts.ArtifactClient.Create.Opts option, JS.Promise<obj>>, get: (string -> JS.Promise<obj>), list: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactRepoSummary[]>), import: Func<string, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportSource, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportOptions option, JS.Promise<obj>>, delete: (string -> JS.Promise<bool>), createToken: Func<string, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactScope option, float option, JS.Promise<obj>>, listTokens: (string -> JS.Promise<obj>), getToken: Func<string, string, JS.Promise<obj>>, revokeToken: Func<string, string, JS.Promise<bool>>, cli: (FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIInput -> JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIResult>)) : ArtifactClient = jsNative
+        static member Create (create: Func<string, Artifacts.ArtifactClient.Create.Opts option, JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateRepoResult>>, get: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsRepoInfo>), list: (unit -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsRepoListResult.Repos.Item[]>), import: Func<string, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportSource, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactImportOptions option, JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateRepoResult>>, delete: (string -> JS.Promise<bool>), createToken: Func<string, FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactScope option, float option, JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsCreateTokenResult>>, listTokens: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsTokenListResult>), getToken: Func<string, string, JS.Promise<FSharp.CloudEdge.Runtime.Workers.ArtifactsTokenInfo>>, revokeToken: Func<string, string, JS.Promise<bool>>, cli: (FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIInput -> JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIResult>), ?sessionId: string) : ArtifactClient = jsNative
 
     type RemoteAddFn = (Artifacts.RemoteAddFn.Opts -> JS.Promise<Artifacts.RemoteAddFn.Result.Item>)
 
@@ -191,7 +150,7 @@ module Artifacts =
         /// <summary>
         /// Environment variables. Reserved for future use.
         /// </summary>
-        abstract env: Record<string, string> option with get, set
+        abstract env: JS.Record<string, string> option with get, set
         /// <summary>
         /// Optional git seam used only by the <c>create</c> shorthand to register
         /// the remote. When absent, <c>create</c> skips the git step and instead
@@ -199,7 +158,7 @@ module Artifacts =
         /// </summary>
         abstract remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (argv: string[], ?env: Record<string, string>, ?remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn) : ArtifactsCLIInput = jsNative
+        static member Create (argv: string[], ?env: JS.Record<string, string>, ?remoteAdd: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.RemoteAddFn) : ArtifactsCLIInput = jsNative
 
     [<Interface>]
     type ArtifactsCLIResult =
@@ -214,6 +173,7 @@ module Artifacts =
     /// contract: CLI dispatchers and external callers branch on it.
     /// </summary>
     [<Interface>]
+    [<Import("ArtifactError", "@cloudflare/computer/artifacts")>]
     type ArtifactError =
         abstract code: string
         abstract name: string with get, set
@@ -227,12 +187,75 @@ module Artifacts =
         /// </summary>
         [<Import("ArtifactError.isError", "@cloudflare/computer/artifacts")>]
         static member isError (error: obj) : bool = jsNative
+        /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        [<Import("ArtifactError.captureStackTrace", "@cloudflare/computer/artifacts")>]
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        [<Import("ArtifactError.prepareStackTrace", "@cloudflare/computer/artifacts")>]
+        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        static member stackTraceLimit
+            with get (): float = jsNative
+            and set (_: float): unit = jsNative
 
     /// <summary>
     /// Raised when a repo name is empty, contains a path separator, or
     /// is otherwise unusable as the trailing segment of a scoped name.
     /// </summary>
     [<Interface>]
+    [<Import("InvalidRepoNameError", "@cloudflare/computer/artifacts")>]
     type InvalidRepoNameError =
         inherit FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactError
         [<ParamObject; Emit("$0")>]
@@ -242,13 +265,81 @@ module Artifacts =
         /// </summary>
         [<Import("InvalidRepoNameError.isError", "@cloudflare/computer/artifacts")>]
         static member isError (error: obj) : bool = jsNative
+        /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        [<Import("InvalidRepoNameError.captureStackTrace", "@cloudflare/computer/artifacts")>]
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        [<Import("InvalidRepoNameError.prepareStackTrace", "@cloudflare/computer/artifacts")>]
+        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        static member stackTraceLimit
+            with get (): float = jsNative
+            and set (_: float): unit = jsNative
 
     /// <summary>
     /// Raised when a session id is empty or contains a path separator.
     /// A session id becomes the leading segment of every scoped name,
     /// so it has the same shape constraints as a repo name.
+    /// <br /><br />
+    /// An empty id is an error rather than a way to ask for a client
+    /// without a session. That is what omitting the id does, and an id
+    /// that came out empty by accident should not silently widen a
+    /// client from one session to the whole namespace.
     /// </summary>
     [<Interface>]
+    [<Import("InvalidSessionIdError", "@cloudflare/computer/artifacts")>]
     type InvalidSessionIdError =
         inherit FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactError
         [<ParamObject; Emit("$0")>]
@@ -258,12 +349,75 @@ module Artifacts =
         /// </summary>
         [<Import("InvalidSessionIdError.isError", "@cloudflare/computer/artifacts")>]
         static member isError (error: obj) : bool = jsNative
+        /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        [<Import("InvalidSessionIdError.captureStackTrace", "@cloudflare/computer/artifacts")>]
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        [<Import("InvalidSessionIdError.prepareStackTrace", "@cloudflare/computer/artifacts")>]
+        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        static member stackTraceLimit
+            with get (): float = jsNative
+            and set (_: float): unit = jsNative
 
     /// <summary>
     /// Raised when a repo lookup misses or a token id can't be found
     /// within a repo's token list.
     /// </summary>
     [<Interface>]
+    [<Import("NotFoundError", "@cloudflare/computer/artifacts")>]
     type NotFoundError =
         inherit FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactError
         [<ParamObject; Emit("$0")>]
@@ -273,17 +427,81 @@ module Artifacts =
         /// </summary>
         [<Import("NotFoundError.isError", "@cloudflare/computer/artifacts")>]
         static member isError (error: obj) : bool = jsNative
+        /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        [<Import("NotFoundError.captureStackTrace", "@cloudflare/computer/artifacts")>]
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        [<Import("NotFoundError.prepareStackTrace", "@cloudflare/computer/artifacts")>]
+        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        static member stackTraceLimit
+            with get (): float = jsNative
+            and set (_: float): unit = jsNative
 
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
         /// <summary>
-        /// Build a session-scoped artifacts client over a namespace binding.
+        /// Build an artifacts client over a namespace binding. Pass a
+        /// session id to scope every operation to that session; omit it for
+        /// a client over the whole namespace.
         /// </summary>
         [<Import("createArtifact", "@cloudflare/computer/artifacts")>]
-        static member createArtifact (binding: obj, sessionId: string) : FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactClient = jsNative
+        static member createArtifact (binding: FSharp.CloudEdge.Runtime.Workers.Artifacts, ?sessionId: string) : FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactClient = jsNative
         [<Import("runArtifactsCLI", "@cloudflare/computer/artifacts")>]
-        static member runArtifactsCLI (client: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactClient, input: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIInput) : JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIResult> = jsNative
+        static member runArtifactsCLI (client: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactClient, input: FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIInput, ?bindingConfigured: bool) : JS.Promise<FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.ArtifactsCLIResult> = jsNative
         /// <summary>
         /// Base class for every artifacts error. The <c>code</c> field is the
         /// contract: CLI dispatchers and external callers branch on it.
@@ -300,6 +518,11 @@ module Artifacts =
         /// Raised when a session id is empty or contains a path separator.
         /// A session id becomes the leading segment of every scoped name,
         /// so it has the same shape constraints as a repo name.
+        /// <br /><br />
+        /// An empty id is an error rather than a way to ask for a client
+        /// without a session. That is what omitting the id does, and an id
+        /// that came out empty by accident should not silently widen a
+        /// client from one session to the whole namespace.
         /// </summary>
         [<Import("InvalidSessionIdError", "@cloudflare/computer/artifacts"); EmitConstructor>]
         static member InvalidSessionIdError (sessionId: string, reason: string, ?options: Artifacts.InvalidSessionIdError.Options) : FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.InvalidSessionIdError = jsNative
@@ -376,6 +599,64 @@ module Artifacts =
         /// </summary>
         abstract isError: error: obj -> bool
         /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        abstract stackTraceLimit: float with get, set
+        /// <summary>
         /// Base class for every artifacts error. The <c>code</c> field is the
         /// contract: CLI dispatchers and external callers branch on it.
         /// </summary>
@@ -392,6 +673,64 @@ module Artifacts =
         /// </summary>
         abstract isError: error: obj -> bool
         /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        abstract stackTraceLimit: float with get, set
+        /// <summary>
         /// Raised when a repo name is empty, contains a path separator, or
         /// is otherwise unusable as the trailing segment of a scoped name.
         /// </summary>
@@ -402,6 +741,11 @@ module Artifacts =
     /// Raised when a session id is empty or contains a path separator.
     /// A session id becomes the leading segment of every scoped name,
     /// so it has the same shape constraints as a repo name.
+    /// <br /><br />
+    /// An empty id is an error rather than a way to ask for a client
+    /// without a session. That is what omitting the id does, and an id
+    /// that came out empty by accident should not silently widen a
+    /// client from one session to the whole namespace.
     /// </summary>
     type InvalidSessionIdErrorConstructor =
         /// <summary>
@@ -409,9 +753,72 @@ module Artifacts =
         /// </summary>
         abstract isError: error: obj -> bool
         /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        abstract stackTraceLimit: float with get, set
+        /// <summary>
         /// Raised when a session id is empty or contains a path separator.
         /// A session id becomes the leading segment of every scoped name,
         /// so it has the same shape constraints as a repo name.
+        /// <br /><br />
+        /// An empty id is an error rather than a way to ask for a client
+        /// without a session. That is what omitting the id does, and an id
+        /// that came out empty by accident should not silently widen a
+        /// client from one session to the whole namespace.
         /// </summary>
         [<EmitConstructor>]
         abstract Create: sessionId: string * reason: string * ?options: Artifacts.InvalidSessionIdError.Options -> FSharp.CloudEdge.Runtime.ComputerArtifacts.Artifacts.InvalidSessionIdError
@@ -426,6 +833,64 @@ module Artifacts =
         /// </summary>
         abstract isError: error: obj -> bool
         /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        abstract captureStackTrace: targetObject: obj * ?constructorOpt: Fable.Core.TS.Es.Function -> unit
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        abstract prepareStackTrace: err: exn * stackTraces: obj[] -> obj
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        abstract stackTraceLimit: float with get, set
+        /// <summary>
         /// Raised when a repo lookup misses or a token id can't be found
         /// within a repo's token list.
         /// </summary>
@@ -436,9 +901,9 @@ module Artifacts =
 module Assets =
     [<Interface>]
     type R2PutBucket =
-        abstract put: key: string * value: obj * ?options: Assets.R2PutBucket.Put.Options -> JS.Promise<obj>
+        abstract put: key: string * value: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> * ?options: Assets.R2PutBucket.Put.Options -> JS.Promise<obj>
         [<ParamObject; Emit("$0")>]
-        static member Create (put: Func<string, obj, Assets.R2PutBucket.Put.Options option, JS.Promise<obj>>) : R2PutBucket = jsNative
+        static member Create (put: Func<string, FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, Assets.R2PutBucket.Put.Options option, JS.Promise<obj>>) : R2PutBucket = jsNative
 
     [<Interface>]
     type WorkspaceLike =
@@ -447,7 +912,7 @@ module Assets =
         [<ParamObject; Emit("$0")>]
         static member Create (sessionId: string, fs: Assets.WorkspaceLike.Fs) : WorkspaceLike = jsNative
 
-    type AssetsEnv = Record<string, string option>
+    type AssetsEnv = JS.Record<string, string option>
 
     [<Interface>]
     type S3Config =
@@ -500,9 +965,9 @@ module Assets =
             [<Interface>]
             type Options =
                 abstract httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata option with get, set
-                abstract customMetadata: Record<string, string> option with get, set
+                abstract customMetadata: JS.Record<string, string> option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (?httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata, ?customMetadata: Record<string, string>) : Options = jsNative
+                static member Create (?httpMetadata: Assets.R2PutBucket.Put.Options.HttpMetadata, ?customMetadata: JS.Record<string, string>) : Options = jsNative
 
             module Options =
                 [<Interface>]
@@ -522,9 +987,9 @@ module Assets =
         [<Interface>]
         type Fs =
             abstract stat: path: string -> JS.Promise<Assets.WorkspaceLike.Fs.Stat.Result.Item>
-            abstract readFile: path: string -> JS.Promise<obj>
+            abstract readFile: path: string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>
             [<ParamObject; Emit("$0")>]
-            static member Create (stat: (string -> JS.Promise<Assets.WorkspaceLike.Fs.Stat.Result.Item>), readFile: (string -> JS.Promise<obj>)) : Fs = jsNative
+            static member Create (stat: (string -> JS.Promise<Assets.WorkspaceLike.Fs.Stat.Result.Item>), readFile: (string -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>>)) : Fs = jsNative
 
         module Fs =
             module Stat =
@@ -547,9 +1012,9 @@ module Observe =
             /// omits the property in environments without the user-tracing
             /// feature flag; the adapter then degrades to a pass-through.
             /// </summary>
-            abstract tracing: obj option with get, set
+            abstract tracing: FSharp.CloudEdge.Runtime.Workers.Tracing option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (?tracing: obj) : CloudflareObserverOptions = jsNative
+            static member Create (?tracing: FSharp.CloudEdge.Runtime.Workers.Tracing) : CloudflareObserverOptions = jsNative
 
         /// <summary>The package's value exports, each bound to its import.</summary>
         [<Erase>]
@@ -574,7 +1039,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/core")>]
-            static member _default: ReadonlyRecord<string, Shell.Core.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Core.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -589,7 +1054,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/curl")>]
-            static member _default: ReadonlyRecord<string, Shell.Curl.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Curl.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -604,7 +1069,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/file")>]
-            static member _default: ReadonlyRecord<string, Shell.File.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.File.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -619,7 +1084,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/html-to-markdown")>]
-            static member _default: ReadonlyRecord<string, Shell.HtmlToMarkdown.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.HtmlToMarkdown.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -634,7 +1099,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/jq")>]
-            static member _default: ReadonlyRecord<string, Shell.Jq.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Jq.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -649,7 +1114,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/js-exec")>]
-            static member _default: ReadonlyRecord<string, Shell.JsExec.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.JsExec.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -664,7 +1129,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/python")>]
-            static member _default: ReadonlyRecord<string, Shell.Python.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Python.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -679,7 +1144,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/sqlite")>]
-            static member _default: ReadonlyRecord<string, Shell.Sqlite.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Sqlite.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -694,7 +1159,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/xan")>]
-            static member _default: ReadonlyRecord<string, Shell.Xan.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Xan.Default.Item> = jsNative
 
         module Default =
             [<Interface>]
@@ -709,7 +1174,7 @@ module Shell =
         [<Erase>]
         type Exports =
             [<Import("default", "@cloudflare/computer/shell/yq")>]
-            static member _default: ReadonlyRecord<string, Shell.Yq.Default.Item> = jsNative
+            static member _default: JS.ReadonlyRecord<string, Shell.Yq.Default.Item> = jsNative
 
         module Default =
             [<Interface>]

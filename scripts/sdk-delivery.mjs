@@ -1,5 +1,5 @@
 import path from "node:path";
-import { generationOrder } from "./catalogs.mjs";
+import { generationOrder, inferenceProfile } from "./catalogs.mjs";
 
 const requireThat = (condition, message) => { if (!condition) throw new Error(message); };
 const object = value => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -10,7 +10,7 @@ export function deliveryConfiguration(configuration, partitions, delivery, root)
   requireThat(delivery.schemaVersion === 1 && typeof delivery.name === "string"
     && Array.isArray(delivery.libraries) && delivery.libraries.length > 0,
   "SDK delivery must name a schema-1 library selection");
-  const allowed = ["schemaVersion", "name", "description", "libraries", "deferred", "supportTargets", "catalogImports", "targetOverrides"];
+  const allowed = ["schemaVersion", "name", "description", "libraries", "deferred", "supportTargets", "catalogImports", "inferenceProfiles", "targetOverrides"];
   requireThat(Object.keys(delivery).every(key => allowed.includes(key)), "SDK delivery contains an unknown field");
   const byPartition = new Map(partitions.map(partition => [partition.id, partition]));
   const byTarget = new Map(configuration.targets.map(target => [target.id, target]));
@@ -74,17 +74,30 @@ export function deliveryConfiguration(configuration, partitions, delivery, root)
   targets.push(...structuredClone(delivery.supportTargets ?? []));
   const byId = new Map(targets.map(target => [target.id, target]));
   requireThat(byId.size === targets.length, "SDK delivery and support target IDs must be unique");
+  // Targets naming one inference profile receive identical lib, types, groups and resolveNoInfer settings.
+  const inferenceSettings = ["lib", "types", "groups", "resolveNoInfer"];
+  const inferenceProfiles = delivery.inferenceProfiles ?? {};
+  requireThat(object(inferenceProfiles) && Object.values(inferenceProfiles).every(settings => object(settings)
+    && Object.keys(settings).every(key => inferenceSettings.includes(key))),
+  "inferenceProfiles may contain only lib, types, groups and resolveNoInfer settings");
   for (const [id, override] of Object.entries(delivery.targetOverrides ?? {})) {
     requireThat(byId.has(id) && object(override)
-      && Object.keys(override).every(key => ["profile", "files", "generator"].includes(key)),
+      && Object.keys(override).every(key => ["profile", "files", "inferenceProfile", "generator"].includes(key)),
     `Invalid SDK delivery override: ${id}`);
     const target = byId.get(id);
     if (override.profile !== undefined) target.profile = override.profile;
     if (override.files !== undefined) target.files = override.files;
+    if (override.inferenceProfile !== undefined) {
+      requireThat(Object.hasOwn(inferenceProfiles, override.inferenceProfile), `${id}: unknown inference profile ${override.inferenceProfile}`);
+      const generator = Object.fromEntries(Object.entries(target.generator).filter(([key]) => !inferenceSettings.includes(key)));
+      target.generator = { ...generator, ...structuredClone(inferenceProfiles[override.inferenceProfile]) };
+    }
     if (override.generator !== undefined) {
       requireThat(object(override.generator)
         && Object.keys(override.generator).every(key => ["lib", "types", "groups", "namespace", "resolveNoInfer"].includes(key)),
       `${id}: generator overrides may change inference settings, not input selection or ownership`);
+      requireThat(override.inferenceProfile === undefined || Object.keys(override.generator).every(key => !inferenceSettings.includes(key)),
+        `${id}: inference settings come from inference profile ${override.inferenceProfile}`);
       target.generator = { ...target.generator, ...override.generator };
     }
   }
@@ -97,6 +110,12 @@ export function deliveryConfiguration(configuration, partitions, delivery, root)
     const references = producers.map(producer => {
       requireThat(byId.has(producer) && producer !== id && byId.get(producer).generator.declarationCatalog === true,
         `${id}: catalog producer must name a distinct configured owner: ${producer}`);
+      const owner = byId.get(producer);
+      // A producer catalog applies to a consumer only under an identical inference profile and a shipped producer package.
+      requireThat(inferenceProfile(target.generator) === inferenceProfile(owner.generator),
+        `${id}: catalog producer ${producer} uses a different inference profile`);
+      requireThat(owner.package === target.package || target.generator.groups?.[owner.package] === "ship",
+        `${id}: catalog producer ${producer} owns ${owner.package}, which ${id} must ship`);
       return slash(path.relative(packageDirectory, path.join(root, "artifacts", producer, "declarations.json")));
     });
     target.dependencies = [...new Set([...target.dependencies, ...producers])];

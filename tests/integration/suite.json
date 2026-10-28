@@ -506,8 +506,7 @@
       ],
       "libraries": [
         "containers",
-        "sandbox",
-        "sandbox--bridge"
+        "sandbox"
       ],
       "dependsOn": [
         "sdk.contracts",

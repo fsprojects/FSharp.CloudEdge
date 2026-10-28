@@ -40,7 +40,7 @@ function uniqueMap(entries, label) {
 
 /** Catalog API hashes cover emitted declarations. They do not assert runtime behavior. */
 export function catalogContract(target, catalog) {
-  requireThat(catalog.schemaVersion === 1 && catalog.owner === target.generator.module
+  requireThat([1, 2].includes(catalog.schemaVersion) && catalog.owner === target.generator.module
     && Array.isArray(catalog.declarations) && Array.isArray(catalog.inputs), `${target.id}: invalid declaration catalog`);
   const declarations = uniqueMap(catalog.declarations.filter(item => item.owner === catalog.owner).map(item => {
     requireThat(typeof item.fSharpName === "string" && typeof item.role === "string"
@@ -162,6 +162,7 @@ export function snapshotContracts({ root = defaultRoot } = {}) {
       publicInputs, ...contract, provenance: { profileLockSha256: provenance.profileLockSha256,
         profileManifestSha256: provenance.profileManifestSha256, overlayFingerprint: provenance.inputOverlays.fingerprint,
         typescript: provenance.typescript, compiler: catalog.compiler, generator: catalog.generator,
+        catalogSchemaVersion: catalog.schemaVersion, compatibility: catalog.compatibility ?? null,
         inferenceProfile: catalog.inferenceProfile, sourceSha256: provenance.sourceSha256,
         declarationCatalogSha256: provenance.declarationCatalogSha256 } }];
   }), "SDK targets");

@@ -9,11 +9,13 @@ import xml.etree.ElementTree as ET
 spec = importlib.util.spec_from_file_location("hawaii_groups", Path(__file__).resolve().parents[1] / "generate.py")
 pipeline = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(pipeline)
+SCRATCH = Path(__file__).resolve().parents[3] / "tests/.scratch/hawaii-tooling"
 
 
 class GroupedOutput(unittest.TestCase):
     def setUp(self):
-        temporary = tempfile.TemporaryDirectory(prefix="hawaii-grouped-output-")
+        SCRATCH.mkdir(parents=True, exist_ok=True)
+        temporary = tempfile.TemporaryDirectory(prefix="hawaii-grouped-output-", dir=SCRATCH)
         self.addCleanup(temporary.cleanup)
         self.work = Path(temporary.name)
         self.output = self.work / "Generated"

@@ -19,7 +19,8 @@ export function selectProfiles(config, requested = [], { catalog, delivery, repo
     if (!catalog || !delivery) throw new Error("--delivery requires the SDK surface and delivery configurations");
     const plan = planPartitions(config, catalog);
     const effective = deliveryConfiguration(partitionConfiguration(config, plan), plan.partitions, delivery, repositoryRoot);
-    const targets = generationOrder(effective.configuration.targets, effective.libraries.map(library => library.id));
+    const requestedTargets = [...effective.libraries.map(library => library.id), ...effective.scope.supportTargets];
+    const targets = generationOrder(effective.configuration.targets, requestedTargets);
     const used = new Set(targets.map(target => target.profile));
     for (const id of used) if (!config.profiles.some(profile => profile.id === id))
       throw new Error(`Unknown dependency profile in delivery: ${id}`);
@@ -28,6 +29,16 @@ export function selectProfiles(config, requested = [], { catalog, delivery, repo
   for (const id of requested) if (!config.profiles.some(profile => profile.id === id))
     throw new Error(`Unknown dependency profile: ${id}`);
   return config.profiles.filter(profile => requested.length === 0 || requested.includes(profile.id));
+}
+
+/** Invoke npm's JavaScript entry point directly on Windows, without a command shell. */
+export function npmInvocation(args, { env = process.env, platform = process.platform, executable = process.execPath } = {}) {
+  const cli = env.npm_execpath ?? (platform === "win32" ? path.join(path.dirname(executable), "node_modules", "npm", "bin", "npm-cli.js") : undefined);
+  if (cli) {
+    if (!existsSync(cli)) throw new Error(`npm CLI entry point is missing: ${cli}; run through npm run install:profiles`);
+    return { command: executable, args: [cli, ...args] };
+  }
+  return { command: "npm", args };
 }
 
 async function main() {
@@ -47,9 +58,10 @@ async function main() {
       const cwd = path.resolve(root, profile.directory);
       if (cwd !== root && !cwd.startsWith(root + path.sep)) throw new Error(`Profile path escapes the project: ${profile.id}`);
       const command = existsSync(path.join(cwd, "package-lock.json")) ? "ci" : "install";
+      const npm = npmInvocation([command, "--ignore-scripts", "--no-audit", "--no-fund"]);
       const log = createWriteStream(path.join(directory, `${profile.id}.log`));
       const result = await new Promise((resolve) => {
-        const child = spawn("npm", [command, "--ignore-scripts", "--no-audit", "--no-fund"], { cwd, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1", PUPPETEER_SKIP_DOWNLOAD: "true" } });
+        const child = spawn(npm.command, npm.args, { cwd, stdio: ["ignore", "pipe", "pipe"], env: { ...process.env, PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1", PUPPETEER_SKIP_DOWNLOAD: "true" } });
         child.stdout.pipe(log, { end: false });
         child.stderr.pipe(log, { end: false });
         child.once("error", (error) => resolve({ error: error.message }));

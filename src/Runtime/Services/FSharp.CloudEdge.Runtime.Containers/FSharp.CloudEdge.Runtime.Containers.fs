@@ -11,14 +11,14 @@ open Fable.Core.JS
 open Fable.Core.TS.Dom
 
 [<Erase>]
-type OutboundHandlerContext<'Params> = private OutboundHandlerContext__ of obj
+type OutboundHandlerContext<'Params> = private Phantom_OutboundHandlerContext__ of obj
 
 type OutboundHandler<'E, 'P> = delegate of req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'E * ctx: obj -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
 
 type OutboundHandlerParams = FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord
 
 [<Erase>]
-type OutboundHandlerParamsOf<'THandler> = private OutboundHandlerParamsOf__ of obj
+type OutboundHandlerParamsOf<'THandler> = private Phantom_OutboundHandlerParamsOf__ of obj
 
 type BivarianceHack<'E> = delegate of req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: 'E * ctx: obj -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
 
@@ -37,11 +37,11 @@ type ContainerProxy =
     abstract queue: (FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj> -> JS.Promise<unit> option) option with get, set
     abstract scheduled: (FSharp.CloudEdge.Runtime.Workers.ScheduledController -> JS.Promise<unit> option) option with get, set
     abstract tail: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option) option with get, set
-    abstract tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailEventHandlerType>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailEventHandlerType2>) option with get, set
+    abstract tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerType option>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerObject> option) option with get, set
     abstract test: (obj -> JS.Promise<unit> option) option with get, set
     abstract trace: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option) option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (fetch: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>), ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<ContainerProxy.Ctx.Item>, env: obj, ?email: (FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage -> JS.Promise<unit> option), ?connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option), ?queue: (FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj> -> JS.Promise<unit> option), ?scheduled: (FSharp.CloudEdge.Runtime.Workers.ScheduledController -> JS.Promise<unit> option), ?tail: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option), ?tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailEventHandlerType>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailEventHandlerType2>), ?test: (obj -> JS.Promise<unit> option), ?trace: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option)) : ContainerProxy = jsNative
+    static member Create (fetch: (FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>), ctx: FSharp.CloudEdge.Runtime.Workers.ExecutionContext<ContainerProxy.Ctx.Item>, env: obj, ?email: (FSharp.CloudEdge.Runtime.Workers.ForwardableEmailMessage -> JS.Promise<unit> option), ?connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option), ?queue: (FSharp.CloudEdge.Runtime.Workers.MessageBatch<obj> -> JS.Promise<unit> option), ?scheduled: (FSharp.CloudEdge.Runtime.Workers.ScheduledController -> JS.Promise<unit> option), ?tail: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option), ?tailStream: (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.Onset> -> U3<JS.Promise<FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerType option>, (FSharp.CloudEdge.Runtime.Workers.TailStream.TailEvent<FSharp.CloudEdge.Runtime.Workers.TailStream.EventType> -> JS.Promise<unit> option), FSharp.CloudEdge.Runtime.Workers.TailStream.TailEventHandlerObject> option), ?test: (obj -> JS.Promise<unit> option), ?trace: (FSharp.CloudEdge.Runtime.Workers.TraceItem[] -> JS.Promise<unit> option)) : ContainerProxy = jsNative
 
 type BivarianceHack2 = delegate of req: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> * env: obj * ctx: OutboundHandlerContext<obj> -> U2<JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>, FSharp.CloudEdge.Runtime.Workers.Response>
 
@@ -72,10 +72,10 @@ type Container<'Env> =
     abstract defaultPort: float option with get, set
     abstract requiredPorts: float[] option with get, set
     abstract sleepAfter: U2<string, float> with get, set
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     abstract entrypoint: string[] option with get, set
     abstract enableInternet: bool with get, set
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     abstract interceptHttps: bool with get, set
     abstract allowedHosts: string[] option with get, set
     abstract deniedHosts: string[] option with get, set
@@ -261,12 +261,6 @@ type Container<'Env> =
     /// </summary>
     abstract renewActivityTimeout: unit -> unit
     /// <summary>
-    /// Decrement the inflight request counter.
-    /// When the counter transitions to 0, renew the activity timeout so the
-    /// inactivity window starts fresh from the moment the last request completes.
-    /// </summary>
-    abstract decrementInflight: obj with get, set
-    /// <summary>
     /// Schedule a task to be executed in the future.
     /// <br /><br />
     /// We strongly recommend using this instead of the <c>alarm</c> handler.
@@ -276,7 +270,7 @@ type Container<'Env> =
     /// <param name="callback">Name of the method to call</param>
     /// <param name="payload">Data to pass to the callback</param>
     /// <returns>Schedule object representing the scheduled task</returns>
-    abstract schedule<'T>: ``when``: U2<float, JS.Date> * callback: string * ?payload: 'T -> JS.Promise<Container.Schedule.Result.Item>
+    abstract schedule<'T>: ``when``: U2<float, Fable.Core.TS.Es.Date> * callback: string * ?payload: 'T -> JS.Promise<Container.Schedule.Result.Item<'T>>
     /// <summary>
     /// Send a request to the container (HTTP or WebSocket) using standard fetch API signature
     /// <br /><br />
@@ -300,123 +294,45 @@ type Container<'Env> =
     /// </summary>
     /// <param name="request">The request to handle</param>
     abstract fetch: request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.Response>
-    abstract container: obj with get, set
-    abstract onStopCalled: obj with get, set
-    abstract state: obj with get, set
-    abstract monitor: obj with get, set
-    abstract startInFlight: obj with get, set
-    abstract monitoredPromise: obj with get, set
-    abstract sleepAfterMs: obj with get, set
-    abstract inflightRequests: obj with get, set
-    abstract outboundByHostOverrides: obj with get, set
-    abstract outboundHandlerOverride: obj option with get, set
-    abstract allowedHostsOverride: obj option with get, set
-    abstract deniedHostsOverride: obj option with get, set
-    abstract hasInterceptAllRegistration: obj with get, set
-    /// <summary>
-    /// Validates that a method name exists in the outboundHandlers registry for this class.
-    /// </summary>
-    /// <remarks>@throws Error if the method name is not found</remarks>
-    abstract validateOutboundHandlerMethodName: obj with get, set
-    abstract effectiveAllowedHosts: obj
-    abstract effectiveDeniedHosts: obj
-    abstract getOutboundConfiguration: obj with get, set
-    abstract persistOutboundConfiguration: obj with get, set
-    abstract restoreOutboundConfiguration: obj with get, set
-    /// <summary>
-    /// Returns true if a catch-all outbound HTTP interception is needed.
-    /// This is the case when a static <c>outbound</c> handler or a runtime
-    /// <c>outboundHandlerOverride</c> (catch-all) is configured.
-    /// When false, we only intercept specific hosts to avoid overhead.
-    /// </summary>
-    abstract needsCatchAllInterception: obj with get, set
-    abstract hasMutableOutboundConfiguration: obj with get, set
-    abstract shouldInterceptAllOutbound: obj with get, set
-    abstract getStaticOutboundByHostKeys: obj with get, set
-    /// <summary>
-    /// Collects all hostnames that need per-host outbound interception.
-    /// This path is only used for the narrow optimized case where outbound
-    /// handling is static and host-specific.
-    /// </summary>
-    abstract getHostsToIntercept: obj with get, set
-    abstract refreshOutboundInterception: obj with get, set
-    /// <summary>
-    /// Applies (or re-applies) outbound HTTP interception with the current
-    /// default registries + runtime overrides passed through ContainerProxy props.
-    /// <br /><br />
-    /// Uses per-host interception only for static host-specific outbound handlers.
-    /// As soon as the config needs to evaluate all hosts (catch-all outbound,
-    /// allow/deny lists, or runtime-mutated outbound config), we promote the
-    /// container to intercept-all and keep it there until the instance restarts.
-    /// <br /><br />
-    /// When <c>interceptHttps</c> is enabled, also applies HTTPS interception:
-    /// - Intercept-all mode: <c>interceptOutboundHttps('*', ...)</c> for all HTTPS traffic
-    /// - Per-host mode: <c>interceptOutboundHttps(host, ...)</c> for each known host
-    /// </summary>
-    abstract applyOutboundInterception: obj with get, set
-    /// <summary>
-    /// Execute SQL queries against the Container's database
-    /// </summary>
-    abstract sql: obj with get, set
-    abstract requestAndPortFromContainerFetchArgs: obj with get, set
-    /// <summary>
-    /// The method prioritizes port sources in this order:
-    /// 1. Ports specified directly in the method call
-    /// 2. <c>requiredPorts</c> class property (if set)
-    /// 3. <c>defaultPort</c> (if neither of the above is specified)
-    /// 4. Falls back to port 33 if none of the above are set
-    /// </summary>
-    abstract getPortsToCheck: obj with get, set
-    /// <summary>
-    /// Tries to start a container if it's not already running
-    /// Returns the number of tries used
-    /// </summary>
-    abstract startContainerIfNotRunning: obj with get, set
-    abstract doStartContainer: obj with get, set
-    abstract setupMonitorCallbacks: obj with get, set
     abstract deleteSchedules: name: string -> unit
     /// <summary>
     /// Method called when an alarm fires
     /// Executes any scheduled tasks that are due
     /// </summary>
     abstract alarm: ?alarmProps: FSharp.CloudEdge.Runtime.Workers.AlarmInvocationInfo -> JS.Promise<unit>
-    abstract timeout: float option with get, set
+    abstract timeout: obj option with get, set
     abstract resolve: (unit -> unit) option with get, set
-    abstract syncPendingStoppedEvents: obj with get, set
-    abstract callOnStop: obj with get, set
     /// <summary>
     /// Schedule the next alarm based on upcoming tasks
     /// </summary>
     abstract scheduleNextAlarm: ?ms: float -> JS.Promise<unit>
-    abstract listSchedules: name: string -> JS.Promise<FSharp.CloudEdge.Runtime.Containers.Container.Schedule.Result.Item[]>
-    abstract toSchedule: obj with get, set
+    abstract listSchedules<'T>: name: string -> JS.Promise<Container.Schedule.Result.Item<'T>[]>
     /// <summary>
     /// Get a scheduled task by ID
     /// </summary>
     /// <remarks>@template T Type of the payload data</remarks>
     /// <param name="id">ID of the scheduled task</param>
     /// <returns>The Schedule object or undefined if not found</returns>
-    abstract getSchedule<'T>: id: string -> JS.Promise<U2<Container.GetSchedule.Result.Item<'T>, Container.GetSchedule.Result.Item2<'T>> option>
-    abstract isActivityExpired: obj with get, set
+    abstract getSchedule<'T>: id: string -> JS.Promise<Container.Schedule.Result.Item<'T> option>
     abstract __DURABLE_OBJECT_BRAND: unit
     abstract ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> with get, set
     abstract env: 'Env with get, set
     abstract connect: (FSharp.CloudEdge.Runtime.Workers.Socket -> JS.Promise<unit> option) option with get, set
-    abstract webSocketMessage: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, U2<string, JS.ArrayBuffer>, JS.Promise<unit> option> option with get, set
+    abstract webSocketMessage: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, U2<string, Fable.Core.TS.Es.ArrayBuffer>, JS.Promise<unit> option> option with get, set
     abstract webSocketClose: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, float, string, bool, JS.Promise<unit> option> option with get, set
     abstract webSocketError: Func<FSharp.CloudEdge.Runtime.Workers.WebSocket, obj, JS.Promise<unit> option> option with get, set
     static member outboundByHost
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outboundHandlers
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outbound
         with get (): BivarianceHack2 option = jsNative
         and set (_: BivarianceHack2 option): unit = jsNative
     static member outboundProxies
-        with get (): Record<string, BivarianceHack2> option = jsNative
-        and set (_: Record<string, BivarianceHack2> option): unit = jsNative
+        with get (): JS.Record<string, BivarianceHack2> option = jsNative
+        and set (_: JS.Record<string, BivarianceHack2> option): unit = jsNative
     static member outboundProxy
         with get (): BivarianceHack2 option = jsNative
         and set (_: BivarianceHack2 option): unit = jsNative
@@ -439,10 +355,16 @@ type State2 =
 [<Interface>]
 type State3 =
     abstract lastChange: float with get, set
+    /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
     abstract status: string with get, set
     abstract exitCode: float option with get, set
-    [<ParamObject; Emit("$0")>]
-    static member Create (lastChange: float, status: string, ?exitCode: float) : State3 = jsNative
+    [<ParamObject; Emit("({ status: 'stopped_with_code', ...$0 })")>]
+    static member Create (lastChange: float, ?exitCode: float) : State3 = jsNative
+
+module State3 =
+    /// <remarks>TypeScript type: <c>"stopped_with_code"</c></remarks>
+    [<Literal>]
+    let status = "stopped_with_code"
 
 /// <summary>
 /// Message structure for communication with containers
@@ -474,7 +396,7 @@ type ContainerOptions =
     /// <summary>
     /// Environment variables to pass to the container
     /// </summary>
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     /// <summary>
     /// Custom entrypoint to override container default
     /// </summary>
@@ -484,7 +406,7 @@ type ContainerOptions =
     /// </summary>
     abstract enableInternet: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?id: string, ?defaultPort: float, ?sleepAfter: U2<string, float>, ?envVars: Record<string, string>, ?entrypoint: string[], ?enableInternet: bool) : ContainerOptions = jsNative
+    static member Create (?id: string, ?defaultPort: float, ?sleepAfter: U2<string, float>, ?envVars: JS.Record<string, string>, ?entrypoint: string[], ?enableInternet: bool) : ContainerOptions = jsNative
 
 type ContainerEventHandler = (unit -> JS.Promise<unit> option)
 
@@ -496,7 +418,7 @@ type ContainerStartConfigOptions =
     /// <summary>
     /// Environment variables to pass to the container
     /// </summary>
-    abstract envVars: Record<string, string> option with get, set
+    abstract envVars: JS.Record<string, string> option with get, set
     /// <summary>
     /// Custom entrypoint to override container default
     /// </summary>
@@ -508,9 +430,9 @@ type ContainerStartConfigOptions =
     /// <summary>
     /// Key-value metadata labels attached to the container for metrics/observability
     /// </summary>
-    abstract labels: Record<string, string> option with get, set
+    abstract labels: JS.Record<string, string> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (?envVars: Record<string, string>, ?entrypoint: string[], ?enableInternet: bool, ?labels: Record<string, string>) : ContainerStartConfigOptions = jsNative
+    static member Create (?envVars: JS.Record<string, string>, ?entrypoint: string[], ?enableInternet: bool, ?labels: JS.Record<string, string>) : ContainerStartConfigOptions = jsNative
 
 /// <summary>
 /// Options for waitForPort()
@@ -591,122 +513,21 @@ type Exports =
     static member switchPort (request: FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>>, port: float) : FSharp.CloudEdge.Runtime.Workers.Request<obj, U2<FSharp.CloudEdge.Runtime.Workers.RequestInitCfProperties, FSharp.CloudEdge.Runtime.Workers.IncomingRequestCfProperties<obj>>> = jsNative
 
 module Container =
-    module GetSchedule =
-        module Result =
-            [<Interface>]
-            type Item<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for one-time execution at a specific time
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item<'T> = jsNative
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for delayed execution
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                /// <summary>
-                /// Number of seconds to delay execution
-                /// </summary>
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item2<'T> = jsNative
-
     module Schedule =
         module Result =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
-            type Item =
-                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: obj * time: float
-                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: obj * time: float * delayInSeconds: float
-
-            [<Interface>]
-            type Item2<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for one-time execution at a specific time
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float) : Item2<'T> = jsNative
-
-            [<Interface>]
-            type Item3<'T> =
-                /// <summary>
-                /// Unique identifier for the schedule
-                /// </summary>
-                abstract taskId: string with get, set
-                /// <summary>
-                /// Name of the method to be called
-                /// </summary>
-                abstract callback: string with get, set
-                /// <summary>
-                /// Data to be passed to the callback
-                /// </summary>
-                abstract payload: 'T with get, set
-                /// <summary>
-                /// Type of schedule for delayed execution
-                /// </summary>
-                abstract ``type``: string with get, set
-                /// <summary>
-                /// Timestamp when the task should execute
-                /// </summary>
-                abstract time: float with get, set
-                /// <summary>
-                /// Number of seconds to delay execution
-                /// </summary>
-                abstract delayInSeconds: float with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (taskId: string, callback: string, payload: 'T, ``type``: string, time: float, delayInSeconds: float) : Item3<'T> = jsNative
+            type Item<'T> =
+                /// <param name="taskId">Unique identifier for the schedule</param>
+                /// <param name="callback">Name of the method to be called</param>
+                /// <param name="payload">Data to be passed to the callback</param>
+                /// <param name="time">Timestamp when the task should execute</param>
+                | [<CompiledName("scheduled")>] Scheduled of taskId: string * callback: string * payload: 'T * time: float
+                /// <param name="taskId">Unique identifier for the schedule</param>
+                /// <param name="callback">Name of the method to be called</param>
+                /// <param name="payload">Data to be passed to the callback</param>
+                /// <param name="time">Timestamp when the task should execute</param>
+                /// <param name="delayInSeconds">Number of seconds to delay execution</param>
+                | [<CompiledName("delayed")>] Delayed of taskId: string * callback: string * payload: 'T * time: float * delayInSeconds: float
 
     module SetOutboundByHosts =
         type Handlers<'Params> =
@@ -720,18 +541,18 @@ module ContainerProxy =
             abstract enableInternet: bool option with get, set
             abstract containerId: string with get, set
             abstract className: string with get, set
-            abstract outboundByHostOverrides: Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>> option with get, set
+            abstract outboundByHostOverrides: JS.Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>> option with get, set
             abstract outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj> option with get, set
             abstract allowedHosts: string[] option with get, set
             abstract deniedHosts: string[] option with get, set
             abstract interceptAll: bool option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (containerId: string, className: string, ?enableInternet: bool, ?outboundByHostOverrides: Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>>, ?outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>, ?allowedHosts: string[], ?deniedHosts: string[], ?interceptAll: bool) : Item = jsNative
+            static member Create (containerId: string, className: string, ?enableInternet: bool, ?outboundByHostOverrides: JS.Record<string, FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>>, ?outboundHandlerOverride: FSharp.CloudEdge.Runtime.Containers.ContainerProxy.Ctx.Item.OutboundByHostOverrides.Item<obj>, ?allowedHosts: string[], ?deniedHosts: string[], ?interceptAll: bool) : Item = jsNative
 
         module Item =
             module OutboundByHostOverrides =
                 [<Erase>]
-                type Item<'Params> = private Item__ of obj
+                type Item<'Params> = private Phantom_Item__ of obj
 
 module State2 =
     [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
@@ -748,10 +569,10 @@ module StopParams =
         | [<CompiledName("runtime_signal")>] RuntimeSignal
 
 type ContainerConstructor =
-    abstract outboundByHost: Record<string, BivarianceHack2> option with get, set
-    abstract outboundHandlers: Record<string, BivarianceHack2> option with get, set
+    abstract outboundByHost: JS.Record<string, BivarianceHack2> option with get, set
+    abstract outboundHandlers: JS.Record<string, BivarianceHack2> option with get, set
     abstract outbound: BivarianceHack2 option with get, set
-    abstract outboundProxies: Record<string, BivarianceHack2> option with get, set
+    abstract outboundProxies: JS.Record<string, BivarianceHack2> option with get, set
     abstract outboundProxy: BivarianceHack2 option with get, set
     [<EmitConstructor>]
     abstract Create<'Env>: ctx: FSharp.CloudEdge.Runtime.Workers.DurableObjectState<obj> * env: 'Env * ?options: ContainerOptions -> Container<'Env>

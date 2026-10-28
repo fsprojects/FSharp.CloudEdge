@@ -6,9 +6,10 @@
   "devDependencies": {
     "@ai-sdk/react": "4.0.96",
     "@chat-adapter/telegram": "4.40.0",
-    "@cloudflare/think": "0.17.0",
-    "@cloudflare/workers-types": "5.20260906.1",
-    "@types/node": "22.19.19",
-    "@types/react": "19.2.18"
+    "@cloudflare/think": "0.21.0",
+    "@cloudflare/workers-types": "5.20261025.1",
+    "@types/node": "26.4.1",
+    "@types/react": "19.2.18",
+    "zod": "4.6.7"
   }
 }

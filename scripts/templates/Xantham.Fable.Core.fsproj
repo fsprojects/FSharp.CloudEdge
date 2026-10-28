@@ -18,6 +18,7 @@
     <Content Include="Library.fs;Helpers.fs;Xantham.Fable.Core.fsproj" Pack="true" PackagePath="fable/" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Fable.Core" Version="5.6.0" />
+    <PackageReference Include="Fickl.Core" Version="0.6.7" />
   </ItemGroup>
 </Project>

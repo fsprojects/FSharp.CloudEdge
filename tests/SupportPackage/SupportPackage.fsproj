@@ -6,7 +6,7 @@
   <ItemGroup>
     <Compile Include="Smoke.fs" />
     <Compile Include="UpstreamHelpers.fs" />
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Fable.Core" Version="5.6.0" />
     <PackageReference Include="Xantham.Fable.Core" Version="$(XanthamFableCoreVersion)" />
   </ItemGroup>
 </Project>

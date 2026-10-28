@@ -1,14 +1,16 @@
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from "node:fs";
-import os from "node:os";
+import fs from "node:fs";
+import { syncBuiltinESMExports } from "node:module";
+import { scratchDirectory } from "../scratch.mjs";
 import path from "node:path";
 import test from "node:test";
 import { resumeCleanup, runLifecycle } from "../../scripts/integration/lifecycle.mjs";
 
 const fingerprint = "a".repeat(64), artifactSha256 = "b".repeat(64), resultSha256 = "c".repeat(64);
 function fixture(t, count = 3) {
-  const directory = mkdtempSync(path.join(os.tmpdir(), "cloudedge-lifecycle-"));
+  const directory = mkdtempSync(path.join(scratchDirectory(), "cloudedge-lifecycle-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const journalPath = path.join(directory, "journal.json");
   const plan = { runId: "run-0123456789abcdef", accountFingerprint: fingerprint, ttlSeconds: 60,
@@ -49,10 +51,26 @@ test("successful lifecycle journals exact ownership, collects results and verifi
   assert.equal(result.execution.resultSha256, resultSha256);
   assert.deepEqual(f.events, ["compile", "preflight", "provision:r0", "provision:r1", "provision:r2", "exercise", "collect",
     "destroy:r2", "verify:r2", "destroy:r1", "verify:r1", "destroy:r0", "verify:r0"]);
-  assert.equal(f.remote.size, 0); assert.equal(statSync(f.journalPath).mode & 0o777, 0o600);
+  assert.equal(f.remote.size, 0);
+  // Windows reports synthetic mode bits rather than POSIX access permissions.
+  if (process.platform === "win32") assert.ok(statSync(f.journalPath).mode & 0o200);
+  else assert.equal(statSync(f.journalPath).mode & 0o777, 0o600);
   assert.deepEqual(readdirSync(f.directory), ["journal.json"]);
   assert.ok(f.journal().resources.every(resource => resource.state === "absent" && resource.receipt && resource.absenceVerifiedAtUtc));
   assert.match(result.qualification, /acceptance-depends-on-configured-adapters/);
+});
+
+test("journal file flush failure propagates before any resource callback", async t => {
+  const f = fixture(t);
+  const failure = Object.assign(new Error("file flush denied"), { code: "EPERM" });
+  const flush = t.mock.method(fs, "fsyncSync", () => { throw failure; });
+  syncBuiltinESMExports();
+  try {
+    await assert.rejects(f.run(), error => error === failure);
+    assert.deepEqual(f.events, []);
+    assert.equal(existsSync(f.journalPath), false);
+    assert.equal(readdirSync(f.directory).some(file => file.endsWith(".tmp")), false);
+  } finally { flush.mock.restore(); syncBuiltinESMExports(); }
 });
 
 test("compile failure invokes no resource callbacks and remains an execution failure", async t => {
