@@ -1,11 +1,9 @@
 ---
 title: NuGet Package Catalog
-description: Package IDs for the published FSharp.CloudEdge release and the 0.1.1 candidate.
+description: Package IDs for the FSharp.CloudEdge 0.1.1 release.
 ---
 
-The published **0.1.0** release contains 47 packages. [Browse the published FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge).
-
-The **0.1.1 package set** contains the following 55 packages, including Pi. Follow a versioned link to check its availability. The [installation guide](../guide/packages.md) explains the required package sources.
+The **0.1.1 package set** contains the following 55 packages, including Pi. [Browse FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge), or follow a versioned link to check its availability. The [installation guide](../guide/packages.md) explains the required package sources.
 
 | Package ID | Version | Target | Consumer |
 | --- | --- | --- | --- |

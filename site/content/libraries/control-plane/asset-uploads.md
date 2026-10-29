@@ -87,7 +87,7 @@ let check (compute: ComputeClient) accountId (assets: Manifest.Asset list) =
 ```
 
 :::warning
-The example response in the direct-upload guide has `"errors": null` and `"messages": null`. The 0.1.0 client reads both fields as lists, and the call throws a `JsonException` when either one is `null`. The client decodes a response that has empty lists in both fields.
+The example response in the direct-upload guide has `"errors": null` and `"messages": null`. The 0.1.1 client reads both fields as lists, and the call throws a `JsonException` when either one is `null`. The client decodes a response that has empty lists in both fields.
 :::
 
 ## Batched Upload

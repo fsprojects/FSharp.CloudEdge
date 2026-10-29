@@ -56,7 +56,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     )
 ```
 
-<div class="ce-needs"><p><strong>Needs</strong> the Workers Paid plan and a container image whose server listens on port 8080. The <code>RESIZER</code> binding refers to a Durable Object class that extends <code>Container</code>. F# code cannot subclass <code>Container</code> in 0.1.0, so that class is written in JavaScript. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how an F# program declares a Worker's bindings.</p></div>
+<div class="ce-needs"><p><strong>Needs</strong> the Workers Paid plan and a container image whose server listens on port 8080. The <code>RESIZER</code> binding refers to a Durable Object class that extends <code>Container</code>. The current <code>Container</code> binding is an interface that F# code cannot subclass, so that class is written in JavaScript. <a href="/FSharp.CloudEdge/libraries/control-plane/worker-upload/">Worker Upload</a> shows how an F# program declares a Worker's bindings.</p></div>
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 

@@ -165,7 +165,7 @@ let consent: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ## Single-Page App
 
-The Worker serves a built front end from Workers KV. `serveSinglePageApp` maps page routes such as `/settings` to `index.html`, so the front end's own router handles them. Because the result of `getAssetFromKV` is typed `obj` in 0.1.0, this Worker is a plain record whose `fetch` returns that result unchanged.
+The Worker serves a built front end from Workers KV. `serveSinglePageApp` maps page routes such as `/settings` to `index.html`, so the front end's own router handles them. The Worker's `fetch` returns the response promise from `getAssetFromKV`.
 
 ```fsharp
 open Fable.Core
@@ -283,7 +283,7 @@ export const signup = new Cabidela(schema, ({
 
 `getSwaggerUI` and `getReDocUI` each build a standalone HTML page. That HTML loads its viewer from jsDelivr and fetches the OpenAPI document at the URL you pass. This Worker serves the document itself at `/openapi.json` and ReDoc at `/redoc`. Swagger UI is the response for every other path.
 
-Chanfana's routes are `OpenAPIRoute` subclasses registered on a Hono or itty-router app. In 0.1.0 `OpenAPIRoute` is an interface that F# code cannot subclass, and neither router has an F# binding. This Worker calls the two documentation functions directly, since each takes only a URL.
+Chanfana's routes are `OpenAPIRoute` subclasses registered on a Hono or itty-router app. The current `OpenAPIRoute` binding is an interface that F# code cannot subclass. This Worker calls the two documentation functions directly, since each takes only a URL.
 
 ```fsharp
 open Fable.Core
@@ -372,7 +372,7 @@ export default worker;
 | `Runtime.Cabidela` | `@cloudflare/cabidela` 0.2.4 | JSON Schema validation |
 | `Runtime.Chanfana` | `chanfana` 3.4.0 | OpenAPI schemas and docs |
 
-Using Dynamic Workflows from F# requires a cast in 0.1.0, so the library has no example here. A Worker Loader stub's `getEntrypoint` is typed `obj`, and `createDynamicWorkflowEntrypoint` takes a loader that must produce a typed `WorkflowRunner`.
+Using Dynamic Workflows from F# requires a cast in 0.1.1, so the library has no example here. A Worker Loader stub's `getEntrypoint` is typed `obj`, and `createDynamicWorkflowEntrypoint` takes a loader that must produce a typed `WorkflowRunner`.
 
 ## Related Pages
 
