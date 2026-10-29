@@ -12,9 +12,9 @@ The version segment in a support name identifies an upstream API family, not the
 
 ## Release availability
 
-All **47 packages** in the **0.1.0** release are published on nuget.org. [Browse all FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge), or use the [package catalog](../libraries/packages.md) to find a specific library.
+The **0.1.1** release contains **55 packages**, including the Pi lifecycle libraries. [Browse FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge), or use the [package catalog](../libraries/packages.md) to find a specific library. During publication, package pages become available as NuGet indexes each package.
 
-The 0.1.0 release uses the published `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` **0.1.0** packages. Contributors can use the [source build](local-build.md) when regenerating or changing the bindings.
+The 0.1.1 packages use `Xantham.Fable.Core` **0.3.0-beta.1** and `Xantham.Fable.Core.TS` **0.4.0-beta.3** from Xantham's public Cloudsmith feed. Contributors can use the [source build](local-build.md) when regenerating or changing the bindings.
 
 ## Add the package your application uses
 
@@ -34,7 +34,7 @@ The latter brings in `FSharp.CloudEdge.Core.Api` transitively. You can list it e
 
 Samples use `0.1.*` to accept stable patches in the `0.1` series without moving to `0.2`. Catalog links identify concrete package versions. For repeatable application builds, commit a NuGet lock file and use locked restore in CI; deliberately refresh it when adopting a patch. Release validation pins the candidate and support versions exactly and records every resolved package.
 
-The NuGet feed is `https://api.nuget.org/v3/index.json`. A package page such as `https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0` is for browsing; it is not a package source URL.
+The NuGet feed is `https://api.nuget.org/v3/index.json`. A package page such as `https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1` is for browsing; it is not a package source URL.
 
 **0.1.1** keeps FSharp.CloudEdge packages on nuget.org and uses newer Xantham support packages from Xantham's public Cloudsmith feed. To restore this version, add `https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json` as a NuGet package source alongside nuget.org.
 
