@@ -96,6 +96,6 @@ Useful test cases include repository response shapes, namespace and session nami
 
 ## NuGet packages
 
-[Runtime.ComputerArtifacts 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.ComputerArtifacts 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

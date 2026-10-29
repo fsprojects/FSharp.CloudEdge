@@ -35,7 +35,7 @@ type Headcount = {| attending: float |}
 type Invitation(ctx: Workers.DurableObjectState<obj>, env: obj) =
     inherit Runtime.DurableObject<obj, obj>(ctx, env)
 
-    let schema = ActorStorage.Exports.Storage ctx.storage
+    let schema = ActorStorage.Exports.Storage (unbox ctx.storage)
 
     do schema.migrations <- [|
         Actors.SQLSchemaMigration.Create(1., "RSVPs", "CREATE TABLE IF NOT EXISTS rsvps (email TEXT PRIMARY KEY)")
@@ -74,25 +74,26 @@ module OAuth = FSharp.CloudEdge.Runtime.WorkersOauthProvider
 
 type User = {| userId: string |}
 
-let account: OAuth.OAuthProviderOptions.ApiHandler<obj> =
-    OAuth.OAuthProviderOptions.ApiHandler.Create(
+let account: OAuth.OAuthProviderOptions.ApiHandler<obj, User> =
+    unbox (OAuth.OAuthProviderOptions.ApiHandler.Base.Create(
         fetch = fun _ _ (ctx: Workers.ExecutionContext<User>) ->
-            Workers.Exports.Response.json {| userId = ctx.props.userId |})
+            Workers.Exports.Response.json {| userId = ctx.props.userId |} |> U2.Case2))
 
 let home: Workers.ExportedHandler<obj, obj, obj, obj> =
     Workers.ExportedHandler.Create(
-        fetch = fun _ _ _ -> U2.Case2(Workers.Exports.Response.Create("Sign in to continue")))
+        fetch = fun _ _ _ -> U2.Case2(Workers.Exports.Response.Create(U9.Case1 "Sign in to continue")))
 
 [<ExportDefault>]
 let provider =
     OAuth.Exports.OAuthProvider(
         OAuth.OAuthProviderOptions.Create(
-            defaultHandler = home,
+            defaultHandler = U2.Case1 home,
             authorizeEndpoint = "/authorize",
             tokenEndpoint = "/oauth/token",
+            resourceMetadata = OAuth.OAuthProtectedResourceMetadata.Create("https://api.example.com"),
             clientRegistrationEndpoint = "/oauth/register",
             apiRoute = U2.Case1 "/api/",
-            apiHandler = U2.Case2 account))
+            apiHandler = U2.Case2 (unbox account)))
 ```
 
 <div class="ce-needs"><p><strong>Needs</strong> a KV namespace bound as <code>OAUTH_KV</code>, where the provider stores grants and tokens.</p></div>
@@ -100,6 +101,7 @@ let provider =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
+
 import { OAuthProvider } from "@cloudflare/workers-oauth-provider";
 
 export const account = {
@@ -116,6 +118,9 @@ export const provider = new OAuthProvider({
     defaultHandler: home,
     authorizeEndpoint: "/authorize",
     tokenEndpoint: "/oauth/token",
+    resourceMetadata: {
+        resource: "https://api.example.com",
+    },
     apiRoute: "/api/",
     apiHandler: account,
     clientRegistrationEndpoint: "/oauth/register",
@@ -145,13 +150,13 @@ let consent: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 if url.pathname <> "/authorize" then
-                    return Workers.Exports.Response.Create("Not found", Workers.ResponseInit.Create(status = 404.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Not found", Workers.ResponseInit.Create(status = 404.))
                 else
-                    let! authRequest = env.OAUTH_PROVIDER.parseAuthRequest request |> Async.AwaitPromise
+                    let! authRequest = env.OAUTH_PROVIDER.parseAuthRequest (unbox request) |> Async.AwaitPromise
                     let! client = env.OAUTH_PROVIDER.lookupClient authRequest.clientId |> Async.AwaitPromise
                     let name = client |> Option.bind (fun c -> c.clientName) |> Option.defaultValue authRequest.clientId
                     let scopes = String.concat ", " authRequest.scope
-                    return Workers.Exports.Response.Create($"{name} asks for: {scopes}")
+                    return Workers.Exports.Response.Create(U9.Case1 $"{name} asks for: {scopes}")
             }
             |> Async.StartAsPromise
             |> U2.Case1
@@ -178,7 +183,7 @@ let options (env: Env) =
 
 [<ExportDefault>]
 let worker =
-    {| fetch = fun (request: obj) (env: Env) (ctx: Workers.ExecutionContext<obj>) ->
+    {| fetch = fun (request: Workers.Request<obj, U2<Workers.RequestInitCfProperties, Workers.IncomingRequestCfProperties<obj>>>) (env: Env) (ctx: Workers.ExecutionContext<obj>) ->
         let lookup = Assets.GetAssetFromKV.Event.Create(request, fun work -> ctx.waitUntil work)
         Assets.Exports.getAssetFromKV(lookup, options env) |}
 ```
@@ -293,7 +298,9 @@ let spec =
        info = {| title = "Tasks API"; version = "1.0.0" |}
        paths = {| ``/tasks`` = {| get = listTasks |} |} |}
 
-let html = Workers.ResponseInit.Create(headers = {| ``content-type`` = "text/html; charset=utf-8" |})
+let headers = Workers.Exports.Headers()
+headers.set("content-type", "text/html; charset=utf-8")
+let html = Workers.ResponseInit.Create(headers = U3.Case1 headers)
 
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
@@ -301,14 +308,15 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
         fetch = fun request _ _ ->
             match Workers.Exports.URL(U2.Case1 request.url).pathname with
             | "/openapi.json" -> U2.Case2(Workers.Exports.Response.json spec)
-            | "/redoc" -> U2.Case2(Workers.Exports.Response.Create(Chanfana.Exports.getReDocUI "/openapi.json", html))
-            | _ -> U2.Case2(Workers.Exports.Response.Create(Chanfana.Exports.getSwaggerUI "/openapi.json", html))
+            | "/redoc" -> U2.Case2(Workers.Exports.Response.Create(U9.Case1 (Chanfana.Exports.getReDocUI "/openapi.json"), html))
+            | _ -> U2.Case2(Workers.Exports.Response.Create(U9.Case1 (Chanfana.Exports.getSwaggerUI "/openapi.json"), html))
     )
 ```
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
+
 import { getSwaggerUI, getReDocUI } from "chanfana";
 
 export const listTasks = {
@@ -333,10 +341,12 @@ export const spec = {
     },
 };
 
+export const headers = new Headers();
+
+headers.set("content-type", "text/html; charset=utf-8");
+
 export const html = {
-    headers: {
-        "content-type": "text/html; charset=utf-8",
-    },
+    headers: headers,
 };
 
 export const worker = {
@@ -376,6 +386,6 @@ Using Dynamic Workflows from F# requires a cast in 0.1.0, so the library has no 
 
 ## NuGet packages
 
-[Runtime.Actors 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Actors/0.1.0), [Runtime.Cabidela 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Cabidela/0.1.0), [Runtime.Chanfana 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Chanfana/0.1.0), [Runtime.DynamicWorkflows 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.DynamicWorkflows/0.1.0), [Runtime.KvAssetHandler 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.KvAssetHandler/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersOauthProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersOauthProvider/0.1.0).
+[Runtime.Actors 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Actors/0.1.1), [Runtime.Cabidela 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Cabidela/0.1.1), [Runtime.Chanfana 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Chanfana/0.1.1), [Runtime.DynamicWorkflows 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.DynamicWorkflows/0.1.1), [Runtime.KvAssetHandler 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.KvAssetHandler/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Runtime.WorkersOauthProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersOauthProvider/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

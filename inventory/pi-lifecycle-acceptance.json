@@ -1,0 +1,280 @@
+{
+  "qualification": "Actual Agents PiHarness and pi-durable SQLite cell on celld, SDK fauxProvider model; restart after completed operations",
+  "xanthamRevision": "d8486b4de3b328e637be255ac7316f666f3bf0b0",
+  "xanthamClean": true,
+  "supportFableSources": {
+    "Xantham.Fable.Core": {
+      "fable/Helpers.fs": "cc5f6c4521240f09169ac65d2f572ecf2291cb62dac042191955f523c805f7b1",
+      "fable/Library.fs": "011449c7655b2f1f5f21f26132279faf7885ba600622dafe7370ddea7ae4d6da"
+    },
+    "Xantham.Fable.Core.TS": {
+      "fable/Fable.Core.TS.Extensions.fs": "b472dd26f3c335c7dd1cc05c8ba00f83eef80984c03b13b1357f60b568171283",
+      "fable/Fable.Core.TS.fs": "04aa6bfb20cc03bf7b2b45dce960b44498f166520c02268e360e316f2da2d905"
+    }
+  },
+  "runtime": {
+    "executable": "/home/hhh/.local/bin/celld",
+    "sha256": "eb0a8158421b69d68dd5d28f2298a7d411dde498295833deeb1cc5ce53b7eb75",
+    "version": "celld 0.6.3"
+  },
+  "checked": [
+    {
+      "target": "workers",
+      "profile": "containers",
+      "dependencies": [],
+      "project": "src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj",
+      "projectSha256": "47fcdc797b7d0469eac4f9ab4a60324c8ef2107a751182b8212a8d70c494a7f2",
+      "sources": {
+        "FSharp.CloudEdge.Runtime.Workers.fs": "c0ed35eabc593cfbb26ce730918a547c8b356d1fa8392936ecff69baac1d6134"
+      },
+      "generationSha256": "e204e9bde3d9b41bb9131e522e85c331dd1c81f8bdef2cbd3f648d6d379547a5"
+    },
+    {
+      "target": "zod-v4",
+      "profile": "agents",
+      "dependencies": [
+        "workers"
+      ],
+      "project": "src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4/FSharp.CloudEdge.Support.Zod.V4.fsproj",
+      "projectSha256": "9e7149bef338b9a48ab2386972b5aff5b7061d84f60cc23a11c534caa8404e37",
+      "sources": {
+        "FSharp.CloudEdge.Support.Zod.V4.fs": "b07b7a754a88f1674b2e75dac480625669910b78a30ee83657028908a020cf70"
+      },
+      "generationSha256": "743c40c7b41c96ae622e8b9039a7049ca68d60abd1d4d16fbcb6d85b65376a96"
+    },
+    {
+      "target": "json-schema-v7",
+      "profile": "agents",
+      "dependencies": [
+        "workers"
+      ],
+      "project": "src/Support/Schema/FSharp.CloudEdge.Support.JsonSchema/FSharp.CloudEdge.Support.JsonSchema.fsproj",
+      "projectSha256": "72dfee85e4e206f4bb07601413c0b917ae0dcb608099de291ccefa0b04719780",
+      "sources": {
+        "FSharp.CloudEdge.Support.JsonSchema.fs": "97798f7424f13918f95c5d85875859ec7b86673840636b4357ded6dfe855238f"
+      },
+      "generationSha256": "b1f3f80592321269473f7d76b76b88e36d71245e9a5101fee504263f73e2e034"
+    },
+    {
+      "target": "ai-provider-v4",
+      "profile": "ai-gateway-provider",
+      "dependencies": [
+        "workers",
+        "json-schema-v7"
+      ],
+      "project": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj",
+      "projectSha256": "98a4d5d5ebfab03ced8983b9c0d4804dc9eeb35eba5196af278ff52959f464e9",
+      "sources": {
+        "groups/FSharp.CloudEdge.Support.AI.V4.JsonSchema.fs": "3ab2e86f0a357914bb0646f61936c88ffa23a32d5dc6ca670e965f2fd78c3f0f",
+        "FSharp.CloudEdge.Support.AI.V4.Provider.fs": "53a5930dc0e0e3ce1eb23f1809f8d5d4258a97d9663ac73d874edc4473d9fb1e"
+      },
+      "generationSha256": "0dfbc5be178d4891a420c0fa2039878a54ab0a990932aac31b5ad67865f82c97"
+    },
+    {
+      "target": "ai-provider-utils-v4",
+      "profile": "agents",
+      "dependencies": [
+        "workers",
+        "zod-v4",
+        "json-schema-v7",
+        "ai-provider-v4"
+      ],
+      "project": "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.ProviderUtils/FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fsproj",
+      "projectSha256": "4fd5a86620fab441b7f55aff4dd239f4342295d140202131442d1645f05724d4",
+      "sources": {
+        "FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fs": "41b37c9f3fdff563de983ba8c6534160f5b79fd2fdc08904a882c89c3373d0c9"
+      },
+      "generationSha256": "08fd63eb53f9fa9e01723c678ae253136933b1bdf5b2c2a17433c6f8998d230d"
+    },
+    {
+      "target": "ai-v7",
+      "profile": "agents",
+      "dependencies": [
+        "workers",
+        "zod-v4",
+        "json-schema-v7",
+        "ai-provider-v4",
+        "ai-provider-utils-v4"
+      ],
+      "project": "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/FSharp.CloudEdge.Support.AI.V7.fsproj",
+      "projectSha256": "9b448d0d05c68995d514c323c08611fb9c9d4fc71e7812a2a724ede3ec3f453b",
+      "sources": {
+        "groups/FSharp.CloudEdge.Support.AI.JsonSchema.fs": "07d306f9b52d3d450e51e38aa6033d48f8f7770977a978093372e7fc55becf8e",
+        "groups/FSharp.CloudEdge.Support.AI.Provider.fs": "d11c490f4753cbecc040dc9dcebdff02103a97f0715209149132870190e7beee",
+        "groups/FSharp.CloudEdge.Support.AI.ProviderUtils.fs": "d2ef14cafa65067fbde13b2611a0202f2b52d9194447752e02462146f3ec85d1",
+        "FSharp.CloudEdge.Support.AI.V7.fs": "27334eb52fb378b9f000f6925bfc6e7aa5936643e03097537b75f0b256685176"
+      },
+      "generationSha256": "908b9a2aa3ac0f79c8ac38b43cf7efb719c06dd8f8369338de30843a642c1627"
+    },
+    {
+      "target": "agents",
+      "profile": "agents",
+      "dependencies": [
+        "workers",
+        "zod-v4",
+        "json-schema-v7",
+        "ai-provider-v4",
+        "ai-provider-utils-v4",
+        "ai-v7"
+      ],
+      "project": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj",
+      "projectSha256": "e829cf3cd5c756fd250defd98bf8e8ce46cb48c5fd1fcdb6bd5069822e8d5e08",
+      "sources": {
+        "groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs": "e8d4c33aed3f36f34116a1cd22da43d41b34efe487c28c9948c67f01aec36040",
+        "FSharp.CloudEdge.Runtime.Agents.fs": "6e3518faab10b45ecd1e2e15698191aa3b0f12c6c31b1c97bc1a8242f0944e72"
+      },
+      "generationSha256": "038316d394c952fd121be1c029b08f1f2834abe9dcd1121727f5205f0256efbb"
+    },
+    {
+      "target": "pi-ai",
+      "profile": "agents-pi",
+      "dependencies": [
+        "workers",
+        "ai-provider-utils-v4",
+        "ai-provider-v4"
+      ],
+      "project": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiAi/FSharp.CloudEdge.Runtime.PiAi.fsproj",
+      "projectSha256": "08dc83fb294830fa71fdbb9ecd7f4e8eeeff4df1e99efd119d2373f0cf0ced0b",
+      "sources": {
+        "groups/FSharp.CloudEdge.Runtime.fs": "f0137ddd297e5bed1645425056a67c7b14f9629b9b56b46223801c414e77d0df"
+      },
+      "generationSha256": "409414b50f3b911c146068070aa968421ef7a63f48558f5d08012c2c218ec28f"
+    },
+    {
+      "target": "pi-durable",
+      "profile": "agents-pi",
+      "dependencies": [
+        "workers",
+        "pi-ai",
+        "ai-provider-utils-v4"
+      ],
+      "project": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiDurable/FSharp.CloudEdge.Runtime.PiDurable.fsproj",
+      "projectSha256": "5e6ccf352ffe97ae8ec45d65acf109ba94e3f45ee84c5e8143dcd4899244e0ef",
+      "sources": {
+        "groups/FSharp.CloudEdge.Runtime.fs": "3bfd5bb7ff795aadeb52e8b75e19d52f8e1e3d36b70a830909280bb1d49d611f"
+      },
+      "generationSha256": "0c8291dff2b93a7846c396fa046df572863e2748c3f6f8df01f3e92644e406a2"
+    },
+    {
+      "target": "agents-pi",
+      "profile": "agents-pi",
+      "dependencies": [
+        "workers",
+        "zod-v4",
+        "json-schema-v7",
+        "ai-provider-v4",
+        "ai-provider-utils-v4",
+        "ai-v7",
+        "agents",
+        "pi-ai",
+        "pi-durable"
+      ],
+      "project": "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj",
+      "projectSha256": "130e78a40f80d7318c32b3c0bc40affe08c7e3cae7b5ef6b60bbf90fe913539c",
+      "sources": {
+        "groups/FSharp.CloudEdge.Runtime.fs": "19281b02502b6976c0562352dc2776a1f067cb6dbdb30ce57cba433a50c6bcde",
+        "FSharp.CloudEdge.Pi.HarnessSubmit.fs": "3684731eeaaf576c3980fe039619981ae8b2569a76bc4f8b4b7df74aa75403d5",
+        "FSharp.CloudEdge.Pi.HarnessPrompt.fs": "dfffd3f5311f8748a6092b622dd20833b5d324d45dcd9a5d167e5937e013ca2b",
+        "FSharp.CloudEdge.Pi.SessionSubmit.fs": "6f0c765e7766d80756a7ee652c8bc512ee20c148ce9d69dc1f65583e72a591d3",
+        "FSharp.CloudEdge.Pi.SessionPrompt.fs": "122c923afeab2d41a94b482ec30837ad1304459106707a7abe649c2363133528"
+      },
+      "generationSha256": "6a0023a8424fc9e778ce63c7c480fb54006c327a8ab7f780b7077b170b7d9553"
+    }
+  ],
+  "inputSha256": {
+    "tests/AgentsPi/Client.fs": "73ee626f4b1eaabad48f59efc8bd6eb3ab6814965cc230c07461d752a3549ba2",
+    "tests/AgentsPi/check.mjs": "b79401f45ec5902d59f41ca989596bb8c205ef0aa5ddd80ef6b0008d96be29eb",
+    "tests/AgentsPi/AgentsPi.fsproj": "f97c1018582f035655356f692ecf09b872bee9b25b41d24852ada1aec29a585f",
+    "tests/AgentsPi/.config/dotnet-tools.json": "339c52cee47eb85fdb19ac5963223111b8255382820ee63222e09d95b02b45e1",
+    "tests/SDKComposition/SDKComposition.fsproj": "d981b159d30285e775f43f3f5c8122582c06c43196268eebadbee0db37b00bb0",
+    "tests/SDKComposition/Pi.fs": "5d69eafe5064157ab666d1dab1116db3745846895a277dd80722ac1741812e32",
+    "src/Support/FSharp.CloudEdge.Support.Workers/DurableObjects.fs": "e7be26a7a1537014a2d48a1ec182817d93b09ce1f7016d8c2d72a42ee21e62d8",
+    "src/Support/FSharp.CloudEdge.Support.Workers/FSharp.CloudEdge.Support.Workers.fsproj": "35193cf6a47a30edadf5abdc5e5cfeca50b1d65d0bf616f26b686a9c3fec19b9",
+    "artifacts/sdk-build/targets.json": "5d4a05ab72e25cd9d9cb1d0a43b100ca13d3b61659f0ca8feeafac7615a5e01d",
+    "Directory.Build.props": "d51c4426fd59e86ce838ec0f24672558683b0ec393e06f6e4880b849f682803a",
+    ".config/dotnet-tools.json": "99993d3d4332f4af87680d79b5ccd43978a1742b270de86106f7590b2b629696",
+    "config/tool-packages.json": "54fb5d844890ddb3186943500ae2934ade0ba2285e3e55f0f55ef6938b179238",
+    "config/sdk-delivery.json": "2db85e6508a7c82d8362a545cc25ab6ea5d08e510e1b040dbe202e9accfb93fc",
+    "config/targets.json": "f8a25a496f0e83bddf6e4ecb3668369762af09e7cf389ee64ec722be24dfa3a2",
+    "config/nuget-release.json": "b40143a6e2df6a6e64683f011518da3a1eddf4a9608435d9a135d18f6bde45d2",
+    "src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj": "47fcdc797b7d0469eac4f9ab4a60324c8ef2107a751182b8212a8d70c494a7f2",
+    "src/Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fs": "c0ed35eabc593cfbb26ce730918a547c8b356d1fa8392936ecff69baac1d6134",
+    "src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4/FSharp.CloudEdge.Support.Zod.V4.fsproj": "9e7149bef338b9a48ab2386972b5aff5b7061d84f60cc23a11c534caa8404e37",
+    "src/Support/Schema/FSharp.CloudEdge.Support.Zod.V4/FSharp.CloudEdge.Support.Zod.V4.fs": "b07b7a754a88f1674b2e75dac480625669910b78a30ee83657028908a020cf70",
+    "src/Support/Schema/FSharp.CloudEdge.Support.JsonSchema/FSharp.CloudEdge.Support.JsonSchema.fsproj": "72dfee85e4e206f4bb07601413c0b917ae0dcb608099de291ccefa0b04719780",
+    "src/Support/Schema/FSharp.CloudEdge.Support.JsonSchema/FSharp.CloudEdge.Support.JsonSchema.fs": "97798f7424f13918f95c5d85875859ec7b86673840636b4357ded6dfe855238f",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fsproj": "98a4d5d5ebfab03ced8983b9c0d4804dc9eeb35eba5196af278ff52959f464e9",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/groups/FSharp.CloudEdge.Support.AI.V4.JsonSchema.fs": "3ab2e86f0a357914bb0646f61936c88ffa23a32d5dc6ca670e965f2fd78c3f0f",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.Provider/FSharp.CloudEdge.Support.AI.V4.Provider.fs": "53a5930dc0e0e3ce1eb23f1809f8d5d4258a97d9663ac73d874edc4473d9fb1e",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.ProviderUtils/FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fsproj": "4fd5a86620fab441b7f55aff4dd239f4342295d140202131442d1645f05724d4",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V4.ProviderUtils/FSharp.CloudEdge.Support.AI.V4.ProviderUtils.fs": "41b37c9f3fdff563de983ba8c6534160f5b79fd2fdc08904a882c89c3373d0c9",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/FSharp.CloudEdge.Support.AI.V7.fsproj": "9b448d0d05c68995d514c323c08611fb9c9d4fc71e7812a2a724ede3ec3f453b",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/groups/FSharp.CloudEdge.Support.AI.JsonSchema.fs": "07d306f9b52d3d450e51e38aa6033d48f8f7770977a978093372e7fc55becf8e",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/groups/FSharp.CloudEdge.Support.AI.Provider.fs": "d11c490f4753cbecc040dc9dcebdff02103a97f0715209149132870190e7beee",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/groups/FSharp.CloudEdge.Support.AI.ProviderUtils.fs": "d2ef14cafa65067fbde13b2611a0202f2b52d9194447752e02462146f3ec85d1",
+    "src/Support/AI/FSharp.CloudEdge.Support.AI.V7/FSharp.CloudEdge.Support.AI.V7.fs": "27334eb52fb378b9f000f6925bfc6e7aa5936643e03097537b75f0b256685176",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj": "e829cf3cd5c756fd250defd98bf8e8ce46cb48c5fd1fcdb6bd5069822e8d5e08",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/groups/FSharp.CloudEdge.Runtime.WorkersTypes.fs": "e8d4c33aed3f36f34116a1cd22da43d41b34efe487c28c9948c67f01aec36040",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fs": "6e3518faab10b45ecd1e2e15698191aa3b0f12c6c31b1c97bc1a8242f0944e72",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiAi/FSharp.CloudEdge.Runtime.PiAi.fsproj": "08dc83fb294830fa71fdbb9ecd7f4e8eeeff4df1e99efd119d2373f0cf0ced0b",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiAi/groups/FSharp.CloudEdge.Runtime.fs": "f0137ddd297e5bed1645425056a67c7b14f9629b9b56b46223801c414e77d0df",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiDurable/FSharp.CloudEdge.Runtime.PiDurable.fsproj": "5e6ccf352ffe97ae8ec45d65acf109ba94e3f45ee84c5e8143dcd4899244e0ef",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiDurable/groups/FSharp.CloudEdge.Runtime.fs": "3bfd5bb7ff795aadeb52e8b75e19d52f8e1e3d36b70a830909280bb1d49d611f",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj": "130e78a40f80d7318c32b3c0bc40affe08c7e3cae7b5ef6b60bbf90fe913539c",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/groups/FSharp.CloudEdge.Runtime.fs": "19281b02502b6976c0562352dc2776a1f067cb6dbdb30ce57cba433a50c6bcde",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Pi.HarnessSubmit.fs": "3684731eeaaf576c3980fe039619981ae8b2569a76bc4f8b4b7df74aa75403d5",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Pi.HarnessPrompt.fs": "dfffd3f5311f8748a6092b622dd20833b5d324d45dcd9a5d167e5937e013ca2b",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Pi.SessionSubmit.fs": "6f0c765e7766d80756a7ee652c8bc512ee20c148ce9d69dc1f65583e72a591d3",
+    "src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Pi.SessionPrompt.fs": "122c923afeab2d41a94b482ec30837ad1304459106707a7abe649c2363133528",
+    "artifacts/workers/generation.json": "e204e9bde3d9b41bb9131e522e85c331dd1c81f8bdef2cbd3f648d6d379547a5",
+    "artifacts/zod-v4/generation.json": "743c40c7b41c96ae622e8b9039a7049ca68d60abd1d4d16fbcb6d85b65376a96",
+    "artifacts/json-schema-v7/generation.json": "b1f3f80592321269473f7d76b76b88e36d71245e9a5101fee504263f73e2e034",
+    "artifacts/ai-provider-v4/generation.json": "0dfbc5be178d4891a420c0fa2039878a54ab0a990932aac31b5ad67865f82c97",
+    "artifacts/ai-provider-utils-v4/generation.json": "08fd63eb53f9fa9e01723c678ae253136933b1bdf5b2c2a17433c6f8998d230d",
+    "artifacts/ai-v7/generation.json": "908b9a2aa3ac0f79c8ac38b43cf7efb719c06dd8f8369338de30843a642c1627",
+    "artifacts/agents/generation.json": "038316d394c952fd121be1c029b08f1f2834abe9dcd1121727f5205f0256efbb",
+    "artifacts/pi-ai/generation.json": "409414b50f3b911c146068070aa968421ef7a63f48558f5d08012c2c218ec28f",
+    "artifacts/pi-durable/generation.json": "0c8291dff2b93a7846c396fa046df572863e2748c3f6f8df01f3e92644e406a2",
+    "artifacts/agents-pi/generation.json": "6a0023a8424fc9e778ce63c7c480fb54006c327a8ab7f780b7077b170b7d9553",
+    "profiles/agents/package.json": "b57e5392bbd42b5d921f8ad7b0514835eeaa1aa2d4b5dde2fa338c8a8332f94f",
+    "profiles/agents/package-lock.json": "ff0f4fc4ea6fc469bf2feb49e5beff701c485cb001581df3e062b638d1e1f20e",
+    "profiles/containers/package.json": "44af70de51e5d57938ab18405cd71e1136e17f9d6fb79cdd8d4071b21ae0c0ee",
+    "profiles/containers/package-lock.json": "3c63738d7a8edd08ecf1e5adbd3559bf3f1030e117a2adddad8ffd1da5c1e57f",
+    "profiles/ai-gateway-provider/package.json": "007f8b8adc746e4cb72a8203370486b8cb587e001e8381df7ede99fa02a5dd8c",
+    "profiles/ai-gateway-provider/package-lock.json": "15d1270a9b09dde5ab7a94e01a302997164daea29fedb580a9e1a93adb4d9224",
+    "profiles/agents-pi/package.json": "fb037636c003c1a4daf6a68ceba7a4dfa2362dea4e6836d46466ce6162f12cba",
+    "profiles/agents-pi/package-lock.json": "75bb8df8cb1983064ee3d447960ecd6960ef6f809575e60c138c5daebe440f96",
+    "artifacts/tool-feed/Xantham.Fable.Core.0.1.0-local.5edd4867b61bc1a2cd6e.nupkg": "acd32539ac917245a8130460363bd1cc877be6ed600eab7aec3b034281221fe4",
+    "artifacts/tool-feed/Xantham.Fable.Core.TS.0.1.0-local.dd0bf3bc307a255e55dd.nupkg": "bf9943122cc00694ee4f4dc0a3efc2c40b9810814d1de5614dcfe289c8510b5c",
+    "scripts/integration/process-lifetime.mjs": "7fa6fd38f9a31e58d0399882c9b0cb14d38a26087550d64a3ef6935c1c9e8146",
+    "scripts/integration/step-job.ps1": "d342a6cfa5d202c19963775b3c13276ec74178f7be4faa28260ebea6daf7398a",
+    "scripts/integration/step-process.mjs": "591eb883a529cd1f89c996f7cbf7b68cba257a3806d25a9549d9b4913e07e90c"
+  },
+  "assertions": [
+    "Default SDK composition excludes Agents Pi; its explicit property enables both the project and consumer",
+    "Existing Pi composition witness and F# cell host compile against the selected generated dependency closure",
+    "Image constructor rejects text payload fields at F# compile time",
+    "Ordinary F# null strings are rejected before invoking the SDK",
+    "F# generated PiHarness constructor and typed factory context enter the actual lifecycle",
+    "Generated closed text/image payloads encode SDK discriminator tags and fields",
+    "Omitted optional property and explicitly present undefined stay distinct at the SDK boundary",
+    "Both typed submit operations persist input and preserve idempotent receipts",
+    "Both typed prompt operations run actual Pi model tasks and return typed terminal responses",
+    "SQLite transcript contains the encoded mixed text/image input",
+    "Durable transcript and idempotency survive a celld restart",
+    "Actual celld Durable Object SQLite files were observed and hashed after stopping the runtime",
+    "The observed celld Durable Object SQLite state was removed"
+  ],
+  "bundleSha256": "93b72795db8f717c5bb29f798d21b5851bbb8c1da13a407152bc79811311392e",
+  "passed": true,
+  "runtimeStopped": true,
+  "durableSqlite": [
+    {
+      "file": ".celld/dev/runtime/PiProbe:15a262870407fd0674314a5374769c071a6b85a606bd5b104778ce061f7f4d8f/ltx/e1/db.sqlite",
+      "bytes": 167936,
+      "sha256": "00495d89442c863dfe6f955a00bbf1fcde5ca73d1c484de38c5ce50f34c7842a"
+    }
+  ],
+  "durableStateObserved": true,
+  "stateRemoved": true
+}

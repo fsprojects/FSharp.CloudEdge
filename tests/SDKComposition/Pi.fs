@@ -14,7 +14,7 @@ let imageAndText text data mimeType : Input.Input =
         Input.InputItemsItem.Image { Data = data; MimeType = mimeType }
     |]
 
-let invocationContext (factory: Raw.PiHarnessContext) : FSharp.CloudEdge.Runtime.Chord.Context = factory.context
+let invocationContext (factory: Raw.PiHarnessContext) : FSharp.CloudEdge.Runtime.Chord.Context2 = factory.context
 
 let submit harness input options : JS.Promise<Raw.PiReceipt> = Input.submit harness input options
 let prompt harness (input: Input.Input) options : JS.Promise<Raw.PiPromptResponse> = HarnessPrompt.prompt harness input options

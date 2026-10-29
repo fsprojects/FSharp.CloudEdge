@@ -11196,8 +11196,7 @@ type Without<'T, 'U> = private Phantom_Without__ of obj
 /// <summary>
 /// Either T or U, but not both (mutually exclusive)
 /// </summary>
-[<Erase>]
-type XOR<'T, 'U> = private Phantom_XOR__ of obj
+type XOR<'T, 'U> = U2<JS.Intersect<'T, Without<'U, 'T>>, JS.Intersect<'U, Without<'T, 'U>>>
 
 type Ai_Cf_Baai_Bge_Base_En_V1_5_Input = U2<Ai_Cf_Baai_Bge_Base_En_V1_5_Input2, Ai_Cf_Baai_Bge_Base_En_V1_5_Input3>
 
@@ -20376,12 +20375,12 @@ type EventContext<'Env, 'P, 'Data> =
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventContext.Next with get, set
     abstract env: JS.Intersect<'Env, EventContext.Env> with get, set
-    abstract ``params``: obj with get, set
+    abstract ``params``: Params<'P> with get, set
     abstract data: 'Data with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: obj, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventContext.Next, env: JS.Intersect<'Env, EventContext.Env>, ``params``: Params<'P>, data: 'Data) : EventContext<'Env, 'P, 'Data> = jsNative
 
-type PagesFunction<'Env, 'Params, 'Data> = (FSharp.CloudEdge.Runtime.Workers.EventContext<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
+type PagesFunction<'Env, 'Params, 'Data> = (EventContext<'Env, 'Params, 'Data> -> U2<JS.Promise<Response>, Response>)
 
 [<Interface>]
 type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
@@ -20391,13 +20390,13 @@ type EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> =
     abstract passThroughOnException: (unit -> unit) with get, set
     abstract next: EventPluginContext.Next with get, set
     abstract env: JS.Intersect<'Env, EventPluginContext.Env> with get, set
-    abstract ``params``: obj with get, set
+    abstract ``params``: Params<'P> with get, set
     abstract data: 'Data with get, set
     abstract pluginArgs: 'PluginArgs with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: obj, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
+    static member Create (request: Request<obj, IncomingRequestCfProperties<obj>>, functionPath: string, waitUntil: (JS.Promise<obj> -> unit), passThroughOnException: (unit -> unit), next: EventPluginContext.Next, env: JS.Intersect<'Env, EventPluginContext.Env>, ``params``: Params<'P>, data: 'Data, pluginArgs: 'PluginArgs) : EventPluginContext<'Env, 'P, 'Data, 'PluginArgs> = jsNative
 
-type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (FSharp.CloudEdge.Runtime.Workers.EventPluginContext<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
+type PagesPluginFunction<'Env, 'Params, 'Data, 'PluginArgs> = (EventPluginContext<'Env, 'Params, 'Data, 'PluginArgs> -> U2<JS.Promise<Response>, Response>)
 
 [<Interface>]
 type PubSubMessage =

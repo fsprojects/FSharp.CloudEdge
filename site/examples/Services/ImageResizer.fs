@@ -16,7 +16,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             let resize =
                 Workers.Exports.Request.Create(
                     U3.Case1 "http://resizer/thumbnail?width=320",
-                    Workers.RequestInit.Create(``method`` = "POST", body = request.body))
+                    Workers.RequestInit<Workers.RequestInitCfProperties>.Create(``method`` = "POST", ?body = (request.body |> Option.map unbox<Workers.BodyInit>)))
             let resizer = Transport.getFetchByName env.RESIZER "resizer"
-            resizer.fetch (Containers.Exports.switchPort(resize, 8080.)) |> U2.Case1
+            resizer.fetch (Containers.Exports.switchPort(unbox resize, 8080.)) |> U2.Case1
     )

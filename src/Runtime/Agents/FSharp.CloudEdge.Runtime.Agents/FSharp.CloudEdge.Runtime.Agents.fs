@@ -143,7 +143,7 @@ type DynamicAgents =
     /// with the same class and name return the same child.
     /// </summary>
     /// <remarks>@experimental</remarks>
-    abstract get<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<obj>
+    abstract get<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<DynamicAgentStub<'T>>
     /// <summary>
     /// Forcefully abort a running dynamic agent. The child stops
     /// executing immediately and restarts on the next get call;
@@ -1584,7 +1584,7 @@ type RunAgentToolOptions<'Input, 'Self> =
     /// <c>onFinish</c> callback. A detached run does NOT inherit <c>options.signal</c> — it
     /// must outlive the spawning turn; cancel it explicitly via <c>cancelAgentTool</c>.
     /// </summary>
-    abstract detached: U2<bool, FSharp.CloudEdge.Runtime.Agents.DetachedAgentToolConfig<'Self>> option with get, set
+    abstract detached: U2<bool, DetachedAgentToolConfig<'Self>> option with get, set
     /// <summary>
     /// Which child events reach the parent's clients. <c>"full"</c> (default) forwards
     /// every streamed chunk. <c>"terminal"</c> forwards only lifecycle events: started,
@@ -1595,7 +1595,7 @@ type RunAgentToolOptions<'Input, 'Self> =
     /// </summary>
     abstract eventDelivery: AgentToolEventDelivery option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (input: 'Input, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?inputPreview: obj, ?display: AgentToolDisplayMetadata, ?detached: U2<bool, FSharp.CloudEdge.Runtime.Agents.DetachedAgentToolConfig<'Self>>, ?eventDelivery: AgentToolEventDelivery) : RunAgentToolOptions<'Input, 'Self> = jsNative
+    static member Create (input: 'Input, ?runId: string, ?parentToolCallId: string, ?displayOrder: float, ?signal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?inputPreview: obj, ?display: AgentToolDisplayMetadata, ?detached: U2<bool, DetachedAgentToolConfig<'Self>>, ?eventDelivery: AgentToolEventDelivery) : RunAgentToolOptions<'Input, 'Self> = jsNative
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type AgentToolEventDelivery =
@@ -1689,13 +1689,13 @@ type AgentToolStoredChunk =
 
 [<Interface>]
 type AgentToolChildAdapter<'Input, 'Output> =
-    abstract startAgentToolRun: input: 'Input * options: AgentToolChildAdapter.StartAgentToolRun.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.AgentToolRunInspection<'Output>>
+    abstract startAgentToolRun: input: 'Input * options: AgentToolChildAdapter.StartAgentToolRun.Options -> JS.Promise<AgentToolRunInspection<'Output>>
     abstract cancelAgentToolRun: runId: string * ?reason: obj -> JS.Promise<unit>
-    abstract inspectAgentToolRun: runId: string * ?options: AgentToolChildAdapter.InspectAgentToolRun.Options -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.AgentToolRunInspection<'Output> option>
+    abstract inspectAgentToolRun: runId: string * ?options: AgentToolChildAdapter.InspectAgentToolRun.Options -> JS.Promise<AgentToolRunInspection<'Output> option>
     abstract getAgentToolChunks: runId: string * ?options: AgentToolChildAdapter.GetAgentToolChunks.Options -> JS.Promise<AgentToolStoredChunk[]>
     abstract tailAgentToolRun: TailAgentToolRun option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (startAgentToolRun: Func<'Input, AgentToolChildAdapter.StartAgentToolRun.Options, JS.Promise<FSharp.CloudEdge.Runtime.Agents.AgentToolRunInspection<'Output>>>, cancelAgentToolRun: Func<string, obj option, JS.Promise<unit>>, inspectAgentToolRun: Func<string, AgentToolChildAdapter.InspectAgentToolRun.Options option, JS.Promise<FSharp.CloudEdge.Runtime.Agents.AgentToolRunInspection<'Output> option>>, getAgentToolChunks: Func<string, AgentToolChildAdapter.GetAgentToolChunks.Options option, JS.Promise<AgentToolStoredChunk[]>>, ?tailAgentToolRun: TailAgentToolRun) : AgentToolChildAdapter<'Input, 'Output> = jsNative
+    static member Create (startAgentToolRun: Func<'Input, AgentToolChildAdapter.StartAgentToolRun.Options, JS.Promise<AgentToolRunInspection<'Output>>>, cancelAgentToolRun: Func<string, obj option, JS.Promise<unit>>, inspectAgentToolRun: Func<string, AgentToolChildAdapter.InspectAgentToolRun.Options option, JS.Promise<AgentToolRunInspection<'Output> option>>, getAgentToolChunks: Func<string, AgentToolChildAdapter.GetAgentToolChunks.Options option, JS.Promise<AgentToolStoredChunk[]>>, ?tailAgentToolRun: TailAgentToolRun) : AgentToolChildAdapter<'Input, 'Output> = jsNative
 
 type TailAgentToolRun = delegate of runId: string * options: TailAgentToolRun.Options option -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<AgentToolStoredChunk>>
 
@@ -1790,11 +1790,11 @@ type AgentToolRunState<'Part when 'Part :> AgentToolRunPart> =
 
 [<Interface>]
 type AgentToolEventState<'Part when 'Part :> AgentToolRunPart> =
-    abstract runsById: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>> with get, set
-    abstract runsByToolCallId: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]> with get, set
-    abstract unboundRuns: FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[] with get, set
+    abstract runsById: JS.Record<string, AgentToolRunState<'Part>> with get, set
+    abstract runsByToolCallId: JS.Record<string, AgentToolRunState<'Part>[]> with get, set
+    abstract unboundRuns: AgentToolRunState<'Part>[] with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (runsById: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>>, runsByToolCallId: JS.Record<string, FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]>, unboundRuns: FSharp.CloudEdge.Runtime.Agents.AgentToolRunState<'Part>[]) : AgentToolEventState<'Part> = jsNative
+    static member Create (runsById: JS.Record<string, AgentToolRunState<'Part>>, runsByToolCallId: JS.Record<string, AgentToolRunState<'Part>[]>, unboundRuns: AgentToolRunState<'Part>[]) : AgentToolEventState<'Part> = jsNative
 
 /// <summary>
 /// RPC request message from client
@@ -1831,8 +1831,7 @@ type RPCResponse = U3<RPCResponse2, RPCResponse3, RPCResponse4>
 
 [<Interface>]
 type RPCResponse2 =
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
+    inherit RPCResponse2.Base
     abstract success: bool with get, set
     abstract result: obj with get, set
     abstract ``done``: bool option with get, set
@@ -1841,8 +1840,7 @@ type RPCResponse2 =
 
 [<Interface>]
 type RPCResponse3 =
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
+    inherit RPCResponse2.Base
     abstract success: bool with get, set
     abstract result: obj with get, set
     abstract ``done``: bool with get, set
@@ -1851,8 +1849,7 @@ type RPCResponse3 =
 
 [<Interface>]
 type RPCResponse4 =
-    abstract ``type``: string with get, set
-    abstract id: string with get, set
+    inherit RPCResponse2.Base
     abstract success: bool with get, set
     abstract error: string with get, set
     [<ParamObject; Emit("$0")>]
@@ -2587,14 +2584,14 @@ type Agent<'Env, 'TState, 'Props> =
     /// </summary>
     /// <param name="id">ID of the task to get</param>
     /// <returns>The task or undefined if not found</returns>
-    abstract getQueue<'T>: id: string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.QueueItem<'T> option>
+    abstract getQueue<'T>: id: string -> JS.Promise<QueueItem<'T> option>
     /// <summary>
     /// Get all queued tasks whose payload has <c>key</c> equal to <c>value</c>
     /// </summary>
     /// <param name="key">Key to filter by</param>
     /// <param name="value">Value to filter by</param>
     /// <returns>Array of matching QueueItem objects</returns>
-    abstract getQueues<'T>: key: string * value: string -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.QueueItem<'T>[]>
+    abstract getQueues<'T>: key: string * value: string -> JS.Promise<QueueItem<'T>[]>
     /// <summary>
     /// Single native-RPC aperture for routed Lifecycle capabilities.
     /// </summary>
@@ -3147,7 +3144,7 @@ type Agent<'Env, 'TState, 'Props> =
     /// </code>
     /// </example>
     /// <remarks>@deprecated Use {@link Agent.dynamicAgents | this.dynamicAgents.get()} instead.</remarks>
-    abstract subAgent<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<obj>
+    abstract subAgent<'T when 'T :> Agent<obj, obj, obj>> : cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T> * name: string -> JS.Promise<DynamicAgentStub<'T>>
     /// <summary>
     /// Maximum number of non-terminal agent-tool runs this parent may own at once.
     /// </summary>
@@ -3171,9 +3168,9 @@ type Agent<'Env, 'TState, 'Props> =
     /// streaming turn — overridden by chat hosts (<c>@cloudflare/think</c>,
     /// <c>AIChatAgent</c>). See <c>design/rfc-detached-agent-tools.md</c>.
     /// </summary>
-    abstract reportProgress<'T>: _progress: FSharp.CloudEdge.Runtime.Agents.AgentToolProgress<'T> * ?_options: Agent.ReportProgress.Options -> JS.Promise<unit>
+    abstract reportProgress<'T>: _progress: AgentToolProgress<'T> * ?_options: Agent.ReportProgress.Options -> JS.Promise<unit>
     abstract runAgentTool<'Input>: cls: FSharp.CloudEdge.Runtime.Agents.AgentConstructor * options: Agent.RunAgentTool.Options<'Input> -> JS.Promise<DetachedRunAgentToolResult>
-    abstract runAgentTool<'Input, 'Output>: cls: FSharp.CloudEdge.Runtime.Agents.AgentConstructor * options: Agent.RunAgentTool.Options2<'Input> -> JS.Promise<FSharp.CloudEdge.Runtime.Agents.RunAgentToolResult<'Output>>
+    abstract runAgentTool<'Input, 'Output>: cls: FSharp.CloudEdge.Runtime.Agents.AgentConstructor * options: Agent.RunAgentTool.Options2<'Input> -> JS.Promise<RunAgentToolResult<'Output>>
     /// <summary>
     /// Cancel an agent-tool run by id. Idempotent: cancelling an already-terminal
     /// run is a no-op. Detached runs deliver through the guarded ledger so a wired
@@ -5066,7 +5063,7 @@ type Exports =
     /// </example>
     /// <remarks>@experimental The API surface may change before stabilizing.</remarks>
     [<Import("getSubAgentByName", "agents")>]
-    static member getSubAgentByName<'T when 'T :> Agent<obj, obj, obj>> (parent: obj, cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>, name: string) : JS.Promise<obj> = jsNative
+    static member getSubAgentByName<'T when 'T :> Agent<obj, obj, obj>> (parent: obj, cls: FSharp.CloudEdge.Runtime.Agents.ChatCapableAgentClass<'T>, name: string) : JS.Promise<DynamicAgentStub<'T>> = jsNative
     /// <summary>
     /// Maximum length of a normalized MCP server id.
     /// </summary>
@@ -5166,7 +5163,7 @@ type Exports =
     /// <param name="options">- Placement, startup properties, and retry options.</param>
     /// <returns>The initialized Agent stub.</returns>
     [<Import("getAgentByName", "agents")>]
-    static member getAgentByName<'Env, 'T, 'Props when 'T :> Agent<'Env, obj, obj>> (``namespace``: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<'T>, name: string, ?options: FSharp.CloudEdge.Runtime.Agents.AgentGetOptions<'Env, 'Props>) : JS.Promise<obj> = jsNative
+    static member getAgentByName<'Env, 'T, 'Props when 'T :> Agent<'Env, obj, obj>> (``namespace``: FSharp.CloudEdge.Runtime.Workers.DurableObjectNamespace<'T>, name: string, ?options: AgentGetOptions<'Env, 'Props>) : JS.Promise<obj> = jsNative
     /// <summary>
     /// Decorator that marks a method as callable by clients
     /// </summary>
@@ -6101,18 +6098,18 @@ module AgentTools =
             inherit AgentTools.AgentTool.Options.Base<'Output>
             abstract inputSchema: 'InputSchema with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (description: string, inputSchema: 'InputSchema, ?outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), FSharp.CloudEdge.Runtime.Agents.AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>>, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Options<'InputSchema, 'Output> = jsNative
+            static member Create (description: string, inputSchema: 'InputSchema, ?outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>>, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Options<'InputSchema, 'Output> = jsNative
 
         module Options =
             [<Interface>]
             type Base<'Output> =
                 abstract description: string with get, set
-                abstract outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), FSharp.CloudEdge.Runtime.Agents.AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>> option with get, set
+                abstract outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>> option with get, set
                 abstract displayName: string option with get, set
                 abstract icon: string option with get, set
                 abstract display: AgentToolDisplayMetadata option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (description: string, ?outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), FSharp.CloudEdge.Runtime.Agents.AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>>, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Base<'Output> = jsNative
+                static member Create (description: string, ?outputSchema: U6<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'Output, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'Output, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>), AgentTools.AgentToolFactoryOptions.OutputSchema<'Output>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.FlexibleSchema2<'Output>>, ?displayName: string, ?icon: string, ?display: AgentToolDisplayMetadata) : Base<'Output> = jsNative
 
     module AgentToolFactoryOptions =
         [<Interface>]
@@ -6226,6 +6223,7 @@ module Chat =
 
     [<Interface>]
     type MessagePart20 =
+        inherit FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part3.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -6237,23 +6235,12 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
-        abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part3.Approval with get, set
         [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part3.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>) : MessagePart20 = jsNative
 
-    module MessagePart20 =
-        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-        [<Literal>]
-        let state = "approval-requested"
-
     [<Interface>]
     type MessagePart21 =
+        inherit FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part4.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -6265,23 +6252,12 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
-        abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part4.Approval with get, set
         [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part4.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>) : MessagePart21 = jsNative
 
-    module MessagePart21 =
-        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-        [<Literal>]
-        let state = "approval-responded"
-
     [<Interface>]
     type MessagePart23 =
+        inherit FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part6.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -6293,25 +6269,12 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract rawInput: obj option with get, set
-        abstract output: unit option with get, set
-        abstract errorText: string with get, set
-        abstract callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
-        abstract resultProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
-        abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part6.Approval option with get, set
         [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?resultProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part6.Approval) : MessagePart23 = jsNative
 
-    module MessagePart23 =
-        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-        [<Literal>]
-        let state = "output-error"
-
     [<Interface>]
     type MessagePart24 =
+        inherit FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part7.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -6323,20 +6286,8 @@ module Chat =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
-        abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part7.Approval with get, set
         [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part7.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>) : MessagePart24 = jsNative
-
-    module MessagePart24 =
-        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-        [<Literal>]
-        let state = "output-denied"
 
     /// <summary>
     /// The parts array type from UIMessage
@@ -9158,9 +9109,9 @@ module Chat =
         [<Import("AgentToolProgressEmitter", "agents/chat"); EmitConstructor>]
         static member AgentToolProgressEmitter (hooks: FSharp.CloudEdge.Runtime.Agents.Chat.AgentToolProgressEmitHooks) : FSharp.CloudEdge.Runtime.Agents.Chat.AgentToolProgressEmitter = jsNative
         [<Import("createAgentToolEventState", "agents/chat")>]
-        static member createAgentToolEventState<'Part when 'Part :> AgentToolRunPart> () : FSharp.CloudEdge.Runtime.Agents.AgentToolEventState<'Part> = jsNative
+        static member createAgentToolEventState<'Part when 'Part :> AgentToolRunPart> () : AgentToolEventState<'Part> = jsNative
         [<Import("applyAgentToolEvent", "agents/chat")>]
-        static member applyAgentToolEvent<'Part when 'Part :> AgentToolRunPart> (state: FSharp.CloudEdge.Runtime.Agents.AgentToolEventState<'Part>, message: AgentToolEventMessage) : FSharp.CloudEdge.Runtime.Agents.AgentToolEventState<'Part> = jsNative
+        static member applyAgentToolEvent<'Part when 'Part :> AgentToolRunPart> (state: AgentToolEventState<'Part>, message: AgentToolEventMessage) : AgentToolEventState<'Part> = jsNative
         /// <summary>
         /// Snoop a host's outgoing chat frames while any agent-tool run is in flight and
         /// forward the owning run's streamed body to its live tailers (or capture its
@@ -11093,9 +11044,9 @@ module ChatSdk =
 
     [<Interface>]
     type ChatSdkStateParent =
-        abstract subAgent<'T when 'T :> FSharp.CloudEdge.Runtime.Agents.ChatSdk.ChatSdkStateAgent>: agentClass: ChatSdk.ChatSdkStateParent.SubAgent.AgentClassConstructor<'T> * name: string -> JS.Promise<obj>
+        abstract subAgent<'T when 'T :> FSharp.CloudEdge.Runtime.Agents.ChatSdk.ChatSdkStateAgent>: agentClass: ChatSdk.ChatSdkStateParent.SubAgent.AgentClassConstructor<'T> * name: string -> JS.Promise<DynamicAgentStub<'T>>
         [<ParamObject; Emit("$0")>]
-        static member Create (subAgent: Func<ChatSdk.ChatSdkStateParent.SubAgent.AgentClassConstructor<'T>, string, JS.Promise<obj>>) : ChatSdkStateParent = jsNative
+        static member Create (subAgent: Func<ChatSdk.ChatSdkStateParent.SubAgent.AgentClassConstructor<'T>, string, JS.Promise<DynamicAgentStub<'T>>>) : ChatSdkStateParent = jsNative
 
     [<Interface>]
     type ChatSdkStateAdapterOptions =
@@ -20107,6 +20058,14 @@ module ParseSubAgentPath =
         [<ParamObject; Emit("$0")>]
         static member Create (?knownClasses: string[]) : Options = jsNative
 
+module RPCResponse2 =
+    [<Interface>]
+    type Base =
+        abstract ``type``: string with get, set
+        abstract id: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (``type``: string, id: string) : Base = jsNative
+
 module RouteSubAgentRequest =
     [<Interface>]
     type Options =
@@ -20812,28 +20771,9 @@ module Workflows =
     [<Interface>]
     type WorkflowProgressCallback<'P> =
         inherit Workflows.WorkflowProgressCallback.Base
-        /// <remarks>TypeScript type: <c>"progress"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract progress: 'P with get, set
+        inherit Workflows.WorkflowProgressCallback.Base2<'P>
         [<ParamObject; Emit("({ type: 'progress', ...$0 })")>]
         static member Create (workflowName: string, workflowId: string, timestamp: float, progress: 'P) : WorkflowProgressCallback<'P> = jsNative
-
-    module WorkflowProgressCallback =
-        /// <remarks>TypeScript type: <c>"progress"</c></remarks>
-        [<Literal>]
-        let ``type`` = "progress"
-
-        [<Interface>]
-        type Base =
-            /// <summary>
-            /// Workflow binding name
-            /// </summary>
-            abstract workflowName: string with get, set
-            abstract workflowId: string with get, set
-            abstract ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType with get, set
-            abstract timestamp: float with get, set
-            [<ParamObject; Emit("$0")>]
-            static member Create (workflowName: string, workflowId: string, ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType, timestamp: float) : Base = jsNative
 
     /// <summary>
     /// Complete callback - workflow finished successfully
@@ -20841,16 +20781,9 @@ module Workflows =
     [<Interface>]
     type WorkflowCompleteCallback =
         inherit Workflows.WorkflowProgressCallback.Base
-        /// <remarks>TypeScript type: <c>"complete"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract result: obj option with get, set
+        inherit Workflows.WorkflowCompleteCallback.Base
         [<ParamObject; Emit("({ type: 'complete', ...$0 })")>]
         static member Create (workflowName: string, workflowId: string, timestamp: float, ?result: obj) : WorkflowCompleteCallback = jsNative
-
-    module WorkflowCompleteCallback =
-        /// <remarks>TypeScript type: <c>"complete"</c></remarks>
-        [<Literal>]
-        let ``type`` = "complete"
 
     /// <summary>
     /// Error callback - workflow encountered an error
@@ -20858,16 +20791,9 @@ module Workflows =
     [<Interface>]
     type WorkflowErrorCallback =
         inherit Workflows.WorkflowProgressCallback.Base
-        /// <remarks>TypeScript type: <c>"error"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract error: string with get, set
+        inherit Workflows.WorkflowErrorCallback.Base
         [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
         static member Create (workflowName: string, workflowId: string, timestamp: float, error: string) : WorkflowErrorCallback = jsNative
-
-    module WorkflowErrorCallback =
-        /// <remarks>TypeScript type: <c>"error"</c></remarks>
-        [<Literal>]
-        let ``type`` = "error"
 
     /// <summary>
     /// Event callback - custom event from workflow
@@ -20875,16 +20801,9 @@ module Workflows =
     [<Interface>]
     type WorkflowEventCallback =
         inherit Workflows.WorkflowProgressCallback.Base
-        /// <remarks>TypeScript type: <c>"event"</c></remarks>
-        abstract ``type``: string with get, set
-        abstract ``event``: obj with get, set
+        inherit Workflows.WorkflowEventCallback.Base
         [<ParamObject; Emit("({ type: 'event', ...$0 })")>]
         static member Create (workflowName: string, workflowId: string, timestamp: float, ``event``: obj) : WorkflowEventCallback = jsNative
-
-    module WorkflowEventCallback =
-        /// <remarks>TypeScript type: <c>"event"</c></remarks>
-        [<Literal>]
-        let ``type`` = "event"
 
     /// <summary>
     /// Union of all callback types
@@ -21263,6 +21182,48 @@ module Workflows =
             | [<CompiledName("pending")>] Pending
             | [<CompiledName("running")>] Running
 
+    module WorkflowCompleteCallback =
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"complete"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract result: obj option with get, set
+            [<ParamObject; Emit("({ type: 'complete', ...$0 })")>]
+            static member Create (?result: obj) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"complete"</c></remarks>
+            [<Literal>]
+            let ``type`` = "complete"
+
+    module WorkflowErrorCallback =
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"error"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract error: string with get, set
+            [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+            static member Create (error: string) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"error"</c></remarks>
+            [<Literal>]
+            let ``type`` = "error"
+
+    module WorkflowEventCallback =
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"event"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract ``event``: obj with get, set
+            [<ParamObject; Emit("({ type: 'event', ...$0 })")>]
+            static member Create (``event``: obj) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"event"</c></remarks>
+            [<Literal>]
+            let ``type`` = "event"
+
     module WorkflowInfo =
         [<Interface>]
         type Error =
@@ -21270,6 +21231,32 @@ module Workflows =
             abstract message: string with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (name: string, message: string) : Error = jsNative
+
+    module WorkflowProgressCallback =
+        [<Interface>]
+        type Base =
+            /// <summary>
+            /// Workflow binding name
+            /// </summary>
+            abstract workflowName: string with get, set
+            abstract workflowId: string with get, set
+            abstract ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType with get, set
+            abstract timestamp: float with get, set
+            [<ParamObject; Emit("$0")>]
+            static member Create (workflowName: string, workflowId: string, ``type``: FSharp.CloudEdge.Runtime.Agents.Workflows.WorkflowCallbackType, timestamp: float) : Base = jsNative
+
+        [<Interface>]
+        type Base2<'P> =
+            /// <remarks>TypeScript type: <c>"progress"</c></remarks>
+            abstract ``type``: string with get, set
+            abstract progress: 'P with get, set
+            [<ParamObject; Emit("({ type: 'progress', ...$0 })")>]
+            static member Create (progress: 'P) : Base2<'P> = jsNative
+
+        module Base2 =
+            /// <remarks>TypeScript type: <c>"progress"</c></remarks>
+            [<Literal>]
+            let ``type`` = "progress"
 
     /// <summary>
     /// Error thrown when a workflow is rejected via rejectWorkflow()

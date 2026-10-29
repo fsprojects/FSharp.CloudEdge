@@ -43,13 +43,13 @@ dotnet run --project tools/NuGetRelease -- snippets
 It compares the site's F# snippets with source files under `site/examples`; it does not compile or execute them. After running the package consumer checks, compare the displayed JavaScript with their Fable output:
 
 ```bash
-dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
+dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.1/consumers-candidate/js
 ```
 
-For example, emit the Agents consumer with the repository's pinned Fable tool:
+For example, emit the Agents consumer with the repository's pinned Fickl tool:
 
 ```bash
-dotnet fable site/examples/Agents/Agents.fsproj --outDir artifacts/site-examples/Agents
+dotnet fickl site/examples/Agents/Agents.fsproj --outDir artifacts/site-examples/Agents
 ```
 
 Use the matching project and output directory for Compute, Services, or Storage. Inspect the relevant generated file before moving on to runtime checks.

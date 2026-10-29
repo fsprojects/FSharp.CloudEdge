@@ -49,31 +49,42 @@ let packBatches (projects: Package array) =
     batches.ToArray()
 
 let inventory () =
+    let sourceRoot = Path.GetFullPath(Path.Combine(root, "src")) + string Path.DirectorySeparatorChar
+    let visited = HashSet<string>(StringComparer.Ordinal)
+    let projects = ResizeArray<Package>()
+    let rec includeProject path =
+        let path = Path.GetFullPath path
+        ensure (path.StartsWith(sourceRoot, StringComparison.Ordinal)) $"Release dependency is outside src/: {path}"
+        if visited.Add path then
+            let doc = XDocument.Load path
+            let name = Path.GetFileNameWithoutExtension path
+            ensure (name.StartsWith "FSharp.CloudEdge.") $"Not a CloudEdge package: {name}"
+            let pathInRepo = relative path
+            let references = elements "PackageReference" doc
+            let dependencies = elements "ProjectReference" doc
+            dependencies |> Array.iter (fun item -> includeProject (Path.Combine(Path.GetDirectoryName path, attr "Include" item)))
+            projects.Add {
+                Id = name; Path = pathInRepo; Framework = (element "TargetFramework" doc).Value
+                Fable = pathInRepo.StartsWith "src/Runtime/" || pathInRepo.StartsWith "src/Support/"
+                Sources = elements "Compile" doc |> Array.map (attr "Include")
+                Dependencies = dependencies |> Array.map (fun n -> Path.GetFileNameWithoutExtension(attr "Include" n), config.Version) |> Map.ofArray
+                External = references |> Array.map (fun n ->
+                    let id = attr "Include" n
+                    id, match config.PublicDependencies.TryGetValue id with true, version -> version | _ -> attr "Version" n) |> Map.ofArray
+            }
     XDocument.Load(Path.Combine(root, config.Solution))
     |> elements "Project"
-    |> Array.map (fun item ->
-        let path = Path.Combine(root, attr "Path" item)
-        let doc = XDocument.Load path
-        let name = Path.GetFileNameWithoutExtension path
-        ensure (name.StartsWith "FSharp.CloudEdge.") $"Not a CloudEdge package: {name}"
-        let pathInRepo = relative path
-        let references = elements "PackageReference" doc
-        {
-            Id = name; Path = pathInRepo; Framework = (element "TargetFramework" doc).Value
-            Fable = pathInRepo.StartsWith "src/Runtime/" || pathInRepo.StartsWith "src/Support/"
-            Sources = elements "Compile" doc |> Array.map (attr "Include")
-            Dependencies = elements "ProjectReference" doc |> Array.map (fun n -> Path.GetFileNameWithoutExtension(attr "Include" n), config.Version) |> Map.ofArray
-            External = references |> Array.map (fun n ->
-                let id = attr "Include" n
-                id, match config.PublicDependencies.TryGetValue id with true, version -> version | _ -> attr "Version" n) |> Map.ofArray
-        })
-    |> order
+    |> Array.map (fun item -> Path.GetFullPath(Path.Combine(root, attr "Path" item)))
+    |> Array.filter (fun path -> path.StartsWith(sourceRoot, StringComparison.Ordinal))
+    |> Array.iter includeProject
+    projects.ToArray() |> order
 
 let packageUrl name = $"https://www.nuget.org/packages/{name}/{config.Version}"
 let dependencies (project: Package) = Map.fold (fun all key value -> Map.add key value all) project.Dependencies project.External
 
 let dependencyRange (id: string) version =
-    if id.StartsWith("FSharp.CloudEdge.") || config.PublicDependencies.ContainsKey id then patchRange version
+    if id.StartsWith("FSharp.CloudEdge.") then patchRange version
+    elif config.PublicDependencies.ContainsKey id then $"[{version}]"
     else version
 
 let stage commit (project: Package) =
@@ -108,7 +119,7 @@ let stage commit (project: Package) =
         xml "ItemGroup" [] assets
     ] |> saveXml file
     let readme = $"# {project.Id}\n\nFSharp.CloudEdge {config.Version}.\n\n[Documentation]({config.ProjectUrl}) · [Source]({config.Repository})\n\nConsult the documentation for pinned upstream SDK versions, setup, binding limitations, and runtime verification status. "
-    let consumer = if project.Fable then "Compile with Fable; install the corresponding npm SDK separately where required. " else "Use this client from a .NET application. "
+    let consumer = if project.Fable then "Compile with Fickl 0.7.3; ordinary Fable 5.13 does not correctly emit all generated tagged unions. Install the corresponding npm SDK separately where required. See the documentation for inline union RPC limitations. " else "Use this client from a .NET application. "
     File.WriteAllText(Path.Combine(directory, "README.md"), readme + consumer + "Package availability does not imply every hosted workflow has been validated.\n")
     copyFile (Path.Combine(root, "LICENSE")) (Path.Combine(directory, "LICENSE"))
     file

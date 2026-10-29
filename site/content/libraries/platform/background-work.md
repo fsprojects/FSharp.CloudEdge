@@ -32,7 +32,7 @@ let worker: Workers.ExportedHandler<Env, string, obj, obj> =
             async {
                 let! payload = request.text () |> Async.AwaitPromise
                 let! _ = env.WEBHOOKS.send payload |> Async.AwaitPromise
-                return Workers.Exports.Response.Create("accepted", Workers.ResponseInit.Create(status = 202.))
+                return Workers.Exports.Response.Create(U9.Case1 "accepted", Workers.ResponseInit.Create(status = 202.))
             }
             |> Async.StartAsPromise
             |> U2.Case1),
@@ -40,7 +40,7 @@ let worker: Workers.ExportedHandler<Env, string, obj, obj> =
             async {
                 for message in batch.messages do
                     let! response =
-                        Workers.Exports.fetch(U3.Case1 "https://orders.example.com/hooks", Workers.RequestInit.Create(``method`` = "POST", body = message.body))
+                        Workers.Exports.fetch(U3.Case1 "https://orders.example.com/hooks", Workers.RequestInit<Workers.RequestInitCfProperties>.Create(``method`` = "POST", body = U9.Case1 message.body))
                         |> Async.AwaitPromise
                     if response.ok then message.ack ()
                     else message.retry (Workers.QueueRetryOptions.Create(delaySeconds = 30. * message.attempts))
@@ -57,8 +57,9 @@ The retry delay is 30 seconds multiplied by the attempt count. By default, Cloud
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(request.text()), (_arg_1) => singleton.Bind(awaitPromise(env.WEBHOOKS.send(_arg_1)), (_arg_2) => singleton.Return(new globalThis.Response("accepted", ({
@@ -123,8 +124,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(request.json()), (_arg_1) => {
@@ -198,7 +200,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 match Workers.Exports.URL(U2.Case1 request.url).searchParams.get "user" with
                 | None ->
-                    return Workers.Exports.Response.Create("user is required", Workers.ResponseInit.Create(status = 400.))
+                    return Workers.Exports.Response.Create(U9.Case1 "user is required", Workers.ResponseInit.Create(status = 400.))
                 | Some user ->
                     let! trial =
                         if request.``method`` = "POST" then
@@ -244,7 +246,8 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, ignore, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
+
+import { awaitPromise, ignore, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
 
 export const worker = {
     scheduled: (controller, env, _arg) => startAsPromise(ignore(awaitPromise(env.DB.prepare("DELETE FROM sessions WHERE expires_at < ?").bind(controller.scheduledTime).run()))),
@@ -272,6 +275,6 @@ export default worker;
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

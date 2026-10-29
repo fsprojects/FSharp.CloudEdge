@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import childProcess from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { resolveSourceTool, sourceToolConfiguration, sameTool } from "./tool-packages.mjs";
+import { ancestorBuildInputFiles, resolveSourceTool, sourceToolConfiguration, sameTool } from "./tool-packages.mjs";
 import { inspectInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, catalogProjectDependencies, declarationReferences, generationOrder } from "./catalogs.mjs";
 
@@ -57,7 +57,7 @@ function projectText(project, defaults, byId) {
 }
 
 /** Pure planning: file order and dependency ownership come only from checked configuration. */
-export function planProjects(config, repositoryRoot, catalogDependencies = new Map()) {
+export function planProjects(config, repositoryRoot, catalogDependencies = new Map(), solutionFile) {
   const root = path.resolve(repositoryRoot);
   const keys = ["schemaVersion", "toolchain", "xantham", "profiles", "projectDefaults", "targets"];
   fields(config, keys, keys, "configuration");
@@ -131,7 +131,7 @@ export function planProjects(config, repositoryRoot, catalogDependencies = new M
   }
   generationOrder(config.targets).forEach((target) => visit(target.id, []));
   projects.forEach((project) => { project.content = projectText(project, defaults, byId); });
-  const solution = path.join(root, "FSharp.CloudEdge.Bindings.slnx");
+  const solution = solutionFile ?? path.join(root, "FSharp.CloudEdge.Bindings.slnx");
   const folders = new Map();
   for (const project of projects) {
     const parent = slash(path.relative(path.join(root, "src"), path.dirname(path.dirname(project.file))));
@@ -144,7 +144,7 @@ export function planProjects(config, repositoryRoot, catalogDependencies = new M
     "  <!-- Generated bindings only; consumer tests remain in FSharp.CloudEdge.slnx. -->",
     ...[...folders].sort(([a], [b]) => compare(a, b)).flatMap(([folder, members]) => [
       `  <Folder Name="${xml(folder)}">`,
-      ...members.map((project) => `    <Project Path="${xml(slash(path.relative(root, project.file)))}" />`),
+      ...members.map((project) => `    <Project Path="${xml(slash(path.relative(path.dirname(solution), project.file)))}" />`),
       "  </Folder>",
     ]),
     "</Solution>",
@@ -308,8 +308,7 @@ export function reconcileProjects(plan, requested = [], strict = false, readRece
     }
   }
   roots.forEach(include);
-  const reconciled = planProjects(plan.config, plan.root, dependencies);
-  reconciled.solution = plan.solution;
+  const reconciled = planProjects(plan.config, plan.root, dependencies, plan.solution);
   if (strict) for (const project of selectedProjects(reconciled, requested)) {
     if (errors.has(project.id)) throw errors.get(project.id);
   }
@@ -339,23 +338,43 @@ export function checkProjects(plan, requested = [], { projectionToolResolver = r
   return checked;
 }
 
-export function buildProjects(plan, requested = [], dotnet = process.env.CLOUDEDGE_DOTNET ?? "dotnet") {
+function projectBuildInputs(plan, checked) {
+  const files = [...new Set(checked.flatMap(project => ancestorBuildInputFiles(path.join(plan.root, project.project))))].sort();
+  return Object.fromEntries(files.map(file => [slash(path.relative(plan.root, file)), sha256(readFileSync(file))]));
+}
+
+function projectAssemblies(plan, checked) {
+  return Object.fromEntries(checked.map(project => {
+    const target = plan.projects.find(candidate => candidate.id === project.target).target;
+    const assembly = path.join(path.dirname(project.project), "bin/Debug", plan.config.projectDefaults.targetFramework,
+      target.generator.module + ".dll");
+    requireThat(existsSync(path.join(plan.root, assembly)), `${project.target}: compiled catalog owner is missing: ${assembly}`);
+    return [slash(assembly), sha256(readFileSync(path.join(plan.root, assembly)))];
+  }));
+}
+
+export function buildProjects(plan, requested = [], dotnet = process.env.CLOUDEDGE_DOTNET ?? "dotnet", reportName = "latest.json") {
   const checked = checkProjects(plan, requested);
+  const buildInputSha256 = projectBuildInputs(plan, checked);
   const reportDirectory = path.join(plan.root, "artifacts", "projects");
   mkdirSync(reportDirectory, { recursive: true });
   const stamp = new Date().toISOString().replaceAll(":", "-");
   const log = path.join(reportDirectory, `build-${stamp}.log`);
-  const report = { startedAtUtc: new Date().toISOString(), dotnet, requested, configurationSha256: sha256(canonical(plan.config)), supportPackage: plan.supportPackage, checked, log, builds: [] };
+  const report = { startedAtUtc: new Date().toISOString(), dotnet, requested, configurationSha256: sha256(canonical(plan.config)), supportPackage: plan.supportPackage, checked, buildInputSha256, log, builds: [] };
   const targets = requested.length ? requested.map((id) => plan.projects.find((project) => project.id === id).file) : [plan.solution];
   const fd = openSync(log, "w");
   try {
     for (const target of targets) {
       const args = ["build", target, "--nologo"];
       console.log(`Building ${slash(path.relative(plan.root, target))}; log: ${log}`);
-      const result = spawnSync(dotnet, args, { cwd: plan.root, stdio: ["ignore", fd, fd] });
+      const result = childProcess.spawnSync(dotnet, args, { cwd: plan.root, stdio: ["ignore", fd, fd] });
       report.builds.push({ args, exitCode: result.status, signal: result.signal, error: result.error?.message });
       requireThat(!result.error && result.status === 0, `Binding compilation failed: ${result.error?.message ?? result.signal ?? result.status}; see ${log}`);
     }
+    requireThat(canonical(checkProjects(plan, requested)) === canonical(checked)
+      && canonical(projectBuildInputs(plan, checked)) === canonical(buildInputSha256),
+    "Binding source/build inputs changed during compilation; output was not accepted");
+    report.assemblySha256 = projectAssemblies(plan, checked);
     report.succeeded = true;
     return report;
   } finally {
@@ -363,8 +382,33 @@ export function buildProjects(plan, requested = [], dotnet = process.env.CLOUDED
     report.finishedAtUtc = new Date().toISOString();
     report.succeeded ??= false;
     atomicWrite(path.join(reportDirectory, `build-${stamp}.json`), JSON.stringify(report, null, 2) + "\n");
-    atomicWrite(path.join(reportDirectory, "latest.json"), JSON.stringify(report, null, 2) + "\n");
+    atomicWrite(path.join(reportDirectory, reportName), JSON.stringify(report, null, 2) + "\n");
   }
+}
+
+/** Compile current catalog owners before a projection validates against their assemblies. */
+export function buildProjectionReferences(config, target, root, dotnet, build = true) {
+  if (!target.dependencies.length) return [];
+  const targets = generationOrder(config.targets, target.dependencies);
+  const plan = planProjects({ ...config, targets }, root);
+  plan.solution = path.join(root, "artifacts/projects", `${target.id}-dependencies.slnx`);
+  const reportName = `${target.id}-dependencies.json`;
+  const reportFile = path.join(root, "artifacts/projects", reportName);
+  if (build) {
+    writeProjects(plan);
+    buildProjects(plan, [], dotnet, reportName);
+  }
+  requireThat(existsSync(reportFile), `${target.id}: projection dependencies have no build receipt; rebuild without --no-build`);
+  const built = JSON.parse(readFileSync(reportFile, "utf8"));
+  const checked = checkProjects(plan);
+  const assemblies = projectAssemblies(plan, checked);
+  requireThat(built.succeeded === true && built.dotnet === dotnet
+    && built.configurationSha256 === sha256(canonical(plan.config))
+    && canonical(built.checked) === canonical(checked)
+    && canonical(built.buildInputSha256) === canonical(projectBuildInputs(plan, checked))
+    && canonical(built.assemblySha256) === canonical(assemblies),
+  `${target.id}: projection dependencies have no matching source-to-assembly build receipt; rebuild without --no-build`);
+  return Object.keys(assemblies).map(file => path.join(root, file));
 }
 
 function main() {

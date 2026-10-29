@@ -18,14 +18,14 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let settings = Search.AISearchNamespaceSettings.Create env.AI_SEARCH
                 let search = Search.Exports.createAISearchNamespace settings
                 let model = search.get("help-center").chat ()
-                let questionPart = V3.LanguageModelV3Message3.Content.Item.Text(question, None)
+                let questionPart = V3.LanguageModelV3Message.Cases.User.Content.Item.Text(V3.LanguageModelV3TextPart.Create(question))
                 let prompt = [| V3.LanguageModelV3Message.User([| questionPart |], None) |]
                 let options = V3.LanguageModelV3CallOptions.Create prompt
                 let! result = model.doGenerate options |> Async.AwaitPromise
                 let answer =
                     result.content
                     |> Array.choose (function
-                        | V3.LanguageModelV3Content.Text(text, _) -> Some text
+                        | V3.LanguageModelV3Content.Text part -> Some part.text
                         | _ -> None)
                     |> String.concat ""
                 return Workers.Exports.Response.json {| answer = answer |}

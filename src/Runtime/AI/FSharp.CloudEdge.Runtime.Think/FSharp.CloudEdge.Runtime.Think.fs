@@ -7166,7 +7166,7 @@ module Think =
                     /// <summary>
                     /// The static tool results that were made in the last step.
                     /// </summary>
-                    abstract staticToolResults: FSharp.CloudEdge.Support.AI.V7.Telemetry.OnStepStart.Event.Steps.Item.ToolResults.Item2[]
+                    abstract staticToolResults: FSharp.CloudEdge.Support.AI.V7.Telemetry.OnStepStart.Event.Steps.Item.Content.Item.Cases.ToolResult2.Base[]
                     /// <summary>
                     /// The dynamic tool results that were made in the last step.
                     /// </summary>

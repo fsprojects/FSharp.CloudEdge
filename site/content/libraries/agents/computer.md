@@ -30,8 +30,9 @@ module Computer = FSharp.CloudEdge.Runtime.Computer
 let savePlan (storage: Computer.DurableObjectStorageLike) (text: string) =
     let workspace = Computer.Exports.Workspace(Computer.WorkspaceOptions.Create storage)
     async {
-        do! workspace.fs.writeFile("/plan.md", text) |> Async.AwaitPromise
-        return! workspace.fs.readFile("/plan.md", "utf8") |> Async.AwaitPromise
+        do! workspace.fs.writeFile("/plan.md", U3.Case1 text) |> Async.AwaitPromise
+        let options: Computer.WorkspaceFilesystem.ReadFile.Options2 = unbox {| encoding = "utf8" |}
+        return! workspace.fs.readFile("/plan.md", options) |> Async.AwaitPromise
     }
     |> Async.StartAsPromise
 ```
@@ -73,6 +74,6 @@ Useful test cases include storage compatibility, file encodings, backend events 
 
 ## NuGet packages
 
-[Runtime.Computer 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.0), [Runtime.ComputerArtifacts 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.0).
+[Runtime.Computer 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.1), [Runtime.ComputerArtifacts 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

@@ -26,16 +26,16 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let gateway = Gateway.Exports.createAiGateway (U2.Case1 settings)
                 let models =
                     [| "openai/gpt-5.2"; "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast" |]
-                    |> Array.map Unified.Exports.unified
+                    |> Array.map Unified.Exports.unified.Invoke
                 let model = gateway.chat (U2.Case1 models)
-                let questionPart = V4.LanguageModelV4Message3.Content.Item.Text(question, None)
+                let questionPart = V4.LanguageModelV4Message.Cases.User.Content.Item.Text(V4.LanguageModelV4TextPart.Create(question))
                 let prompt = [| V4.LanguageModelV4Message.User([| questionPart |], None) |]
                 let options = V4.LanguageModelV4CallOptions.Create prompt
                 let! result = model.doGenerate options |> Async.AwaitPromise
                 let answer =
                     result.content
                     |> Array.choose (function
-                        | V4.LanguageModelV4Content.Text(text, _) -> Some text
+                        | V4.LanguageModelV4Content.Text part -> Some part.text
                         | _ -> None)
                     |> String.concat ""
                 return Workers.Exports.Response.json {| answer = answer |}

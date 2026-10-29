@@ -27,11 +27,11 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let headers = Workers.Exports.Headers()
                     file.writeHttpMetadata headers
                     headers.set("etag", file.httpEtag)
-                    let init = Workers.ResponseInit.Create(headers = headers)
-                    return Workers.Exports.Response.Create(file.body, init)
+                    let init = Workers.ResponseInit.Create(headers = U3.Case1 headers)
+                    return Workers.Exports.Response.Create(unbox<Workers.BodyInit> file.body, init)
                 | None ->
                     let notFound = Workers.ResponseInit.Create(status = 404.)
-                    return Workers.Exports.Response.Create("Not found", notFound)
+                    return Workers.Exports.Response.Create(U9.Case1 "Not found", notFound)
         }
         |> Async.StartAsPromise
         |> U2.Case1)

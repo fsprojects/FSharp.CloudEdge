@@ -18,7 +18,7 @@ type ChatRoom(ctx: Workers.DurableObjectState<obj>, env: obj) =
                 let upgrade = Workers.ResponseInit.Create(status = 101., webSocket = client)
                 Workers.Exports.Response.Create(init = upgrade) |> U2.Case2
             else
-                Workers.Exports.Response.Create("Expected a WebSocket", Workers.ResponseInit.Create(status = 426.))
+                Workers.Exports.Response.Create(U9.Case1 "Expected a WebSocket", Workers.ResponseInit.Create(status = 426.))
                 |> U2.Case2
 
     interface Runtime.DurableObject.IWebSocketMessageHandler with

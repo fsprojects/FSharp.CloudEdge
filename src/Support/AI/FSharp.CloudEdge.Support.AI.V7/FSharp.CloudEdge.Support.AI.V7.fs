@@ -2338,7 +2338,7 @@ type StaticToolOutputDenied<'TOOLS> = private Phantom_StaticToolOutputDenied__ o
 type TypedToolOutputDenied<'TOOLS> = private Phantom_TypedToolOutputDenied__ of obj
 
 [<Interface>]
-type UIMessageStreamOptions<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> =
+type UIMessageStreamOptions<'UI_MESSAGE> =
     /// <summary>
     /// The original messages. If they are provided, persistence mode is assumed,
     /// and a message ID is provided for the response message.
@@ -2510,13 +2510,13 @@ type StreamTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputIn
     /// <br /><br />
     /// Automatically consumes the stream.
     /// </summary>
-    abstract steps: JS.Promise<FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]>
+    abstract steps: JS.Promise<StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]>
     /// <summary>
     /// The final step. This is a shortcut for <c>steps.at(-1)</c>.
     /// <br /><br />
     /// Automatically consumes the stream.
     /// </summary>
-    abstract finalStep: JS.Promise<FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>>
+    abstract finalStep: JS.Promise<StepResult<'TOOLS, 'RUNTIME_CONTEXT>>
     /// <summary>
     /// Additional request information from the last step.
     /// <br /><br />
@@ -2603,7 +2603,7 @@ type StreamTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputIn
     /// <c>'ai'</c> with <c>result.stream</c> instead. This method will be removed
     /// in the next major release.
     /// </remarks>
-    abstract toUIMessageStream<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> : ?options: FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions<'UI_MESSAGE> -> AsyncIterableStream<obj>
+    abstract toUIMessageStream<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> : ?options: UIMessageStreamOptions<'UI_MESSAGE> -> AsyncIterableStream<obj>
     /// <summary>
     /// Writes UI message stream output to a Node.js response-like object.
     /// </summary>
@@ -3020,7 +3020,7 @@ type StreamTextOnErrorRetryCallback = (StreamTextOnErrorRetryCallback.Event -> U
 type StreamTextOnChunkCallback<'TOOLS> = (StreamTextOnChunkCallback.Event<'TOOLS> -> JS.Promise<unit> option)
 
 type StreamTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputInterface<obj, obj, obj>> =
-    inherit FSharp.CloudEdge.Support.AI.V7.GenerateTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT>
+    inherit GenerateTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT>
     /// <summary>
     /// The parsed output when an output setting was provided and parsing
     /// succeeded.
@@ -3050,9 +3050,9 @@ type OutputInterface<'OUTPUT, 'PARTIAL, 'ELEMENT> =
     /// <summary>
     /// Creates a stream transform that emits individual elements as they complete.
     /// </summary>
-    abstract createElementStreamTransform: unit -> FSharp.CloudEdge.Runtime.Workers.TransformStream<OutputInterface.CreateElementStreamTransform.Result.Item<'PARTIAL>, 'ELEMENT> option
+    abstract createElementStreamTransform: unit -> FSharp.CloudEdge.Runtime.Workers.TransformStream<OutputInterface.CreateElementStreamTransform.Result.Item2<'PARTIAL>, 'ELEMENT> option
     [<ParamObject; Emit("$0")>]
-    static member Create (name: string, responseFormat: JS.Promise<U2<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.ResponseFormat, FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.ResponseFormat2> option>, parseCompleteOutput: Func<OutputInterface.ParseCompleteOutput.Options, OutputInterface.ParseCompleteOutput.Context, JS.Promise<'OUTPUT>>, parsePartialOutput: (OutputInterface.ParsePartialOutput.Options -> JS.Promise<OutputInterface.ParsePartialOutput.Result.Item<'PARTIAL> option>), createElementStreamTransform: (unit -> FSharp.CloudEdge.Runtime.Workers.TransformStream<OutputInterface.CreateElementStreamTransform.Result.Item<'PARTIAL>, 'ELEMENT> option)) : OutputInterface<'OUTPUT, 'PARTIAL, 'ELEMENT> = jsNative
+    static member Create (name: string, responseFormat: JS.Promise<U2<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.ResponseFormat, FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.ResponseFormat2> option>, parseCompleteOutput: Func<OutputInterface.ParseCompleteOutput.Options, OutputInterface.ParseCompleteOutput.Context, JS.Promise<'OUTPUT>>, parsePartialOutput: (OutputInterface.ParsePartialOutput.Options -> JS.Promise<OutputInterface.ParsePartialOutput.Result.Item<'PARTIAL> option>), createElementStreamTransform: (unit -> FSharp.CloudEdge.Runtime.Workers.TransformStream<OutputInterface.CreateElementStreamTransform.Result.Item2<'PARTIAL>, 'ELEMENT> option)) : OutputInterface<'OUTPUT, 'PARTIAL, 'ELEMENT> = jsNative
 
 [<Interface>]
 type Output =
@@ -3179,7 +3179,7 @@ type GenerateTextStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :
     /// <summary>
     /// Array of results from previous steps (empty for first step).
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// Additional provider-specific options for this step.
     /// </summary>
@@ -3197,7 +3197,7 @@ type GenerateTextStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :
     /// </summary>
     abstract toolsContext: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (callId: string, provider: string, modelId: string, stepNumber: float, steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], runtimeContext: 'RUNTIME_CONTEXT, toolsContext: obj, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolChoice: U2<string, GenerateTextStepStartEvent.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?output: 'OUTPUT, ?instructions: Instructions) : GenerateTextStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
+    static member Create (callId: string, provider: string, modelId: string, stepNumber: float, steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], runtimeContext: 'RUNTIME_CONTEXT, toolsContext: obj, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolChoice: U2<string, GenerateTextStepStartEvent.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?output: 'OUTPUT, ?instructions: Instructions) : GenerateTextStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
 
 /// <summary>
 /// Event passed to the <c>onStepEnd</c> callback.
@@ -3435,11 +3435,11 @@ type GenerateTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT> =
     /// <summary>
     /// Array containing results from all steps in the generation.
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// The final step. This is a shortcut for <c>steps.at(-1)</c>.
     /// </summary>
-    abstract finalStep: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>
+    abstract finalStep: StepResult<'TOOLS, 'RUNTIME_CONTEXT>
 
 /// <summary>
 /// Event passed to an <c>onAbort</c> callback for text generation.
@@ -3456,13 +3456,13 @@ type GenerateTextAbortEvent<'TOOLS, 'RUNTIME_CONTEXT> =
     /// <summary>
     /// Details for all previously finished steps.
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// The abort reason from the AbortSignal, when one is available.
     /// </summary>
     abstract reason: obj option
     [<ParamObject; Emit("$0")>]
-    static member Create (callId: string, steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], ?reason: obj) : GenerateTextAbortEvent<'TOOLS, 'RUNTIME_CONTEXT> = jsNative
+    static member Create (callId: string, steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], ?reason: obj) : GenerateTextAbortEvent<'TOOLS, 'RUNTIME_CONTEXT> = jsNative
 
 /// <remarks>@deprecated Use <c>GenerateTextStartEvent</c> instead.</remarks>
 type OnStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputInterface<obj, obj, obj>> =
@@ -3570,7 +3570,7 @@ type OnStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputIn
     /// <summary>
     /// Array of results from previous steps (empty for first step).
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// Additional provider-specific options for this step.
     /// </summary>
@@ -3588,7 +3588,7 @@ type OnStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputIn
     /// </summary>
     abstract toolsContext: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (callId: string, provider: string, modelId: string, stepNumber: float, steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], runtimeContext: 'RUNTIME_CONTEXT, toolsContext: obj, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolChoice: U2<string, OnStepStartEvent.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?output: 'OUTPUT, ?instructions: Instructions) : OnStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
+    static member Create (callId: string, provider: string, modelId: string, stepNumber: float, steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], runtimeContext: 'RUNTIME_CONTEXT, toolsContext: obj, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolChoice: U2<string, OnStepStartEvent.ToolChoice>, ?activeTools: obj[], ?toolOrder: obj[], ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?output: 'OUTPUT, ?instructions: Instructions) : OnStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
 
 /// <remarks>@deprecated Use <c>GenerateTextStepEndEvent</c> instead.</remarks>
 type OnStepFinishEvent<'TOOLS, 'RUNTIME_CONTEXT> =
@@ -3816,23 +3816,23 @@ type OnFinishEvent<'TOOLS, 'RUNTIME_CONTEXT> =
     /// <summary>
     /// Array containing results from all steps in the generation.
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// The final step. This is a shortcut for <c>steps.at(-1)</c>.
     /// </summary>
-    abstract finalStep: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>
+    abstract finalStep: StepResult<'TOOLS, 'RUNTIME_CONTEXT>
 
 type GenerateTextOnStartCallback<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputInterface<obj, obj, obj>> = (GenerateTextStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> -> JS.Promise<unit> option)
 
 type GenerateTextOnStepStartCallback<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> OutputInterface<obj, obj, obj>> = (GenerateTextStepStartEvent<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> -> JS.Promise<unit> option)
 
-type GenerateTextOnStepEndCallback<'TOOLS, 'RUNTIME_CONTEXT> = (FSharp.CloudEdge.Support.AI.V7.GenerateTextStepEndEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
+type GenerateTextOnStepEndCallback<'TOOLS, 'RUNTIME_CONTEXT> = (GenerateTextStepEndEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
 
 type GenerateTextOnStepFinishCallback<'TOOLS, 'RUNTIME_CONTEXT> = FSharp.CloudEdge.Support.AI.V7.GenerateTextOnStepEndCallback<'TOOLS, 'RUNTIME_CONTEXT>
 
-type GenerateTextOnEndCallback<'TOOLS, 'RUNTIME_CONTEXT> = (FSharp.CloudEdge.Support.AI.V7.GenerateTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
+type GenerateTextOnEndCallback<'TOOLS, 'RUNTIME_CONTEXT> = (GenerateTextEndEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
 
-type GenerateTextOnAbortCallback<'TOOLS, 'RUNTIME_CONTEXT> = (FSharp.CloudEdge.Support.AI.V7.GenerateTextAbortEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
+type GenerateTextOnAbortCallback<'TOOLS, 'RUNTIME_CONTEXT> = (GenerateTextAbortEvent<'TOOLS, 'RUNTIME_CONTEXT> -> JS.Promise<unit> option)
 
 type GenerateTextOnFinishCallback<'TOOLS, 'RUNTIME_CONTEXT> = FSharp.CloudEdge.Support.AI.V7.GenerateTextOnEndCallback<'TOOLS, 'RUNTIME_CONTEXT>
 
@@ -4270,11 +4270,11 @@ type GenerateTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> Output
     /// You can use this to get information about intermediate steps,
     /// such as the tool calls or the response headers.
     /// </summary>
-    abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
+    abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]
     /// <summary>
     /// The final step. This is a shortcut for <c>steps.at(-1)</c>.
     /// </summary>
-    abstract finalStep: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>
+    abstract finalStep: StepResult<'TOOLS, 'RUNTIME_CONTEXT>
     /// <summary>
     /// The generated output according to the <c>output</c> specification.
     /// </summary>
@@ -4286,7 +4286,7 @@ type GenerateTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT when 'OUTPUT :> Output
     /// </remarks>
     abstract output: obj
     [<ParamObject; Emit("$0")>]
-    static member Create (content: obj[], text: string, reasoning: StreamTextResult.Reasoning.Item.Item[], files: GeneratedFile[], sources: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Source[], toolCalls: obj[], staticToolCalls: obj[], dynamicToolCalls: DynamicToolCall[], toolResults: obj[], staticToolResults: obj[], dynamicToolResults: DynamicToolResult[], finishReason: FinishReason, usage: LanguageModelUsage, totalUsage: LanguageModelUsage, request: LanguageModelRequestMetadata, response: LanguageModelResponseMetadata, responseMessages: ResponseMessage[], steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], finalStep: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>, output: obj, ?reasoningText: string, ?rawFinishReason: string, ?warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[], ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : GenerateTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
+    static member Create (content: obj[], text: string, reasoning: StreamTextResult.Reasoning.Item.Item[], files: GeneratedFile[], sources: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4Source[], toolCalls: obj[], staticToolCalls: obj[], dynamicToolCalls: DynamicToolCall[], toolResults: obj[], staticToolResults: obj[], dynamicToolResults: DynamicToolResult[], finishReason: FinishReason, usage: LanguageModelUsage, totalUsage: LanguageModelUsage, request: LanguageModelRequestMetadata, response: LanguageModelResponseMetadata, responseMessages: ResponseMessage[], steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[], finalStep: StepResult<'TOOLS, 'RUNTIME_CONTEXT>, output: obj, ?reasoningText: string, ?rawFinishReason: string, ?warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[], ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : GenerateTextResult<'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> = jsNative
 
 /// <summary>
 /// Parameters for calling an agent.
@@ -4605,6 +4605,7 @@ type ChatAddToolOutputFunction0<'TOOL> =
 
 [<Interface>]
 type ChatAddToolOutputFunction02<'TOOL> =
+    inherit ChatAddToolOutputFunction02.Base
     /// <summary>
     /// Name of the tool that was called.
     /// </summary>
@@ -4617,17 +4618,8 @@ type ChatAddToolOutputFunction02<'TOOL> =
     /// Optional request options to be used if <c>sendAutomaticallyWhen</c> callback returns true.
     /// </summary>
     abstract options: ChatRequestOptions option with get, set
-    /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-    abstract state: string with get, set
-    abstract output: unit option with get, set
-    abstract errorText: string with get, set
     [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
     static member Create (tool: 'TOOL, toolCallId: string, errorText: string, ?options: ChatRequestOptions, ?output: unit) : ChatAddToolOutputFunction02<'TOOL> = jsNative
-
-module ChatAddToolOutputFunction02 =
-    /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-    [<Literal>]
-    let state = "output-error"
 
 [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
 type ChatStatus =
@@ -5127,7 +5119,7 @@ type ToUIMessageChunkOptions<'TOOLS, 'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<o
 
 [<Interface>]
 type ToUIMessageStream0<'TOOLS, 'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> =
-    inherit FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions<'UI_MESSAGE>
+    inherit UIMessageStreamOptions<'UI_MESSAGE>
     abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<obj> with get, set
     abstract tools: 'TOOLS option with get, set
     [<ParamObject; Emit("$0")>]
@@ -5147,7 +5139,7 @@ type UIMessageStreamOnFinishCallback<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<o
 
 [<Interface>]
 type CreateAgentUIStream0<'CALL_OPTIONS, 'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT, 'UI_MESSAGE when 'OUTPUT :> OutputInterface<obj, obj, obj>> =
-    inherit CreateAgentUIStream0.Base<'UI_MESSAGE>
+    inherit UIMessageStreamOptions<'UI_MESSAGE>
     abstract agent: Agent<'CALL_OPTIONS, 'TOOLS, 'RUNTIME_CONTEXT, 'OUTPUT> with get, set
     abstract uiMessages: obj[] with get, set
     abstract abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal option with get, set
@@ -5456,17 +5448,10 @@ type Experimental_TextBatchItemResult3 =
 
 [<Interface>]
 type Experimental_TextBatchItemResult4<'TOOLS> =
-    inherit FSharp.CloudEdge.Support.AI.V7.Experimental_TextBatchGenerationResult<'TOOLS>
-    abstract id: string
-    /// <remarks>TypeScript type: <c>"succeeded"</c></remarks>
-    abstract status: string
+    inherit Experimental_TextBatchGenerationResult<'TOOLS>
+    inherit Experimental_TextBatchItemResult4.Base
     [<ParamObject; Emit("({ status: 'succeeded', ...$0 })")>]
     static member Create (content: obj[], text: string, finishReason: FinishReason, usage: LanguageModelUsage, id: string, ?rawFinishReason: string, ?response: Experimental_TextBatchGenerationResult.Response, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Experimental_TextBatchItemResult4<'TOOLS> = jsNative
-
-module Experimental_TextBatchItemResult4 =
-    /// <remarks>TypeScript type: <c>"succeeded"</c></remarks>
-    [<Literal>]
-    let status = "succeeded"
 
 [<Interface>]
 type ExperimentalGetBatchStatus0 =
@@ -5792,7 +5777,7 @@ type ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT when 'OUTPUT :> Output
     abstract includeRawChunks: bool option with get, set
     abstract providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject> option with get, set
     abstract repairToolCall: (ToolCallRepairFunction.Options<'TOOLS> -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4ToolCall option>) option with get, set
-    abstract refineToolInput: FSharp.CloudEdge.Support.AI.V7.ToolInputRefinement<'TOOLS> option with get, set
+    abstract refineToolInput: ToolInputRefinement<'TOOLS> option with get, set
     abstract executeLanguageModelCallInTelemetryContext: Telemetry.ExecuteLanguageModelCall option with get, set
     abstract callId: string option with get, set
     /// <summary>
@@ -5899,9 +5884,9 @@ type ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT when 'OUTPUT :> Output
     /// </summary>
     abstract messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[] option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (model: LanguageModel, prompt: U2<string, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[]>, ?tools: 'TOOLS, ?toolOrder: obj[], ?output: 'OUTPUT, ?toolChoice: U2<string, ExperimentalStreamLanguageModelCall0.ToolChoice>, ?download: Experimental_DownloadFunction, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool, ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?repairToolCall: (ToolCallRepairFunction.Options<'TOOLS> -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4ToolCall option>), ?refineToolInput: FSharp.CloudEdge.Support.AI.V7.ToolInputRefinement<'TOOLS>, ?executeLanguageModelCallInTelemetryContext: Telemetry.ExecuteLanguageModelCall, ?callId: string, ?toolsContext: obj, ?experimental_sandbox: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Experimental_SandboxSession, ?_internal: ExperimentalStreamLanguageModelCall0.Internal, ?onLanguageModelCallStart: U2<OnLanguageModelCallStartCallback[], OnLanguageModelCallStartCallback>, ?onLanguageModelCallEnd: U2<(LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)[], (LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)>, ?onStart: (ExperimentalStreamLanguageModelCall0.OnStart.Args -> JS.Promise<unit> option), ?instructions: Instructions, ?system: Instructions, ?allowSystemInMessages: bool, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.Reasoning) : ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT> = jsNative
+    static member Create (model: LanguageModel, prompt: U2<string, FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[]>, ?tools: 'TOOLS, ?toolOrder: obj[], ?output: 'OUTPUT, ?toolChoice: U2<string, ExperimentalStreamLanguageModelCall0.ToolChoice>, ?download: Experimental_DownloadFunction, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool, ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?repairToolCall: (ToolCallRepairFunction.Options<'TOOLS> -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4ToolCall option>), ?refineToolInput: ToolInputRefinement<'TOOLS>, ?executeLanguageModelCallInTelemetryContext: Telemetry.ExecuteLanguageModelCall, ?callId: string, ?toolsContext: obj, ?experimental_sandbox: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Experimental_SandboxSession, ?_internal: ExperimentalStreamLanguageModelCall0.Internal, ?onLanguageModelCallStart: U2<OnLanguageModelCallStartCallback[], OnLanguageModelCallStartCallback>, ?onLanguageModelCallEnd: U2<(LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)[], (LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)>, ?onStart: (ExperimentalStreamLanguageModelCall0.OnStart.Args -> JS.Promise<unit> option), ?instructions: Instructions, ?system: Instructions, ?allowSystemInMessages: bool, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.Reasoning) : ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT> = jsNative
     [<ParamObject; Emit("$0")>]
-    static member Create (model: LanguageModel, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolOrder: obj[], ?output: 'OUTPUT, ?toolChoice: U2<string, ExperimentalStreamLanguageModelCall0.ToolChoice>, ?download: Experimental_DownloadFunction, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool, ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?repairToolCall: (ToolCallRepairFunction.Options<'TOOLS> -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4ToolCall option>), ?refineToolInput: FSharp.CloudEdge.Support.AI.V7.ToolInputRefinement<'TOOLS>, ?executeLanguageModelCallInTelemetryContext: Telemetry.ExecuteLanguageModelCall, ?callId: string, ?toolsContext: obj, ?experimental_sandbox: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Experimental_SandboxSession, ?_internal: ExperimentalStreamLanguageModelCall0.Internal, ?onLanguageModelCallStart: U2<OnLanguageModelCallStartCallback[], OnLanguageModelCallStartCallback>, ?onLanguageModelCallEnd: U2<(LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)[], (LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)>, ?onStart: (ExperimentalStreamLanguageModelCall0.OnStart.Args -> JS.Promise<unit> option), ?instructions: Instructions, ?system: Instructions, ?allowSystemInMessages: bool, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.Reasoning) : ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT> = jsNative
+    static member Create (model: LanguageModel, messages: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[], ?tools: 'TOOLS, ?toolOrder: obj[], ?output: 'OUTPUT, ?toolChoice: U2<string, ExperimentalStreamLanguageModelCall0.ToolChoice>, ?download: Experimental_DownloadFunction, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>, ?includeRawChunks: bool, ?providerOptions: JS.Record<string, FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject>, ?repairToolCall: (ToolCallRepairFunction.Options<'TOOLS> -> JS.Promise<FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4ToolCall option>), ?refineToolInput: ToolInputRefinement<'TOOLS>, ?executeLanguageModelCallInTelemetryContext: Telemetry.ExecuteLanguageModelCall, ?callId: string, ?toolsContext: obj, ?experimental_sandbox: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Experimental_SandboxSession, ?_internal: ExperimentalStreamLanguageModelCall0.Internal, ?onLanguageModelCallStart: U2<OnLanguageModelCallStartCallback[], OnLanguageModelCallStartCallback>, ?onLanguageModelCallEnd: U2<(LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)[], (LanguageModelCallEndEvent<'TOOLS> -> JS.Promise<unit> option)>, ?onStart: (ExperimentalStreamLanguageModelCall0.OnStart.Args -> JS.Promise<unit> option), ?instructions: Instructions, ?system: Instructions, ?allowSystemInMessages: bool, ?maxOutputTokens: float, ?temperature: float, ?topP: float, ?topK: float, ?presencePenalty: float, ?frequencyPenalty: float, ?stopSequences: string[], ?seed: float, ?reasoning: FSharp.CloudEdge.Support.AI.V4.Provider.LanguageModelV4CallOptions.Reasoning) : ExperimentalStreamLanguageModelCall0<'TOOLS, 'OUTPUT> = jsNative
 
 [<Interface>]
 [<Import("InvalidStreamPartError", "ai")>]
@@ -9713,9 +9698,9 @@ type Exports =
     [<Import("convertToModelMessages", "ai")>]
     static member convertToModelMessages<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (messages: ConvertToModelMessages.Messages.Item<'UI_MESSAGE>[], ?options: ConvertToModelMessages.Options) : JS.Promise<FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ModelMessage[]> = jsNative
     [<Import("HttpChatTransport", "ai"); EmitConstructor>]
-    static member HttpChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (__0: FSharp.CloudEdge.Support.AI.V7.HttpChatTransportInitOptions<'UI_MESSAGE>) : HttpChatTransport<'UI_MESSAGE> = jsNative
+    static member HttpChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (__0: HttpChatTransportInitOptions<'UI_MESSAGE>) : HttpChatTransport<'UI_MESSAGE> = jsNative
     [<Import("DefaultChatTransport", "ai"); EmitConstructor>]
-    static member DefaultChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (?options: FSharp.CloudEdge.Support.AI.V7.HttpChatTransportInitOptions<'UI_MESSAGE>) : DefaultChatTransport<'UI_MESSAGE> = jsNative
+    static member DefaultChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (?options: HttpChatTransportInitOptions<'UI_MESSAGE>) : DefaultChatTransport<'UI_MESSAGE> = jsNative
     /// <summary>
     /// A transport that directly communicates with an Agent in-process,
     /// without going through HTTP. This is useful for:
@@ -9754,7 +9739,7 @@ type Exports =
     [<Import("lastAssistantMessageIsCompleteWithToolCalls", "ai")>]
     static member lastAssistantMessageIsCompleteWithToolCalls (__0: LastAssistantMessageIsCompleteWithToolCalls0) : bool = jsNative
     [<Import("TextStreamChatTransport", "ai"); EmitConstructor>]
-    static member TextStreamChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (?options: FSharp.CloudEdge.Support.AI.V7.HttpChatTransportInitOptions<'UI_MESSAGE>) : TextStreamChatTransport<'UI_MESSAGE> = jsNative
+    static member TextStreamChatTransport<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (?options: HttpChatTransportInitOptions<'UI_MESSAGE>) : TextStreamChatTransport<'UI_MESSAGE> = jsNative
     /// <summary>
     /// Validates a list of UI messages like <c>validateUIMessages</c>,
     /// but instead of throwing it returns <c>{ success: true, data }</c>
@@ -9770,7 +9755,7 @@ type Exports =
     /// valid.
     /// </summary>
     [<Import("validateUIMessages", "ai")>]
-    static member validateUIMessages<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (options: FSharp.CloudEdge.Support.AI.V7.SafeValidateUIMessages.Options<'UI_MESSAGE>) : JS.Promise<'UI_MESSAGE[]> = jsNative
+    static member validateUIMessages<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (options: SafeValidateUIMessages.Options<'UI_MESSAGE>) : JS.Promise<'UI_MESSAGE[]> = jsNative
     /// <summary>
     /// Creates a UI message stream that can be used to send messages to the client.
     /// </summary>
@@ -9840,7 +9825,7 @@ type Exports =
     /// Returns <c>undefined</c> for stream parts that do not produce UI message chunks.
     /// </summary>
     [<Import("toUIMessageChunk", "ai")>]
-    static member toUIMessageChunk<'TOOLS, 'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (part: obj, ?__1: FSharp.CloudEdge.Support.AI.V7.ToUIMessageChunkOptions<'TOOLS, 'UI_MESSAGE>) : obj option = jsNative
+    static member toUIMessageChunk<'TOOLS, 'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> (part: obj, ?__1: ToUIMessageChunkOptions<'TOOLS, 'UI_MESSAGE>) : obj option = jsNative
     /// <summary>
     /// Converts a stream of <c>TextStreamPart&lt;TOOLS&gt;</c> chunks (as emitted by
     /// <c>streamText</c>'s <c>stream</c>) into a stream of <c>UIMessageChunk</c>s suitable for
@@ -11063,42 +11048,42 @@ module AddToolInputExamplesMiddleware0 =
 
 module AsyncIterableStream =
     [<Interface>]
-    type Item6<'UI_MESSAGE> =
+    type Item4<'UI_MESSAGE> =
         /// <remarks>TypeScript type: <c>"start"</c></remarks>
         abstract ``type``: string with get, set
         abstract messageId: string option with get, set
         abstract messageMetadata: obj option with get, set
         [<ParamObject; Emit("({ type: 'start', ...$0 })")>]
-        static member Create (?messageId: string, ?messageMetadata: obj) : Item6<'UI_MESSAGE> = jsNative
+        static member Create (?messageId: string, ?messageMetadata: obj) : Item4<'UI_MESSAGE> = jsNative
 
-    module Item6 =
+    module Item4 =
         /// <remarks>TypeScript type: <c>"start"</c></remarks>
         [<Literal>]
         let ``type`` = "start"
 
     [<Interface>]
-    type Item7<'UI_MESSAGE> =
+    type Item5<'UI_MESSAGE> =
         /// <remarks>TypeScript type: <c>"finish"</c></remarks>
         abstract ``type``: string with get, set
         abstract finishReason: FinishReason option with get, set
         abstract messageMetadata: obj option with get, set
         [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-        static member Create (?finishReason: FinishReason, ?messageMetadata: obj) : Item7<'UI_MESSAGE> = jsNative
+        static member Create (?finishReason: FinishReason, ?messageMetadata: obj) : Item5<'UI_MESSAGE> = jsNative
 
-    module Item7 =
+    module Item5 =
         /// <remarks>TypeScript type: <c>"finish"</c></remarks>
         [<Literal>]
         let ``type`` = "finish"
 
     [<Interface>]
-    type Item8<'UI_MESSAGE> =
+    type Item6<'UI_MESSAGE> =
         /// <remarks>TypeScript type: <c>"message-metadata"</c></remarks>
         abstract ``type``: string with get, set
         abstract messageMetadata: obj with get, set
         [<ParamObject; Emit("({ type: 'message-metadata', ...$0 })")>]
-        static member Create (messageMetadata: obj) : Item8<'UI_MESSAGE> = jsNative
+        static member Create (messageMetadata: obj) : Item6<'UI_MESSAGE> = jsNative
 
-    module Item8 =
+    module Item6 =
         /// <remarks>TypeScript type: <c>"message-metadata"</c></remarks>
         [<Literal>]
         let ``type`` = "message-metadata"
@@ -11130,6 +11115,21 @@ module CallSettings =
         abstract headers: JS.Record<string, string option> option with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (?maxRetries: float, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal, ?headers: JS.Record<string, string option>) : Base = jsNative
+
+module ChatAddToolOutputFunction02 =
+    [<Interface>]
+    type Base =
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+        abstract state: string with get, set
+        abstract output: unit option with get, set
+        abstract errorText: string with get, set
+        [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+        static member Create (errorText: string, ?output: unit) : Base = jsNative
+
+    module Base =
+        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+        [<Literal>]
+        let state = "output-error"
 
 module ChatInit =
     module MessageMetadataSchema =
@@ -11264,61 +11264,6 @@ module ConvertToModelMessages =
             static member Create (role: FSharp.CloudEdge.Runtime.Workers.AgentMemoryMessage.Role, parts: U23<CustomContentUIPart, FileUIPart, ReasoningFileUIPart, ReasoningUIPart, SourceDocumentUIPart, SourceUrlUIPart, StepStartUIPart, TextUIPart, IsTextUIPart.Part, FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item, UIMessage.Parts.Item2, UIMessage.Parts.Item3, UIMessage.Parts.Item4, UIMessage.Parts.Item5, UIMessage.Parts.Item6, UIMessage.Parts.Item7, IsDataUIPart.Part, IsDataUIPart.Part2, IsDataUIPart.Part3, IsDataUIPart.Part4, IsDataUIPart.Part5, IsDataUIPart.Part6, IsDataUIPart.Part7>[], ?metadata: obj) : Item<'UI_MESSAGE> = jsNative
 
 module CreateAgentUIStream0 =
-    [<Interface>]
-    type Base<'UI_MESSAGE> =
-        /// <summary>
-        /// The original messages. If they are provided, persistence mode is assumed,
-        /// and a message ID is provided for the response message.
-        /// </summary>
-        abstract originalMessages: 'UI_MESSAGE[] option with get, set
-        /// <summary>
-        /// Generate a message ID for the response message.
-        /// <br /><br />
-        /// If not provided, no message ID will be set for the response message (unless
-        /// the original messages are provided and the last message is an assistant message).
-        /// </summary>
-        abstract generateMessageId: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.IdGenerator option with get, set
-        abstract onEnd: (UIMessageStreamOnEndCallback.Event<'UI_MESSAGE> -> JS.Promise<unit> option) option with get, set
-        /// <remarks>@deprecated Use <c>onEnd</c> instead.</remarks>
-        abstract onFinish: (UIMessageStreamOnEndCallback.Event<'UI_MESSAGE> -> JS.Promise<unit> option) option with get, set
-        /// <summary>
-        /// Extracts message metadata that will be sent to the client.
-        /// <br /><br />
-        /// Called on <c>start</c> and <c>finish</c> events.
-        /// </summary>
-        abstract messageMetadata: (UIMessageStreamOptions.MessageMetadata.Options -> obj option) option with get, set
-        /// <summary>
-        /// Send reasoning parts to the client.
-        /// Default to true.
-        /// </summary>
-        abstract sendReasoning: bool option with get, set
-        /// <summary>
-        /// Send source parts to the client.
-        /// Default to false.
-        /// </summary>
-        abstract sendSources: bool option with get, set
-        /// <summary>
-        /// Send the finish event to the client.
-        /// Set to false if you are using additional streamText calls
-        /// that send additional data.
-        /// Default to true.
-        /// </summary>
-        abstract sendFinish: bool option with get, set
-        /// <summary>
-        /// Send the message start event to the client.
-        /// Set to false if you are using additional streamText calls
-        /// and the message start event has already been sent.
-        /// Default to true.
-        /// </summary>
-        abstract sendStart: bool option with get, set
-        /// <summary>
-        /// Process an error, e.g. to log it. Default to <c>() =&gt; 'An error occurred.'</c>.
-        /// </summary>
-        /// <returns>error message to include in the data stream.</returns>
-        abstract onError: (obj -> string) option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (?originalMessages: 'UI_MESSAGE[], ?generateMessageId: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.IdGenerator, ?onEnd: (UIMessageStreamOnEndCallback.Event<'UI_MESSAGE> -> JS.Promise<unit> option), ?onFinish: (UIMessageStreamOnEndCallback.Event<'UI_MESSAGE> -> JS.Promise<unit> option), ?messageMetadata: (UIMessageStreamOptions.MessageMetadata.Options -> obj option), ?sendReasoning: bool, ?sendSources: bool, ?sendFinish: bool, ?sendStart: bool, ?onError: (obj -> string)) : Base<'UI_MESSAGE> = jsNative
-
     module OnStepEnd =
         type Event<'TOOLS> =
             /// <summary>
@@ -11435,7 +11380,7 @@ module CreateAgentUIStreamResponse0 =
         /// The original messages. If they are provided, persistence mode is assumed,
         /// and a message ID is provided for the response message.
         /// </summary>
-        abstract originalMessages: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>>[] option with get, set
+        abstract originalMessages: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>>[] option with get, set
         /// <summary>
         /// Generate a message ID for the response message.
         /// <br /><br />
@@ -11482,7 +11427,7 @@ module CreateAgentUIStreamResponse0 =
         /// <returns>error message to include in the data stream.</returns>
         abstract onError: (obj -> string) option with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (?originalMessages: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>>[], ?generateMessageId: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.IdGenerator, ?onEnd: (CreateAgentUIStreamResponse0.OnEnd.Event<'MESSAGE_METADATA, 'TOOLS> -> JS.Promise<unit> option), ?onFinish: (CreateAgentUIStreamResponse0.OnEnd.Event<'MESSAGE_METADATA, 'TOOLS> -> JS.Promise<unit> option), ?messageMetadata: (UIMessageStreamOptions.MessageMetadata.Options -> 'MESSAGE_METADATA option), ?sendReasoning: bool, ?sendSources: bool, ?sendFinish: bool, ?sendStart: bool, ?onError: (obj -> string)) : Base<'MESSAGE_METADATA, 'TOOLS> = jsNative
+        static member Create (?originalMessages: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>>[], ?generateMessageId: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.IdGenerator, ?onEnd: (CreateAgentUIStreamResponse0.OnEnd.Event<'MESSAGE_METADATA, 'TOOLS> -> JS.Promise<unit> option), ?onFinish: (CreateAgentUIStreamResponse0.OnEnd.Event<'MESSAGE_METADATA, 'TOOLS> -> JS.Promise<unit> option), ?messageMetadata: (UIMessageStreamOptions.MessageMetadata.Options -> 'MESSAGE_METADATA option), ?sendReasoning: bool, ?sendSources: bool, ?sendFinish: bool, ?sendStart: bool, ?onError: (obj -> string)) : Base<'MESSAGE_METADATA, 'TOOLS> = jsNative
 
     module OnEnd =
         [<Interface>]
@@ -11490,7 +11435,7 @@ module CreateAgentUIStreamResponse0 =
             /// <summary>
             /// The updated list of UI messages.
             /// </summary>
-            abstract messages: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>>[] with get, set
+            abstract messages: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>>[] with get, set
             /// <summary>
             /// Indicates whether the response message is a continuation of the last original message,
             /// or if a new message was created.
@@ -11509,13 +11454,13 @@ module CreateAgentUIStreamResponse0 =
             /// The message that was sent to the client as a response
             /// (including the original message if it was extended).
             /// </summary>
-            abstract responseMessage: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>> with get, set
+            abstract responseMessage: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>> with get, set
             /// <summary>
             /// The reason why the generation finished.
             /// </summary>
             abstract finishReason: FinishReason option with get, set
             [<ParamObject; Emit("$0")>]
-            static member Create (messages: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>>[], isContinuation: bool, isAborted: bool, outcome: UIMessageStreamOutcome, responseMessage: UIMessage<'MESSAGE_METADATA, unit, FSharp.CloudEdge.Support.AI.V7.InferUITools<'TOOLS>>, ?finishReason: FinishReason) : Event<'MESSAGE_METADATA, 'TOOLS> = jsNative
+            static member Create (messages: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>>[], isContinuation: bool, isAborted: bool, outcome: UIMessageStreamOutcome, responseMessage: UIMessage<'MESSAGE_METADATA, unit, InferUITools<'TOOLS>>, ?finishReason: FinishReason) : Event<'MESSAGE_METADATA, 'TOOLS> = jsNative
 
 module CreateDownload =
     [<Interface>]
@@ -12082,7 +12027,7 @@ module Experimental_DownloadFunction =
                 [<ParamObject; Emit("$0")>]
                 static member Create (data: Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>, ?mediaType: string) : Item = jsNative
 
-module Experimental_LanguageModelStreamPart4 =
+module Experimental_LanguageModelStreamPart2 =
     [<Interface>]
     type Performance =
         abstract responseTimeMs: float with get, set
@@ -12209,6 +12154,20 @@ module Experimental_TextBatchGenerationResult =
         abstract modelId: string option
         [<ParamObject; Emit("$0")>]
         static member Create (?id: string, ?timestamp: string, ?modelId: string) : Response = jsNative
+
+module Experimental_TextBatchItemResult4 =
+    [<Interface>]
+    type Base =
+        abstract id: string
+        /// <remarks>TypeScript type: <c>"succeeded"</c></remarks>
+        abstract status: string
+        [<ParamObject; Emit("({ status: 'succeeded', ...$0 })")>]
+        static member Create (id: string) : Base = jsNative
+
+    module Base =
+        /// <remarks>TypeScript type: <c>"succeeded"</c></remarks>
+        [<Literal>]
+        let status = "succeeded"
 
 module ExtractJsonMiddleware =
     [<Interface>]
@@ -12722,23 +12681,23 @@ module InferUITools =
 module InvalidStreamPartError =
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Chunk =
-        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of OutputInterface.CreateElementStreamTransform.Result.Item.Part3
-        | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of OutputInterface.CreateElementStreamTransform.Result.Item.Part4
-        | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of OutputInterface.CreateElementStreamTransform.Result.Item.Part5
-        | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of OutputInterface.CreateElementStreamTransform.Result.Item.Part8
-        | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part9
-        | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part10
-        | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of OutputInterface.CreateElementStreamTransform.Result.Item.Part11
-        | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part12
-        | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part15
-        | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part16
-        | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part17
-        | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of OutputInterface.CreateElementStreamTransform.Result.Item.Part18
-        | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of OutputInterface.CreateElementStreamTransform.Result.Item.Part19
-        | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part20
-        | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part21
-        | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part22
-        | [<CompiledName("model-call-end")>] ModelCallEnd of finishReason: FinishReason * rawFinishReason: string option * usage: LanguageModelUsage * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * performance: Experimental_LanguageModelStreamPart4.Performance
+        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of OutputInterface.CreateElementStreamTransform.Result.Item.Part2
+        | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of OutputInterface.CreateElementStreamTransform.Result.Item.Part3
+        | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of OutputInterface.CreateElementStreamTransform.Result.Item.Part4
+        | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of OutputInterface.CreateElementStreamTransform.Result.Item.Part7
+        | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part8
+        | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part9
+        | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of OutputInterface.CreateElementStreamTransform.Result.Item.Part10
+        | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part11
+        | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part14
+        | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part15
+        | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part16
+        | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of OutputInterface.CreateElementStreamTransform.Result.Item2.Part2
+        | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of OutputInterface.CreateElementStreamTransform.Result.Item2.Part3
+        | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part19
+        | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part20
+        | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part21
+        | [<CompiledName("model-call-end")>] ModelCallEnd of finishReason: FinishReason * rawFinishReason: string option * usage: LanguageModelUsage * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * performance: Experimental_LanguageModelStreamPart2.Performance
         | [<CompiledName("model-call-start")>] ModelCallStart of warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[]
         /// <param name="id">ID for the generated response, if the provider sends one.</param>
         /// <param name="timestamp">Timestamp for the start of the generated response, if the provider sends one.</param>
@@ -12802,7 +12761,7 @@ module InvalidStreamPartError =
         /// <param name="error">The error that caused the tool call to be invalid.</param>
         | [<CompiledName("tool-call"); CaseTest("$0.dynamic === true")>] ToolCall2 of toolCallId: string * providerExecuted: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option * toolName: string * input: obj * dynamic: bool * title: string option * invalid: bool option * error: obj option
         [<ParamObject; Emit("({ type: 'model-call-end', ...$0 })")>]
-        static member CreateModelCallEnd (finishReason: FinishReason, usage: LanguageModelUsage, performance: Experimental_LanguageModelStreamPart4.Performance, ?rawFinishReason: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Chunk = jsNative
+        static member CreateModelCallEnd (finishReason: FinishReason, usage: LanguageModelUsage, performance: Experimental_LanguageModelStreamPart2.Performance, ?rawFinishReason: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Chunk = jsNative
         [<ParamObject; Emit("({ type: 'model-call-response-metadata', ...$0 })")>]
         static member CreateModelCallResponseMetadata (?id: string, ?timestamp: Fable.Core.TS.Es.Date, ?modelId: string) : Chunk = jsNative
         [<ParamObject; Emit("({ type: 'source', sourceType: 'url', ...$0 })")>]
@@ -12825,6 +12784,7 @@ module InvalidStreamPartError =
 module IsDataUIPart =
     [<Interface>]
     type Part =
+        inherit IsDataUIPart.Part.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -12836,23 +12796,12 @@ module IsDataUIPart =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj option with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: unit option with get, set
         [<ParamObject; Emit("({ state: 'input-streaming', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Part = jsNative
 
-    module Part =
-        /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
-        [<Literal>]
-        let state = "input-streaming"
-
     [<Interface>]
     type Part2 =
+        inherit IsDataUIPart.Part2.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -12864,23 +12813,12 @@ module IsDataUIPart =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: unit option with get, set
         [<ParamObject; Emit("({ state: 'input-available', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Part2 = jsNative
 
-    module Part2 =
-        /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
-        [<Literal>]
-        let state = "input-available"
-
     [<Interface>]
     type Part3 =
+        inherit IsDataUIPart.Part3.Base
         abstract ``type``: string with get, set
         /// <summary>
         /// ID of the tool call.
@@ -12892,21 +12830,114 @@ module IsDataUIPart =
         /// Whether the tool call was executed by the provider.
         /// </summary>
         abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: IsDataUIPart.Part3.Approval with get, set
         [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
         static member Create (``type``: string, toolCallId: string, input: obj, approval: IsDataUIPart.Part3.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part3 = jsNative
 
-    module Part3 =
-        /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-        [<Literal>]
-        let state = "approval-requested"
+    [<Interface>]
+    type Part4 =
+        inherit IsDataUIPart.Part4.Base
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// ID of the tool call.
+        /// </summary>
+        abstract toolCallId: string with get, set
+        abstract title: string option with get, set
+        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+        /// <summary>
+        /// Whether the tool call was executed by the provider.
+        /// </summary>
+        abstract providerExecuted: bool option with get, set
+        [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, approval: IsDataUIPart.Part4.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part4 = jsNative
 
+    [<Interface>]
+    type Part5 =
+        inherit IsDataUIPart.Part5.Base
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// ID of the tool call.
+        /// </summary>
+        abstract toolCallId: string with get, set
+        abstract title: string option with get, set
+        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+        /// <summary>
+        /// Whether the tool call was executed by the provider.
+        /// </summary>
+        abstract providerExecuted: bool option with get, set
+        [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: IsDataUIPart.Part5.Approval) : Part5 = jsNative
+
+    [<Interface>]
+    type Part6 =
+        inherit IsDataUIPart.Part6.Base
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// ID of the tool call.
+        /// </summary>
+        abstract toolCallId: string with get, set
+        abstract title: string option with get, set
+        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+        /// <summary>
+        /// Whether the tool call was executed by the provider.
+        /// </summary>
+        abstract providerExecuted: bool option with get, set
+        [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: IsDataUIPart.Part6.Approval) : Part6 = jsNative
+
+    [<Interface>]
+    type Part7 =
+        inherit IsDataUIPart.Part7.Base
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// ID of the tool call.
+        /// </summary>
+        abstract toolCallId: string with get, set
+        abstract title: string option with get, set
+        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+        /// <summary>
+        /// Whether the tool call was executed by the provider.
+        /// </summary>
+        abstract providerExecuted: bool option with get, set
+        [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
+        static member Create (``type``: string, toolCallId: string, input: obj, approval: IsDataUIPart.Part7.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part7 = jsNative
+
+    module Part =
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj option with get, set
+            abstract output: unit option with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: unit option with get, set
+            [<ParamObject; Emit("({ state: 'input-streaming', ...$0 })")>]
+            static member Create (?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+            [<Literal>]
+            let state = "input-streaming"
+
+    module Part2 =
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract output: unit option with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: unit option with get, set
+            [<ParamObject; Emit("({ state: 'input-available', ...$0 })")>]
+            static member Create (input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+            [<Literal>]
+            let state = "input-available"
+
+    module Part3 =
         [<Interface>]
         type Approval =
             abstract id: string with get, set
@@ -12919,34 +12950,24 @@ module IsDataUIPart =
             [<ParamObject; Emit("$0")>]
             static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-    [<Interface>]
-    type Part4 =
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// ID of the tool call.
-        /// </summary>
-        abstract toolCallId: string with get, set
-        abstract title: string option with get, set
-        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-        /// <summary>
-        /// Whether the tool call was executed by the provider.
-        /// </summary>
-        abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: IsDataUIPart.Part4.Approval with get, set
-        [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
-        static member Create (``type``: string, toolCallId: string, input: obj, approval: IsDataUIPart.Part4.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part4 = jsNative
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract output: unit option with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part3.Approval with get, set
+            [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
+            static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part3.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+            [<Literal>]
+            let state = "approval-requested"
 
     module Part4 =
-        /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-        [<Literal>]
-        let state = "approval-responded"
-
         [<Interface>]
         type Approval =
             abstract id: string with get, set
@@ -12959,36 +12980,24 @@ module IsDataUIPart =
             [<ParamObject; Emit("$0")>]
             static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-    [<Interface>]
-    type Part5 =
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// ID of the tool call.
-        /// </summary>
-        abstract toolCallId: string with get, set
-        abstract title: string option with get, set
-        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-        /// <summary>
-        /// Whether the tool call was executed by the provider.
-        /// </summary>
-        abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: obj with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract preliminary: bool option with get, set
-        abstract approval: IsDataUIPart.Part5.Approval option with get, set
-        [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
-        static member Create (``type``: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: IsDataUIPart.Part5.Approval) : Part5 = jsNative
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract output: unit option with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part4.Approval with get, set
+            [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
+            static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part4.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+            [<Literal>]
+            let state = "approval-responded"
 
     module Part5 =
-        /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
-        [<Literal>]
-        let state = "output-available"
-
         [<Interface>]
         type Approval =
             abstract id: string with get, set
@@ -13001,36 +13010,26 @@ module IsDataUIPart =
             [<ParamObject; Emit("$0")>]
             static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-    [<Interface>]
-    type Part6 =
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// ID of the tool call.
-        /// </summary>
-        abstract toolCallId: string with get, set
-        abstract title: string option with get, set
-        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-        /// <summary>
-        /// Whether the tool call was executed by the provider.
-        /// </summary>
-        abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract rawInput: obj option with get, set
-        abstract output: unit option with get, set
-        abstract errorText: string with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: IsDataUIPart.Part6.Approval option with get, set
-        [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
-        static member Create (``type``: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?rawInput: obj, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: IsDataUIPart.Part6.Approval) : Part6 = jsNative
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract output: obj with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract preliminary: bool option with get, set
+            abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part5.Approval option with get, set
+            [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
+            static member Create (input: obj, output: obj, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part5.Approval) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+            [<Literal>]
+            let state = "output-available"
 
     module Part6 =
-        /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-        [<Literal>]
-        let state = "output-error"
-
         [<Interface>]
         type Approval =
             abstract id: string with get, set
@@ -13043,34 +13042,26 @@ module IsDataUIPart =
             [<ParamObject; Emit("$0")>]
             static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-    [<Interface>]
-    type Part7 =
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// ID of the tool call.
-        /// </summary>
-        abstract toolCallId: string with get, set
-        abstract title: string option with get, set
-        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-        /// <summary>
-        /// Whether the tool call was executed by the provider.
-        /// </summary>
-        abstract providerExecuted: bool option with get, set
-        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-        abstract state: string with get, set
-        abstract input: obj with get, set
-        abstract output: unit option with get, set
-        abstract errorText: unit option with get, set
-        abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-        abstract approval: IsDataUIPart.Part7.Approval with get, set
-        [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
-        static member Create (``type``: string, toolCallId: string, input: obj, approval: IsDataUIPart.Part7.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part7 = jsNative
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract rawInput: obj option with get, set
+            abstract output: unit option with get, set
+            abstract errorText: string with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part6.Approval option with get, set
+            [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+            static member Create (input: obj, errorText: string, ?rawInput: obj, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part6.Approval) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+            [<Literal>]
+            let state = "output-error"
 
     module Part7 =
-        /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-        [<Literal>]
-        let state = "output-denied"
-
         [<Interface>]
         type Approval =
             abstract id: string with get, set
@@ -13082,6 +13073,23 @@ module IsDataUIPart =
             abstract signature: string option with get, set
             [<ParamObject; Emit("$0")>]
             static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
+
+        [<Interface>]
+        type Base =
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+            abstract state: string with get, set
+            abstract input: obj with get, set
+            abstract output: unit option with get, set
+            abstract errorText: unit option with get, set
+            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+            abstract approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part7.Approval with get, set
+            [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
+            static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.IsDataUIPart.Part7.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+        module Base =
+            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+            [<Literal>]
+            let state = "output-denied"
 
 module IsStepCount =
     module Result =
@@ -13145,11 +13153,11 @@ module IsStepCount =
                     /// <summary>
                     /// The tool calls that were made during the generation.
                     /// </summary>
-                    abstract toolCalls: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall[]
+                    abstract toolCalls: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall[]
                     /// <summary>
                     /// The static tool calls that were made in the last step.
                     /// </summary>
-                    abstract staticToolCalls: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall2[]
+                    abstract staticToolCalls: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall2[]
                     /// <summary>
                     /// The dynamic tool calls that were made in the last step.
                     /// </summary>
@@ -13161,7 +13169,7 @@ module IsStepCount =
                     /// <summary>
                     /// The static tool results that were made in the last step.
                     /// </summary>
-                    abstract staticToolResults: IsStepCount.Result.Options.Steps.Item.ToolResults.Item2[]
+                    abstract staticToolResults: OutputInterface.CreateElementStreamTransform.Result.Item2.Part.Cases.ToolResult2.Base[]
                     /// <summary>
                     /// The dynamic tool results that were made in the last step.
                     /// </summary>
@@ -13207,8 +13215,8 @@ module IsStepCount =
                         type Item =
                             | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of ReasoningFileOutput
                             | [<CompiledName("reasoning"); Fickl.Core.InlineInterface>] Reasoning of ReasoningOutput
-                            | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part18
-                            | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part19
+                            | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item2.Part2
+                            | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item2.Part3
                             | [<CompiledName("text")>] Text of text: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
                             | [<CompiledName("custom")>] Custom of kind: string * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
                             | [<CompiledName("file")>] File of file: GeneratedFile * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option
@@ -13299,28 +13307,6 @@ module IsStepCount =
                             | [<CompiledName("tool-result"); CaseTest("($0.dynamic === false || $0.dynamic === undefined)")>] ToolResult2 of toolCallId: string * toolName: string * input: obj * output: obj * providerExecuted: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option * dynamic: bool option * preliminary: bool option * title: string option
                             [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
                             static member CreateToolResult2 (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Item = jsNative
-
-                        [<Interface>]
-                        type Item2 =
-                            /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract toolCallId: string with get, set
-                            abstract toolName: string with get, set
-                            abstract input: obj with get, set
-                            abstract output: obj with get, set
-                            abstract providerExecuted: bool option with get, set
-                            abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-                            abstract dynamic: bool option with get, set
-                            abstract preliminary: bool option with get, set
-                            abstract title: string option with get, set
-                            [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
-                            static member Create (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Item2 = jsNative
-
-                        module Item2 =
-                            /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "tool-result"
 
 module IsTextUIPart =
     [<Interface>]
@@ -13655,37 +13641,343 @@ module OutputInterface =
     module CreateElementStreamTransform =
         module Result =
             [<Interface>]
-            type Item<'PARTIAL> =
-                abstract part: OutputInterface.CreateElementStreamTransform.Result.Item.Part with get, set
+            type Item<'TOOLS, 'PARTIAL_OUTPUT> =
+                abstract part: obj with get, set
+                abstract partialOutput: 'PARTIAL_OUTPUT option with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (part: obj, ?partialOutput: 'PARTIAL_OUTPUT) : Item<'TOOLS, 'PARTIAL_OUTPUT> = jsNative
+
+            [<Interface>]
+            type Item2<'PARTIAL> =
+                abstract part: OutputInterface.CreateElementStreamTransform.Result.Item2.Part with get, set
                 abstract partialOutput: 'PARTIAL option with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (part: OutputInterface.CreateElementStreamTransform.Result.Item.Part, ?partialOutput: 'PARTIAL) : Item<'PARTIAL> = jsNative
+                static member Create (part: OutputInterface.CreateElementStreamTransform.Result.Item2.Part, ?partialOutput: 'PARTIAL) : Item2<'PARTIAL> = jsNative
 
             module Item =
+                [<Interface>]
+                type Part =
+                    /// <remarks>TypeScript type: <c>"abort"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract reason: string option with get, set
+                    [<ParamObject; Emit("({ type: 'abort', ...$0 })")>]
+                    static member Create (?reason: string) : Part = jsNative
+
+                module Part =
+                    /// <remarks>TypeScript type: <c>"abort"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "abort"
+
+                    [<Interface>]
+                    type Base =
+                        /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
+                        abstract ``type``: string with get, set
+                        [<Emit("({ type: 'tool-output-denied' })")>]
+                        static member Create () : Base = jsNative
+
+                    module Base =
+                        /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "tool-output-denied"
+
+                    [<Interface>]
+                    type Base2 =
+                        /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+                        abstract ``type``: string with get, set
+                        [<Emit("({ type: 'tool-call' })")>]
+                        static member Create () : Base2 = jsNative
+
+                    module Base2 =
+                        /// <remarks>TypeScript type: <c>"tool-call"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "tool-call"
+
+                [<Interface>]
+                type Part10 =
+                    /// <remarks>TypeScript type: <c>"reasoning-file"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract file: GeneratedFile with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'reasoning-file', ...$0 })")>]
+                    static member Create (file: GeneratedFile, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part10 = jsNative
+
+                module Part10 =
+                    /// <remarks>TypeScript type: <c>"reasoning-file"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "reasoning-file"
+
+                [<Interface>]
+                type Part11 =
+                    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'reasoning-start', ...$0 })")>]
+                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part11 = jsNative
+
+                module Part11 =
+                    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "reasoning-start"
+
+                [<Interface>]
+                type Part12 =
+                    /// <remarks>TypeScript type: <c>"start"</c></remarks>
+                    abstract ``type``: string with get, set
+                    [<Emit("({ type: 'start' })")>]
+                    static member Create () : Part12 = jsNative
+
+                module Part12 =
+                    /// <remarks>TypeScript type: <c>"start"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "start"
+
+                [<Interface>]
+                type Part13 =
+                    /// <remarks>TypeScript type: <c>"start-step"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract request: LanguageModelRequestMetadata with get, set
+                    abstract warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[] with get, set
+                    [<ParamObject; Emit("({ type: 'start-step', ...$0 })")>]
+                    static member Create (request: LanguageModelRequestMetadata, warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[]) : Part13 = jsNative
+
+                module Part13 =
+                    /// <remarks>TypeScript type: <c>"start-step"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "start-step"
+
+                [<Interface>]
+                type Part14 =
+                    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    abstract text: string with get, set
+                    [<ParamObject; Emit("({ type: 'text-delta', ...$0 })")>]
+                    static member Create (id: string, text: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part14 = jsNative
+
+                module Part14 =
+                    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "text-delta"
+
+                [<Interface>]
+                type Part15 =
+                    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'text-end', ...$0 })")>]
+                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part15 = jsNative
+
+                module Part15 =
+                    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "text-end"
+
+                [<Interface>]
+                type Part16 =
+                    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'text-start', ...$0 })")>]
+                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part16 = jsNative
+
+                module Part16 =
+                    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "text-start"
+
+                [<Interface>]
+                type Part19 =
+                    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract delta: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'tool-input-delta', ...$0 })")>]
+                    static member Create (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part19 = jsNative
+
+                module Part19 =
+                    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "tool-input-delta"
+
+                [<Interface>]
+                type Part2 =
+                    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract kind: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
+                    static member Create (kind: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part2 = jsNative
+
+                module Part2 =
+                    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "custom"
+
+                [<Interface>]
+                type Part20 =
+                    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
+                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part20 = jsNative
+
+                module Part20 =
+                    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "tool-input-end"
+
+                [<Interface>]
+                type Part21 =
+                    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract toolName: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+                    abstract providerExecuted: bool option with get, set
+                    abstract dynamic: bool option with get, set
+                    abstract title: string option with get, set
+                    [<ParamObject; Emit("({ type: 'tool-input-start', ...$0 })")>]
+                    static member Create (id: string, toolName: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : Part21 = jsNative
+
+                module Part21 =
+                    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "tool-input-start"
+
+                [<Interface>]
+                type Part3 =
+                    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract error: obj with get, set
+                    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
+                    static member Create (error: obj) : Part3 = jsNative
+
+                module Part3 =
+                    /// <remarks>TypeScript type: <c>"error"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "error"
+
+                [<Interface>]
+                type Part4 =
+                    /// <remarks>TypeScript type: <c>"file"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract file: GeneratedFile with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
+                    static member Create (file: GeneratedFile, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part4 = jsNative
+
+                module Part4 =
+                    /// <remarks>TypeScript type: <c>"file"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "file"
+
+                [<Interface>]
+                type Part5 =
+                    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract finishReason: FinishReason with get, set
+                    abstract rawFinishReason: string option with get, set
+                    abstract totalUsage: LanguageModelUsage with get, set
+                    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
+                    static member Create (finishReason: FinishReason, totalUsage: LanguageModelUsage, ?rawFinishReason: string) : Part5 = jsNative
+
+                module Part5 =
+                    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "finish"
+
+                [<Interface>]
+                type Part6 =
+                    /// <remarks>TypeScript type: <c>"finish-step"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract response: OutputInterface.ParseCompleteOutput.Context.Response with get, set
+                    abstract usage: LanguageModelUsage with get, set
+                    abstract performance: StepResultPerformance with get, set
+                    abstract finishReason: FinishReason with get, set
+                    abstract rawFinishReason: string option with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'finish-step', ...$0 })")>]
+                    static member Create (response: OutputInterface.ParseCompleteOutput.Context.Response, usage: LanguageModelUsage, performance: StepResultPerformance, finishReason: FinishReason, ?rawFinishReason: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part6 = jsNative
+
+                module Part6 =
+                    /// <remarks>TypeScript type: <c>"finish-step"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "finish-step"
+
+                [<Interface>]
+                type Part7 =
+                    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract rawValue: obj with get, set
+                    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
+                    static member Create (rawValue: obj) : Part7 = jsNative
+
+                module Part7 =
+                    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "raw"
+
+                [<Interface>]
+                type Part8 =
+                    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    abstract id: string with get, set
+                    abstract text: string with get, set
+                    [<ParamObject; Emit("({ type: 'reasoning-delta', ...$0 })")>]
+                    static member Create (id: string, text: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part8 = jsNative
+
+                module Part8 =
+                    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "reasoning-delta"
+
+                [<Interface>]
+                type Part9 =
+                    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
+                    abstract ``type``: string with get, set
+                    abstract id: string with get, set
+                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                    [<ParamObject; Emit("({ type: 'reasoning-end', ...$0 })")>]
+                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part9 = jsNative
+
+                module Part9 =
+                    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
+                    [<Literal>]
+                    let ``type`` = "reasoning-end"
+
+            module Item2 =
                 [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                 type Part =
-                    | [<CompiledName("abort"); Fickl.Core.InlineInterface>] Abort of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part2
-                    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part3
-                    | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part4
-                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part5
-                    | [<CompiledName("finish"); Fickl.Core.InlineInterface>] Finish of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part6
-                    | [<CompiledName("finish-step"); Fickl.Core.InlineInterface>] FinishStep of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part7
-                    | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part8
-                    | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part9
-                    | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part10
-                    | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part11
-                    | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part12
-                    | [<CompiledName("start"); Fickl.Core.InlineInterface>] Start of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part13
-                    | [<CompiledName("start-step"); Fickl.Core.InlineInterface>] StartStep of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part14
-                    | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part15
-                    | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part16
-                    | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part17
-                    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part18
-                    | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part19
-                    | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part20
-                    | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part21
-                    | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part22
-                    | [<CompiledName("tool-output-denied"); Fickl.Core.InlineInterface>] ToolOutputDenied of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part23
+                    | [<CompiledName("abort"); Fickl.Core.InlineInterface>] Abort of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part
+                    | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part2
+                    | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part3
+                    | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part4
+                    | [<CompiledName("finish"); Fickl.Core.InlineInterface>] Finish of OutputInterface.CreateElementStreamTransform.Result.Item.Part5
+                    | [<CompiledName("finish-step"); Fickl.Core.InlineInterface>] FinishStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part6
+                    | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of OutputInterface.CreateElementStreamTransform.Result.Item.Part7
+                    | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part8
+                    | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part9
+                    | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of OutputInterface.CreateElementStreamTransform.Result.Item.Part10
+                    | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part11
+                    | [<CompiledName("start"); Fickl.Core.InlineInterface>] Start of OutputInterface.CreateElementStreamTransform.Result.Item.Part12
+                    | [<CompiledName("start-step"); Fickl.Core.InlineInterface>] StartStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part13
+                    | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part14
+                    | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part15
+                    | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part16
+                    | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item2.Part2
+                    | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item2.Part3
+                    | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part19
+                    | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part20
+                    | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part21
+                    | [<CompiledName("tool-output-denied"); Fickl.Core.InlineInterface>] ToolOutputDenied of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item2.Part4
                     /// <param name="sourceType">
                     /// The type of source - URL sources reference web content.
                     /// TypeScript type: <c>"url"</c>
@@ -13761,118 +14053,7 @@ module OutputInterface =
                     static member CreateToolCall2 (toolCallId: string, toolName: string, input: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?title: string, ?invalid: bool, ?error: obj) : Part = jsNative
 
                 [<Interface>]
-                type Part10 =
-                    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'reasoning-end', ...$0 })")>]
-                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part10 = jsNative
-
-                module Part10 =
-                    /// <remarks>TypeScript type: <c>"reasoning-end"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "reasoning-end"
-
-                [<Interface>]
-                type Part11 =
-                    /// <remarks>TypeScript type: <c>"reasoning-file"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract file: GeneratedFile with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'reasoning-file', ...$0 })")>]
-                    static member Create (file: GeneratedFile, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part11 = jsNative
-
-                module Part11 =
-                    /// <remarks>TypeScript type: <c>"reasoning-file"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "reasoning-file"
-
-                [<Interface>]
-                type Part12 =
-                    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'reasoning-start', ...$0 })")>]
-                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part12 = jsNative
-
-                module Part12 =
-                    /// <remarks>TypeScript type: <c>"reasoning-start"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "reasoning-start"
-
-                [<Interface>]
-                type Part13 =
-                    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-                    abstract ``type``: string with get, set
-                    [<Emit("({ type: 'start' })")>]
-                    static member Create () : Part13 = jsNative
-
-                module Part13 =
-                    /// <remarks>TypeScript type: <c>"start"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "start"
-
-                [<Interface>]
-                type Part14 =
-                    /// <remarks>TypeScript type: <c>"start-step"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract request: LanguageModelRequestMetadata with get, set
-                    abstract warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[] with get, set
-                    [<ParamObject; Emit("({ type: 'start-step', ...$0 })")>]
-                    static member Create (request: LanguageModelRequestMetadata, warnings: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV4Warning[]) : Part14 = jsNative
-
-                module Part14 =
-                    /// <remarks>TypeScript type: <c>"start-step"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "start-step"
-
-                [<Interface>]
-                type Part15 =
-                    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    abstract text: string with get, set
-                    [<ParamObject; Emit("({ type: 'text-delta', ...$0 })")>]
-                    static member Create (id: string, text: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part15 = jsNative
-
-                module Part15 =
-                    /// <remarks>TypeScript type: <c>"text-delta"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "text-delta"
-
-                [<Interface>]
-                type Part16 =
-                    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'text-end', ...$0 })")>]
-                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part16 = jsNative
-
-                module Part16 =
-                    /// <remarks>TypeScript type: <c>"text-end"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "text-end"
-
-                [<Interface>]
-                type Part17 =
-                    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'text-start', ...$0 })")>]
-                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part17 = jsNative
-
-                module Part17 =
-                    /// <remarks>TypeScript type: <c>"text-start"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "text-start"
-
-                [<Interface>]
-                type Part18 =
+                type Part2 =
                     /// <remarks>TypeScript type: <c>"tool-approval-request"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
@@ -13882,7 +14063,7 @@ module OutputInterface =
                     /// <summary>
                     /// Tool call that the approval request is for.
                     /// </summary>
-                    abstract toolCall: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall with get, set
+                    abstract toolCall: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall with get, set
                     /// <summary>
                     /// Reason why the tool call requires approval.
                     /// </summary>
@@ -13897,9 +14078,9 @@ module OutputInterface =
                     /// </summary>
                     abstract signature: string option with get, set
                     [<ParamObject; Emit("({ type: 'tool-approval-request', ...$0 })")>]
-                    static member Create (approvalId: string, toolCall: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall, ?reason: string, ?isAutomatic: bool, ?signature: string) : Part18 = jsNative
+                    static member Create (approvalId: string, toolCall: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall, ?reason: string, ?isAutomatic: bool, ?signature: string) : Part2 = jsNative
 
-                module Part18 =
+                module Part2 =
                     /// <remarks>TypeScript type: <c>"tool-approval-request"</c></remarks>
                     [<Literal>]
                     let ``type`` = "tool-approval-request"
@@ -13924,7 +14105,7 @@ module OutputInterface =
                         static member Create (toolCallId: string, toolName: string, input: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?invalid: bool, ?error: unit, ?title: string) : ToolCall2 = jsNative
 
                 [<Interface>]
-                type Part19 =
+                type Part3 =
                     /// <remarks>TypeScript type: <c>"tool-approval-response"</c></remarks>
                     abstract ``type``: string with get, set
                     /// <summary>
@@ -13934,7 +14115,7 @@ module OutputInterface =
                     /// <summary>
                     /// Tool call that the approval response is for.
                     /// </summary>
-                    abstract toolCall: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall with get, set
+                    abstract toolCall: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall with get, set
                     /// <summary>
                     /// Flag indicating whether the approval was granted or denied.
                     /// </summary>
@@ -13949,191 +14130,61 @@ module OutputInterface =
                     /// </summary>
                     abstract providerExecuted: bool option with get, set
                     [<ParamObject; Emit("({ type: 'tool-approval-response', ...$0 })")>]
-                    static member Create (approvalId: string, toolCall: OutputInterface.CreateElementStreamTransform.Result.Item.Part18.ToolCall, approved: bool, ?reason: string, ?providerExecuted: bool) : Part19 = jsNative
+                    static member Create (approvalId: string, toolCall: OutputInterface.CreateElementStreamTransform.Result.Item2.Part2.ToolCall, approved: bool, ?reason: string, ?providerExecuted: bool) : Part3 = jsNative
 
-                module Part19 =
+                module Part3 =
                     /// <remarks>TypeScript type: <c>"tool-approval-response"</c></remarks>
                     [<Literal>]
                     let ``type`` = "tool-approval-response"
 
                 [<Interface>]
-                type Part2 =
-                    /// <remarks>TypeScript type: <c>"abort"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract reason: string option with get, set
-                    [<ParamObject; Emit("({ type: 'abort', ...$0 })")>]
-                    static member Create (?reason: string) : Part2 = jsNative
-
-                module Part2 =
-                    /// <remarks>TypeScript type: <c>"abort"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "abort"
-
-                [<Interface>]
-                type Part20 =
-                    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract delta: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'tool-input-delta', ...$0 })")>]
-                    static member Create (id: string, delta: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part20 = jsNative
-
-                module Part20 =
-                    /// <remarks>TypeScript type: <c>"tool-input-delta"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "tool-input-delta"
-
-                [<Interface>]
-                type Part21 =
-                    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'tool-input-end', ...$0 })")>]
-                    static member Create (id: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part21 = jsNative
-
-                module Part21 =
-                    /// <remarks>TypeScript type: <c>"tool-input-end"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "tool-input-end"
-
-                [<Interface>]
-                type Part22 =
-                    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract id: string with get, set
-                    abstract toolName: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-                    abstract providerExecuted: bool option with get, set
-                    abstract dynamic: bool option with get, set
-                    abstract title: string option with get, set
-                    [<ParamObject; Emit("({ type: 'tool-input-start', ...$0 })")>]
-                    static member Create (id: string, toolName: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?dynamic: bool, ?title: string) : Part22 = jsNative
-
-                module Part22 =
-                    /// <remarks>TypeScript type: <c>"tool-input-start"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "tool-input-start"
-
-                [<Interface>]
-                type Part23 =
-                    /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract toolCallId: string with get, set
-                    abstract toolName: string with get, set
-                    abstract providerExecuted: bool option with get, set
-                    abstract dynamic: bool option with get, set
-                    [<ParamObject; Emit("({ type: 'tool-output-denied', ...$0 })")>]
-                    static member Create (toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Part23 = jsNative
-
-                module Part23 =
-                    /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "tool-output-denied"
-
-                [<Interface>]
-                type Part3 =
-                    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract kind: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'custom', ...$0 })")>]
-                    static member Create (kind: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part3 = jsNative
-
-                module Part3 =
-                    /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "custom"
-
-                [<Interface>]
                 type Part4 =
-                    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract error: obj with get, set
-                    [<ParamObject; Emit("({ type: 'error', ...$0 })")>]
-                    static member Create (error: obj) : Part4 = jsNative
+                    inherit OutputInterface.CreateElementStreamTransform.Result.Item.Part.Base
+                    inherit OutputInterface.CreateElementStreamTransform.Result.Item2.Part4.Base
+                    [<ParamObject; Emit("({ type: 'tool-output-denied', ...$0 })")>]
+                    static member Create (toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Part4 = jsNative
+
+                module Part =
+                    module Cases =
+                        module ToolResult2 =
+                            [<Interface>]
+                            type Base =
+                                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                                abstract ``type``: string with get, set
+                                abstract toolCallId: string with get, set
+                                abstract toolName: string with get, set
+                                abstract input: obj with get, set
+                                abstract output: obj with get, set
+                                abstract providerExecuted: bool option with get, set
+                                abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                                abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+                                abstract dynamic: bool option with get, set
+                                abstract preliminary: bool option with get, set
+                                abstract title: string option with get, set
+                                [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+                                static member Create (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Base = jsNative
+
+                            module Base =
+                                /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                                [<Literal>]
+                                let ``type`` = "tool-result"
 
                 module Part4 =
-                    /// <remarks>TypeScript type: <c>"error"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "error"
+                    [<Interface>]
+                    type Base =
+                        /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
+                        abstract ``type``: string with get, set
+                        abstract toolCallId: string with get, set
+                        abstract toolName: string with get, set
+                        abstract providerExecuted: bool option with get, set
+                        abstract dynamic: bool option with get, set
+                        [<ParamObject; Emit("({ type: 'tool-output-denied', ...$0 })")>]
+                        static member Create (toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Base = jsNative
 
-                [<Interface>]
-                type Part5 =
-                    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract file: GeneratedFile with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'file', ...$0 })")>]
-                    static member Create (file: GeneratedFile, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part5 = jsNative
-
-                module Part5 =
-                    /// <remarks>TypeScript type: <c>"file"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "file"
-
-                [<Interface>]
-                type Part6 =
-                    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract finishReason: FinishReason with get, set
-                    abstract rawFinishReason: string option with get, set
-                    abstract totalUsage: LanguageModelUsage with get, set
-                    [<ParamObject; Emit("({ type: 'finish', ...$0 })")>]
-                    static member Create (finishReason: FinishReason, totalUsage: LanguageModelUsage, ?rawFinishReason: string) : Part6 = jsNative
-
-                module Part6 =
-                    /// <remarks>TypeScript type: <c>"finish"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "finish"
-
-                [<Interface>]
-                type Part7 =
-                    /// <remarks>TypeScript type: <c>"finish-step"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract response: OutputInterface.ParseCompleteOutput.Context.Response with get, set
-                    abstract usage: LanguageModelUsage with get, set
-                    abstract performance: StepResultPerformance with get, set
-                    abstract finishReason: FinishReason with get, set
-                    abstract rawFinishReason: string option with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    [<ParamObject; Emit("({ type: 'finish-step', ...$0 })")>]
-                    static member Create (response: OutputInterface.ParseCompleteOutput.Context.Response, usage: LanguageModelUsage, performance: StepResultPerformance, finishReason: FinishReason, ?rawFinishReason: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part7 = jsNative
-
-                module Part7 =
-                    /// <remarks>TypeScript type: <c>"finish-step"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "finish-step"
-
-                [<Interface>]
-                type Part8 =
-                    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract rawValue: obj with get, set
-                    [<ParamObject; Emit("({ type: 'raw', ...$0 })")>]
-                    static member Create (rawValue: obj) : Part8 = jsNative
-
-                module Part8 =
-                    /// <remarks>TypeScript type: <c>"raw"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "raw"
-
-                [<Interface>]
-                type Part9 =
-                    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-                    abstract ``type``: string with get, set
-                    abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                    abstract id: string with get, set
-                    abstract text: string with get, set
-                    [<ParamObject; Emit("({ type: 'reasoning-delta', ...$0 })")>]
-                    static member Create (id: string, text: string, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Part9 = jsNative
-
-                module Part9 =
-                    /// <remarks>TypeScript type: <c>"reasoning-delta"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "reasoning-delta"
+                    module Base =
+                        /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
+                        [<Literal>]
+                        let ``type`` = "tool-output-denied"
 
     module ParseCompleteOutput =
         [<Interface>]
@@ -14673,9 +14724,9 @@ module SmoothStream0 =
 module StopCondition =
     [<Interface>]
     type Options<'RUNTIME_CONTEXT, 'TOOLS> =
-        abstract steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[] with get, set
+        abstract steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[] with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (steps: FSharp.CloudEdge.Support.AI.V7.StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]) : Options<'RUNTIME_CONTEXT, 'TOOLS> = jsNative
+        static member Create (steps: StepResult<'TOOLS, 'RUNTIME_CONTEXT>[]) : Options<'RUNTIME_CONTEXT, 'TOOLS> = jsNative
 
 module StreamObjectOnFinishCallback =
     [<Interface>]
@@ -14742,7 +14793,7 @@ module StreamTextResult =
         [<Interface>]
         type Options<'UI_MESSAGE when 'UI_MESSAGE :> UIMessage<obj, FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, UITools>> =
             inherit FSharp.CloudEdge.Runtime.Workers.ResponseInit
-            inherit FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions<'UI_MESSAGE>
+            inherit UIMessageStreamOptions<'UI_MESSAGE>
             /// <summary>
             /// Optional callback to consume a copy of the SSE stream independently.
             /// This is useful for logging, debugging, or processing the stream in parallel.
@@ -15123,7 +15174,7 @@ module Telemetry =
                 /// <summary>
                 /// Static tool results that were generated in all steps.
                 /// </summary>
-                abstract staticToolResults: Telemetry.OnStepStart.Event.Steps.Item.ToolResults.Item2[]
+                abstract staticToolResults: FSharp.CloudEdge.Support.AI.V7.Telemetry.OnStepStart.Event.Steps.Item.Content.Item.Cases.ToolResult2.Base[]
                 /// <summary>
                 /// Dynamic tool results that were generated in all steps.
                 /// </summary>
@@ -15567,7 +15618,7 @@ module Telemetry =
                 /// <summary>
                 /// The static tool results that were made in the last step.
                 /// </summary>
-                abstract staticToolResults: Telemetry.OnStepStart.Event.Steps.Item.ToolResults.Item2[]
+                abstract staticToolResults: FSharp.CloudEdge.Support.AI.V7.Telemetry.OnStepStart.Event.Steps.Item.Content.Item.Cases.ToolResult2.Base[]
                 /// <summary>
                 /// The dynamic tool results that were made in the last step.
                 /// </summary>
@@ -15737,7 +15788,7 @@ module Telemetry =
                     /// <summary>
                     /// The static tool results that were made in the last step.
                     /// </summary>
-                    abstract staticToolResults: Telemetry.OnStepStart.Event.Steps.Item.ToolResults.Item2[]
+                    abstract staticToolResults: Telemetry.OnStepStart.Event.Steps.Item.Content.Item.Cases.ToolResult2.Base[]
                     /// <summary>
                     /// The dynamic tool results that were made in the last step.
                     /// </summary>
@@ -15881,6 +15932,31 @@ module Telemetry =
                             [<ParamObject; Emit("({ type: 'tool-call', dynamic: true, ...$0 })")>]
                             static member CreateToolCall2 (toolCallId: string, toolName: string, input: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?title: string, ?invalid: bool, ?error: obj) : Item = jsNative
 
+                        module Item =
+                            module Cases =
+                                module ToolResult2 =
+                                    [<Interface>]
+                                    type Base =
+                                        /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                                        abstract ``type``: string with get, set
+                                        abstract toolCallId: string with get, set
+                                        abstract toolName: string with get, set
+                                        abstract input: obj with get, set
+                                        abstract output: obj with get, set
+                                        abstract providerExecuted: bool option with get, set
+                                        abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                                        abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+                                        abstract dynamic: bool option with get, set
+                                        abstract preliminary: bool option with get, set
+                                        abstract title: string option with get, set
+                                        [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
+                                        static member Create (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Base = jsNative
+
+                                    module Base =
+                                        /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
+                                        [<Literal>]
+                                        let ``type`` = "tool-result"
+
                         module Item2 =
                             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
                             type ToolCall =
@@ -15914,28 +15990,6 @@ module Telemetry =
                             | [<CompiledName("tool-result"); CaseTest("($0.dynamic === false || $0.dynamic === undefined)")>] ToolResult2 of toolCallId: string * toolName: string * input: obj * output: obj * providerExecuted: bool option * providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option * toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option * dynamic: bool option * preliminary: bool option * title: string option
                             [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
                             static member CreateToolResult2 (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Item = jsNative
-
-                        [<Interface>]
-                        type Item2 =
-                            /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
-                            abstract ``type``: string with get, set
-                            abstract toolCallId: string with get, set
-                            abstract toolName: string with get, set
-                            abstract input: obj with get, set
-                            abstract output: obj with get, set
-                            abstract providerExecuted: bool option with get, set
-                            abstract providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-                            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-                            abstract dynamic: bool option with get, set
-                            abstract preliminary: bool option with get, set
-                            abstract title: string option with get, set
-                            [<ParamObject; Emit("({ type: 'tool-result', ...$0 })")>]
-                            static member Create (toolCallId: string, toolName: string, input: obj, output: obj, ?providerExecuted: bool, ?providerMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?dynamic: bool, ?preliminary: bool, ?title: string) : Item2 = jsNative
-
-                        module Item2 =
-                            /// <remarks>TypeScript type: <c>"tool-result"</c></remarks>
-                            [<Literal>]
-                            let ``type`` = "tool-result"
 
     module OnToolExecutionEnd =
         [<Interface>]
@@ -16121,112 +16175,116 @@ module UIMessage =
     module Parts =
         [<Interface>]
         type Item =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj option with get, set
-            abstract output: unit option with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: unit option with get, set
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item.Base2
             [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-streaming', ...$0 })")>]
             static member Create (toolName: string, toolCallId: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Item = jsNative
 
-        module Item =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
-            [<Literal>]
-            let state = "input-streaming"
-
         [<Interface>]
         type Item2 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: unit option with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: unit option with get, set
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item2.Base
             [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'input-available', ...$0 })")>]
             static member Create (toolName: string, toolCallId: string, input: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Item2 = jsNative
 
-        module Item2 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
-            [<Literal>]
-            let state = "input-available"
-
         [<Interface>]
         type Item3 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: unit option with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: UIMessage.Parts.Item3.Approval with get, set
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item3.Base
             [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-requested', ...$0 })")>]
             static member Create (toolName: string, toolCallId: string, input: obj, approval: UIMessage.Parts.Item3.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item3 = jsNative
 
-        module Item3 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
-            [<Literal>]
-            let state = "approval-requested"
+        [<Interface>]
+        type Item4 =
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item4.Base
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-responded', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, approval: UIMessage.Parts.Item4.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item4 = jsNative
 
+        [<Interface>]
+        type Item5 =
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item5.Base
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-available', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: UIMessage.Parts.Item5.Approval) : Item5 = jsNative
+
+        [<Interface>]
+        type Item6 =
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item6.Base
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-error', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: UIMessage.Parts.Item6.Approval) : Item6 = jsNative
+
+        [<Interface>]
+        type Item7 =
+            inherit UIMessage.Parts.Item.Base
+            inherit UIMessage.Parts.Item7.Base
+            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-denied', ...$0 })")>]
+            static member Create (toolName: string, toolCallId: string, input: obj, approval: UIMessage.Parts.Item7.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item7 = jsNative
+
+        module Item =
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+                abstract ``type``: string with get, set
+                /// <summary>
+                /// Name of the tool that is being called.
+                /// </summary>
+                abstract toolName: string with get, set
+                /// <summary>
+                /// ID of the tool call.
+                /// </summary>
+                abstract toolCallId: string with get, set
+                abstract title: string option with get, set
+                abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
+                /// <summary>
+                /// Whether the tool call was executed by the provider.
+                /// </summary>
+                abstract providerExecuted: bool option with get, set
+                [<ParamObject; Emit("({ type: 'dynamic-tool', ...$0 })")>]
+                static member Create (toolName: string, toolCallId: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
+                [<Literal>]
+                let ``type`` = "dynamic-tool"
+
+            [<Interface>]
+            type Base2 =
+                /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj option with get, set
+                abstract output: unit option with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: unit option with get, set
+                [<ParamObject; Emit("({ state: 'input-streaming', ...$0 })")>]
+                static member Create (?input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Base2 = jsNative
+
+            module Base2 =
+                /// <remarks>TypeScript type: <c>"input-streaming"</c></remarks>
+                [<Literal>]
+                let state = "input-streaming"
+
+        module Item2 =
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: unit option with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: unit option with get, set
+                [<ParamObject; Emit("({ state: 'input-available', ...$0 })")>]
+                static member Create (input: obj, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: unit) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"input-available"</c></remarks>
+                [<Literal>]
+                let state = "input-available"
+
+        module Item3 =
             [<Interface>]
             type Approval =
                 abstract id: string with get, set
@@ -16239,42 +16297,24 @@ module UIMessage =
                 [<ParamObject; Emit("$0")>]
                 static member Create (id: string, ?approved: unit, ?descriptor: obj, ?requestReason: string, ?reason: unit, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-        [<Interface>]
-        type Item4 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: unit option with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: UIMessage.Parts.Item4.Approval with get, set
-            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'approval-responded', ...$0 })")>]
-            static member Create (toolName: string, toolCallId: string, input: obj, approval: UIMessage.Parts.Item4.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item4 = jsNative
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: unit option with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item3.Approval with get, set
+                [<ParamObject; Emit("({ state: 'approval-requested', ...$0 })")>]
+                static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item3.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"approval-requested"</c></remarks>
+                [<Literal>]
+                let state = "approval-requested"
 
         module Item4 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
-            [<Literal>]
-            let state = "approval-responded"
-
             [<Interface>]
             type Approval =
                 abstract id: string with get, set
@@ -16287,44 +16327,24 @@ module UIMessage =
                 [<ParamObject; Emit("$0")>]
                 static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-        [<Interface>]
-        type Item5 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: obj with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract preliminary: bool option with get, set
-            abstract approval: UIMessage.Parts.Item5.Approval option with get, set
-            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-available', ...$0 })")>]
-            static member Create (toolName: string, toolCallId: string, input: obj, output: obj, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: UIMessage.Parts.Item5.Approval) : Item5 = jsNative
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: unit option with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item4.Approval with get, set
+                [<ParamObject; Emit("({ state: 'approval-responded', ...$0 })")>]
+                static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item4.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"approval-responded"</c></remarks>
+                [<Literal>]
+                let state = "approval-responded"
 
         module Item5 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
-            [<Literal>]
-            let state = "output-available"
-
             [<Interface>]
             type Approval =
                 abstract id: string with get, set
@@ -16337,43 +16357,26 @@ module UIMessage =
                 [<ParamObject; Emit("$0")>]
                 static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-        [<Interface>]
-        type Item6 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: unit option with get, set
-            abstract errorText: string with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: UIMessage.Parts.Item6.Approval option with get, set
-            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-error', ...$0 })")>]
-            static member Create (toolName: string, toolCallId: string, input: obj, errorText: string, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: UIMessage.Parts.Item6.Approval) : Item6 = jsNative
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: obj with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract preliminary: bool option with get, set
+                abstract approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item5.Approval option with get, set
+                [<ParamObject; Emit("({ state: 'output-available', ...$0 })")>]
+                static member Create (input: obj, output: obj, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?preliminary: bool, ?approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item5.Approval) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"output-available"</c></remarks>
+                [<Literal>]
+                let state = "output-available"
 
         module Item6 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
-            [<Literal>]
-            let state = "output-error"
-
             [<Interface>]
             type Approval =
                 abstract id: string with get, set
@@ -16386,42 +16389,25 @@ module UIMessage =
                 [<ParamObject; Emit("$0")>]
                 static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
 
-        [<Interface>]
-        type Item7 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            abstract ``type``: string with get, set
-            /// <summary>
-            /// Name of the tool that is being called.
-            /// </summary>
-            abstract toolName: string with get, set
-            /// <summary>
-            /// ID of the tool call.
-            /// </summary>
-            abstract toolCallId: string with get, set
-            abstract title: string option with get, set
-            abstract toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject option with get, set
-            /// <summary>
-            /// Whether the tool call was executed by the provider.
-            /// </summary>
-            abstract providerExecuted: bool option with get, set
-            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-            abstract state: string with get, set
-            abstract input: obj with get, set
-            abstract output: unit option with get, set
-            abstract errorText: unit option with get, set
-            abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
-            abstract approval: UIMessage.Parts.Item7.Approval with get, set
-            [<ParamObject; Emit("({ type: 'dynamic-tool', state: 'output-denied', ...$0 })")>]
-            static member Create (toolName: string, toolCallId: string, input: obj, approval: UIMessage.Parts.Item7.Approval, ?title: string, ?toolMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?providerExecuted: bool, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Item7 = jsNative
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: unit option with get, set
+                abstract errorText: string with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item6.Approval option with get, set
+                [<ParamObject; Emit("({ state: 'output-error', ...$0 })")>]
+                static member Create (input: obj, errorText: string, ?output: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?resultProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item6.Approval) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"output-error"</c></remarks>
+                [<Literal>]
+                let state = "output-error"
 
         module Item7 =
-            /// <remarks>TypeScript type: <c>"dynamic-tool"</c></remarks>
-            [<Literal>]
-            let ``type`` = "dynamic-tool"
-            /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
-            [<Literal>]
-            let state = "output-denied"
-
             [<Interface>]
             type Approval =
                 abstract id: string with get, set
@@ -16433,6 +16419,23 @@ module UIMessage =
                 abstract signature: string option with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (id: string, approved: bool, ?descriptor: obj, ?requestReason: string, ?reason: string, ?isAutomatic: bool, ?signature: string) : Approval = jsNative
+
+            [<Interface>]
+            type Base =
+                /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+                abstract state: string with get, set
+                abstract input: obj with get, set
+                abstract output: unit option with get, set
+                abstract errorText: unit option with get, set
+                abstract callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata option with get, set
+                abstract approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item7.Approval with get, set
+                [<ParamObject; Emit("({ state: 'output-denied', ...$0 })")>]
+                static member Create (input: obj, approval: FSharp.CloudEdge.Support.AI.V7.UIMessage.Parts.Item7.Approval, ?output: unit, ?errorText: unit, ?callProviderMetadata: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata) : Base = jsNative
+
+            module Base =
+                /// <remarks>TypeScript type: <c>"output-denied"</c></remarks>
+                [<Literal>]
+                let state = "output-denied"
 
 module UIMessageStreamOnEndCallback =
     [<Interface>]
@@ -16498,27 +16501,27 @@ module UIMessageStreamOptions =
         module Options =
             [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
             type Part =
-                | [<CompiledName("abort"); Fickl.Core.InlineInterface>] Abort of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part2
-                | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part3
-                | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part4
-                | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of OutputInterface.CreateElementStreamTransform.Result.Item.Part5
-                | [<CompiledName("finish"); Fickl.Core.InlineInterface>] Finish of OutputInterface.CreateElementStreamTransform.Result.Item.Part6
-                | [<CompiledName("finish-step"); Fickl.Core.InlineInterface>] FinishStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part7
-                | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of OutputInterface.CreateElementStreamTransform.Result.Item.Part8
-                | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part9
-                | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part10
-                | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of OutputInterface.CreateElementStreamTransform.Result.Item.Part11
-                | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part12
-                | [<CompiledName("start"); Fickl.Core.InlineInterface>] Start of OutputInterface.CreateElementStreamTransform.Result.Item.Part13
-                | [<CompiledName("start-step"); Fickl.Core.InlineInterface>] StartStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part14
-                | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part15
-                | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part16
-                | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part17
+                | [<CompiledName("abort"); Fickl.Core.InlineInterface>] Abort of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part
+                | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part2
+                | [<CompiledName("error"); Fickl.Core.InlineInterface>] Error of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part3
+                | [<CompiledName("file"); Fickl.Core.InlineInterface>] File of FSharp.CloudEdge.Support.AI.V7.OutputInterface.CreateElementStreamTransform.Result.Item.Part4
+                | [<CompiledName("finish"); Fickl.Core.InlineInterface>] Finish of OutputInterface.CreateElementStreamTransform.Result.Item.Part5
+                | [<CompiledName("finish-step"); Fickl.Core.InlineInterface>] FinishStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part6
+                | [<CompiledName("raw"); Fickl.Core.InlineInterface>] Raw of OutputInterface.CreateElementStreamTransform.Result.Item.Part7
+                | [<CompiledName("reasoning-delta"); Fickl.Core.InlineInterface>] ReasoningDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part8
+                | [<CompiledName("reasoning-end"); Fickl.Core.InlineInterface>] ReasoningEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part9
+                | [<CompiledName("reasoning-file"); Fickl.Core.InlineInterface>] ReasoningFile of OutputInterface.CreateElementStreamTransform.Result.Item.Part10
+                | [<CompiledName("reasoning-start"); Fickl.Core.InlineInterface>] ReasoningStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part11
+                | [<CompiledName("start"); Fickl.Core.InlineInterface>] Start of OutputInterface.CreateElementStreamTransform.Result.Item.Part12
+                | [<CompiledName("start-step"); Fickl.Core.InlineInterface>] StartStep of OutputInterface.CreateElementStreamTransform.Result.Item.Part13
+                | [<CompiledName("text-delta"); Fickl.Core.InlineInterface>] TextDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part14
+                | [<CompiledName("text-end"); Fickl.Core.InlineInterface>] TextEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part15
+                | [<CompiledName("text-start"); Fickl.Core.InlineInterface>] TextStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part16
                 | [<CompiledName("tool-approval-request"); Fickl.Core.InlineInterface>] ToolApprovalRequest of FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions.MessageMetadata.Options.Part2
                 | [<CompiledName("tool-approval-response"); Fickl.Core.InlineInterface>] ToolApprovalResponse of FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions.MessageMetadata.Options.Part3
-                | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part20
-                | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part21
-                | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part22
+                | [<CompiledName("tool-input-delta"); Fickl.Core.InlineInterface>] ToolInputDelta of OutputInterface.CreateElementStreamTransform.Result.Item.Part19
+                | [<CompiledName("tool-input-end"); Fickl.Core.InlineInterface>] ToolInputEnd of OutputInterface.CreateElementStreamTransform.Result.Item.Part20
+                | [<CompiledName("tool-input-start"); Fickl.Core.InlineInterface>] ToolInputStart of OutputInterface.CreateElementStreamTransform.Result.Item.Part21
                 | [<CompiledName("tool-output-denied"); Fickl.Core.InlineInterface>] ToolOutputDenied of FSharp.CloudEdge.Support.AI.V7.UIMessageStreamOptions.MessageMetadata.Options.Part4
                 /// <param name="sourceType">
                 /// The type of source - URL sources reference web content.
@@ -16662,19 +16665,10 @@ module UIMessageStreamOptions =
 
             [<Interface>]
             type Part4 =
-                /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
-                abstract ``type``: string with get, set
-                abstract toolCallId: string with get, set
-                abstract toolName: string with get, set
-                abstract providerExecuted: bool option with get, set
-                abstract dynamic: bool option with get, set
+                inherit OutputInterface.CreateElementStreamTransform.Result.Item.Part.Base
+                inherit OutputInterface.CreateElementStreamTransform.Result.Item2.Part4.Base
                 [<ParamObject; Emit("({ type: 'tool-output-denied', ...$0 })")>]
                 static member Create (toolCallId: string, toolName: string, ?providerExecuted: bool, ?dynamic: bool) : Part4 = jsNative
-
-            module Part4 =
-                /// <remarks>TypeScript type: <c>"tool-output-denied"</c></remarks>
-                [<Literal>]
-                let ``type`` = "tool-output-denied"
 
 module UiMessageChunkSchema =
     [<Interface>]

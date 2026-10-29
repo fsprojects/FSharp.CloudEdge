@@ -299,22 +299,39 @@ test("a shared source adapter generates ordinary and projected targets with one 
   f.config.targets[1].projection = { selections: [{ methodName: "submit" }] };
   f.save();
   const builds = [];
-  const options = { toolResolver: () => assert.fail("source delivery used the packaged tool"), sourceToolResolver: (_root, source, _env, build) => {
+  const dependencyBuilds = [];
+  const ownerAssembly = f.write("src/owner/bin/Debug/net8.0/owner.dll", "current owner");
+  const options = { compileProjectionDependencies: (_config, target, _root, _dotnet, build) => {
+    dependencyBuilds.push(build);
+    assert.equal(target.id, "adapter");
+    assert.ok(existsSync(path.join(f.root, "artifacts/owner/generation.json")));
+    return [ownerAssembly];
+  }, toolResolver: () => assert.fail("source delivery used the packaged tool"), sourceToolResolver: (_root, source, _env, build) => {
     if (build) builds.push(source);
     return { args: ["source-adapter.dll"], fingerprint: { source, payload: "frozen" } };
   } };
   const argumentsFile = path.join(f.root, "arguments.jsonl");
   assert.deepEqual((await f.run(["adapter"], { FAKE_ARGUMENTS_LOG: argumentsFile }, options)).map(result => result.status), ["generated", "generated"]);
   assert.equal(builds.length, 1);
+  assert.deepEqual(dependencyBuilds, [true]);
   const calls = readFileSync(argumentsFile, "utf8").trim().split("\n").map(JSON.parse);
   assert.ok(calls.every(args => args[0] === "source-adapter.dll" && args.includes("--workspace")));
   assert.equal(calls[0].includes("--projection"), false);
   assert.equal(calls[1].includes("--projection"), true);
+  assert.equal(calls[1].includes("--references"), true);
+  assert.deepEqual(json(path.join(f.root, "artifacts/adapter/generation.json")).projectionReferenceSha256,
+    { "src/owner/bin/Debug/net8.0/owner.dll": hash("current owner") });
   for (const id of ["owner", "adapter"]) assert.deepEqual(json(path.join(f.root, `artifacts/${id}/generation.json`)).sourceTool, f.config.xantham.source);
   assert.deepEqual((await f.run(["--resume", "--no-build", "adapter"], {}, options)).map(result => result.status), ["current", "current"]);
   assert.equal(builds.length, 1);
+  assert.deepEqual(dependencyBuilds, [true, false]);
+  writeFileSync(ownerAssembly, "changed owner");
+  assert.deepEqual((await f.run(["--resume", "adapter"], {}, options)).map(result => result.status), ["current", "generated"]);
   f.config.xantham.source.xanthamRevision = "1".repeat(40); f.save();
   assert.deepEqual((await f.run(["--resume", "adapter"], {}, options)).map(result => result.status), ["generated", "generated"]);
+  writeFileSync(ownerAssembly, "in-flight owner");
+  await assert.rejects(f.run(["--resume", "adapter"], { FAKE_MUTATE_FILE: ownerAssembly }, options),
+    /dependency profile or declaration catalog changed during generation/);
 });
 
 test("ordinary source generation rejects payload drift before accepting output", async t => {

@@ -3,7 +3,7 @@
 **Build applications and agents across Cloudflare's platform, in F#.**
 
 [![for: Cloudflare Platform](https://img.shields.io/badge/for-Cloudflare%20Platform-F38020?logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/)
-[![F# → JavaScript: Fable 5.13](https://img.shields.io/badge/F%23%20%E2%86%92%20JavaScript-Fable%205.13-378BBA?logo=fsharp&logoColor=white)](https://fable.io)
+[![F# to JavaScript: Fickl 0.7.2](https://img.shields.io/badge/F%23%20to%20JavaScript-Fickl%200.7.2-378BBA?logo=fsharp&logoColor=white)](https://github.com/shayanhabibi/fickl)
 [![.NET SDK: 10.0](https://img.shields.io/badge/.NET%20SDK-10.0-512BD4?logo=dotnet&logoColor=white)](global.json)
 [![targets: net8.0 · netstandard2.0](https://img.shields.io/badge/targets-net8.0%20%C2%B7%20netstandard2.0-512BD4?logo=dotnet&logoColor=white)](FSharp.CloudEdge.slnx)
 
@@ -16,7 +16,7 @@ FSharp.CloudEdge brings F# to Cloudflare's application and AI platform: stateful
 
 The opportunity is in composing those capabilities. Give an agent tools through MCP, connect it to data in D1 and R2 or search in Vectorize, and run its tasks in a Sandbox. Use Containers for services that need their own runtime, and Git and Artifacts for versioned work. These capabilities sit alongside queues, workflows, real-time coordination, analytics and the wider control plane.
 
-Runtime code compiles from F# to JavaScript with [Fable](https://fable.io), using Cloudflare's SDKs and native bindings. Generated .NET clients handle the REST API, so application logic, resource provisioning and deployment can share a language. The bindings follow pinned TypeScript declarations and OpenAPI contracts; generator provenance and compatibility checks are documented below.
+Runtime code compiles from F# to JavaScript with [Fickl](https://github.com/shayanhabibi/fickl), using Cloudflare's SDKs and native bindings. Fable.Core supplies the shared interop attributes; Fickl.Core supplies the compiler's additional binding support. Generated .NET clients handle the REST API, so application logic, resource provisioning and deployment can share a language. The bindings follow pinned TypeScript declarations and OpenAPI contracts; generator provenance and compatibility checks are documented below.
 
 The **0.1.0** release is a foundation for community testing, especially across the expanding agent and compute APIs. Help [verify real workflows](https://fsprojects.github.io/FSharp.CloudEdge/guide/verify-bindings/), contribute examples, and [report binding issues](https://github.com/fsprojects/FSharp.CloudEdge/issues) so the implementation matures through use.
 
@@ -29,7 +29,7 @@ Every generated line in this repository is output from one of two community gene
 ```mermaid
 flowchart TD
     npm["Cloudflare npm packages<br/>pinned TypeScript declarations"] -->|Xantham| runtime["31 runtime libraries<br/>3 shared AI contract libraries"]
-    runtime -->|Fable| worker["Worker module<br/>JavaScript"]
+    runtime -->|Fickl| worker["Worker module<br/>JavaScript"]
     openapi["Cloudflare OpenAPI document<br/>pinned commit and SHA-256"] -->|Hawaii| clients["11 .NET clients<br/>3,437 operations"]
     clients -->|HTTP| api["Cloudflare REST API"]
     worker -.->|designed upload path| clients
@@ -37,7 +37,7 @@ flowchart TD
 
 ### Xantham
 
-[Xantham](https://github.com/shayanhabibi/Xantham) is the TypeScript-to-F# bindings generator by Shayan Habibi and contributors. It runs the TypeScript 7 compiler as an API server (`tsc --api`) and loads the declaration files Cloudflare publishes in its npm packages through that compiler. The root npm manifest pins the compiler build, `typescript` `7.1.0-dev.20260902.1`. Xantham assigns each generated symbol one of the four grades below and lists every widened or escaped symbol in a manifest beside the generated source.
+[Xantham](https://github.com/shayanhabibi/Xantham) is the TypeScript-to-F# bindings generator by Shayan Habibi and contributors. It runs the TypeScript 7 compiler as an API server (`tsc --api`) and loads the declaration files Cloudflare publishes in its npm packages through that compiler. The root package manifest pins the compiler build, `typescript` `7.1.0-beta`. Xantham assigns each generated symbol one of the four grades below and lists every widened or escaped symbol in a manifest beside the generated source.
 
 | Grade | Xantham's definition |
 | --- | --- |

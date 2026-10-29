@@ -362,11 +362,11 @@ type Experimental_BatchV4ItemResult4 =
 /// </summary>
 [<Interface>]
 type Experimental_BatchModelV4<'REQUEST, 'RESULT> =
-    abstract experimental_doStartBatch: options: FSharp.CloudEdge.Support.AI.V4.Provider.Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>
+    abstract experimental_doStartBatch: options: Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>
     abstract experimental_doGetBatchStatus: options: Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>
     abstract experimental_doGetBatchResults: options: Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchV4ItemResult2<'RESULT>, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>
     [<ParamObject; Emit("$0")>]
-    static member Create (experimental_doStartBatch: (FSharp.CloudEdge.Support.AI.V4.Provider.Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchV4ItemResult2<'RESULT>, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>)) : Experimental_BatchModelV4<'REQUEST, 'RESULT> = jsNative
+    static member Create (experimental_doStartBatch: (Experimental_BatchV4StartOptions<'REQUEST> -> JS.Promise<Experimental_BatchV4StartResult>), experimental_doGetBatchStatus: (Experimental_BatchV4OperationOptions -> JS.Promise<Experimental_BatchV4Status>), experimental_doGetBatchResults: (Experimental_BatchV4OperationOptions -> JS.Promise<FSharp.CloudEdge.Runtime.Workers.ReadableStream<U3<Experimental_BatchV4ItemResult2<'RESULT>, Experimental_BatchV4ItemResult3, Experimental_BatchV4ItemResult4>>>)) : Experimental_BatchModelV4<'REQUEST, 'RESULT> = jsNative
 
 [<Interface>]
 type EmbeddingModelV4CallOptions =

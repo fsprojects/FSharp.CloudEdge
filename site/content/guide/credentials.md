@@ -184,5 +184,5 @@ For a rejected token, the `Status4XX` branch prints the HTTP status with each er
 ## Next Step
 
 <div class="ce-next">
-<a class="ce-next__card" href="/FSharp.CloudEdge/guide/packages/"><strong>Packages</strong><span>Install the 0.1.0 libraries</span></a>
+<a class="ce-next__card" href="/FSharp.CloudEdge/guide/packages/"><strong>Packages</strong><span>Install the 0.1.1 libraries</span></a>
 </div>

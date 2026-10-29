@@ -6,7 +6,7 @@ layout: splash
 
 <section class="ce-hero">
 <div class="ce-hero__copy">
-<span class="ce-chip"><b>0.1.0</b> MIT licensed</span>
+<span class="ce-chip"><b>0.1.1</b> MIT licensed</span>
 <h1 class="ce-wordmark">FSharp<span class="ce-dot">.</span>CloudEdge</h1>
 <p class="ce-line">Build intelligent products on Cloudflare with F#.</p>
 <p class="ce-why">F# developers deserve a first-class experience for building on Cloudflare. And Cloudflare gets a first-class functional language that can honor its contracts and honor the Fable Compiler's original promise of “<a href="https://fable.io">JavaScript you can be proud of</a>”.</p>
@@ -39,7 +39,7 @@ layout: splash
             }
             |&gt; Async.StartAsPromise
             |&gt; U2.Case1</code></pre>
-<figcaption>Compiles against FSharp.CloudEdge 0.1.0.</figcaption>
+<figcaption>Compiles against FSharp.CloudEdge 0.1.1.</figcaption>
 </figure>
 </section>
 

@@ -9,7 +9,7 @@ module Shell = FSharp.CloudEdge.Runtime.Shell
 type DraftsFolder(ctx: Workers.DurableObjectState<obj>, env: obj) =
     inherit Runtime.DurableObject<obj, obj>(ctx, env)
 
-    let workspace = Shell.Exports.Workspace(Shell.WorkspaceOptions.Create(sql = ctx.storage.sql))
+    let workspace = Shell.Exports.Workspace(Shell.WorkspaceOptions.Create(sql = U3.Case3 ctx.storage.sql))
 
     interface Runtime.DurableObject.IFetchHandler with
         member _.fetch request =

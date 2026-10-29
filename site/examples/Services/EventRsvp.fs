@@ -13,7 +13,7 @@ type Headcount = {| attending: float |}
 type Invitation(ctx: Workers.DurableObjectState<obj>, env: obj) =
     inherit Runtime.DurableObject<obj, obj>(ctx, env)
 
-    let schema = ActorStorage.Exports.Storage ctx.storage
+    let schema = ActorStorage.Exports.Storage (unbox ctx.storage)
 
     do schema.migrations <- [|
         Actors.SQLSchemaMigration.Create(1., "RSVPs", "CREATE TABLE IF NOT EXISTS rsvps (email TEXT PRIMARY KEY)")

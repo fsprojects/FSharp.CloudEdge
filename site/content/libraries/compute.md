@@ -48,6 +48,6 @@ Those choices can be combined. A coding agent can clone an Artifacts repository 
 
 ## NuGet packages
 
-[Runtime.Computer 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.0), [Runtime.ComputerArtifacts 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.0), [Runtime.Containers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Containers/0.1.0), [Runtime.Sandbox 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Sandbox/0.1.0), [Runtime.SandboxBridge 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.SandboxBridge/0.1.0).
+[Runtime.Computer 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.1), [Runtime.ComputerArtifacts 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ComputerArtifacts/0.1.1), [Runtime.Containers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Containers/0.1.1), [Runtime.Sandbox 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Sandbox/0.1.1), [Runtime.SandboxBridge 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.SandboxBridge/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

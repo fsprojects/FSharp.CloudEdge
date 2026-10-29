@@ -37,7 +37,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let settings = WorkersAI.WorkersAISettings2.Create(binding = env.AI)
                 let workersai = WorkersAI.Exports.createWorkersAI (U2.Case1 settings)
                 let model = workersai.chat<string> (U2.Case1 "@cf/zai-org/glm-4.7-flash")
-                let articlePart = V4.LanguageModelV4Message3.Content.Item.Text(article, None)
+                let articlePart = V4.LanguageModelV4Message.Cases.User.Content.Item.Text(V4.LanguageModelV4TextPart.Create(article))
                 let prompt =
                     [| V4.LanguageModelV4Message.System("Summarize in two sentences.", None)
                        V4.LanguageModelV4Message.User([| articlePart |], None) |]
@@ -46,7 +46,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let summary =
                     result.content
                     |> Array.choose (function
-                        | V4.LanguageModelV4Content.Text(text, _) -> Some text
+                        | V4.LanguageModelV4Content.Text part -> Some part.text
                         | _ -> None)
                     |> String.concat ""
                 return Workers.Exports.Response.json {| summary = summary |}
@@ -61,11 +61,13 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { createWorkersAI } from "workers-ai-provider";
-import { join } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { choose } from "./fable_modules/fable-library-js.5.13.0/Array.js";
+import { getInlineInterfaceValue, withInlineInterfaceTag } from "./fable_modules/fable-library-js.5.24.0/TaggedUnion.js";
+import { join } from "./fable_modules/fable-library-js.5.24.0/String.js";
+import { choose } from "./fable_modules/fable-library-js.5.24.0/Array.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(request.text()), (_arg_1) => {
@@ -76,12 +78,13 @@ export const worker = {
         const prompt = [{
             role: "system",
             content: "Summarize in two sentences.",
+            providerOptions: undefined,
         }, {
             role: "user",
-            content: [{
-                type: "text",
+            content: [withInlineInterfaceTag(({ type: 'text', ...{
                 text: _arg_1,
-            }],
+            } }), "type", "text")],
+            providerOptions: undefined,
         }];
         const options = {
             prompt: prompt,
@@ -89,7 +92,8 @@ export const worker = {
         return singleton.Bind(awaitPromise(model.doGenerate(options)), (_arg_2) => {
             const summary = join("", choose((_arg_3) => {
                 if (_arg_3.type === "text") {
-                    return _arg_3.text;
+                    const part = getInlineInterfaceValue(_arg_3);
+                    return part.text;
                 }
                 else {
                     return undefined;
@@ -175,14 +179,14 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let settings = Search.AISearchNamespaceSettings.Create env.AI_SEARCH
                 let search = Search.Exports.createAISearchNamespace settings
                 let model = search.get("help-center").chat ()
-                let questionPart = V3.LanguageModelV3Message3.Content.Item.Text(question, None)
+                let questionPart = V3.LanguageModelV3Message.Cases.User.Content.Item.Text(V3.LanguageModelV3TextPart.Create(question))
                 let prompt = [| V3.LanguageModelV3Message.User([| questionPart |], None) |]
                 let options = V3.LanguageModelV3CallOptions.Create prompt
                 let! result = model.doGenerate options |> Async.AwaitPromise
                 let answer =
                     result.content
                     |> Array.choose (function
-                        | V3.LanguageModelV3Content.Text(text, _) -> Some text
+                        | V3.LanguageModelV3Content.Text part -> Some part.text
                         | _ -> None)
                     |> String.concat ""
                 return Workers.Exports.Response.json {| answer = answer |}
@@ -204,10 +208,11 @@ The assistant replies to customers with live data from your own API. `createTool
 open Fable.Core
 
 module Workers = FSharp.CloudEdge.Runtime.Workers
+module WorkersTypes = FSharp.CloudEdge.Runtime.WorkersTypes
 module AIUtils = FSharp.CloudEdge.Runtime.AIUtils
 
 type Env =
-    abstract AI: Workers.Ai<Workers.AiModels>
+    abstract AI: WorkersTypes.Ai<WorkersTypes.AiModels>
 
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
@@ -217,7 +222,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let! question = request.text () |> Async.AwaitPromise
                 let spec = "https://shop.example.com/openapi.json"
                 let! tools = AIUtils.Exports.createToolsFromOpenAPISpec spec |> Async.AwaitPromise
-                let messages: obj[] = [| {| role = "user"; content = question |} |]
+                let messages = [| WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item.Create("user", question) |]
                 let input = AIUtils.RunWithTools.Input.Create(messages, tools)
                 let model = "@hf/nousresearch/hermes-2-pro-mistral-7b"
                 let! answer =
@@ -264,16 +269,16 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let gateway = Gateway.Exports.createAiGateway (U2.Case1 settings)
                 let models =
                     [| "openai/gpt-5.2"; "workers-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast" |]
-                    |> Array.map Unified.Exports.unified
+                    |> Array.map Unified.Exports.unified.Invoke
                 let model = gateway.chat (U2.Case1 models)
-                let questionPart = V4.LanguageModelV4Message3.Content.Item.Text(question, None)
+                let questionPart = V4.LanguageModelV4Message.Cases.User.Content.Item.Text(V4.LanguageModelV4TextPart.Create(question))
                 let prompt = [| V4.LanguageModelV4Message.User([| questionPart |], None) |]
                 let options = V4.LanguageModelV4CallOptions.Create prompt
                 let! result = model.doGenerate options |> Async.AwaitPromise
                 let answer =
                     result.content
                     |> Array.choose (function
-                        | V4.LanguageModelV4Content.Text(text, _) -> Some text
+                        | V4.LanguageModelV4Content.Text part -> Some part.text
                         | _ -> None)
                     |> String.concat ""
                 return Workers.Exports.Response.json {| answer = answer |}
@@ -320,10 +325,11 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { last } from "./fable_modules/fable-library-js.5.13.0/Array.js";
-import { split } from "./fable_modules/fable-library-js.5.13.0/String.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { last } from "./fable_modules/fable-library-js.5.24.0/Array.js";
+import { split } from "./fable_modules/fable-library-js.5.24.0/String.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => {
@@ -372,6 +378,6 @@ Conversation persistence, history migration, and the F# `AIChatAgent` binding bo
 
 ## NuGet packages
 
-[Runtime.AIChat 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIChat/0.1.0), [Runtime.AIGatewayProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIGatewayProvider/0.1.0), [Runtime.AISearchProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AISearchProvider/0.1.0), [Runtime.AIUtils 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIUtils/0.1.0), [Runtime.Think 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Think/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V3.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+[Runtime.AIChat 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIChat/0.1.1), [Runtime.AIGatewayProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIGatewayProvider/0.1.1), [Runtime.AISearchProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AISearchProvider/0.1.1), [Runtime.AIUtils 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIUtils/0.1.1), [Runtime.Think 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Think/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Runtime.WorkersAIProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.1), [Support.AI.V3.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.1), [Support.AI.V4.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

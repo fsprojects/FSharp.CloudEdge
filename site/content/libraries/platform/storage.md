@@ -37,6 +37,6 @@ The Worker-side types remain in `Runtime.Workers`. See the [data service overvie
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

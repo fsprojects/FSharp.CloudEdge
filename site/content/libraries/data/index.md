@@ -19,6 +19,6 @@ Start with [Account Setup](../control-plane/account-setup.md) to see management 
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

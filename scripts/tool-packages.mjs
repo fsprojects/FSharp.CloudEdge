@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import childProcess from "node:child_process";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -14,7 +14,7 @@ const canonical = (value) => JSON.stringify(value, (_, item) => item && typeof i
 
 export function packageCache(environment = process.env, root = process.cwd()) {
   if (environment.NUGET_PACKAGES) return path.resolve(root, environment.NUGET_PACKAGES);
-  const result = spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["nuget", "locals", "global-packages", "--list"],
+  const result = childProcess.spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["nuget", "locals", "global-packages", "--list"],
     { cwd: root, encoding: "utf8", env: { ...environment, DOTNET_CLI_UI_LANGUAGE: "en-US" } });
   requireThat(!result.error && result.status === 0, "Cannot locate the NuGet package cache");
   const match = result.stdout.trim().match(/^global-packages:\s*(.+)$/m);
@@ -34,7 +34,7 @@ function restoredCommand(root, name, definition, environment) {
   // The SDK keys its local-tool cache by the SDK's own framework, not the
   // framework of the selected tool payload. Read the selected SDK's config
   // rather than inferring that framework from a tool's directory or version.
-  const result = spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["--info"],
+  const result = childProcess.spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["--info"],
     { cwd: root, encoding: "utf8", env: { ...environment, DOTNET_CLI_UI_LANGUAGE: "en-US" } });
   requireThat(!result.error && result.status === 0, `${name}: cannot identify the SDK used by the tool resolver`);
   const sdk = result.stdout.match(/^\s*Base Path:\s*(.+)$/m)?.[1].trim();
@@ -54,7 +54,7 @@ function restoredCommand(root, name, definition, environment) {
     && row.TargetFramework === targetFramework && row.RuntimeIdentifier?.toLowerCase() === "any" && row.Name === definition.command);
   requireThat(matching.length === 1, `${name}: expected one local tool resolver mapping for ${definition.version}/${targetFramework}; run dotnet tool restore`);
   const row = matching[0];
-  requireThat(row.Runner === "dotnet", `${name}: unexpected local tool resolver runner`);
+  requireThat(["dotnet", "executable"].includes(row.Runner), `${name}: unexpected local tool resolver runner`);
   requireThat(typeof row.PathToExecutable === "string" && path.isAbsolute(row.PathToExecutable), `${name}: invalid local tool resolver executable path`);
   return { cacheFile, targetFramework, executable: path.normalize(row.PathToExecutable), runner: row.Runner, sdkRuntimeConfigSha256: fileHash(sdkConfig) };
 }
@@ -86,6 +86,56 @@ function verifyArchivePayload(name, packageBytes, packageSha256, directory, payl
   requireThat(canonical(expected) === canonical(payloadSha256), `${name}: installed tool payload differs from its package archive`);
 }
 
+// Version 2 tools can put their runtime library outside tools/. Authenticate the
+// complete extraction of both the pointer and selected RID package, not just the executable directory.
+function verifyExtractedPackage(name, packageBytes, packageSha256, directory, packageId, version) {
+  const key = `${packageSha256}:extraction:${packageId.toLowerCase()}:${version.toLowerCase()}`;
+  let expected = archivePayloads.get(key);
+  if (!expected) {
+    const seen = new Set();
+    let unpacked;
+    try {
+      unpacked = unzipSync(packageBytes, { filter: ({ name: entry }) => {
+        requireThat(!seen.has(entry), `${name}: duplicate entry in package archive: ${entry}`);
+        seen.add(entry);
+        requireThat(!entry.includes("\\") && !entry.startsWith("/") && !entry.split("/").some(part => part === "." || part === ".."),
+          `${name}: invalid path in package archive: ${entry}`);
+        // NuGet's ZIP container metadata is not extracted to the global package cache.
+        return !entry.endsWith("/") && entry !== "[Content_Types].xml" && entry !== "_rels/.rels"
+          && !entry.startsWith("package/services/metadata/core-properties/");
+      } });
+    } catch (error) { throw new Error(`${name}: cannot verify package ZIP archive: ${error.message}`); }
+    const nuspec = Object.keys(unpacked).filter(file => !file.includes("/") && file.toLowerCase().endsWith(".nuspec"));
+    requireThat(nuspec.length === 1, `${name}: package must contain one NuGet specification`);
+    const metadata = new TextDecoder().decode(unpacked[nuspec[0]]);
+    requireThat(metadata.match(/<id>\s*([^<]+)\s*<\/id>/)?.[1].trim().toLowerCase() === packageId.toLowerCase()
+      && metadata.match(/<version>\s*([^<]+)\s*<\/version>/)?.[1].trim().toLowerCase() === version.toLowerCase(),
+    `${name}: package specification differs from its requested identity`);
+    expected = Object.fromEntries(Object.entries(unpacked).map(([entry, bytes]) =>
+      [entry === nuspec[0] ? entry.toLowerCase() : entry, createHash("sha256").update(bytes).digest("hex")]));
+    archivePayloads.set(key, expected);
+  }
+  const archive = `${packageId.toLowerCase()}.${version.toLowerCase()}.nupkg`;
+  const generated = new Set([archive, `${archive}.sha512`, ".nupkg.metadata"]);
+  const actual = {};
+  for (const file of files(directory).filter(file => !generated.has(file))) {
+    const hash = fileHash(path.join(directory, file));
+    // The v2 tool installer also retains an unversioned archive and preserves
+    // nuspec casing; ordinary NuGet extraction lowercases the nuspec filename.
+    if (file === `${packageId}.nupkg`) {
+      requireThat(hash === packageSha256, `${name}: retained package archive differs from its digest`);
+      continue;
+    }
+    const key = file.toLowerCase() === `${packageId.toLowerCase()}.nuspec` ? file.toLowerCase() : file;
+    requireThat(!Object.hasOwn(actual, key), `${name}: duplicate extracted package file: ${key}`);
+    actual[key] = hash;
+  }
+  requireThat(canonical(expected) === canonical(actual), `${name}: installed package extraction differs from its archive`);
+  return actual;
+}
+
+const xmlAttributes = text => Object.fromEntries([...text.matchAll(/([A-Za-z]+)="([^"]*)"/g)].map(([, key, value]) => [key, value]));
+
 export function installedTool(root, name, environment = process.env, expected) {
   const manifestFile = path.join(root, ".config/dotnet-tools.json");
   const manifest = readJson(manifestFile);
@@ -99,22 +149,52 @@ export function installedTool(root, name, environment = process.env, expected) {
   requireThat(typeof entry.version === "string" && /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(entry.version), `${name}: tool version must be an exact NuGet version`);
   requireThat(!definition.version || definition.version === entry.version, `${name}: tool manifest differs from the package lock`);
   const resolver = restoredCommand(root, name, { ...definition, version: entry.version }, environment);
-  const directory = path.join(packageCache(environment, root), definition.packageId.toLowerCase(), entry.version.toLowerCase());
+  const cache = packageCache(environment, root);
+  let directory = path.join(cache, definition.packageId.toLowerCase(), entry.version.toLowerCase());
   const archive = path.join(directory, `${definition.packageId.toLowerCase()}.${entry.version.toLowerCase()}.nupkg`);
   requireThat(existsSync(archive), `${name}: restore the pinned local tool package first`);
   const packageBytes = readFileSync(archive);
   const packageSha256 = createHash("sha256").update(packageBytes).digest("hex");
   if (definition.packageSha256) requireThat(definition.packageSha256 === packageSha256, `${name}: installed package differs from the reviewed package digest`);
-  const payloadFiles = files(path.join(directory, "tools"));
-  const settings = payloadFiles.filter((file) => file.endsWith("/DotnetToolSettings.xml"));
-  const candidates = settings.flatMap((file) => {
-    const text = readFileSync(path.join(directory, "tools", file), "utf8");
-    const commands = [...text.matchAll(/<Command\s+([^>]+)\/?\s*>/g)];
-    return commands.flatMap(([, attributes]) => {
-      const values = Object.fromEntries([...attributes.matchAll(/([A-Za-z]+)="([^"]*)"/g)].map(([, key, value]) => [key, value]));
-      return values.Name === definition.command && values.Runner === "dotnet" ? [{ file, entryPoint: values.EntryPoint }] : [];
-    });
-  });
+  const readSettings = directory => files(path.join(directory, "tools")).filter(file => file.endsWith("/DotnetToolSettings.xml"))
+    .map(file => ({ file, text: readFileSync(path.join(directory, "tools", file), "utf8") }));
+  let settings = readSettings(directory);
+  const pointers = settings.filter(({ text }) => /<DotNetCliTool\s+Version="2"\s*>/.test(text)
+    && /<RuntimeIdentifierPackages>/.test(text)
+    && [...text.matchAll(/<Command\s+([^>]+)\/?\s*>/g)].some(([, attributes]) => xmlAttributes(attributes).Name === definition.command));
+  let runtimePackage, packageFilesSha256;
+  let selectedBytes = packageBytes, selectedSha256 = packageSha256;
+  if (pointers.length) {
+    requireThat(pointers.length === 1, `${name}: ambiguous runtime package pointer`);
+    packageFilesSha256 = verifyExtractedPackage(name, packageBytes, packageSha256, directory, definition.packageId, entry.version);
+    const packages = [...pointers[0].text.matchAll(/<RuntimeIdentifierPackage\s+([^>]+)\/?\s*>/g)].map(([, attributes]) => xmlAttributes(attributes));
+    requireThat(packages.length > 0 && packages.every(item => typeof item.Id === "string" && /^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(item.Id)
+      && typeof item.RuntimeIdentifier === "string" && /^[A-Za-z0-9][A-Za-z0-9.-]*$/.test(item.RuntimeIdentifier))
+      && new Set(packages.map(item => item.RuntimeIdentifier)).size === packages.length,
+    `${name}: invalid runtime package pointer`);
+    const selected = packages.filter(item => resolver.executable.startsWith(path.join(cache, item.Id.toLowerCase(), entry.version.toLowerCase()) + path.sep));
+    requireThat(selected.length === 1, `${name}: resolver executable path does not match a referenced runtime package and version`);
+    const item = selected[0];
+    directory = path.join(cache, item.Id.toLowerCase(), entry.version.toLowerCase());
+    const runtimeArchive = path.join(directory, `${item.Id.toLowerCase()}.${entry.version.toLowerCase()}.nupkg`);
+    requireThat(existsSync(runtimeArchive), `${name}: restore the referenced runtime package first`);
+    selectedBytes = readFileSync(runtimeArchive);
+    selectedSha256 = createHash("sha256").update(selectedBytes).digest("hex");
+    runtimePackage = { packageId: item.Id, version: entry.version, runtimeIdentifier: item.RuntimeIdentifier, packageSha256: selectedSha256 };
+    if (definition.packageSha256) {
+      requireThat(definition.runtimePackage && Object.entries(runtimePackage).every(([key, value]) => definition.runtimePackage[key] === value),
+        `${name}: runtime package differs from the reviewed identity or digest`);
+    }
+    runtimePackage.filesSha256 = verifyExtractedPackage(name, selectedBytes, selectedSha256, directory, item.Id, entry.version);
+    settings = readSettings(directory).filter(({ file, text }) => file.split("/")[1] === item.RuntimeIdentifier
+      && /<DotNetCliTool\s+Version="2"\s*>/.test(text));
+  } else {
+    requireThat(!definition.runtimePackage && resolver.runner === "dotnet", `${name}: unexpected local tool resolver runner or runtime package`);
+  }
+  const candidates = settings.flatMap(({ file, text }) => [...text.matchAll(/<Command\s+([^>]+)\/?\s*>/g)].flatMap(([, attributes]) => {
+    const values = xmlAttributes(attributes);
+    return values.Name === definition.command && values.Runner === resolver.runner ? [{ file, entryPoint: values.EntryPoint }] : [];
+  }));
   const resolvedCandidates = candidates.filter((candidate) => candidate.entryPoint
     && path.basename(candidate.entryPoint) === candidate.entryPoint
     && path.join(directory, "tools", path.dirname(candidate.file), candidate.entryPoint) === resolver.executable);
@@ -125,10 +205,13 @@ export function installedTool(root, name, environment = process.env, expected) {
   const assembly = path.join(payload, candidate.entryPoint);
   requireThat(existsSync(assembly), `${name}: installed entry point is missing`);
   const payloadSha256 = Object.fromEntries(files(payload).map((file) => [file, fileHash(path.join(payload, file))]));
-  verifyArchivePayload(name, packageBytes, packageSha256, directory, payload, payloadSha256);
+  verifyArchivePayload(name, selectedBytes, selectedSha256, directory, payload, payloadSha256);
   const identity = { packageId: definition.packageId, command: definition.command, version: entry.version, packageSha256, payloadSha256 };
+  if (runtimePackage) Object.assign(identity, { packageFilesSha256, runtimePackage });
   if (definition.packageSha256) {
     requireThat(canonical(definition.payloadSha256) === canonical(payloadSha256), `${name}: installed tool payload differs from the reviewed package`);
+    if (runtimePackage) requireThat(canonical(definition.packageFilesSha256) === canonical(packageFilesSha256)
+      && canonical(definition.runtimePackage) === canonical(runtimePackage), `${name}: installed runtime package files differ from the reviewed package`);
   }
   return { identity, assembly, resolver, manifestSha256: fileHash(manifestFile), args: ["tool", "run", definition.command, "--"] };
 }
@@ -173,6 +256,17 @@ export function sourceToolConfiguration(configuration, target) {
   return shared ?? local;
 }
 
+/** Shared enumeration of MSBuild configuration inherited by a project. */
+export function ancestorBuildInputFiles(project) {
+  const inputs = [];
+  for (let directory = path.dirname(project); ; directory = path.dirname(directory)) {
+    for (const name of ["Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props", "NuGet.Config", "nuget.config", "global.json"])
+      if (existsSync(path.join(directory, name))) inputs.push(path.join(directory, name));
+    if (path.dirname(directory) === directory) break;
+  }
+  return inputs;
+}
+
 /** Build and authenticate the source adapter and its complete runtime payload. */
 export function resolveSourceTool(root, sourceConfiguration, environment = process.env, build = false) {
   const project = path.resolve(root, sourceConfiguration.project);
@@ -180,7 +274,7 @@ export function resolveSourceTool(root, sourceConfiguration, environment = proce
   const xanthamRoot = path.resolve(environment.CLOUDEDGE_XANTHAM_ROOT ?? path.join(root, "../Xantham"));
   requireThat(typeof sourceConfiguration.xanthamRevision === "string" && /^[0-9a-f]{40}$/.test(sourceConfiguration.xanthamRevision), "Projection must pin an exact Xantham source revision");
   const git = args => {
-    const result = spawnSync("git", ["-C", xanthamRoot, ...args], { encoding: "utf8" });
+    const result = childProcess.spawnSync("git", ["-C", xanthamRoot, ...args], { encoding: "utf8" });
     requireThat(!result.error && result.status === 0, "Projection requires the primary Xantham source checkout");
     return result.stdout;
   };
@@ -193,17 +287,12 @@ export function resolveSourceTool(root, sourceConfiguration, environment = proce
     const dirty = diff.length > 0 || untracked.length > 0;
     requireThat(!dirty || environment.CLOUDEDGE_ALLOW_DIRTY_XANTHAM === "1", "Projection requires clean pinned Xantham sources; explicit development override CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1 records the source diff");
     const source = { root: xanthamRoot, revision, dirty, diffSha256: createHash("sha256").update(diff).digest("hex"), untrackedSha256: Object.fromEntries(untracked.map(file => [file, fileHash(path.join(xanthamRoot, file))])) };
-    const buildInputs = [project, path.join(path.dirname(project), "Program.fs")];
-    for (let directory = path.dirname(project); ; directory = path.dirname(directory)) {
-      for (const name of ["Directory.Build.props", "Directory.Build.targets", "Directory.Packages.props", "NuGet.Config", "nuget.config", "global.json"])
-        if (existsSync(path.join(directory, name))) buildInputs.push(path.join(directory, name));
-      if (path.dirname(directory) === directory) break;
-    }
+    const buildInputs = [project, path.join(path.dirname(project), "Program.fs"), ...ancestorBuildInputFiles(project)];
     return { source, configuration: "Release", framework: "net10.0", buildInputSha256: Object.fromEntries([...new Set(buildInputs)].sort().map(file => [path.relative(root, file), fileHash(file)])) };
   };
   const before = inputs();
   if (build) {
-    const result = spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["build", project, "-c", "Release", `-p:XanthamProjectRoot=${xanthamRoot}`], { cwd: root, env: environment, stdio: "inherit" });
+    const result = childProcess.spawnSync(environment.CLOUDEDGE_DOTNET ?? "dotnet", ["build", project, "-c", "Release", `-p:XanthamProjectRoot=${xanthamRoot}`], { cwd: root, env: environment, stdio: "inherit" });
     requireThat(!result.error && result.status === 0, "Projection adapter build failed");
     requireThat(canonical(inputs()) === canonical(before), "Projection source/build inputs changed during compilation; output was not accepted");
   }

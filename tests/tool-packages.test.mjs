@@ -76,6 +76,118 @@ test("initial acceptance verifies extracted payload against the package ZIP", (t
   assert.deepEqual(installedTool(f.root, "example", f.env, f.definition).identity, f.identity);
 });
 
+function runtimeFixture(t, runtimeIdentifier = "linux-x64", runner = "executable") {
+  const f = fixture(t);
+  const runtimeId = `Example.Tool.${runtimeIdentifier}`;
+  const runtimeDirectory = path.join(f.root, "nuget", runtimeId.toLowerCase(), f.definition.version);
+  const runtimePrefix = `tools/net10.0/${runtimeIdentifier}/`;
+  const entryPoint = runner === "executable" ? "example" : "example.dll";
+  const runtimePayload = {
+    "DotnetToolSettings.xml": `<DotNetCliTool Version="2"><Commands><Command Name="example" EntryPoint="${entryPoint}" Runner="${runner}" /></Commands></DotNetCliTool>`,
+    [entryPoint]: "fixture executable",
+    "example.deps.json": "fixture dependencies",
+  };
+  const pack = (directory, id, data) => {
+    const spec = `<package><metadata><id>${id}</id><version>${f.definition.version}</version></metadata></package>`;
+    const archiveData = { [`${id}.nuspec`]: spec, ...data };
+    const extracted = { [`${id.toLowerCase()}.nuspec`]: spec, ...data };
+    const bytes = zipSync(Object.fromEntries(Object.entries(archiveData).map(([name, value]) => [name, Buffer.from(value)])));
+    const archive = path.join(directory, `${id.toLowerCase()}.${f.definition.version}.nupkg`);
+    rmSync(directory, { recursive: true, force: true });
+    write(archive, bytes);
+    for (const [name, value] of Object.entries(extracted)) write(path.join(directory, name), value);
+    // NuGet generates these files; they are not archive payloads.
+    write(path.join(directory, `${id}.nupkg`), bytes);
+    write(`${archive}.sha512`, "cache digest");
+    json(path.join(directory, ".nupkg.metadata"), { version: 2 });
+    return { archive, packageSha256: hash(bytes), filesSha256: Object.fromEntries(Object.entries(extracted).map(([name, value]) => [name, hash(value)])) };
+  };
+  const pointer = pack(f.directory, f.definition.packageId, {
+    "tools/net10.0/any/DotnetToolSettings.xml": `<DotNetCliTool Version="2"><Commands><Command Name="example" /></Commands><RuntimeIdentifierPackages><RuntimeIdentifierPackage RuntimeIdentifier="${runtimeIdentifier}" Id="${runtimeId}" /></RuntimeIdentifierPackages></DotNetCliTool>`,
+    "fable-library-js/TaggedUnion.js": "pointer runtime library",
+  });
+  const runtime = pack(runtimeDirectory, runtimeId, {
+    ...Object.fromEntries(Object.entries(runtimePayload).map(([name, value]) => [runtimePrefix + name, value])),
+    "fable-library-js/TaggedUnion.js": "selected runtime library",
+  });
+  const assembly = path.join(runtimeDirectory, runtimePrefix, entryPoint);
+  const row = { ...f.row, Runner: runner, PathToExecutable: assembly };
+  json(f.cache, [row]);
+  const identity = { ...f.definition, packageSha256: pointer.packageSha256,
+    payloadSha256: Object.fromEntries(Object.entries(runtimePayload).map(([name, value]) => [name, hash(value)])),
+    packageFilesSha256: pointer.filesSha256,
+    runtimePackage: { packageId: runtimeId, version: f.definition.version, runtimeIdentifier, packageSha256: runtime.packageSha256, filesSha256: runtime.filesSha256 } };
+  json(f.lock, { schemaVersion: 1, tools: { example: identity } });
+  return { ...f, assembly, row, identity, runtimeDirectory, runtimeArchive: runtime.archive };
+}
+
+for (const [rid, runner] of [["linux-x64", "executable"], ["any", "dotnet"]]) {
+  test(`version 2 resolves and authenticates the selected ${rid} ${runner} package`, t => {
+    const f = runtimeFixture(t, rid, runner);
+    assert.deepEqual(installedTool(f.root, "example", f.env, f.definition).identity, f.identity);
+    const tool = resolveTool(f.root, "example", f.env);
+    assert.deepEqual(tool.identity, f.identity);
+    assert.equal(tool.assembly, f.assembly);
+    assert.equal(tool.resolver.runner, runner);
+    assert.deepEqual(tool.args, ["tool", "run", "example", "--"]);
+    assert.ok(sameTool(tool, resolveTool(f.root, "example", f.env)));
+  });
+}
+
+for (const [label, mutate] of [
+  ["changed RID executable", f => write(f.assembly, "changed")],
+  ["changed RID runtime outside tools", f => write(path.join(f.runtimeDirectory, "fable-library-js/TaggedUnion.js"), "changed")],
+  ["changed pointer runtime outside tools", f => write(path.join(f.directory, "fable-library-js/TaggedUnion.js"), "changed")],
+  ["additional RID file", f => write(path.join(f.runtimeDirectory, "extra.js"), "extra")],
+  ["missing RID file", f => rmSync(path.join(f.runtimeDirectory, "fable-library-js/TaggedUnion.js"))],
+  ["changed pointer specification", f => write(path.join(f.directory, "example.tool.nuspec"), "changed")],
+]) test(`version 2 initial acceptance refuses ${label}`, t => {
+  const f = runtimeFixture(t);
+  // Warm the archive hash cache first: acceptance must still reread every extracted byte.
+  installedTool(f.root, "example", f.env, f.definition);
+  mutate(f);
+  assert.throws(() => installedTool(f.root, "example", f.env, f.definition), /extraction.*archive/);
+});
+
+test("version 2 accepts original nuspec casing and rejects an altered retained archive", t => {
+  const f = runtimeFixture(t);
+  const lower = path.join(f.directory, "example.tool.nuspec");
+  write(path.join(f.directory, "Example.Tool.nuspec"), readFileSync(lower));
+  rmSync(lower);
+  assert.deepEqual(resolveTool(f.root, "example", f.env).identity, f.identity);
+  write(path.join(f.runtimeDirectory, "Example.Tool.linux-x64.nupkg"), "altered archive copy");
+  assert.throws(() => resolveTool(f.root, "example", f.env), /retained package archive.*digest/);
+});
+
+test("version 2 binds the executable to the pointer's package and exact version", t => {
+  const f = runtimeFixture(t);
+  for (const executable of [
+    f.assembly.replace("example.tool.linux-x64", "unlisted.tool"),
+    f.assembly.replace(f.definition.version, "9.0.0"),
+  ]) {
+    json(f.cache, [{ ...f.row, PathToExecutable: executable }]);
+    assert.throws(() => resolveTool(f.root, "example", f.env), /referenced runtime package and version/);
+  }
+});
+
+test("version 2 rejects changed RID archives and incomplete or mismatched reviewed identities", t => {
+  const f = runtimeFixture(t);
+  for (const runtimePackage of [undefined, { ...f.identity.runtimePackage, version: "9.0.0" },
+    { ...f.identity.runtimePackage, packageSha256: "0".repeat(64) }]) {
+    json(f.lock, { schemaVersion: 1, tools: { example: { ...f.identity, runtimePackage } } });
+    assert.throws(() => resolveTool(f.root, "example", f.env), /runtime package.*reviewed identity or digest/);
+  }
+  json(f.lock, { schemaVersion: 1, tools: { example: f.identity } });
+  write(f.runtimeArchive, "altered archive");
+  assert.throws(() => resolveTool(f.root, "example", f.env), /runtime package.*reviewed identity or digest/);
+});
+
+test("version 2 refuses symlinks outside the selected executable directory", t => {
+  const f = runtimeFixture(t);
+  symlinkSync(f.assembly, path.join(f.runtimeDirectory, "runtime-alias"));
+  assert.throws(() => resolveTool(f.root, "example", f.env), /symlink/);
+});
+
 test("resolver refuses an executable from another NuGet cache even when the expected payload is intact", (t) => {
   const f = fixture(t);
   const other = path.join(f.root, "old-cache/example.dll");

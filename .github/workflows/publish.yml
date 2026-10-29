@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       publish:
-        description: Publish validated 0.1.0 packages to NuGet.org
+        description: Publish the configured release to NuGet.org
         type: boolean
         default: false
         required: true
@@ -30,6 +30,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Read release version
+        run: echo "RELEASE_VERSION=$(node -p 'require("./config/nuget-release.json").version')" >> "$GITHUB_ENV"
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -40,13 +42,15 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: nuget-support-check
-          path: artifacts/nuget-release/0.1.0/public-support/logs/
+          path: artifacts/nuget-release/${{ env.RELEASE_VERSION }}/public-support/logs/
 
   validate:
     if: ${{ !inputs.verify_only && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Read release version
+        run: echo "RELEASE_VERSION=$(node -p 'require("./config/nuget-release.json").version')" >> "$GITHUB_ENV"
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -57,19 +61,19 @@ jobs:
       - name: Compile package-only consumers
         run: dotnet run --project tools/NuGetRelease -- examples --fable
       - name: Check documentation excerpts
-        run: dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
+        run: dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-candidate/js
       - name: Retain candidates and verification evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: nuget-candidates
           path: |
-            artifacts/nuget-release/0.1.0/packages/
-            artifacts/nuget-release/0.1.0/manifest.json
-            artifacts/nuget-release/0.1.0/consumers-candidate/results.json
-            artifacts/nuget-release/0.1.0/consumers-candidate/logs/
-            artifacts/nuget-release/0.1.0/consumers-candidate/resolved-packages/
-            artifacts/nuget-release/0.1.0/pack-logs/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/packages/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/manifest.json
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-candidate/results.json
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-candidate/logs/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-candidate/resolved-packages/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/pack-logs/
 
   publish:
     if: ${{ !inputs.verify_only && ((github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) || (github.event_name == 'workflow_dispatch' && inputs.publish)) }}
@@ -81,13 +85,15 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v7
+      - name: Read release version
+        run: echo "RELEASE_VERSION=$(node -p 'require("./config/nuget-release.json").version')" >> "$GITHUB_ENV"
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - uses: actions/download-artifact@v8
         with:
           name: nuget-candidates
-          path: artifacts/nuget-release/0.1.0
+          path: artifacts/nuget-release/${{ env.RELEASE_VERSION }}
       - name: Verify candidate contents and hashes
         run: dotnet run --project tools/NuGetRelease -- verify
       - name: Obtain temporary NuGet credentials
@@ -98,13 +104,13 @@ jobs:
       - name: Publish in dependency order
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
-        run: dotnet run --project tools/NuGetRelease -- publish --confirm 0.1.0
+        run: dotnet run --project tools/NuGetRelease -- publish --confirm "$RELEASE_VERSION"
       - name: Retain publication logs
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: nuget-publication-logs
-          path: artifacts/nuget-release/0.1.0/publish-logs/
+          path: artifacts/nuget-release/${{ env.RELEASE_VERSION }}/publish-logs/
 
   verify-public:
     if: >-
@@ -115,6 +121,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+      - name: Read release version
+        run: echo "RELEASE_VERSION=$(node -p 'require("./config/nuget-release.json").version')" >> "$GITHUB_ENV"
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
@@ -129,6 +137,6 @@ jobs:
         with:
           name: nuget-public-consumers
           path: |
-            artifacts/nuget-release/0.1.0/consumers-public/results.json
-            artifacts/nuget-release/0.1.0/consumers-public/logs/
-            artifacts/nuget-release/0.1.0/consumers-public/resolved-packages/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-public/results.json
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-public/logs/
+            artifacts/nuget-release/${{ env.RELEASE_VERSION }}/consumers-public/resolved-packages/

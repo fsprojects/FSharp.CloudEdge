@@ -44,8 +44,9 @@ type PricingApi() =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
+
 import { RpcTarget } from "cloudflare:workers";
-import { class_type } from "./fable_modules/fable-library-js.5.13.0/Reflection.js";
+import { class_type } from "./fable_modules/fable-library-js.5.24.0/Reflection.js";
 
 export class PricingApi extends RpcTarget {
     constructor() {
@@ -62,6 +63,14 @@ export class PricingApi extends RpcTarget {
         };
     }
 }
+
+export function PricingApi_$reflection() {
+    return class_type("Pricing.PricingApi", undefined, PricingApi, class_type("FSharp.CloudEdge.Runtime.Workers.CloudflareModule.Workers.RpcTarget", undefined, RpcTarget));
+}
+
+export function PricingApi_$ctor() {
+    return new PricingApi();
+}
 ```
 
 </details>
@@ -75,7 +84,7 @@ module Workers = FSharp.CloudEdge.Runtime.Workers
 module Capnweb = FSharp.CloudEdge.Runtime.Capnweb
 
 let onRequest (context: Workers.EventContext<obj, string, obj>) =
-    Capnweb.Exports.newWorkersRpcResponse(context.request, Pricing.PricingApi())
+    Capnweb.Exports.newWorkersRpcResponse(unbox context.request, Pricing.PricingApi())
 ```
 
 <div class="ce-needs"><p><strong>Needs</strong> a Pages project with this module compiled to <code>functions/api.js</code>. Pages serves that file's <code>onRequest</code> export at <code>/api</code>, following its <a href="https://developers.cloudflare.com/pages/functions/routing/">file-based routing</a>.</p></div>
@@ -105,7 +114,7 @@ let options =
     )
 
 let onRequest (context: Workers.EventContext<obj, string, obj>) =
-    Capnweb.Exports.newWorkersRpcResponse(context.request, Pricing.PricingApi(), options)
+    Capnweb.Exports.newWorkersRpcResponse(unbox context.request, Pricing.PricingApi(), options)
 ```
 
 In this example the maximum incoming message size is 65,536 UTF-16 code units, set through `limits`. The default is 33,554,432. Cap'n Web rejects a larger message and aborts the session.
@@ -150,6 +159,6 @@ export function onRequest(context) {
 
 ## NuGet packages
 
-[Runtime.Capnweb 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Capnweb/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Capnweb 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Capnweb/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

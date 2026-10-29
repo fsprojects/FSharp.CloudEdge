@@ -671,9 +671,9 @@ type Schema<'OBJECT> =
     [<ParamObject; Emit("$0")>]
     static member Create (_type: 'OBJECT, jsonSchema: U2<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, JS.Promise<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>>, ?validate: (obj -> U3<JS.Promise<U2<ValidationResult2<'OBJECT>, ValidationResult3>>, ValidationResult2<'OBJECT>, ValidationResult3>)) : Schema<'OBJECT> = jsNative
 
-type LazySchema<'SCHEMA> = (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'SCHEMA>)
+type LazySchema<'SCHEMA> = (unit -> Schema<'SCHEMA>)
 
-type FlexibleSchema<'SCHEMA> = U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'SCHEMA, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'SCHEMA, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'SCHEMA>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'SCHEMA>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'SCHEMA, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'SCHEMA>>
+type FlexibleSchema<'SCHEMA> = U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'SCHEMA, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'SCHEMA, obj>>, (unit -> Schema<'SCHEMA>), Schema<'SCHEMA>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'SCHEMA, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'SCHEMA>>
 
 [<Interface>]
 type FlexibleSchema2<'SCHEMA> =
@@ -753,26 +753,26 @@ type CreateJsonErrorResponseHandler =
 
 [<Interface>]
 type CreateJsonErrorResponseHandler0<'T> =
-    abstract errorSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
+    abstract errorSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
     abstract errorToMessage: ('T -> string) with get, set
     abstract isRetryable: CreateJsonErrorResponseHandler0.IsRetryable<'T> option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (errorSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>, errorToMessage: ('T -> string), ?isRetryable: CreateJsonErrorResponseHandler0.IsRetryable<'T>) : CreateJsonErrorResponseHandler0<'T> = jsNative
+    static member Create (errorSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>, errorToMessage: ('T -> string), ?isRetryable: CreateJsonErrorResponseHandler0.IsRetryable<'T>) : CreateJsonErrorResponseHandler0<'T> = jsNative
 
 [<Fickl.Core.CallableInterface>]
 type CreateEventSourceResponseHandler =
     [<Emit("$0($1...)")>]
-    abstract Invoke<'T>: chunkSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<CreateEventSourceResponseHandler.Result.Result.Item<'T>>)
+    abstract Invoke<'T>: chunkSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<CreateEventSourceResponseHandler.Result.Result.Item<'T>>)
 
 [<Fickl.Core.CallableInterface>]
 type CreateJsonResponseHandler =
     [<Emit("$0($1...)")>]
-    abstract Invoke<'T>: responseSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<ResponseHandler.Result.Item<'T>>)
+    abstract Invoke<'T>: responseSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<ResponseHandler.Result.Item<'T>>)
 
 [<Fickl.Core.CallableInterface>]
 type CreateJsonLinesResponseHandler =
     [<Emit("$0($1...)")>]
-    abstract Invoke<'T>: responseSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<CreateJsonLinesResponseHandler.Result.Result.Item<'T>>)
+    abstract Invoke<'T>: responseSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> -> (ResponseHandler.Options -> JS.Promise<CreateJsonLinesResponseHandler.Result.Result.Item<'T>>)
 
 [<Fickl.Core.CallableInterface>]
 type DeleteFromApi =
@@ -1071,17 +1071,17 @@ type NormalizeBatchRequestCounts0 =
 [<Interface>]
 type ParseJsonEventStream0<'T> =
     abstract stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>> with get, set
-    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
+    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : ParseJsonEventStream0<'T> = jsNative
+    static member Create (stream: FSharp.CloudEdge.Runtime.Workers.ReadableStream<Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : ParseJsonEventStream0<'T> = jsNative
 
 [<Interface>]
 type ParseProviderOptions0<'OPTIONS> =
     abstract provider: string with get, set
     abstract providerOptions: JS.Record<string, obj> option with get, set
-    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OPTIONS, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OPTIONS, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OPTIONS>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OPTIONS>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OPTIONS, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OPTIONS>> with get, set
+    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OPTIONS, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OPTIONS, obj>>, (unit -> Schema<'OPTIONS>), Schema<'OPTIONS>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OPTIONS, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OPTIONS>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (provider: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OPTIONS, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OPTIONS, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OPTIONS>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OPTIONS>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OPTIONS, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OPTIONS>>, ?providerOptions: JS.Record<string, obj>) : ParseProviderOptions0<'OPTIONS> = jsNative
+    static member Create (provider: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OPTIONS, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OPTIONS, obj>>, (unit -> Schema<'OPTIONS>), Schema<'OPTIONS>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OPTIONS, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OPTIONS>>, ?providerOptions: JS.Record<string, obj>) : ParseProviderOptions0<'OPTIONS> = jsNative
 
 /// <summary>
 /// A part of a streaming multipart/form-data request body.
@@ -1556,19 +1556,19 @@ type ProviderDefinedToolFactory<'INPUT, 'ARGS, 'CONTEXT> =
 [<Interface>]
 type CreateProviderDefinedToolFactory0<'INPUT> =
     abstract id: string with get, set
-    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
+    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>) : CreateProviderDefinedToolFactory0<'INPUT> = jsNative
+    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>) : CreateProviderDefinedToolFactory0<'INPUT> = jsNative
 
 type ProviderDefinedToolFactoryWithOutputSchema<'INPUT, 'OUTPUT, 'ARGS, 'CONTEXT> = (JS.Intersect<'ARGS, ProviderDefinedToolFactoryWithOutputSchema.Options<'INPUT, 'CONTEXT, 'OUTPUT>> -> obj)
 
 [<Interface>]
 type CreateProviderDefinedToolFactoryWithOutputSchema0<'INPUT, 'OUTPUT> =
     abstract id: string with get, set
-    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
-    abstract outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>> with get, set
+    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
+    abstract outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> Schema<'OUTPUT>), Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>> with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>, outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>>) : CreateProviderDefinedToolFactoryWithOutputSchema0<'INPUT, 'OUTPUT> = jsNative
+    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>, outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> Schema<'OUTPUT>), Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>>) : CreateProviderDefinedToolFactoryWithOutputSchema0<'INPUT, 'OUTPUT> = jsNative
 
 [<Erase>]
 type ProviderExecutedToolFactory<'INPUT, 'OUTPUT, 'ARGS, 'CONTEXT> = private Phantom_ProviderExecutedToolFactory__ of (JS.Intersect<'ARGS, ProviderExecutedToolFactory.Options> -> obj)
@@ -1576,8 +1576,8 @@ type ProviderExecutedToolFactory<'INPUT, 'OUTPUT, 'ARGS, 'CONTEXT> = private Pha
 [<Interface>]
 type CreateProviderExecutedToolFactory0<'INPUT, 'OUTPUT> =
     abstract id: string with get, set
-    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
-    abstract outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>> with get, set
+    abstract inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>> with get, set
+    abstract outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> Schema<'OUTPUT>), Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>> with get, set
     /// <summary>
     /// Whether this provider-executed tool supports deferred results.
     /// <br /><br />
@@ -1589,7 +1589,7 @@ type CreateProviderExecutedToolFactory0<'INPUT, 'OUTPUT> =
     /// <defaultValue>false</defaultValue>
     abstract supportsDeferredResults: bool option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>, outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>>, ?supportsDeferredResults: bool) : CreateProviderExecutedToolFactory0<'INPUT, 'OUTPUT> = jsNative
+    static member Create (id: string, inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'INPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'INPUT, obj>>, (unit -> Schema<'INPUT>), Schema<'INPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'INPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'INPUT>>, outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OUTPUT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OUTPUT, obj>>, (unit -> Schema<'OUTPUT>), Schema<'OUTPUT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OUTPUT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OUTPUT>>, ?supportsDeferredResults: bool) : CreateProviderExecutedToolFactory0<'INPUT, 'OUTPUT> = jsNative
 
 [<Interface>]
 type ReadResponseWithSizeLimit0 =
@@ -1870,18 +1870,18 @@ type Experimental_TranscriptionStreamClientFrame =
 [<Interface>]
 type ValidateTypes0<'OBJECT> =
     abstract value: obj with get, set
-    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>> with get, set
+    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> Schema<'OBJECT>), Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>> with get, set
     abstract context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>, ?context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext) : ValidateTypes0<'OBJECT> = jsNative
+    static member Create (value: obj, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> Schema<'OBJECT>), Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>, ?context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext) : ValidateTypes0<'OBJECT> = jsNative
 
 [<Interface>]
 type SafeValidateTypes0<'OBJECT> =
     abstract value: obj with get, set
-    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>> with get, set
+    abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> Schema<'OBJECT>), Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>> with get, set
     abstract context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext option with get, set
     [<ParamObject; Emit("$0")>]
-    static member Create (value: obj, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>, ?context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext) : SafeValidateTypes0<'OBJECT> = jsNative
+    static member Create (value: obj, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> Schema<'OBJECT>), Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>, ?context: FSharp.CloudEdge.Support.AI.V4.Provider.TypeValidationContext) : SafeValidateTypes0<'OBJECT> = jsNative
 
 /// <summary>
 /// Infer the context type of a tool.
@@ -2201,18 +2201,18 @@ type Exports =
     /// <param name="createValidator">A function that creates a schema.</param>
     /// <returns>A function that returns a schema.</returns>
     [<Import("lazySchema", "@ai-sdk/provider-utils")>]
-    static member lazySchema<'SCHEMA> (createSchema: (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'SCHEMA>)) : (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'SCHEMA>) = jsNative
+    static member lazySchema<'SCHEMA> (createSchema: (unit -> Schema<'SCHEMA>)) : (unit -> Schema<'SCHEMA>) = jsNative
     /// <summary>
     /// Create a schema using a JSON Schema.
     /// </summary>
     /// <param name="jsonSchema">The JSON Schema for the schema.</param>
     /// <param name="options.validate">Optional. A validation function for the schema.</param>
     [<Import("jsonSchema", "@ai-sdk/provider-utils")>]
-    static member jsonSchema<'OBJECT> (jsonSchema: U3<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, JS.Promise<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>, (unit -> U2<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, JS.Promise<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>>)>, ?__1: JsonSchema1<'OBJECT>) : FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT> = jsNative
+    static member jsonSchema<'OBJECT> (jsonSchema: U3<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, JS.Promise<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>, (unit -> U2<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7, JS.Promise<FSharp.CloudEdge.Support.JsonSchema.JSONSchema7>>)>, ?__1: JsonSchema1<'OBJECT>) : Schema<'OBJECT> = jsNative
     [<Import("asSchema", "@ai-sdk/provider-utils")>]
-    static member asSchema<'OBJECT> (?schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>) : FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT> = jsNative
+    static member asSchema<'OBJECT> (?schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, (unit -> Schema<'OBJECT>), Schema<'OBJECT>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'OBJECT>>) : Schema<'OBJECT> = jsNative
     [<Import("zodSchema", "@ai-sdk/provider-utils")>]
-    static member zodSchema<'OBJECT> (zodSchema: U2<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>>, ?options: ZodSchema.Options) : FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'OBJECT> = jsNative
+    static member zodSchema<'OBJECT> (zodSchema: U2<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'OBJECT, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'OBJECT, obj>>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'OBJECT, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>>, ?options: ZodSchema.Options) : Schema<'OBJECT> = jsNative
     /// <summary>
     /// Parses a JSON string into an unknown object.
     /// Parses a JSON string into a strongly-typed object using the provided schema.
@@ -3072,6 +3072,18 @@ module DownloadBlob =
         static member Create (?maxBytes: float, ?abortSignal: FSharp.CloudEdge.Runtime.Workers.AbortSignal) : Options = jsNative
 
 module DynamicTool =
+    [<Interface>]
+    type Base =
+        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+        abstract ``type``: string with get, set
+        [<Emit("({ type: 'dynamic' })")>]
+        static member Create () : Base = jsNative
+
+    module Base =
+        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
+        [<Literal>]
+        let ``type`` = "dynamic"
+
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Result =
         | [<CompiledName("dynamic"); CaseTest("'execute' in $0"); Fickl.Core.InlineInterface>] Dynamic of FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Result2
@@ -3079,6 +3091,7 @@ module DynamicTool =
 
     [<Interface>]
     type Result2 =
+        inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Base
         /// <summary>
         /// An optional title of the tool.
         /// </summary>
@@ -3183,18 +3196,12 @@ module DynamicTool =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, execute: DynamicTool.Tool.Execute, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.ContextSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.ContextSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord>>, ?needsApproval: U2<bool, DynamicTool.Tool.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (DynamicTool.Tool.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (DynamicTool.Tool.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (DynamicTool.Tool.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?description: U2<string, (DynamicTool.Tool.Description.Options -> string)>, ?strict: bool, ?inputExamples: DynamicTool.Tool.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Result2 = jsNative
 
-    module Result2 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
-
     [<Interface>]
     type Result3 =
+        inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Base
         /// <summary>
         /// An optional title of the tool.
         /// </summary>
@@ -3293,15 +3300,8 @@ module DynamicTool =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.OutputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.ContextSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.DynamicTool.Tool.ContextSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<FSharp.CloudEdge.Runtime.Workers.Cloudflare.Pipelines.PipelineRecord>>, ?needsApproval: U2<bool, DynamicTool.Tool.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (DynamicTool.Tool.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (DynamicTool.Tool.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (DynamicTool.Tool.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?description: U2<string, (DynamicTool.Tool.Description.Options -> string)>, ?strict: bool, ?inputExamples: DynamicTool.Tool.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Result3 = jsNative
-
-    module Result3 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Tool =
@@ -3834,6 +3834,7 @@ module Experimental_ToolCallerDefinition =
                 [<Interface>]
                 type Result2 =
                     inherit ToolSet.Item.Base
+                    inherit DynamicTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -3925,19 +3926,13 @@ module Experimental_ToolCallerDefinition =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-                    abstract ``type``: string with get, set
                     [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: ToolSet.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Result2 = jsNative
-
-                module Result2 =
-                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Result3 =
                     inherit ToolSet.Item.Base
+                    inherit ProviderDefinedTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -4001,19 +3996,6 @@ module Experimental_ToolCallerDefinition =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-                    /// </summary>
-                    abstract args: JS.Record<string, obj> with get, set
-                    abstract description: unit option with get, set
-                    abstract strict: unit option with get, set
-                    abstract inputExamples: unit option with get, set
                     /// <summary>
                     /// Flag that indicates whether the tool is executed by the provider.
                     /// </summary>
@@ -4022,14 +4004,10 @@ module Experimental_ToolCallerDefinition =
                     [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Result3 = jsNative
 
-                module Result3 =
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "provider"
-
                 [<Interface>]
                 type Result4 =
                     inherit ToolSet.Item.Base
+                    inherit ProviderDefinedTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -4093,19 +4071,6 @@ module Experimental_ToolCallerDefinition =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-                    /// </summary>
-                    abstract args: JS.Record<string, obj> with get, set
-                    abstract description: unit option with get, set
-                    abstract strict: unit option with get, set
-                    abstract inputExamples: unit option with get, set
                     /// <summary>
                     /// Flag that indicates whether the tool is executed by the provider.
                     /// </summary>
@@ -4125,11 +4090,6 @@ module Experimental_ToolCallerDefinition =
                     abstract supportsDeferredResults: bool option with get, set
                     [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Result4 = jsNative
-
-                module Result4 =
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "provider"
 
                 [<Interface>]
                 type Result5 =
@@ -4232,6 +4192,7 @@ module Experimental_ToolCallerDefinition =
                 [<Interface>]
                 type Result6 =
                     inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+                    inherit DynamicTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -4323,19 +4284,13 @@ module Experimental_ToolCallerDefinition =
                     abstract isProviderExecuted: unit option with get, set
                     abstract args: unit option with get, set
                     abstract supportsDeferredResults: unit option with get, set
-                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-                    abstract ``type``: string with get, set
                     [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: ToolSet.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Result6 = jsNative
-
-                module Result6 =
-                    /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "dynamic"
 
                 [<Interface>]
                 type Result7 =
                     inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+                    inherit ProviderDefinedTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -4399,19 +4354,6 @@ module Experimental_ToolCallerDefinition =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-                    /// </summary>
-                    abstract args: JS.Record<string, obj> with get, set
-                    abstract description: unit option with get, set
-                    abstract strict: unit option with get, set
-                    abstract inputExamples: unit option with get, set
                     /// <summary>
                     /// Flag that indicates whether the tool is executed by the provider.
                     /// </summary>
@@ -4420,14 +4362,10 @@ module Experimental_ToolCallerDefinition =
                     [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Result7 = jsNative
 
-                module Result7 =
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "provider"
-
                 [<Interface>]
                 type Result8 =
                     inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+                    inherit ProviderDefinedTool.Base
                     /// <summary>
                     /// An optional title of the tool.
                     /// </summary>
@@ -4491,19 +4429,6 @@ module Experimental_ToolCallerDefinition =
                     /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
                     /// </summary>
                     abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    abstract ``type``: string with get, set
-                    /// <summary>
-                    /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-                    /// </summary>
-                    abstract id: string with get, set
-                    /// <summary>
-                    /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-                    /// </summary>
-                    abstract args: JS.Record<string, obj> with get, set
-                    abstract description: unit option with get, set
-                    abstract strict: unit option with get, set
-                    abstract inputExamples: unit option with get, set
                     /// <summary>
                     /// Flag that indicates whether the tool is executed by the provider.
                     /// </summary>
@@ -4523,11 +4448,6 @@ module Experimental_ToolCallerDefinition =
                     abstract supportsDeferredResults: bool option with get, set
                     [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
                     static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Result8 = jsNative
-
-                module Result8 =
-                    /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-                    [<Literal>]
-                    let ``type`` = "provider"
 
 module GetFromApi =
     module Result =
@@ -4572,9 +4492,9 @@ module ParseJSON =
     [<Interface>]
     type Options2<'T> =
         abstract text: string with get, set
-        abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
+        abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (text: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : Options2<'T> = jsNative
+        static member Create (text: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : Options2<'T> = jsNative
 
 module PostFormDataToApi =
     module Result =
@@ -4623,6 +4543,30 @@ module PostToApi0 =
         abstract values: obj with get, set
         [<ParamObject; Emit("$0")>]
         static member Create (content: U4<string, FSharp.CloudEdge.Runtime.Workers.Blob, FSharp.CloudEdge.Runtime.Workers.FormData, Fable.Core.TS.Es.Uint8Array<U2<Fable.Core.TS.Es.ArrayBuffer, Fable.Core.TS.Es.SharedArrayBuffer>>>, values: obj) : Body = jsNative
+
+module ProviderDefinedTool =
+    [<Interface>]
+    type Base =
+        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+        abstract ``type``: string with get, set
+        /// <summary>
+        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
+        /// </summary>
+        abstract id: string with get, set
+        /// <summary>
+        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
+        /// </summary>
+        abstract args: JS.Record<string, obj> with get, set
+        abstract description: unit option with get, set
+        abstract strict: unit option with get, set
+        abstract inputExamples: unit option with get, set
+        [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
+        static member Create (id: string, args: JS.Record<string, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit) : Base = jsNative
+
+    module Base =
+        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
+        [<Literal>]
+        let ``type`` = "provider"
 
 module ProviderDefinedToolFactory =
     [<Interface>]
@@ -4686,9 +4630,9 @@ module SafeParseJSON =
     [<Interface>]
     type Options2<'T> =
         abstract text: string with get, set
-        abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
+        abstract schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>> with get, set
         [<ParamObject; Emit("$0")>]
-        static member Create (text: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>), FSharp.CloudEdge.Support.AI.V4.ProviderUtils.Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : Options2<'T> = jsNative
+        static member Create (text: string, schema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<'T, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<'T, obj>>, (unit -> Schema<'T>), Schema<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<'T>>) : Options2<'T> = jsNative
 
     module Result =
         [<Interface>]
@@ -4991,6 +4935,7 @@ module ToolSet =
     [<Interface>]
     type Item10 =
         inherit ToolSet.Item9.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5063,19 +5008,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item10 = jsNative
-
-    module Item10 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item11 =
         inherit ToolSet.Item9.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5120,19 +5059,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -5141,14 +5067,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item11 = jsNative
 
-    module Item11 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item12 =
         inherit ToolSet.Item9.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5193,19 +5115,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -5225,11 +5134,6 @@ module ToolSet =
         abstract supportsDeferredResults: bool option with get, set
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item12 = jsNative
-
-    module Item12 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
 
     [<Interface>]
     type Item13 =
@@ -5330,6 +5234,7 @@ module ToolSet =
     [<Interface>]
     type Item14 =
         inherit ToolSet.Item13.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5419,19 +5324,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: Func<unit, ToolExecutionOptions<obj>, obj>, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item14 = jsNative
-
-    module Item14 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item15 =
         inherit ToolSet.Item13.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5493,19 +5392,6 @@ module ToolSet =
         /// <remarks>@args is the input of the tool call.</remarks>
         /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
         abstract execute: Func<unit, ToolExecutionOptions<obj>, obj> option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -5514,14 +5400,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: Func<unit, ToolExecutionOptions<obj>, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item15 = jsNative
 
-    module Item15 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item16 =
         inherit ToolSet.Item13.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5583,19 +5465,6 @@ module ToolSet =
         /// <remarks>@args is the input of the tool call.</remarks>
         /// <remarks>@options .abortSignal is a signal that can be used to abort the tool call.</remarks>
         abstract execute: Func<unit, ToolExecutionOptions<obj>, obj> option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -5615,11 +5484,6 @@ module ToolSet =
         abstract supportsDeferredResults: bool option with get, set
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: Func<unit, ToolExecutionOptions<obj>, obj>, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item16 = jsNative
-
-    module Item16 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
 
     [<Interface>]
     type Item17 =
@@ -5713,6 +5577,7 @@ module ToolSet =
     [<Interface>]
     type Item18 =
         inherit ToolSet.Item17.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5795,19 +5660,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item18 = jsNative
-
-    module Item18 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item19 =
         inherit ToolSet.Item17.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5862,19 +5721,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -5883,14 +5729,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item19 = jsNative
 
-    module Item19 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item2 =
         inherit ToolSet.Item.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -5963,19 +5805,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item2 = jsNative
-
-    module Item2 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item20 =
         inherit ToolSet.Item17.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6030,19 +5866,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6062,11 +5885,6 @@ module ToolSet =
         abstract supportsDeferredResults: bool option with get, set
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item20 = jsNative
-
-    module Item20 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
 
     [<Interface>]
     type Item21 =
@@ -6160,6 +5978,7 @@ module ToolSet =
     [<Interface>]
     type Item22 =
         inherit ToolSet.Item9.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6242,19 +6061,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item22 = jsNative
-
-    module Item22 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item23 =
         inherit ToolSet.Item9.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6309,19 +6122,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6330,14 +6130,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item23 = jsNative
 
-    module Item23 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item24 =
         inherit ToolSet.Item9.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6392,19 +6188,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6425,14 +6208,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<unit, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<unit, obj>>, (unit -> ToolSet.Item13.InputSchema.Result), ToolSet.Item13.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<unit, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<unit>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: obj, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item13.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item13.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?execute: unit, ?outputSchema: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item24 = jsNative
 
-    module Item24 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item3 =
         inherit ToolSet.Item.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6477,19 +6256,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6498,14 +6264,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item3 = jsNative
 
-    module Item3 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item4 =
         inherit ToolSet.Item.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6550,19 +6312,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6582,11 +6331,6 @@ module ToolSet =
         abstract supportsDeferredResults: bool option with get, set
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: ToolSet.Item.Execute, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item4 = jsNative
-
-    module Item4 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
 
     [<Interface>]
     type Item5 =
@@ -6670,6 +6414,7 @@ module ToolSet =
     [<Interface>]
     type Item6 =
         inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+        inherit DynamicTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6742,19 +6487,13 @@ module ToolSet =
         abstract isProviderExecuted: unit option with get, set
         abstract args: unit option with get, set
         abstract supportsDeferredResults: unit option with get, set
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        abstract ``type``: string with get, set
         [<ParamObject; Emit("({ type: 'dynamic', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: U2<string, (ToolSet.Item.Description.Options -> string)>, ?strict: bool, ?inputExamples: FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item.InputExamples.Item[], ?id: unit, ?isProviderExecuted: unit, ?args: unit, ?supportsDeferredResults: unit) : Item6 = jsNative
-
-    module Item6 =
-        /// <remarks>TypeScript type: <c>"dynamic"</c></remarks>
-        [<Literal>]
-        let ``type`` = "dynamic"
 
     [<Interface>]
     type Item7 =
         inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6799,19 +6538,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6820,14 +6546,10 @@ module ToolSet =
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: unit) : Item7 = jsNative
 
-    module Item7 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
-
     [<Interface>]
     type Item8 =
         inherit FSharp.CloudEdge.Support.AI.V4.ProviderUtils.ToolSet.Item17.Base
+        inherit ProviderDefinedTool.Base
         inherit ToolSet.Item.Base2
         /// <summary>
         /// An optional title of the tool.
@@ -6872,19 +6594,6 @@ module ToolSet =
         /// This function is invoked on the server by <c>convertToModelMessages</c>, so ensure that you pass the same "tools" (ToolSet) to both "convertToModelMessages" and "streamText" (or other generation APIs).
         /// </summary>
         abstract toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>) option with get, set
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        abstract ``type``: string with get, set
-        /// <summary>
-        /// The ID of the tool. Must follow the format <c>&lt;provider-name&gt;.&lt;unique-tool-name&gt;</c>.
-        /// </summary>
-        abstract id: string with get, set
-        /// <summary>
-        /// The arguments for configuring the tool. Must match the expected arguments defined by the provider for this tool.
-        /// </summary>
-        abstract args: JS.Record<string, obj> with get, set
-        abstract description: unit option with get, set
-        abstract strict: unit option with get, set
-        abstract inputExamples: unit option with get, set
         /// <summary>
         /// Flag that indicates whether the tool is executed by the provider.
         /// </summary>
@@ -6904,11 +6613,6 @@ module ToolSet =
         abstract supportsDeferredResults: bool option with get, set
         [<ParamObject; Emit("({ type: 'provider', ...$0 })")>]
         static member Create (inputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, id: string, args: JS.Record<string, obj>, isProviderExecuted: bool, ?title: string, ?providerOptions: FSharp.CloudEdge.Support.AI.V4.Provider.SharedV3ProviderMetadata, ?metadata: FSharp.CloudEdge.Support.AI.V4.Provider.JSONObject, ?contextSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?needsApproval: U2<bool, ToolSet.Item.NeedsApproval>, ?onInputStart: (ToolExecutionOptions<obj> -> JS.Promise<unit> option), ?onInputDelta: (ToolSet.Item.OnInputDelta.Options -> JS.Promise<unit> option), ?onInputAvailable: (ToolSet.Item.OnInputAvailable.Options -> JS.Promise<unit> option), ?toModelOutput: (ToolSet.Item.ToModelOutput.Options -> U7<JS.Promise<ToolResultOutput>, ToolResultOutput2, ToolResultOutput3, ToolResultOutput4, ToolResultOutput5, ToolResultOutput6, ToolResultOutput7>), ?outputSchema: U5<FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodType<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodTypeInternals2<obj, obj>>, (unit -> ToolSet.Item.InputSchema.Result), ToolSet.Item.InputSchema.Result, FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>, FlexibleSchema2<obj>>, ?execute: unit, ?description: unit, ?strict: unit, ?inputExamples: unit, ?supportsDeferredResults: bool) : Item8 = jsNative
-
-    module Item8 =
-        /// <remarks>TypeScript type: <c>"provider"</c></remarks>
-        [<Literal>]
-        let ``type`` = "provider"
 
     [<Interface>]
     type Item9 =

@@ -16,9 +16,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 let term = url.searchParams.get "q" |> Option.defaultValue ""
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, "files")
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox "files"
                 let! found = sandbox.exec $"grep -rn -- {Bridge.Exports.shellQuote term} /workspace" |> Async.AwaitPromise
-                return Workers.Exports.Response.Create(found.stdout)
+                return Workers.Exports.Response.Create(U9.Case1 found.stdout)
             }
             |> Async.StartAsPromise
             |> U2.Case1

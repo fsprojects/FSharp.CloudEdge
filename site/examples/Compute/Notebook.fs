@@ -15,14 +15,14 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 let notebook = url.searchParams.get "notebook" |> Option.defaultValue "scratch"
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, notebook)
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox notebook
                 let! contexts = sandbox.listCodeContexts () |> Async.AwaitPromise
                 let! context =
                     match Array.tryHead contexts with
                     | Some context -> async { return context }
                     | None -> sandbox.createCodeContext () |> Async.AwaitPromise
                 let! cell = request.text () |> Async.AwaitPromise
-                let! result = sandbox.runCode(cell, Sandbox.RunCodeOptions.Create(context = context)) |> Async.AwaitPromise
+                let! result = sandbox.runCode(cell, FSharp.CloudEdge.Runtime.SandboxBridge.RunCodeOptions.Create(context = context)) |> Async.AwaitPromise
                 let values = result.results |> Array.choose (fun item -> item.text)
                 return Workers.Exports.Response.json {| output = result.logs.stdout; values = values |}
             }

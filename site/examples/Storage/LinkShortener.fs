@@ -19,12 +19,12 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 return Workers.Exports.Response.json {| slug = slug; target = target |}
             | _ ->
                 let! target =
-                    env.LINKS.get(slug, Workers.KVNamespace.Text) |> Async.AwaitPromise
+                    env.LINKS.getText slug |> Async.AwaitPromise
                 match target with
                 | Some url -> return Workers.Exports.Response.redirect(url, 302.)
                 | None ->
                     let notFound = Workers.ResponseInit.Create(status = 404.)
-                    return Workers.Exports.Response.Create("No such link", notFound)
+                    return Workers.Exports.Response.Create(U9.Case1 "No such link", notFound)
         }
         |> Async.StartAsPromise
         |> U2.Case1)

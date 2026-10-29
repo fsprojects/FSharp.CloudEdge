@@ -14,7 +14,7 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
         let url = Workers.Exports.URL(U2.Case1 request.url)
         let response =
             match request.``method``, url.pathname with
-            | "GET", "/" -> Workers.Exports.Response.Create("Welcome to the API")
+            | "GET", "/" -> Workers.Exports.Response.Create(U9.Case1 "Welcome to the API")
             | "GET", "/api/greeting" ->
                 let name = url.searchParams.get "name" |> Option.defaultValue "world"
                 Workers.Exports.Response.json {| greeting = $"Hello, {name}" |}

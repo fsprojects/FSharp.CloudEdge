@@ -41,12 +41,12 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 return Workers.Exports.Response.json {| slug = slug; target = target |}
             | _ ->
                 let! target =
-                    env.LINKS.get(slug, Workers.KVNamespace.Text) |> Async.AwaitPromise
+                    env.LINKS.getText slug |> Async.AwaitPromise
                 match target with
                 | Some url -> return Workers.Exports.Response.redirect(url, 302.)
                 | None ->
                     let notFound = Workers.ResponseInit.Create(status = 404.)
-                    return Workers.Exports.Response.Create("No such link", notFound)
+                    return Workers.Exports.Response.Create(U9.Case1 "No such link", notFound)
         }
         |> Async.StartAsPromise
         |> U2.Case1)
@@ -57,9 +57,10 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { substring } from "./fable_modules/fable-library-js.5.13.0/String.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { substring } from "./fable_modules/fable-library-js.5.24.0/String.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => {
@@ -70,7 +71,7 @@ export const worker = {
                 slug: slug,
                 target: target,
             })));
-        }) : singleton.Bind(awaitPromise(env.LINKS.get(slug, "text")), (_arg_3) => {
+        }) : singleton.Bind(awaitPromise(env.LINKS.get(slug, 'text')), (_arg_3) => {
             const target_1 = _arg_3;
             if (target_1 == null) {
                 const notFound = {
@@ -120,7 +121,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 return Workers.Exports.Response.json cart
             | _ ->
                 let! saved =
-                    env.CARTS.get<Cart>(cartId, Workers.KVNamespace.Json)
+                    env.CARTS.getJson<Cart> cartId
                     |> Async.AwaitPromise
                 let cart = saved |> Option.defaultValue {| items = [||] |}
                 return Workers.Exports.Response.json cart
@@ -144,6 +145,6 @@ Useful checks include missing keys, JSON decoding, expiration, pagination, and v
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

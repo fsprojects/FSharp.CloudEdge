@@ -51,10 +51,11 @@ let vectorSearch (ai: Workers.Ai<Workers.AiModels>) (index: Workers.Vectorize) (
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { createWorkersAI } from "workers-ai-provider";
-import { awaitPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { map, item } from "./fable_modules/fable-library-js.5.13.0/Array.js";
+import { awaitPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { map, item } from "./fable_modules/fable-library-js.5.24.0/Array.js";
 
 export function embed(ai, texts) {
     return singleton.Delay(() => {
@@ -103,6 +104,6 @@ Useful checks include vector dimensions, metadata filters, result shapes, mutati
 
 ## NuGet packages
 
-[Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+[Management.Storage 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Runtime.WorkersAIProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.1), [Support.AI.V4.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

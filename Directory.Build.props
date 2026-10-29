@@ -4,8 +4,8 @@
     <_CloudEdgeProjectDirectory>$([MSBuild]::NormalizeDirectory('$(MSBuildProjectDirectory)'))</_CloudEdgeProjectDirectory>
   </PropertyGroup>
 
-  <!-- Release 0.1.0 for every assembly and package built from src/. AssemblyVersion and FileVersion follow as 0.1.0.0. -->
+  <!-- Keep source assembly versions aligned with the configured package release. -->
   <PropertyGroup Condition="$(_CloudEdgeProjectDirectory.StartsWith('$(_CloudEdgeSourceTree)'))">
-    <Version>0.1.0</Version>
+    <Version>0.1.1</Version>
   </PropertyGroup>
 </Project>

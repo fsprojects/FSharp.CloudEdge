@@ -36,7 +36,7 @@ type ChatRoom(ctx: Workers.DurableObjectState<obj>, env: obj) =
                 let upgrade = Workers.ResponseInit.Create(status = 101., webSocket = client)
                 Workers.Exports.Response.Create(init = upgrade) |> U2.Case2
             else
-                Workers.Exports.Response.Create("Expected a WebSocket", Workers.ResponseInit.Create(status = 426.))
+                Workers.Exports.Response.Create(U9.Case1 "Expected a WebSocket", Workers.ResponseInit.Create(status = 426.))
                 |> U2.Case2
 
     interface Runtime.DurableObject.IWebSocketMessageHandler with
@@ -57,11 +57,12 @@ type ChatRoom(ctx: Workers.DurableObjectState<obj>, env: obj) =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { equals } from "./fable_modules/fable-library-js.5.13.0/Util.js";
-import { item } from "./fable_modules/fable-library-js.5.13.0/Array.js";
+
+import { equals } from "./fable_modules/fable-library-js.5.24.0/Util.js";
+import { item } from "./fable_modules/fable-library-js.5.24.0/Array.js";
 import { WorkerEntrypoint, DurableObject } from "cloudflare:workers";
-import { class_type, obj_type } from "./fable_modules/fable-library-js.5.13.0/Reflection.js";
-import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
+import { class_type, obj_type } from "./fable_modules/fable-library-js.5.24.0/Reflection.js";
+import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.1/DurableObjects.fs.js";
 
 export class ChatRoom extends DurableObject {
     constructor(ctx, env) {
@@ -103,6 +104,36 @@ export class ChatRoom extends DurableObject {
         return undefined;
     }
 }
+
+export function ChatRoom_$reflection() {
+    return class_type("ChatRoom.ChatRoom", undefined, ChatRoom, class_type("FSharp.CloudEdge.Runtime.Workers.CloudflareModule.Workers.DurableObject`2", [obj_type, obj_type], DurableObject));
+}
+
+export function ChatRoom_$ctor_6A0EF749(ctx, env) {
+    return new ChatRoom(ctx, env);
+}
+
+export class RoomLookup extends WorkerEntrypoint {
+    constructor(ctx, env) {
+        super(ctx, env);
+        this.env = env;
+    }
+    fetch(request) {
+        const _ = this;
+        const room = (new URL(request.url)).pathname;
+        return getFetchByName(_.env.ROOMS, room).fetch(request);
+    }
+}
+
+export function RoomLookup_$reflection() {
+    return class_type("ChatRoom.RoomLookup", undefined, RoomLookup, class_type("FSharp.CloudEdge.Runtime.Workers.CloudflareModule.Workers.WorkerEntrypoint`2", [class_type("ChatRoom.Env"), obj_type], WorkerEntrypoint));
+}
+
+export function RoomLookup_$ctor_Z6948133D(ctx, env) {
+    return new RoomLookup(ctx, env);
+}
+
+export default RoomLookup;
 ```
 
 </details>
@@ -306,6 +337,6 @@ type Leaderboard(ctx: Workers.DurableObjectState<obj>, env: obj) =
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Support.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

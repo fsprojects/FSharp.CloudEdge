@@ -32,7 +32,7 @@ module Shell = FSharp.CloudEdge.Runtime.Shell
 type DraftsFolder(ctx: Workers.DurableObjectState<obj>, env: obj) =
     inherit Runtime.DurableObject<obj, obj>(ctx, env)
 
-    let workspace = Shell.Exports.Workspace(Shell.WorkspaceOptions.Create(sql = ctx.storage.sql))
+    let workspace = Shell.Exports.Workspace(Shell.WorkspaceOptions.Create(sql = U3.Case3 ctx.storage.sql))
 
     interface Runtime.DurableObject.IFetchHandler with
         member _.fetch request =
@@ -75,6 +75,6 @@ Useful test cases include persistence across Durable Object restarts, file metad
 
 ## NuGet packages
 
-[Runtime.Shell 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Shell/0.1.0), [Runtime.ShellGit 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ShellGit/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Shell 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Shell/0.1.1), [Runtime.ShellGit 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ShellGit/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

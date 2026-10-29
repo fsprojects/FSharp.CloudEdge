@@ -4,7 +4,7 @@ description: The Cloudflare SDKs these libraries cover.
 order: 1
 ---
 
-The 31 runtime libraries bind the Cloudflare SDKs below, and 11 control-plane clients call Cloudflare's REST API. Project names start with `FSharp.CloudEdge.`, and [`docs/SDK-DELIVERY-SCOPE.md`](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/SDK-DELIVERY-SCOPE.md) lists each project with its npm package and pinned version.
+The runtime libraries bind the Cloudflare SDKs below, and 11 control-plane clients call Cloudflare's REST API. Project names start with `FSharp.CloudEdge.`, and [`docs/SDK-DELIVERY-SCOPE.md`](https://github.com/fsprojects/FSharp.CloudEdge/blob/main/docs/SDK-DELIVERY-SCOPE.md) lists each project with its npm package and pinned version.
 
 | Area | Cloudflare SDKs |
 | --- | --- |
@@ -26,8 +26,8 @@ Each capability page includes examples and known limitations. See [Verify bindin
 
 ## NuGet packages
 
-[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0).
+[Core.Api 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.1).
 
 See [installation and release availability](../guide/packages.md).
 
-[Browse all FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). The [package catalog](packages.md) lists every package ID and its versioned `0.1.0` URL.
+[Browse all FSharp.CloudEdge packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). The [package catalog](packages.md) lists every package ID and its versioned `0.1.1` URL.

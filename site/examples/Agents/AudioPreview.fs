@@ -3,11 +3,12 @@ module AudioPreview
 open Fable.Core
 
 module Workers = FSharp.CloudEdge.Runtime.Workers
+module Agents = FSharp.CloudEdge.Runtime.Agents
 module Voice = FSharp.CloudEdge.Runtime.Voice
 module Errors = FSharp.CloudEdge.Runtime.VoiceErrors.Errors
 
 type Env =
-    abstract AI: Voice.AiLike
+    abstract AI: Agents.AiLike
 
 let opening (article: string) =
     let chunker = Voice.Exports.SentenceChunker()
@@ -27,12 +28,13 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let! audio = tts.synthesize (opening article) |> Async.AwaitPromise
                     match audio with
                     | Some bytes ->
-                        let headers = [| [| "content-type"; "audio/mpeg" |] |]
-                        return Workers.Exports.Response.Create(bytes, Workers.ResponseInit.Create(headers = headers))
+                        let headers = Workers.Exports.Headers()
+                        headers.set("content-type", "audio/mpeg")
+                        return Workers.Exports.Response.Create(unbox<Workers.BodyInit> bytes, Workers.ResponseInit.Create(headers = U3.Case1 headers))
                     | None -> return failed "No audio"
                 with caught ->
                     let error = Errors.Exports.toVoiceError (caught, "Speech is unavailable")
-                    Errors.Exports.logVoiceError (Errors.VoiceErrorLogOptions.Create(``component`` = "AudioPreview", stage = "synthesize", message = "Preview failed", error = error))
+                    Errors.Exports.logVoiceError ({| ``component`` = "AudioPreview"; stage = "synthesize"; message = "Preview failed"; error = error |})
                     return failed (Errors.Exports.voiceErrorMessage (error, "Speech is unavailable"))
             }
             |> Async.StartAsPromise

@@ -40,7 +40,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 match Workers.Exports.URL(U2.Case1 request.url).searchParams.get "user" with
                 | None ->
-                    return Workers.Exports.Response.Create("user is required", Workers.ResponseInit.Create(status = 400.))
+                    return Workers.Exports.Response.Create(U9.Case1 "user is required", Workers.ResponseInit.Create(status = 400.))
                 | Some user ->
                     let! trial =
                         if request.``method`` = "POST" then

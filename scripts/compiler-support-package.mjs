@@ -21,8 +21,11 @@ export function packCompilerSupport({ root, source, version, supportVersion, dot
   const catalogueTool = path.join(source, "tools/package-core-ts-catalog.fsx");
   project = project.replaceAll("$(MSBuildThisFileDirectory)../../tools/package-core-ts-catalog.fsx", catalogueTool)
     .replace(/<Version>[^<]+<\/Version>/, `<Version>${version}</Version>`)
-    .replace(/<ProjectReference Include="[^\"]+"\s*\/>/, `<PackageReference Include="Xantham.Fable.Core" Version="${supportVersion}" />`)
-    .replace("</Project>", `  <ItemGroup><Content Include="${[...files, projectName].join(";")}" Pack="true" PackagePath="fable/" /></ItemGroup>\n</Project>`);
+    .replace(/<ProjectReference Include="[^\"]+"(?:\s+Condition="[^"]+")?\s*\/>/, `<PackageReference Include="Xantham.Fable.Core" Version="${supportVersion}" />`)
+    .replace(/\s*<PackageReference Include="Xantham.Fable.Core" Version="[^"]+" Condition="[^"]+"\s*\/>/, "");
+  if (!project.includes('PackagePath="fable/"')) {
+    project = project.replace("</Project>", `  <ItemGroup><Content Include="${[...files, projectName].join(";")}" Pack="true" PackagePath="fable/" /></ItemGroup>\n</Project>`);
+  }
   writeFileSync(path.join(stage, projectName), project);
   const result = spawnSync(dotnet, ["pack", projectName, "-c", "Release", "-o", feed, "--nologo"], {
     cwd: stage, encoding: "utf8", maxBuffer: 16 * 1024 * 1024,

@@ -18,6 +18,22 @@ Choose Sandbox when a task needs installed packages, native executables, or an e
 
 Configure the Sandbox Durable Object binding and container image before running these examples. They target the repository's pinned SDK version; newer SDK previews can have different session and execution APIs. Cloudflare's [Sandbox guide](https://developers.cloudflare.com/agents/tools/sandbox/) explains the execution model.
 
+The current Sandbox binding does not yet expose `getSandbox`. These examples use this small Fable import, alongside the generated `SandboxBridge.ISandbox` interface, until the binding is regenerated:
+
+```fsharp
+open Fable.Core
+open Fable.Core.JsInterop
+
+module Workers = FSharp.CloudEdge.Runtime.Workers
+module Bridge = FSharp.CloudEdge.Runtime.SandboxBridge
+
+// The package exports getSandbox; its binding is pending regeneration.
+[<Import("getSandbox", "@cloudflare/sandbox")>]
+let getSandbox (binding: Workers.DurableObjectNamespace<obj>) (id: string) : Bridge.ISandbox = jsNative
+```
+
+Place it in a module named `SandboxApi` before the example Worker in your project.
+
 ## Code Runner
 
 Visitors POST Python source. `runCode` executes it in the sandbox's code interpreter, and the Worker sends back stdout and stderr as JSON.
@@ -36,7 +52,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     Workers.ExportedHandler.Create(
         fetch = fun request env _ ->
             async {
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, "playground")
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox "playground"
                 let! code = request.text () |> Async.AwaitPromise
                 let! run = sandbox.runCode code |> Async.AwaitPromise
                 return Workers.Exports.Response.json {| output = run.logs.stdout; errors = run.logs.stderr |}
@@ -51,8 +67,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { getSandbox } from "@cloudflare/sandbox";
 
 export const worker = {
@@ -94,17 +111,17 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
         fetch = fun request env _ ->
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, "files")
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox "files"
                 match url.searchParams.get "path" |> Option.bind Bridge.Exports.resolveWorkspacePath with
                 | None ->
-                    return Workers.Exports.Response.Create("Paths must stay inside /workspace", Workers.ResponseInit.Create(status = 400.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Paths must stay inside /workspace", Workers.ResponseInit.Create(status = 400.))
                 | Some path when request.``method`` = "PUT" ->
                     let! body = request.text () |> Async.AwaitPromise
                     let! saved = sandbox.writeFile(path, body) |> Async.AwaitPromise
                     return Workers.Exports.Response.json {| saved = saved.path |}
                 | Some path ->
                     let! file = sandbox.readFile path |> Async.AwaitPromise
-                    return Workers.Exports.Response.Create(file.content)
+                    return Workers.Exports.Response.Create(U9.Case1 file.content)
             }
             |> Async.StartAsPromise
             |> U2.Case1
@@ -131,14 +148,14 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 let notebook = url.searchParams.get "notebook" |> Option.defaultValue "scratch"
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, notebook)
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox notebook
                 let! contexts = sandbox.listCodeContexts () |> Async.AwaitPromise
                 let! context =
                     match Array.tryHead contexts with
                     | Some context -> async { return context }
                     | None -> sandbox.createCodeContext () |> Async.AwaitPromise
                 let! cell = request.text () |> Async.AwaitPromise
-                let! result = sandbox.runCode(cell, Sandbox.RunCodeOptions.Create(context = context)) |> Async.AwaitPromise
+                let! result = sandbox.runCode(cell, FSharp.CloudEdge.Runtime.SandboxBridge.RunCodeOptions.Create(context = context)) |> Async.AwaitPromise
                 let values = result.results |> Array.choose (fun item -> item.text)
                 return Workers.Exports.Response.json {| output = result.logs.stdout; values = values |}
             }
@@ -167,12 +184,14 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let! repository = request.text () |> Async.AwaitPromise
                 let runId = string (System.Guid.NewGuid())
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, runId)
-                let checkout = Sandbox.ISandbox.GitCheckout.Options.Create(targetDir = "/workspace/app", depth = 1.)
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox runId
+                let checkout = FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox.GitCheckout.Options.Create(targetDir = "/workspace/app", depth = 1.)
                 let! _ = sandbox.gitCheckout(repository, checkout) |> Async.AwaitPromise
                 let! log = sandbox.execStream "cd /workspace/app && npm ci && npm test" |> Async.AwaitPromise
-                let headers = {| ``Content-Type`` = "text/event-stream"; ``Cache-Control`` = "no-cache" |}
-                return Workers.Exports.Response.Create(log, Workers.ResponseInit.Create(headers = headers))
+                let headers = Workers.Exports.Headers()
+                headers.set("Content-Type", "text/event-stream")
+                headers.set("Cache-Control", "no-cache")
+                return Workers.Exports.Response.Create(unbox<Workers.BodyInit> log, Workers.ResponseInit.Create(headers = U3.Case1 headers))
             }
             |> Async.StartAsPromise
             |> U2.Case1
@@ -182,9 +201,10 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { newGuid } from "./fable_modules/fable-library-js.5.13.0/Guid.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { newGuid } from "./fable_modules/fable-library-js.5.24.0/Guid.js";
 import { getSandbox } from "@cloudflare/sandbox";
 
 export const worker = {
@@ -196,10 +216,9 @@ export const worker = {
             depth: 1,
         };
         return singleton.Bind(awaitPromise(sandbox.gitCheckout(_arg_1, checkout)), (_arg_2) => singleton.Bind(awaitPromise(sandbox.execStream("cd /workspace/app && npm ci && npm test")), (_arg_3) => {
-            const headers = {
-                "Cache-Control": "no-cache",
-                "Content-Type": "text/event-stream",
-            };
+            const headers = new Headers();
+            headers.set("Content-Type", "text/event-stream");
+            headers.set("Cache-Control", "no-cache");
             return singleton.Return(new globalThis.Response(_arg_3, ({
                 headers: headers,
             })));
@@ -233,9 +252,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             async {
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 let term = url.searchParams.get "q" |> Option.defaultValue ""
-                let sandbox: Sandbox.ISandbox = Sandbox.Exports.getSandbox<Sandbox.Sandbox<obj>>(env.Sandbox, "files")
+                let sandbox: FSharp.CloudEdge.Runtime.SandboxBridge.ISandbox = SandboxApi.getSandbox env.Sandbox "files"
                 let! found = sandbox.exec $"grep -rn -- {Bridge.Exports.shellQuote term} /workspace" |> Async.AwaitPromise
-                return Workers.Exports.Response.Create(found.stdout)
+                return Workers.Exports.Response.Create(U9.Case1 found.stdout)
             }
             |> Async.StartAsPromise
             |> U2.Case1
@@ -245,11 +264,12 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { defaultArg } from "./fable_modules/fable-library-js.5.13.0/Option.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { defaultArg } from "./fable_modules/fable-library-js.5.24.0/Option.js";
 import { getSandbox } from "@cloudflare/sandbox";
-import { concat } from "./fable_modules/fable-library-js.5.13.0/String.js";
+import { concat } from "./fable_modules/fable-library-js.5.24.0/String.js";
 import { shellQuote } from "@cloudflare/sandbox/bridge";
 
 export const worker = {
@@ -290,6 +310,6 @@ Useful test cases include command results and errors, stream handling, session o
 
 ## NuGet packages
 
-[Runtime.Sandbox 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Sandbox/0.1.0), [Runtime.SandboxBridge 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.SandboxBridge/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Sandbox 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Sandbox/0.1.1), [Runtime.SandboxBridge 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.SandboxBridge/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

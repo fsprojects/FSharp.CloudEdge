@@ -49,10 +49,11 @@ let keywordSearch (db: Workers.D1Database) (query: string) =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { map } from "./fable_modules/fable-library-js.5.13.0/Array.js";
-import { join, replace, split } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { awaitPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
+
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { map } from "./fable_modules/fable-library-js.5.24.0/Array.js";
+import { join, replace, split } from "./fable_modules/fable-library-js.5.24.0/String.js";
+import { awaitPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
 
 export const schema = "CREATE VIRTUAL TABLE IF NOT EXISTS chunks USING fts5(id UNINDEXED, page UNINDEXED, title, text, hash UNINDEXED)";
 
@@ -108,10 +109,11 @@ let vectorSearch (ai: Workers.Ai<Workers.AiModels>) (index: Workers.Vectorize) (
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { createWorkersAI } from "workers-ai-provider";
-import { awaitPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { map, item } from "./fable_modules/fable-library-js.5.13.0/Array.js";
+import { awaitPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { map, item } from "./fable_modules/fable-library-js.5.24.0/Array.js";
 
 export function embed(ai, texts) {
     return singleton.Delay(() => {
@@ -168,7 +170,7 @@ let chunkHash (chunk: Chunk) =
     async {
         let bytes = Workers.Exports.TextEncoder().encode (chunk.title + "\n" + chunk.text)
         let! digest =
-            Workers.Exports.crypto.subtle.digest (U2.Case1 "SHA-256", U2.Case1 bytes.buffer)
+            Workers.Exports.crypto.subtle.digest (U2.Case1 "SHA-256", U2.Case2 (unbox bytes))
             |> Async.AwaitPromise
         let view = JS.Constructors.Uint8Array.Create digest
         let hash = Array.init view.length (fun i -> sprintf "%02x" view[i]) |> String.concat ""
@@ -179,15 +181,16 @@ let chunkHash (chunk: Chunk) =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
-import { awaitPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { printf, toText, join } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { initialize } from "./fable_modules/fable-library-js.5.13.0/Array.js";
+
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
+import { awaitPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { printf, toText, join } from "./fable_modules/fable-library-js.5.24.0/String.js";
+import { initialize } from "./fable_modules/fable-library-js.5.24.0/Array.js";
 
 export function chunkHash(chunk) {
     return singleton.Delay(() => {
         const bytes = (new TextEncoder()).encode((chunk.title + "\n") + chunk.text);
-        return singleton.Bind(awaitPromise(crypto.subtle.digest("SHA-256", bytes.buffer)), (_arg) => {
+        return singleton.Bind(awaitPromise(crypto.subtle.digest("SHA-256", bytes)), (_arg) => {
             const view = new Uint8Array(_arg);
             const hash = join("", initialize(view.length, (i) => {
                 const arg = view[i];
@@ -303,7 +306,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let! counts = IndexUpdate.reindex env.DB env.VECTORS env.AI page
                     return Workers.Exports.Response.json counts
                 | "POST", _ ->
-                    return Workers.Exports.Response.Create("Unauthorized", Workers.ResponseInit.Create(status = 401.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Unauthorized", Workers.ResponseInit.Create(status = 401.))
                 | _, Some query when query.Trim() <> "" ->
                     let! rankings =
                         Async.Parallel
@@ -312,7 +315,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let results = RankFusion.fuse rankings |> Array.truncate 10
                     return Workers.Exports.Response.json {| query = query; results = results |}
                 | _ ->
-                    return Workers.Exports.Response.Create("Add ?q= to the URL", Workers.ResponseInit.Create(status = 400.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Add ?q= to the URL", Workers.ResponseInit.Create(status = 400.))
             }
             |> Async.StartAsPromise
             |> U2.Case1
@@ -340,6 +343,6 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ## NuGet packages
 
-[Management.Storage 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0).
+[Management.Storage 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Storage/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Runtime.WorkersAIProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.1), [Support.AI.V4.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

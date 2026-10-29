@@ -6,14 +6,14 @@ module V3 = FSharp.CloudEdge.Support.AI.V3.Provider
 
 let askWithUsage (model: V3.LanguageModelV3) (question: string) =
     async {
-        let part = V3.LanguageModelV3Message3.Content.Item.Text(question, None)
+        let part = V3.LanguageModelV3Message.Cases.User.Content.Item.Text(V3.LanguageModelV3TextPart.Create(question))
         let prompt = [| V3.LanguageModelV3Message.User([| part |], None) |]
         let options = V3.LanguageModelV3CallOptions.Create(prompt = prompt, maxOutputTokens = 400.)
         let! result = model.doGenerate options |> Async.AwaitPromise
         let answer =
             result.content
             |> Array.choose (function
-                | V3.LanguageModelV3Content.Text(text, _) -> Some text
+                | V3.LanguageModelV3Content.Text part -> Some part.text
                 | _ -> None)
             |> String.concat ""
         return

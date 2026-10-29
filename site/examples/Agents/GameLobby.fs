@@ -17,4 +17,5 @@ type GameLobby(ctx: Workers.DurableObjectState<obj>, env: obj) as this =
         player.send (U3.Case1 $"Welcome to {lifecycle.name}")
 
     member _.onMessage(player: Agents.Connection<obj>, message: Agents.WSMessage) =
-        lifecycle.broadcast (message, [| player.id |])
+        for socket in ctx.getWebSockets() do
+            if not (obj.ReferenceEquals(socket, player)) then socket.send message

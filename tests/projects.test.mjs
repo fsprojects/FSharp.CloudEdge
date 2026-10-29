@@ -1,10 +1,11 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, mkdirSync, readFileSync, rmSync, statSync, utimesSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { buildProjects, checkProjects, planProjects, reconcileProjects, writeProjects } from "../scripts/projects.mjs";
+import { buildProjectionReferences, buildProjects, checkProjects, planProjects, reconcileProjects, writeProjects } from "../scripts/projects.mjs";
+import { executableScript } from "./fake-executable.mjs";
 import { catalogCandidates, declarationReferences } from "../scripts/catalogs.mjs";
 import { inspectInputOverlays, prepareInputOverlays } from "../scripts/input-overlays.mjs";
 
@@ -127,6 +128,17 @@ test("solution folders follow the organized source parent directories", (t) => {
   assert.match(plan.solutionContent, /Folder Name="\/Core\/"/);
   assert.match(plan.solutionContent, /Folder Name="\/Runtime\/Agents\/"/);
   assert.match(plan.projects[1].content, /ProjectReference Include="..\/..\/..\/Core\/Workers\/FSharp.CloudEdge.Workers.fsproj"/);
+});
+
+test("a relocated dependency solution resolves projects from its own directory", t => {
+  const plan = planProjects(configuration(), temporary(t));
+  plan.solution = path.join(plan.root, "artifacts/projects/dependencies.slnx");
+  generated(plan);
+  const content = readFileSync(plan.solution, "utf8");
+  const paths = [...content.matchAll(/<Project Path="([^"]+)"/g)].map(match =>
+    path.resolve(path.dirname(plan.solution), match[1]));
+  assert.deepEqual(paths, plan.projects.map(project => project.file));
+  assert.equal(checkProjects(plan).length, 1);
 });
 
 for (const [name, change, error] of [
@@ -348,6 +360,77 @@ test("a failed compiler invocation remains a failed gate with durable evidence",
   assert.equal(report.builds.length, 1);
   assert.match(report.builds[0].error, /ENOENT/);
   assert.ok(existsSync(report.log));
+});
+
+function projectionBuild(t) {
+  const config = configuration();
+  const root = temporary(t);
+  const plan = planProjects(config, root);
+  generated(plan);
+  const consumer = target("consumer", "Example.Consumer", "runtime", ["workers"]);
+  const assembly = path.join(root, "src/FSharp.CloudEdge.Workers/bin/Debug/net8.0/FSharp.CloudEdge.Workers.dll");
+  const commands = path.join(root, "build-commands.jsonl");
+  const mutation = path.join(root, "mutate-input");
+  const inherited = path.join(root, "Directory.Build.props");
+  const dotnet = path.join(root, "dotnet.mjs");
+  writeFileSync(dotnet, `
+import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import path from "node:path";
+appendFileSync(${JSON.stringify(commands)}, JSON.stringify(process.argv.slice(2)) + "\\n");
+mkdirSync(path.dirname(${JSON.stringify(assembly)}), { recursive: true });
+writeFileSync(${JSON.stringify(assembly)}, "compiled owner");
+if (existsSync(${JSON.stringify(mutation)})) writeFileSync(${JSON.stringify(inherited)}, "changed during build");
+`);
+  executableScript(t, dotnet);
+  const run = (build = true) => buildProjectionReferences(config, consumer, root, dotnet, build);
+  return { root, plan, config, run, assembly, commands, mutation, inherited,
+    receipt: path.join(root, "artifacts/projects/consumer-dependencies.json") };
+}
+
+test("projection no-build authenticates existing assemblies without invoking dotnet or rewriting projects", t => {
+  const f = projectionBuild(t);
+  const latest = path.join(f.root, "artifacts/projects/latest.json");
+  mkdirSync(path.dirname(latest), { recursive: true });
+  writeFileSync(latest, "previous full build");
+  assert.deepEqual(f.run(), [f.assembly]);
+  assert.equal(readFileSync(latest, "utf8"), "previous full build");
+  const files = [f.plan.projects[0].file, path.join(f.root, "artifacts/projects/consumer-dependencies.slnx")];
+  files.forEach(file => utimesSync(file, 1000, 1000));
+  const before = files.map(file => statSync(file).mtimeMs);
+  const calls = readFileSync(f.commands, "utf8");
+  assert.deepEqual(f.run(false), [f.assembly]);
+  assert.deepEqual(files.map(file => statSync(file).mtimeMs), before);
+  assert.equal(readFileSync(f.commands, "utf8"), calls);
+});
+
+for (const [label, change] of [
+  ["assembly", f => writeFileSync(f.assembly, "another build")],
+  ["inherited build input", f => writeFileSync(f.inherited, "new props")],
+  ["source with refreshed generation provenance", f => {
+    const source = f.plan.projects[0].sources[0];
+    writeFileSync(source, "module FSharp.CloudEdge.Workers\nlet changed = 1\n");
+    changeReceipt(f.plan, receipt => { receipt.sourceSha256["FSharp.CloudEdge.Workers.fs"] = hash(readFileSync(source)); });
+  }],
+  ["missing receipt", f => rmSync(f.receipt)],
+  ["failed receipt", f => {
+    const receipt = JSON.parse(readFileSync(f.receipt, "utf8"));
+    receipt.succeeded = false;
+    writeFileSync(f.receipt, JSON.stringify(receipt));
+  }],
+]) test(`projection no-build refuses ${label} drift without rebuilding`, t => {
+  const f = projectionBuild(t);
+  f.run();
+  const calls = readFileSync(f.commands, "utf8");
+  change(f);
+  assert.throws(() => f.run(false), /build receipt/);
+  assert.equal(readFileSync(f.commands, "utf8"), calls);
+});
+
+test("dependency compilation refuses inherited input drift before accepting its output", t => {
+  const f = projectionBuild(t);
+  writeFileSync(f.mutation, "mutate");
+  assert.throws(() => f.run());
+  assert.equal(JSON.parse(readFileSync(f.receipt, "utf8")).succeeded, false);
 });
 
 function catalogFamily(t, extras = []) {

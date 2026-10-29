@@ -7,7 +7,7 @@ description: Handle inbound email as an event in an agent workflow.
 <p class="ce-block-lead">Handle inbound email as an event in an agent workflow.</p>
 <ul class="ce-facts">
 <li><span>Libraries</span> <code>Runtime.AgentsAiChatAgent</code></li>
-<li><span>npm</span> <code>agents 0.22.0</code></li>
+<li><span>npm</span> <code>agents 0.30.1</code></li>
 <li><span>Upstream/API</span> Requires an Email Routing configuration</li>
 </ul>
 </div>
@@ -57,9 +57,10 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
+
 import { isAutoReplyEmail } from "agents/email";
-import { choose } from "./fable_modules/fable-library-js.5.13.0/Array.js";
-import { awaitPromise, ignore, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
+import { choose } from "./fable_modules/fable-library-js.5.24.0/Array.js";
+import { awaitPromise, ignore, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
 
 export function isAutoReply(message) {
     return isAutoReplyEmail(choose((key) => {
@@ -103,6 +104,6 @@ Useful test cases include header and message shapes, optional async handlers, fo
 
 ## NuGet packages
 
-[Runtime.AgentsAiChatAgent 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.AgentsAiChatAgent 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

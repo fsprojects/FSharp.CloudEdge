@@ -25,7 +25,7 @@ module Workers = FSharp.CloudEdge.Runtime.Workers
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
     Workers.ExportedHandler.Create(fetch = fun request env ctx ->
-        U2.Case2(Workers.Exports.Response.Create("ok")))
+        U2.Case2(Workers.Exports.Response.Create(U9.Case1 "ok")))
 ```
 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
@@ -59,7 +59,7 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
         let url = Workers.Exports.URL(U2.Case1 request.url)
         let response =
             match request.``method``, url.pathname with
-            | "GET", "/" -> Workers.Exports.Response.Create("Welcome to the API")
+            | "GET", "/" -> Workers.Exports.Response.Create(U9.Case1 "Welcome to the API")
             | "GET", "/api/greeting" ->
                 let name = url.searchParams.get "name" |> Option.defaultValue "world"
                 Workers.Exports.Response.json {| greeting = $"Hello, {name}" |}
@@ -84,7 +84,7 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
             request.cf
             |> Option.bind (fun cf -> cf.city)
             |> Option.defaultValue "your city"
-        U2.Case2(Workers.Exports.Response.Create($"Hello to everyone in {city}")))
+        U2.Case2(Workers.Exports.Response.Create(U9.Case1 $"Hello to everyone in {city}")))
 ```
 
 ## API Proxy
@@ -105,8 +105,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
     Workers.ExportedHandler.Create(fetch = fun request env _ ->
         let url = Workers.Exports.URL(U2.Case1 request.url)
         let upstream = env.UPSTREAM_URL + url.pathname + url.search
-        let auth = {| Authorization = $"Bearer {env.API_KEY}" |}
-        let init = Workers.RequestInit.Create(headers = auth)
+        let headers = Workers.Exports.Headers()
+        headers.set("Authorization", $"Bearer {env.API_KEY}")
+        let init = Workers.RequestInit<Workers.RequestInitCfProperties>.Create(headers = U3.Case1 headers)
         Workers.Exports.fetch(U3.Case1 upstream, init) |> U2.Case1)
 ```
 
@@ -115,17 +116,17 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { concat } from "./fable_modules/fable-library-js.5.13.0/String.js";
+
+import { concat } from "./fable_modules/fable-library-js.5.24.0/String.js";
 
 export const worker = {
     fetch: (request, env, _arg) => {
         const url = new URL(request.url);
         const upstream = (env.UPSTREAM_URL + url.pathname) + url.search;
-        const auth = {
-            Authorization: concat("Bearer ", env.API_KEY),
-        };
+        const headers = new Headers();
+        headers.set("Authorization", concat("Bearer ", env.API_KEY));
         return fetch(upstream, {
-            headers: auth,
+            headers: headers,
         });
     },
 };
@@ -161,7 +162,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
         async {
             let url = Workers.Exports.URL(U2.Case1 request.url)
             let pageUrl = env.ORIGIN + url.pathname + url.search
-            let! page = Workers.Exports.fetch(U3.Case1 pageUrl) |> Async.AwaitPromise
+            let! page = Workers.Exports.fetch(U3.Case1 pageUrl, Workers.RequestInit<Workers.RequestInitCfProperties>.Create()) |> Async.AwaitPromise
             return Workers.Exports.HTMLRewriter().on("body", addBanner).transform page
         }
         |> Async.StartAsPromise
@@ -193,7 +194,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             | None ->
                 let url = Workers.Exports.URL(U2.Case1 request.url)
                 let pageUrl = env.ORIGIN + url.pathname + url.search
-                let! page = Workers.Exports.fetch(U3.Case1 pageUrl) |> Async.AwaitPromise
+                let! page = Workers.Exports.fetch(U3.Case1 pageUrl, Workers.RequestInit<Workers.RequestInitCfProperties>.Create()) |> Async.AwaitPromise
                 do! cache.put(U3.Case1 request.url, page.clone()) |> Async.AwaitPromise
                 return page
         }
@@ -220,6 +221,6 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

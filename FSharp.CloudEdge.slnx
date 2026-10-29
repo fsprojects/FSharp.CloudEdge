@@ -18,7 +18,10 @@
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Agents/FSharp.CloudEdge.Runtime.Agents.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/FSharp.CloudEdge.Runtime.AgentsAiChatAgent.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsMcpClient/FSharp.CloudEdge.Runtime.AgentsMcpClient.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.CodeMode/FSharp.CloudEdge.Runtime.CodeMode.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiAi/FSharp.CloudEdge.Runtime.PiAi.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiDurable/FSharp.CloudEdge.Runtime.PiDurable.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Shell/FSharp.CloudEdge.Runtime.Shell.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />

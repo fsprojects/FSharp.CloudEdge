@@ -17,6 +17,8 @@
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.ShellGit/FSharp.CloudEdge.Runtime.ShellGit.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.Voice/FSharp.CloudEdge.Runtime.Voice.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.VoiceErrors/FSharp.CloudEdge.Runtime.VoiceErrors.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiAi/FSharp.CloudEdge.Runtime.PiAi.fsproj" />
+    <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.PiDurable/FSharp.CloudEdge.Runtime.PiDurable.fsproj" />
     <Project Path="src/Runtime/Agents/FSharp.CloudEdge.Runtime.AgentsPi/FSharp.CloudEdge.Runtime.AgentsPi.fsproj" />
   </Folder>
   <Folder Name="/Runtime/Compute/">

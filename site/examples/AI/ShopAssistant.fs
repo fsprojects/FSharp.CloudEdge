@@ -3,10 +3,11 @@ module ShopAssistant
 open Fable.Core
 
 module Workers = FSharp.CloudEdge.Runtime.Workers
+module WorkersTypes = FSharp.CloudEdge.Runtime.WorkersTypes
 module AIUtils = FSharp.CloudEdge.Runtime.AIUtils
 
 type Env =
-    abstract AI: Workers.Ai<Workers.AiModels>
+    abstract AI: WorkersTypes.Ai<WorkersTypes.AiModels>
 
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
@@ -16,7 +17,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 let! question = request.text () |> Async.AwaitPromise
                 let spec = "https://shop.example.com/openapi.json"
                 let! tools = AIUtils.Exports.createToolsFromOpenAPISpec spec |> Async.AwaitPromise
-                let messages: obj[] = [| {| role = "user"; content = question |} |]
+                let messages = [| WorkersTypes.BaseAiTextGeneration.Inputs.Messages.Item.Create("user", question) |]
                 let input = AIUtils.RunWithTools.Input.Create(messages, tools)
                 let model = "@hf/nousresearch/hermes-2-pro-mistral-7b"
                 let! answer =

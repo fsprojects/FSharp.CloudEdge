@@ -1,11 +1,12 @@
 import { createHash } from "node:crypto";
-import { spawnSync } from "node:child_process";
+import childProcess from "node:child_process";
 import { closeSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, readdirSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { inspectInputOverlays, prepareInputOverlays } from "./input-overlays.mjs";
 import { catalogCandidates, declarationReferences, generationDependencies, generationOrder } from "./catalogs.mjs";
 import { resolveTool, resolveSourceTool, sourceToolConfiguration, sameTool } from "./tool-packages.mjs";
+import { buildProjectionReferences } from "./projects.mjs";
 
 const defaultRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const readJson = (file) => JSON.parse(readFileSync(file, "utf8"));
@@ -27,7 +28,7 @@ function inside(base, relative) {
 }
 
 function run(command, args, options = {}) {
-  const result = spawnSync(command, args, { stdio: "inherit", ...options });
+  const result = childProcess.spawnSync(command, args, { stdio: "inherit", ...options });
   if (result.error) throw result.error;
   requireThat(result.status === 0, `${command} failed (${result.signal ?? result.status}); output was not accepted`);
 }
@@ -39,7 +40,7 @@ function sourceFiles(directory, prefix = "") {
   }).sort();
 }
 
-export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, projectionToolResolver = resolveSourceTool, sourceToolResolver = projectionToolResolver, configuration } = {}) {
+export async function generate({ root = defaultRoot, args = process.argv.slice(2), env: environment = process.env, toolResolver = resolveTool, projectionToolResolver = resolveSourceTool, sourceToolResolver = projectionToolResolver, compileProjectionDependencies = buildProjectionReferences, configuration } = {}) {
   requireThat(args.filter((arg) => arg.startsWith("--")).every((arg) => ["--check", "--no-build", "--continue-on-error", "--resume"].includes(arg)), "Usage: node scripts/generate.mjs [--check] [--no-build] [--continue-on-error] [--resume] [target ...]");
   const config = configuration ?? readJson(path.join(root, "config/targets.json"));
   fields(config, ["schemaVersion", "toolchain", "xantham", "profiles", "projectDefaults", "targets"], "targets.json");
@@ -150,6 +151,9 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       const references = declarationReferences(target, root, originalPackageDirectory);
       const referenceHashes = () => Object.fromEntries(references.map(({ key, file }) => [key, hash(file)]));
       const declarationReferenceSha256 = referenceHashes();
+      const projectionReferences = target.projection ? compileProjectionDependencies(config, target, root, dotnet, !args.includes("--no-build")) : [];
+      const projectionHashes = () => Object.fromEntries(projectionReferences.map(file => [path.relative(root, file), hash(file)]));
+      const projectionReferenceSha256 = projectionHashes();
       const effectiveGenerator = references.length ? { ...target.generator, declarationReferences: references.map(({ file }) => file) } : target.generator;
       const catalogFile = path.join(artifacts, "declarations.json");
       const previousFile = path.join(artifacts, "generation.json");
@@ -167,6 +171,7 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
             && JSON.stringify(previous.generatorTool) === JSON.stringify(tool.fingerprint)
             && previous.typescriptExecutableSha256 === typescriptExecutableSha256
             && JSON.stringify(previous.declarationReferenceSha256 ?? {}) === JSON.stringify(declarationReferenceSha256)
+            && JSON.stringify(previous.projectionReferenceSha256 ?? {}) === JSON.stringify(projectionReferenceSha256)
             && (!target.generator.declarationCatalog || existsSync(catalogFile) && previous.declarationCatalogSha256 === hash(catalogFile))
             && JSON.stringify(Object.keys(previous.sourceSha256 ?? {}).sort()) === JSON.stringify([...target.files].sort())
             && target.files.every((file) => existsSync(inside(inside(root, target.outputDirectory), file)) && previous.sourceSha256?.[file] === hash(inside(inside(root, target.outputDirectory), file)))) {
@@ -184,6 +189,9 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
         const projectionFile = path.join(stage, "projection.json");
         writeFileSync(projectionFile, JSON.stringify(target.projection, null, 2) + "\n");
         projectionArguments.push("--projection", projectionFile);
+        const referenceFile = path.join(stage, "references.json");
+        writeFileSync(referenceFile, JSON.stringify(projectionReferences, null, 2) + "\n");
+        projectionArguments.push("--references", referenceFile);
       }
       const log = openSync(path.join(artifacts, "generate.log"), "w");
       try {
@@ -192,7 +200,8 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       requireThat(sameTool(currentTool(), tool) && hash(tsc) === typescriptExecutableSha256,
         `${target.id}: generator or compiler changed during generation; output was not accepted`);
       requireThat(prepareInputOverlays({ root, profileDirectory: sourceProfileDirectory }).fingerprint === inputOverlays.fingerprint
-        && JSON.stringify(referenceHashes()) === JSON.stringify(declarationReferenceSha256),
+        && JSON.stringify(referenceHashes()) === JSON.stringify(declarationReferenceSha256)
+        && JSON.stringify(projectionHashes()) === JSON.stringify(projectionReferenceSha256),
         `${target.id}: dependency profile or declaration catalog changed during generation; output was not accepted`);
       requireThat(JSON.stringify(sourceFiles(stage)) === JSON.stringify([...target.files].sort()), `${target.id}: emitted F# files differ from the configured list; inspect ${stage}`);
       const manifest = readJson(path.join(stage, "manifest.json"));
@@ -203,7 +212,7 @@ export async function generate({ root = defaultRoot, args = process.argv.slice(2
       target.files.forEach((file) => requireThat(readFileSync(inside(stage, file)).length > 0, `${target.id}: empty generated source ${file}`));
       const declarationCatalogSha256 = target.generator.declarationCatalog ? hash(path.join(stage, "declarations.json")) : undefined;
       const projectionManifestSha256 = target.projection ? hash(path.join(stage, "manifest.json")) : undefined;
-      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, projection: target.projection, sourceTool: source, projectionManifestSha256, effectiveGenerator, declarationReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
+      const provenance = { target: target.id, catalogCandidates: catalogCandidates(target), package: target.package, version: target.version, profile: target.profile, profileLockSha256: profileLocks.get(target.profile), profileManifestSha256: expectedInput.profileManifestSha256, inputOverlays, inputPackageDirectory: packageDirectory, typescript: config.toolchain.typescript, typescriptExecutable: tsc, typescriptExecutableSha256, generator: target.generator, projection: target.projection, sourceTool: source, projectionManifestSha256, effectiveGenerator, declarationReferenceSha256, projectionReferenceSha256, declarationCatalogSha256, generatorTool: tool.fingerprint, generatedAtUtc: new Date().toISOString(), sourceSha256: Object.fromEntries(target.files.map((file) => [file, hash(inside(stage, file))])), counts: manifest.counts };
       for (const file of target.files) {
         const destination = inside(inside(root, target.outputDirectory), file);
         mkdirSync(path.dirname(destination), { recursive: true });

@@ -14,6 +14,6 @@ let onRequestGet (context: Workers.EventContext<obj, string, Access.PluginData>)
             return Workers.Exports.Response.json profile
         | None ->
             let notFound = Workers.ResponseInit.Create(status = 404.)
-            return Workers.Exports.Response.Create("No identity for this sign-in", notFound)
+            return Workers.Exports.Response.Create(U9.Case1 "No identity for this sign-in", notFound)
     }
     |> Async.StartAsPromise

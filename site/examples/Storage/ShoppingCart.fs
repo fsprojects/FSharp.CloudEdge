@@ -24,7 +24,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                 return Workers.Exports.Response.json cart
             | _ ->
                 let! saved =
-                    env.CARTS.get<Cart>(cartId, Workers.KVNamespace.Json)
+                    env.CARTS.getJson<Cart> cartId
                     |> Async.AwaitPromise
                 let cart = saved |> Option.defaultValue {| items = [||] |}
                 return Workers.Exports.Response.json cart

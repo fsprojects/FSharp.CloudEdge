@@ -3,21 +3,21 @@
   "isRoot": true,
   "tools": {
     "hawaii.unofficial": {
-      "version": "1.0.0-local.c3814098186d1b62c9e7",
+      "version": "1.0.0-local.8b77c5534f22eccbbb0f",
       "commands": [
         "hawaii-unofficial"
       ],
       "rollForward": false
     },
     "xantham": {
-      "version": "0.1.0-local.e0d08eb8343e261f10ca",
+      "version": "0.1.0-local.b7bccd8993af277a0197",
       "commands": [
         "xantham"
       ],
       "rollForward": false
     },
     "fickl": {
-      "version": "0.6.7",
+      "version": "0.7.3",
       "commands": [
         "fickl"
       ],

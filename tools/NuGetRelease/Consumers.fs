@@ -38,13 +38,18 @@ let audit packages =
     printfn "Audited %d examples, %d package references, %d catalog URLs" projects.Length count ids.Count
     projects
 
-let installFable directory =
-    let tool = Path.Combine(directory, "tools", if OperatingSystem.IsWindows() then "fable.exe" else "fable")
+let installTool directory packageId version command =
+    let tool = Path.Combine(directory, "tools", if OperatingSystem.IsWindows() then command + ".exe" else command)
     let source = Path.Combine(directory, "Tools.NuGet.Config")
     writeNuGetConfig source (Path.Combine(directory, "tool-cache")) false
     if not (File.Exists tool) then
-        run "dotnet" ["tool"; "install"; "fable"; "--version"; "5.13.0"; "--tool-path"; Path.GetDirectoryName tool; "--configfile"; source] (Path.Combine(directory, "logs/fable-install.log"))
+        run "dotnet" ["tool"; "install"; packageId; "--version"; version; "--tool-path"; Path.GetDirectoryName tool; "--configfile"; source] (Path.Combine(directory, "logs", command + "-install.log"))
     tool
+
+let installCompiler directory =
+    use manifest = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root, ".config/dotnet-tools.json")))
+    let version = manifest.RootElement.GetProperty("tools").GetProperty("fickl").GetProperty("version").GetString()
+    installTool directory "fickl" version "fickl"
 
 let prepareConsumerDirectory publicFeed =
     let mode = if publicFeed then "public" else "candidate"
@@ -77,6 +82,44 @@ let prepareConsumerDirectory publicFeed =
     writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) (not publicFeed)
     mode, directory
 
+// Reuse the source composition witness against packages only, so the published
+// Pi contracts must preserve the same shared input and factory context types.
+let preparePiConsumer directory =
+    let witness = Path.Combine(root, "tests/SDKComposition/Pi.fs")
+    let client = Path.Combine(root, "tests/AgentsPi/Client.fs")
+    let original = Path.Combine(root, "tests/AgentsPi/AgentsPi.fsproj")
+    let compilerManifest = Path.Combine(root, "tests/AgentsPi/.config/dotnet-tools.json")
+    let doc = XDocument.Load original
+    let framework = (element "TargetFramework" doc).Value
+    let coreVersion = elements "PackageReference" doc |> Array.find (fun n -> attr "Include" n = "Fable.Core") |> attr "Version"
+    let destination = Path.Combine(directory, "examples/agents-pi")
+    copyFile witness (Path.Combine(destination, "Pi.fs"))
+    copyFile client (Path.Combine(destination, "Client.fs"))
+    let project = Path.Combine(destination, "AgentsPi.PackageConsumer.fsproj")
+    xml "Project" ["Sdk", "Microsoft.NET.Sdk"] [
+        xml "PropertyGroup" [] [valueElement "TargetFramework" framework]
+        xml "ItemGroup" [] [
+            xml "Compile" ["Include", "Pi.fs"] []
+            xml "Compile" ["Include", "Client.fs"] []
+            xml "PackageReference" ["Include", "Fable.Core"; "Version", coreVersion] []
+            xml "PackageReference" ["Include", "FSharp.CloudEdge.Runtime.AgentsPi"; "Version", $"[{config.Version}]"] []
+            xml "PackageReference" ["Include", "FSharp.CloudEdge.Support.Workers"; "Version", $"[{config.Version}]"] []
+            for KeyValue(id, version) in config.PublicDependencies do
+                xml "PackageReference" ["Include", id; "Version", $"[{version}]"] []
+        ]
+    ] |> saveXml project
+    mkdir (Path.Combine(directory, "logs"))
+    [witness; client; original; compilerManifest]
+    |> List.map (fun file -> relative file, sha256 file)
+    |> Map.ofList
+    |> writeJson (Path.Combine(directory, "logs/agents-pi-inputs.json"))
+    project
+
+let requirePiPackages (packages: string array) =
+    for name in ["AgentsPi"; "PiAi"; "PiDurable"] do
+        let package = $"FSharp.CloudEdge.Runtime.{name}/{config.Version}"
+        ensure (Array.contains package packages) $"Pi consumer did not resolve {package}"
+
 let recordResolvedPackages directory name project =
     use assets = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(Path.GetDirectoryName(project: string), "obj/project.assets.json")))
     let packages = assets.RootElement.GetProperty("libraries").EnumerateObject()
@@ -92,26 +135,32 @@ let recordResolvedPackages directory name project =
     let destination = Path.Combine(directory, "resolved-packages")
     mkdir destination
     writeJson (Path.Combine(destination, name + ".json")) packages
+    packages
 
 let buildExamples (projects: string array) publicFeed emit =
     let mode, directory = prepareConsumerDirectory publicFeed
-    let tool = if emit then installFable directory else ""
-    let results = ResizeArray<ConsumerResult>()
-    for index, original in Array.indexed projects do
+    // Generated tagged unions throughout the bindings require Fickl's inline-interface support.
+    let tool = if emit then installCompiler directory else ""
+    let piProject = preparePiConsumer directory
+    let consumers = Array.append (projects |> Array.map (fun original ->
         let name = Path.GetFileName(Path.GetDirectoryName original)
-        let project = Path.Combine(directory, "examples", name, Path.GetFileName original)
-        printfn "[%d/%d] %s package consumer: %s" (index + 1) projects.Length mode name
+        name, Path.Combine(directory, "examples", name, Path.GetFileName original), false)) [|"agents-pi", piProject, true|]
+    let results = ResizeArray<ConsumerResult>()
+    for index, (name, project, pi) in Array.indexed consumers do
+        printfn "[%d/%d] %s package consumer: %s" (index + 1) consumers.Length mode name
         let mutable built = false
         let mutable emitted = "not run"
         let mutable error = ""
         try
             run "dotnet" ["build"; project; "-c"; "Release"; "--nologo"] (Path.Combine(directory, "logs", name + "-build.log"))
-            recordResolvedPackages directory name project
+            let resolved = recordResolvedPackages directory name project
+            if pi then requirePiPackages resolved
             built <- true
             let kind = elements "ExampleKind" (XDocument.Load project) |> Array.tryHead
             if emit && (kind |> Option.forall (fun n -> n.Value <> "DotNet")) then
                 emitted <- "failed"
-                run tool [project; "--outDir"; Path.Combine(directory, "js", name)] (Path.Combine(directory, "logs", name + "-fable.log"))
+                let arguments = [project; "--outDir"; Path.Combine(directory, "js", name)] @ (if pi then ["--noCache"] else [])
+                run tool arguments (Path.Combine(directory, "logs", name + "-fable.log"))
                 emitted <- "passed"
         with ex -> error <- ex.Message
         results.Add { Project = name; Build = (if built then "passed" else "failed"); Fable = emitted; Error = error }
@@ -127,7 +176,7 @@ let checkSupport () =
     if Directory.Exists directory then Directory.Delete(directory, true)
     mkdir directory
     writeNuGetConfig (Path.Combine(directory, "NuGet.Config")) (Path.Combine(directory, "cache")) false
-    let tool = installFable directory
+    let tool = installCompiler directory
     for file in ["Smoke.fs"; "check.mjs"] do
         copyFile (Path.Combine(root, "tests/SupportPackage", file)) (Path.Combine(directory, file))
     let version = config.PublicDependencies["Xantham.Fable.Core"]
@@ -137,15 +186,23 @@ let checkSupport () =
         xml "PropertyGroup" [] [valueElement "TargetFramework" "net8.0"]
         xml "ItemGroup" [] [
             xml "Compile" ["Include", "Smoke.fs"] []
-            xml "PackageReference" ["Include", "Fable.Core"; "Version", "5.2.0"] []
+            xml "PackageReference" ["Include", "Fable.Core"; "Version", "5.6.0"] []
             xml "PackageReference" ["Include", "Xantham.Fable.Core"; "Version", $"[{version}]"] []
             xml "PackageReference" ["Include", "Xantham.Fable.Core.TS"; "Version", $"[{tsVersion}]"] []
         ]
     ] |> saveXml project
     run "dotnet" ["build"; project; "--nologo"] (Path.Combine(directory, "logs/build.log"))
+    use receipt = System.Text.Json.JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "inventory/pi-lifecycle-acceptance.json")))
+    let expected = receipt.RootElement.GetProperty("supportFableSources")
+    for KeyValue(id, version) in config.PublicDependencies do
+        let package = Path.Combine(directory, "cache", id.ToLowerInvariant(), version.ToLowerInvariant())
+        let fable = Path.Combine(package, "fable")
+        let sources = expected.GetProperty(id).EnumerateObject() |> Seq.map (fun item -> item.Name, item.Value.GetString()) |> Map.ofSeq
+        let actual = Directory.GetFiles(fable, "*.fs", SearchOption.AllDirectories) |> Array.map (fun file -> "fable/" + Path.GetRelativePath(fable, file).Replace('\\', '/'), sha256 file) |> Map.ofArray
+        ensure (not sources.IsEmpty && sources = actual) $"Published {id} Fable sources differ from the Pi lifecycle gate"
     run tool [project; "--outDir"; Path.Combine(directory, "fable-out")] (Path.Combine(directory, "logs/fable.log"))
     run "node" [Path.Combine(directory, "check.mjs")] (Path.Combine(directory, "logs/runtime.log"))
-    printfn "Public support %s builds, emits through Fable and passes binding runtime assertions" version
+    printfn "Public support %s builds, emits through Fickl and passes binding runtime assertions" version
 
 let normalized (text: string) =
     text.Replace("\r\n", "\n").Split('\n') |> Array.map _.TrimEnd() |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev |> Array.skipWhile String.IsNullOrWhiteSpace |> Array.rev
@@ -167,7 +224,7 @@ let checkSnippets jsRoot =
         Directory.GetFiles(folder, extension, SearchOption.AllDirectories)
         |> Array.filter (fun p -> p.Split(Path.DirectorySeparatorChar) |> Array.exists (fun x -> x = "bin" || x = "obj" || x = "fable_modules") |> not)
         |> Array.map File.ReadAllText
-    let fs = sources "*.fs" (Path.Combine(root, "site/examples"))
+    let fs = Array.append (sources "*.fs" (Path.Combine(root, "site/examples"))) [| File.ReadAllText(Path.Combine(root, "tests/AgentsPi/Client.fs")) |]
     let js = jsRoot |> Option.map (sources "*.js") |> Option.defaultValue [||]
     let fence = Regex("^```(\\w+)[^\\n]*\\n(.*?)^```[ \\t]*$", RegexOptions.Multiline ||| RegexOptions.Singleline)
     let pre = Regex("<pre([^>]*)><code[^>]*>(.*?)</code></pre>", RegexOptions.Singleline)

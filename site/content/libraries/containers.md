@@ -50,9 +50,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
             let resize =
                 Workers.Exports.Request.Create(
                     U3.Case1 "http://resizer/thumbnail?width=320",
-                    Workers.RequestInit.Create(``method`` = "POST", body = request.body))
+                    Workers.RequestInit<Workers.RequestInitCfProperties>.Create(``method`` = "POST", ?body = (request.body |> Option.map unbox<Workers.BodyInit>)))
             let resizer = Transport.getFetchByName env.RESIZER "resizer"
-            resizer.fetch (Containers.Exports.switchPort(resize, 8080.)) |> U2.Case1
+            resizer.fetch (Containers.Exports.switchPort(unbox resize, 8080.)) |> U2.Case1
     )
 ```
 
@@ -61,14 +61,17 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
+
+import { unwrap } from "./fable_modules/fable-library-js.5.24.0/Option.js";
+import { getFetchByName } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.1/DurableObjects.fs.js";
 import { switchPort } from "@cloudflare/containers";
 
 export const worker = {
     fetch: (request, env, _arg) => {
+        let option_1;
         const resize = new globalThis.Request("http://resizer/thumbnail?width=320", ({
             method: "POST",
-            body: request.body,
+            body: unwrap((option_1 = request.body, (option_1 != null) ? option_1 : undefined)),
         }));
         const resizer = getFetchByName(env.RESIZER, "resizer");
         return resizer.fetch(switchPort(resize, 8080));
@@ -101,6 +104,6 @@ Share a working container example or [report a binding issue](https://github.com
 
 ## NuGet packages
 
-[Runtime.Containers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Containers/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+[Runtime.Containers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Containers/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Support.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

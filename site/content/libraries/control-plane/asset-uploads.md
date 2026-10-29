@@ -272,6 +272,6 @@ These runs were recorded against a local test server in place of Cloudflare's AP
 
 ## NuGet packages
 
-[Core.Api 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.0), [Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0).
+[Core.Api 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Core.Api/0.1.1), [Management.Compute 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

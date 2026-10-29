@@ -15,8 +15,9 @@ Ordinary delivered SDK targets use the authenticated packaged Xantham CLI.
 The optional Agents Pi projection uses the source adapter in `generators/xantham`,
 whose project and exact source revision are recorded with the projection configuration.
 Projected generation runs `Pipeline.runProjectedWith` and compiles its output against
-the adapter's support assemblies before accepting it. That check has no catalog producer
-assemblies, so the projected target imports no catalogs. Set `CLOUDEDGE_XANTHAM_ROOT`
+the adapter's support assemblies and freshly compiled catalog owners before accepting it.
+The existing project builder authenticates and compiles those owners first; their DLL
+hashes participate in projection receipts and resume checks. Set `CLOUDEDGE_XANTHAM_ROOT`
 to the reviewed checkout when its location differs from the default sibling layout.
 
 Generation requires clean pinned generator/support sources. Explicit development may set `CLOUDEDGE_ALLOW_DIRTY_XANTHAM=1`, recording the source diff and untracked-source hashes as `source.dirty` in each receipt. Such receipts are development evidence: they authenticate only while the variable is set and the same diff persists. Acceptance regenerates at a committed `xanthamRevision` with the variable unset. Generated projects compile against the `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` packages in `projectDefaults`; `npm run tools:bootstrap -- --only xantham --xantham-source ../Xantham` packs them from the checked-out Xantham revision, so bootstrap at the pin before regenerating.
@@ -25,6 +26,10 @@ Generation receipts bind the selected tool payload, TypeScript pin, installed pr
 catalog references and output hashes. Project checks authenticate those inputs again
 before compilation. Projected targets additionally bind the adapter configuration,
 source and ancestor build inputs; `--no-build` refuses stale build associations.
+That option also authenticates the catalog owners' existing DLLs against their
+checked source, project and inherited build inputs without compiling or rewriting
+projects. Dependency builds record `<target>-dependencies.json` under
+`artifacts/projects/`; `latest.json` continues to describe the explicit bindings build.
 
 For SDK-only work:
 
@@ -62,17 +67,21 @@ and versions; `config/sdk-delivery.json` records reasons for excluded inputs.
 
 `agents-pi` adds Agents 0.30.1's `agents/harness/pi` and `agents/models/pi-ai`
 entrypoints in an isolated profile alongside the main Agents 0.30.1 delivery. It pins
-pi-ai, pi-durable and Chord at 1.4.0. The generated project owns their reached
-binding types in a recursive namespace source, so references between packages
-compile together.
+pi-ai, pi-durable and Chord at 1.4.0. The `pi-ai` and `pi-durable` producers select
+their public factory exports and own their types. AgentsPi imports those catalogs
+and the main Agents catalog, including its Lifecycle contracts. Every owner uses
+the same inference profile and Node/Workers declarations.
+
+The current F# host and celld gate are under validation. The coverage described
+below is the gate's intended contract; generation, compilation and runtime
+acceptance for this revision are still pending.
 
 ```sh
-npm run install:profiles -- agents-pi
-npm run build:sdk -- agents-pi
-npm run test:agents-pi
+bun scripts/build-sdk.mjs agents-pi
+bun tests/AgentsPi/check.mjs
 ```
 
-This support target adds early operation projections to the source runner. It calls Xantham's projection API and actual Myriad plugin before shaping. Its receipt additionally hashes the exact projection selection and projection provenance in the manifest. It keeps its own profile with Workers types `5.20261025.1` and imports no catalogs, because projection validation compiles without producer assemblies.
+This support target adds early operation projections to the source runner. It calls Xantham's projection API and actual Myriad plugin before shaping. Its receipt additionally hashes the exact projection selection and projection provenance in the manifest. Its profile uses Workers types `5.20261025.1` and Node declarations `26.4.1`; imported catalog owners are compiled before projection validation.
 
 The shared public input is `FSharp.CloudEdge.Pi.HarnessSubmit.Input`. Its `Text`
 case takes a string; its `Items` case takes typed text/image payloads. The same
@@ -85,28 +94,32 @@ text payloads require `Text`. `TextSignature = None` omits the property, while
 
 The raw SDK surface remains available. Its UserInput already has an erased `U2`
 representation; the strict operations add closed payload construction and shared
-F# types. The public factory context now resolves to the shipped Chord `Context`.
-Other lossy mappings remain recorded in the manifest. Reached dependency types
-are included; standalone pi-ai/pi-durable value exports remain outside this
-Agents entrypoint selection.
+F# types. Fresh-generation compilation must verify that the constructor and factory
+callback share the same canonical Chord context type.
+Other lossy mappings remain recorded in the manifest. The PiAI producer also
+selects `api/openai-completions`, allowing an explicit provider to call a local
+OpenAI-compatible inference endpoint such as Magnitude. Workers AI remains a
+separate provider through `agents/models/pi-ai`.
 
-`test:agents-pi` pins public Fickl 0.6.7 and Fable.Core 5.6.0. It enables the optional
-SDKComposition consumer with `CloudEdgeIncludeAgentsPi=true`; the default
-composition excludes this project and its Pi consumer. It rejects malformed image
-payloads at compile time, then runs the generated F# constructor and operations
-inside a local SQLite Durable Object. The JavaScript host installs the real
-PiHarness lifecycle and supplies pi-ai's deterministic `fauxProvider` through
-`createModels`, `createRegistry` and `Harness.open`. The gate checks both submit
+The Pi gate pins public Fickl 0.7.2 and Fable.Core 5.6.0. It checks the optional
+SDKComposition inclusion property and links that existing Pi witness into the
+selected Pi consumer project; full SDK composition remains a separate build.
+It rejects malformed image payloads at compile time, then runs the generated
+bindings in a local SQLite cell on celld. The F# host subclasses the native
+DurableObject, installs Lifecycle and PiHarness, and supplies pi-ai's deterministic
+`fauxProvider` through generated `createModels`, `createRegistry` and `Harness.open`
+exports. It forwards `onWake` so Lifecycle owns the physical alarm. The gate checks both submit
 and prompt receiver types, encoded mixed content, optional-property presence,
 model replies, durable transcripts and idempotency across runtime restart.
 Receipts and local runtime state live under ignored `tests/.scratch/agents-pi`;
-state is removed when the gate ends. This gate proves local SDK behavior with a
+state is removed when the gate ends. This gate is intended to prove local SDK behavior with a
 scripted provider; hosted provider credentials and deployed Cloudflare behavior
 remain separate integration checks.
 
-### Agents Pi acceptance, 2026-10-09
+### Historical Agents Pi acceptance, 2026-10-09
 
-The delivery pins clean Xantham `2ecbd73cff0ee95b46ebc68ade560a473307e974`.
+This earlier delivery used clean Xantham `2ecbd73cff0ee95b46ebc68ade560a473307e974`.
+Its counts and retained receipts below do not qualify the current SDK versions.
 `npm run test:tooling` passed 184 tests. The explicit generated project and
 SDKComposition consumer compiled; the malformed image control failed with F#
 field/type diagnostics as expected. The Fable/workerd gate passed all 11

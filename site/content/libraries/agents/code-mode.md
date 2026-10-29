@@ -52,10 +52,11 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { DynamicWorkerExecutor } from "@cloudflare/codemode";
-import { unwrap } from "./fable_modules/fable-library-js.5.13.0/Option.js";
+import { unwrap } from "./fable_modules/fable-library-js.5.24.0/Option.js";
 
 export const worker = {
     fetch: (request, env, _arg) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(request.text()), (_arg_1) => {
@@ -103,6 +104,6 @@ Useful test cases include provider compatibility, argument and result marshallin
 
 ## NuGet packages
 
-[Runtime.CodeMode 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.CodeMode/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.CodeMode 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.CodeMode/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

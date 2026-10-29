@@ -21,7 +21,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
         async {
             let url = Workers.Exports.URL(U2.Case1 request.url)
             let pageUrl = env.ORIGIN + url.pathname + url.search
-            let! page = Workers.Exports.fetch(U3.Case1 pageUrl) |> Async.AwaitPromise
+            let! page = Workers.Exports.fetch(U3.Case1 pageUrl, Workers.RequestInit<Workers.RequestInitCfProperties>.Create()) |> Async.AwaitPromise
             return Workers.Exports.HTMLRewriter().on("body", addBanner).transform page
         }
         |> Async.StartAsPromise

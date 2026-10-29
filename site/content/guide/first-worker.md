@@ -39,7 +39,7 @@ Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the
     <Compile Include="Worker.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
+    <PackageReference Include="Fable.Core" Version="5.6.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.CloudEdge.Runtime.Workers" Version="0.1.*" />
@@ -47,9 +47,9 @@ Save this as `hello-worker.fsproj`. It declares `Worker.fs`, Fable.Core, and the
 </Project>
 ```
 
-Fable.Core 5.2.0 matches the Workers package's dependency. NuGet restores the Xantham support packages transitively. The package includes the F# source needed by Fable.
+Fable.Core 5.6.0 matches the Workers package's dependency. NuGet restores the Xantham support packages transitively. The package includes the F# source needed by Fable.
 
-Next to the project, add `NuGet.Config` to select the public feed. Package IDs and versions belong in `PackageReference`; the feed URL belongs here.
+Next to the project, add `NuGet.Config` for nuget.org and Xantham's public support feed. Package IDs and versions belong in `PackageReference`; feed URLs belong here.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -57,7 +57,15 @@ Next to the project, add `NuGet.Config` to select the public feed. Package IDs a
   <packageSources>
     <clear />
     <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+    <add key="xantham" value="https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json" />
   </packageSources>
+  <packageSourceMapping>
+    <packageSource key="nuget.org"><package pattern="*" /></packageSource>
+    <packageSource key="xantham">
+      <package pattern="Xantham.Fable.Core" />
+      <package pattern="Xantham.Fable.Core.TS" />
+    </packageSource>
+  </packageSourceMapping>
 </configuration>
 ```
 
@@ -108,20 +116,20 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
    The template "Dotnet local tool manifest file" was created successfully.
    ```
 
-2. Install Fable 5.13.0, the release that the tool manifest of FSharp.CloudEdge pins.
+2. Install Fickl 0.7.3, the compiler used to validate the release examples and their generated tagged unions.
 
    ```bash
-   dotnet tool install fable --version 5.13.0
+   dotnet tool install fickl --version 0.7.3
    ```
 
    ```text
-   You can invoke the tool from this directory using the following commands: 'dotnet tool run fable' or 'dotnet fable'.
+   You can invoke the tool from this directory using the following commands: 'dotnet tool run fickl' or 'dotnet fickl'.
    ```
 
 3. Compile `hello-worker.fsproj` into the `build` folder.
 
    ```bash
-   dotnet fable hello-worker.fsproj -o build
+   dotnet fickl hello-worker.fsproj -o build
    ```
 
 Fable processes `Worker.fs` and the sources supplied by its NuGet dependencies. Source counts and compile times vary with the package contents. `build/Worker.js` contains your handler, and the Fable library code it imports is in `build/fable_modules`.
@@ -129,9 +137,10 @@ Fable processes `Worker.fs` and the sources supplied by its NuGet dependencies. 
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { defaultArg } from "./fable_modules/fable-library-js.5.13.0/Option.js";
-import { concat } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { utcNow, toString } from "./fable_modules/fable-library-js.5.13.0/Date.js";
+
+import { defaultArg } from "./fable_modules/fable-library-js.5.24.0/Option.js";
+import { concat } from "./fable_modules/fable-library-js.5.24.0/String.js";
+import { utcNow, toString } from "./fable_modules/fable-library-js.5.24.0/Date.js";
 
 export const worker = {
     fetch: (request, _arg, _arg_1) => {
@@ -291,7 +300,7 @@ In watch mode, Fable keeps the project loaded and recompiles whenever you save `
 1. In a third terminal, go to `hello-worker` and start the watch.
 
    ```bash
-   dotnet fable watch hello-worker.fsproj -o build --runWatch npx esbuild build/Worker.js --bundle --format=esm '--external:cloudflare:*' --outfile=dist/worker.js
+   dotnet fickl watch hello-worker.fsproj -o build --runWatch npx esbuild build/Worker.js --bundle --format=esm '--external:cloudflare:*' --outfile=dist/worker.js
    ```
 
    The initial compile takes as long as before. Fable prints `Watching ..` when it is ready.

@@ -10,22 +10,6 @@ open Fable.Core.JsInterop
 open Fable.Core.JS
 open Fable.Core.TS.Dom
 
-[<Fickl.Core.CallableInterface>]
-type Create =
-    [<Emit("$0($1...)")>]
-    abstract Invoke<'Discriminator, 'Types>: discriminator: 'Discriminator * options: 'Types * ?``params``: V3.RawCreateParams2 -> V3.ZodDiscriminatedUnion<'Discriminator, 'Types>
-
-[<Fickl.Core.CallableInterface>]
-type Create2 =
-    [<Emit("$0($1...)")>]
-    abstract Invoke<'ASchema, 'BSchema when 'ASchema :> V3.ZodTypeAny and 'BSchema :> V3.ZodTypeAny>: a: 'ASchema * b: 'BSchema -> V3.ZodPipeline<'ASchema, 'BSchema>
-
-type CreateZodEnum =
-    [<Emit("$0($1...)")>]
-    abstract Invoke<'U, 'T>: values: 'T * ?``params``: V3.RawCreateParams2 -> V3.ZodEnum<'U[]>
-    [<Emit("$0($1...)")>]
-    abstract Invoke<'T>: values: 'T * ?``params``: V3.RawCreateParams2 -> V3.ZodEnum<'T>
-
 type ErrMessage = U2<string, ErrMessage2>
 
 [<Interface>]
@@ -55,19 +39,6 @@ type Issue =
     abstract path: U4<string, float, Fable.Core.TS.Es.Symbol, PathSegment>[] option
     [<ParamObject; Emit("$0")>]
     static member Create (message: string, ?path: U4<string, float, Fable.Core.TS.Es.Symbol, PathSegment>[]) : Issue = jsNative
-
-[<Interface>]
-type ObjectUtil =
-    abstract mergeShapes: ObjectUtil.MergeShapes
-    [<ParamObject; Emit("$0")>]
-    static member Create (mergeShapes: ObjectUtil.MergeShapes) : ObjectUtil = jsNative
-
-type ParseStatusConstructor =
-    abstract mergeArray: status: V3.ParseStatus * results: V3.SyncParseReturnType<obj>[] -> V3.SyncParseReturnType<obj>
-    abstract mergeObjectAsync: status: V3.ParseStatus * pairs: V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item[] -> JS.Promise<V3.SyncParseReturnType<obj>>
-    abstract mergeObjectSync: status: V3.ParseStatus * pairs: V3.Zod.ParseStatus.MergeObjectSync.Pairs.Item[] -> V3.SyncParseReturnType<obj>
-    [<EmitConstructor>]
-    abstract Create: unit -> V3.ParseStatus
 
 [<Interface>]
 type PathSegment =
@@ -133,6 +104,35 @@ type Types<'Input, 'Output> =
     abstract output: 'Output
     [<ParamObject; Emit("$0")>]
     static member Create (input: 'Input, output: 'Output) : Types<'Input, 'Output> = jsNative
+
+[<Fickl.Core.CallableInterface>]
+type Create =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'Discriminator, 'Types>: discriminator: 'Discriminator * options: 'Types * ?``params``: V3.RawCreateParams2 -> V3.ZodDiscriminatedUnion<'Discriminator, 'Types>
+
+[<Fickl.Core.CallableInterface>]
+type Create2 =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'ASchema, 'BSchema when 'ASchema :> V3.ZodTypeAny and 'BSchema :> V3.ZodTypeAny>: a: 'ASchema * b: 'BSchema -> V3.ZodPipeline<'ASchema, 'BSchema>
+
+type CreateZodEnum =
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'U, 'T>: values: 'T * ?``params``: V3.RawCreateParams2 -> V3.ZodEnum<'U[]>
+    [<Emit("$0($1...)")>]
+    abstract Invoke<'T>: values: 'T * ?``params``: V3.RawCreateParams2 -> V3.ZodEnum<'T>
+
+[<Interface>]
+type ObjectUtil =
+    abstract mergeShapes: ObjectUtil.MergeShapes
+    [<ParamObject; Emit("$0")>]
+    static member Create (mergeShapes: ObjectUtil.MergeShapes) : ObjectUtil = jsNative
+
+type ParseStatusConstructor =
+    abstract mergeArray: status: V3.ParseStatus * results: V3.SyncParseReturnType<obj>[] -> V3.SyncParseReturnType<obj>
+    abstract mergeObjectAsync: status: V3.ParseStatus * pairs: V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item[] -> JS.Promise<V3.SyncParseReturnType<obj>>
+    abstract mergeObjectSync: status: V3.ParseStatus * pairs: V3.Zod.ParseStatus.MergeObjectSync.Pairs.Item[] -> V3.SyncParseReturnType<obj>
+    [<EmitConstructor>]
+    abstract Create: unit -> V3.ParseStatus
 
 type Util =
     abstract assertEqual: Util.AssertEqual
@@ -725,9 +725,9 @@ type ZodCoercedString<'T> =
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> string
     abstract encodeAsync: data: string * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<string>
-    abstract safeEncode: data: string * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeEncode: data: string * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodCoercedString.SafeParse.Result, ZodCoercedString.SafeParse.Result2>
-    abstract safeEncodeAsync: data: string * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncodeAsync: data: string * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodCoercedString.SafeParse.Result, ZodCoercedString.SafeParse.Result2>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodBase64.SuperRefine.Refinement * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCoercedString<'T>
     abstract overwrite: fn: (string -> string) -> ZodCoercedString<'T>
@@ -826,9 +826,9 @@ type ZodCoercedNumber<'T> =
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> float
     abstract encodeAsync: data: float * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<float>
-    abstract safeEncode: data: float * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeEncode: data: float * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodCoercedNumber.SafeParse.Result, ZodCoercedNumber.SafeParse.Result2>
-    abstract safeEncodeAsync: data: float * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncodeAsync: data: float * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodCoercedNumber.SafeParse.Result, ZodCoercedNumber.SafeParse.Result2>>
     abstract superRefine: refinement: ZodCoercedNumber.SuperRefine.Refinement * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCoercedNumber<'T>
     abstract overwrite: fn: (float -> float) -> ZodCoercedNumber<'T>
@@ -947,9 +947,9 @@ type ZodCoercedBoolean<'T> =
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> bool
     abstract encodeAsync: data: bool * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<bool>
-    abstract safeEncode: data: bool * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeEncode: data: bool * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodCoercedBoolean.SafeParse.Result, ZodCoercedBoolean.SafeParse.Result2>
-    abstract safeEncodeAsync: data: bool * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncodeAsync: data: bool * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodCoercedBoolean.SafeParse.Result, ZodCoercedBoolean.SafeParse.Result2>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodBoolean.SuperRefine.Refinement * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCoercedBoolean<'T>
     abstract overwrite: fn: (bool -> bool) -> ZodCoercedBoolean<'T>
@@ -1033,9 +1033,9 @@ type ZodCoercedBigInt<'T> =
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> bigint
     abstract encodeAsync: data: bigint * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<bigint>
-    abstract safeEncode: data: bigint * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeEncode: data: bigint * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodCoercedBigInt.SafeParse.Result, ZodCoercedBigInt.SafeParse.Result2>
-    abstract safeEncodeAsync: data: bigint * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncodeAsync: data: bigint * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodCoercedBigInt.SafeParse.Result, ZodCoercedBigInt.SafeParse.Result2>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodBigInt.SuperRefine.Refinement * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCoercedBigInt<'T>
     abstract overwrite: fn: (bigint -> bigint) -> ZodCoercedBigInt<'T>
@@ -1136,9 +1136,9 @@ type ZodCoercedDate<'T> =
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> Fable.Core.TS.Es.Date
     abstract encodeAsync: data: Fable.Core.TS.Es.Date * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<Fable.Core.TS.Es.Date>
-    abstract safeEncode: data: Fable.Core.TS.Es.Date * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeEncode: data: Fable.Core.TS.Es.Date * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodCoercedDate.SafeParse.Result, ZodCoercedDate.SafeParse.Result2>
-    abstract safeEncodeAsync: data: Fable.Core.TS.Es.Date * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncodeAsync: data: Fable.Core.TS.Es.Date * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodCoercedDate.SafeParse.Result, ZodCoercedDate.SafeParse.Result2>>
     abstract superRefine: refinement: ZodCoercedDate.SuperRefine.Refinement * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCoercedDate<'T>
     abstract overwrite: fn: (Fable.Core.TS.Es.Date -> Fable.Core.TS.Es.Date) -> ZodCoercedDate<'T>
@@ -1340,7 +1340,7 @@ type ZodError<'T> =
     abstract format<'U>: mapper: (ZodIssue -> 'U) -> V4.Core.ZodFormattedError<'T, 'U>
     /// <remarks>@deprecated Use the <c>z.treeifyError(err)</c> function instead.</remarks>
     abstract flatten: unit -> ZodError.Flatten.Result<'T>
-    abstract flatten<'U>: mapper: (ZodIssue -> 'U) -> FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodFlattenedError<'T, 'U>
+    abstract flatten<'U>: mapper: (ZodIssue -> 'U) -> V4.Core.ZodFlattenedError<'T, 'U>
     /// <remarks>@deprecated Push directly to <c>.issues</c> instead.</remarks>
     abstract addIssue: issue: ZodIssue -> unit
     /// <remarks>@deprecated Push directly to <c>.issues</c> instead.</remarks>
@@ -1771,8 +1771,8 @@ type Zod =
     abstract prettifyError: error: FailureResult2 -> string
     abstract formatError<'T>: error: V4.Core.ZodError<'T> -> V4.Core.ZodFormattedError<'T, string>
     abstract formatError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> V4.Core.ZodFormattedError<'T, 'U>
-    abstract flattenError<'T>: error: V4.Core.ZodError<'T> -> Zod.Core.FlattenError.Result<'T>
-    abstract flattenError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> Zod.Core.FlattenError.Result2<'T, 'U>
+    abstract flattenError<'T>: error: V4.Core.ZodError<'T> -> Zod.Core.FlattenError.Result2<'T>
+    abstract flattenError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> Zod.Core.FlattenError.Result<'T, 'U>
     abstract TimePrecision: Zod.Core.TimePrecision with get, set
     abstract util: Zod.Core.Util with get, set
     abstract NEVER: unit
@@ -2150,7 +2150,7 @@ type input<'T> = private Phantom_input__ of obj
 [<Erase>]
 type output<'T> = private Phantom_output__ of obj
 
-type ZodSafeParseResult<'T> = U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+type ZodSafeParseResult<'T> = U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
 
 [<Interface>]
 type ZodSafeParseSuccess<'T> =
@@ -6509,7 +6509,7 @@ type ZodObject<'Shape, 'Config> =
     /// <summary>
     /// Define a schema to validate all unrecognized keys. This overrides the existing strict/loose behavior.
     /// </summary>
-    abstract catchall<'T when 'T :> V4.Core.SomeType>: schema: 'T -> ZodObject<'Shape, FSharp.CloudEdge.Support.Zod.V4.V4.Core.Catchall<'T>>
+    abstract catchall<'T when 'T :> V4.Core.SomeType>: schema: 'T -> ZodObject<'Shape, V4.Core.Catchall<'T>>
     /// <remarks>@deprecated Use <c>z.looseObject()</c> or <c>.loose()</c> instead.</remarks>
     abstract passthrough: unit -> ZodObject<'Shape, V4.Core.Loose>
     /// <summary>
@@ -6620,11 +6620,11 @@ module ZodObject =
 
     module SafeExtend =
         type Shape<'Shape, 'U> =
-            inherit FSharp.CloudEdge.Support.Zod.V4.SafeExtendShape<'Shape, 'U>
-            inherit ZodObject.SafeExtend.Shape.Base2
+            inherit SafeExtendShape<'Shape, 'U>
+            inherit ZodObject.SafeExtend.Shape.Base
 
         module Shape =
-            type Base2 =
+            type Base =
                 [<EmitIndexer>]
                 abstract Item: string -> obj option with get, set
                 [<EmitIndexer>]
@@ -7663,18 +7663,18 @@ type ZodLiteral<'T> =
     abstract clone: ?def: V4.Core.ZodLiteralDef<'T> * ?``params``: FSharp.CloudEdge.Support.Zod.V4.ZodAny.Clone.Params -> ZodLiteral<'T>
     abstract register<'R when 'R :> V4.Core.ZodRegistry<obj option, V4.Core.ZodType<obj, obj, V4.Core.ZodTypeInternals2<obj, obj>>>> : registry: 'R * [<ParamArray>] meta: obj option[] -> ZodLiteral<'T>
     abstract parse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'T
-    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
+    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
     abstract parseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
-    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract spa: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.Spa<'T> with get, set
     abstract encode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'T
     abstract decode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'T
     abstract encodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
     abstract decodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'T>
-    abstract safeEncode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
-    abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
-    abstract safeEncodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
-    abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
+    abstract safeEncode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
+    abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>
+    abstract safeEncodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
+    abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'T>, ZodSafeParseSuccess<'T>>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.SuperRefine.Refinement<'T> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodLiteral<'T>
     abstract overwrite: fn: ('T -> 'T) -> ZodLiteral<'T>
     abstract optional: unit -> ZodOptional<ZodLiteral<'T>>
@@ -7849,18 +7849,18 @@ type ZodTransform<'O, 'I> =
     abstract clone: ?def: V4.Core.ZodTransformDef * ?``params``: FSharp.CloudEdge.Support.Zod.V4.ZodAny.Clone.Params -> ZodTransform<'O, 'I>
     abstract register<'R when 'R :> V4.Core.ZodRegistry<obj option, V4.Core.ZodType<obj, obj, V4.Core.ZodTypeInternals2<obj, obj>>>> : registry: 'R * [<ParamArray>] meta: obj option[] -> ZodTransform<'O, 'I>
     abstract parse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'O
-    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>
+    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>
     abstract parseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'O>
-    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>>
+    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>>
     abstract spa: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.Spa<'O> with get, set
     abstract encode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'I
     abstract decode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'O
     abstract encodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'I>
     abstract decodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'O>
-    abstract safeEncode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>
-    abstract safeDecode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>
-    abstract safeEncodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>>
-    abstract safeDecodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>>
+    abstract safeEncode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>
+    abstract safeDecode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>
+    abstract safeEncodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>>
+    abstract safeDecodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.SuperRefine.Refinement<'O> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodTransform<'O, 'I>
     abstract overwrite: fn: ('O -> 'O) -> ZodTransform<'O, 'I>
     abstract optional: unit -> ZodOptional<ZodTransform<'O, 'I>>
@@ -8902,9 +8902,9 @@ type ZodPreprocess<'B, 'I> =
     abstract decode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> obj
     abstract encodeAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'I>
     abstract decodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<obj>
-    abstract safeEncode: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>
+    abstract safeEncode: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>
     abstract safeDecode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodCatch.SafeParse.Result<'B>, FSharp.CloudEdge.Support.Zod.V4.ZodCatch.SafeParse.Result2<'B>>
-    abstract safeEncodeAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>>
+    abstract safeEncodeAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>>
     abstract safeDecodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodCatch.SafeParse.Result<'B>, FSharp.CloudEdge.Support.Zod.V4.ZodCatch.SafeParse.Result2<'B>>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodCatch.SuperRefine.Refinement<'B> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodPreprocess<'B, 'I>
     abstract overwrite: fn: (obj -> obj) -> ZodPreprocess<'B, 'I>
@@ -9076,18 +9076,18 @@ type ZodTemplateLiteral<'Template> =
     abstract clone: ?def: V4.Core.ZodTemplateLiteralDef * ?``params``: FSharp.CloudEdge.Support.Zod.V4.ZodAny.Clone.Params -> ZodTemplateLiteral<'Template>
     abstract register<'R when 'R :> V4.Core.ZodRegistry<obj option, V4.Core.ZodType<obj, obj, V4.Core.ZodTypeInternals2<obj, obj>>>> : registry: 'R * [<ParamArray>] meta: obj option[] -> ZodTemplateLiteral<'Template>
     abstract parse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'Template
-    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>
+    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>
     abstract parseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'Template>
-    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>>
+    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>>
     abstract spa: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.Spa<'Template> with get, set
     abstract encode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'Template
     abstract decode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'Template
     abstract encodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'Template>
     abstract decodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'Template>
-    abstract safeEncode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>
-    abstract safeDecode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>
-    abstract safeEncodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>>
-    abstract safeDecodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'Template>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'Template>>>
+    abstract safeEncode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>
+    abstract safeDecode: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>
+    abstract safeEncodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>>
+    abstract safeDecodeAsync: data: 'Template * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'Template>, ZodSafeParseSuccess<'Template>>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.SuperRefine.Refinement<'Template> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodTemplateLiteral<'Template>
     abstract overwrite: fn: ('Template -> 'Template) -> ZodTemplateLiteral<'Template>
     abstract optional: unit -> ZodOptional<ZodTemplateLiteral<'Template>>
@@ -9475,18 +9475,18 @@ type ZodCustom<'O, 'I> =
     abstract clone: ?def: V4.Core.ZodCustomDef<obj> * ?``params``: FSharp.CloudEdge.Support.Zod.V4.ZodAny.Clone.Params -> ZodCustom<'O, 'I>
     abstract register<'R when 'R :> V4.Core.ZodRegistry<obj option, V4.Core.ZodType<obj, obj, V4.Core.ZodTypeInternals2<obj, obj>>>> : registry: 'R * [<ParamArray>] meta: obj option[] -> ZodCustom<'O, 'I>
     abstract parse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'O
-    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>
+    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>
     abstract parseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'O>
-    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>>
+    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>>
     abstract spa: ZodCustom.Spa<'O> with get, set
     abstract encode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'I
     abstract decode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> 'O
     abstract encodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'I>
     abstract decodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<'O>
-    abstract safeEncode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>
-    abstract safeDecode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>
-    abstract safeEncodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'I>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'I>>>
-    abstract safeDecodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>>
+    abstract safeEncode: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>
+    abstract safeDecode: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>
+    abstract safeEncodeAsync: data: 'O * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'I>, ZodSafeParseSuccess<'I>>>
+    abstract safeDecodeAsync: data: 'I * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>>
     abstract superRefine: refinement: ZodCustom.SuperRefine.Refinement<'O> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodCustom<'O, 'I>
     abstract overwrite: fn: ('O -> 'O) -> ZodCustom<'O, 'I>
     abstract optional: unit -> ZodOptional<ZodCustom<'O, 'I>>
@@ -9527,7 +9527,7 @@ module ZodCustom =
     [<Literal>]
     let ``type`` = "custom"
 
-    type Spa<'O> = delegate of data: obj * ``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> option -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'O>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'O>>>
+    type Spa<'O> = delegate of data: obj * ``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> option -> JS.Promise<U2<ZodSafeParseError<'O>, ZodSafeParseSuccess<'O>>>
 
     module Apply =
         type Fn<'O, 'I, 'TArgs, 'T> = delegate of schema: ZodCustom<'O, 'I> * args: 'TArgs -> 'T
@@ -9551,13 +9551,7 @@ type ZodInstanceOf<'T> =
     abstract ``with``: [<ParamArray>] checks: U2<V4.Core.ZodCheck<'T>, (V4.Core.ParsePayload<'T> -> JS.Promise<unit> option)>[] -> ZodInstanceOf<'T>
     abstract clone: ?def: V4.Core.ZodCustomDef<obj> * ?``params``: FSharp.CloudEdge.Support.Zod.V4.ZodAny.Clone.Params -> ZodInstanceOf<'T>
     abstract register<'R when 'R :> V4.Core.ZodRegistry<obj option, V4.Core.ZodType<obj, obj, V4.Core.ZodTypeInternals2<obj, obj>>>> : registry: 'R * [<ParamArray>] meta: obj option[] -> ZodInstanceOf<'T>
-    abstract safeParse: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
-    abstract safeParseAsync: data: obj * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
     abstract spa: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.Spa<'T> with get, set
-    abstract safeEncode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
-    abstract safeDecode: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>
-    abstract safeEncodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
-    abstract safeDecodeAsync: data: 'T * ?``params``: V4.Core.ParseContext<V4.Core.ZodIssueBase> -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.ZodSafeParseSuccess<'T>>>
     abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.ZodCustom.SuperRefine.Refinement<'T> * ?``params``: V4.Core.ZodSuperRefineParams -> ZodInstanceOf<'T>
     abstract overwrite: fn: ('T -> 'T) -> ZodInstanceOf<'T>
     abstract optional: unit -> ZodOptional<ZodInstanceOf<'T>>
@@ -10671,9 +10665,9 @@ type Exports =
     [<Import("config", "zod")>]
     static member config (?newConfig: Zod.Core.Config.NewConfig) : V4.Core.ZodConfig = jsNative
     [<Import("flattenError", "zod")>]
-    static member flattenError<'T> (error: V4.Core.ZodError<'T>) : Zod.Core.FlattenError.Result<'T> = jsNative
+    static member flattenError<'T> (error: V4.Core.ZodError<'T>) : Zod.Core.FlattenError.Result2<'T> = jsNative
     [<Import("flattenError", "zod")>]
-    static member flattenError<'T, 'U> (error: V4.Core.ZodError<'T>, ?mapper: (ZodIssue -> 'U)) : Zod.Core.FlattenError.Result2<'T, 'U> = jsNative
+    static member flattenError<'T, 'U> (error: V4.Core.ZodError<'T>, ?mapper: (ZodIssue -> 'U)) : Zod.Core.FlattenError.Result<'T, 'U> = jsNative
     [<Import("formatError", "zod")>]
     static member formatError<'T> (error: V4.Core.ZodError<'T>) : V4.Core.ZodFormattedError<'T, string> = jsNative
     [<Import("formatError", "zod")>]
@@ -11251,25 +11245,6 @@ module Uuid =
 /// <summary>zod/v3</summary>
 module V3 =
     [<Interface>]
-    type StringValidation2 =
-        abstract includes: string with get, set
-        abstract position: float option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (includes: string, ?position: float) : StringValidation2 = jsNative
-
-    [<Interface>]
-    type StringValidation3 =
-        abstract startsWith: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (startsWith: string) : StringValidation3 = jsNative
-
-    [<Interface>]
-    type StringValidation4 =
-        abstract endsWith: string with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (endsWith: string) : StringValidation4 = jsNative
-
-    [<Interface>]
     type IssueData10 =
         inherit V3.IssueData.Cases.InvalidType.Base
         abstract path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option with get, set
@@ -11398,6 +11373,618 @@ module V3 =
         static member Create (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData9 = jsNative
 
     [<Interface>]
+    type StringValidation2 =
+        abstract includes: string with get, set
+        abstract position: float option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (includes: string, ?position: float) : StringValidation2 = jsNative
+
+    [<Interface>]
+    type StringValidation3 =
+        abstract startsWith: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (startsWith: string) : StringValidation3 = jsNative
+
+    [<Interface>]
+    type StringValidation4 =
+        abstract endsWith: string with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (endsWith: string) : StringValidation4 = jsNative
+
+    [<Interface>]
+    type inferFlattenedErrors<'T, 'U when 'T :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>> =
+        abstract formErrors: 'U[] with get, set
+        abstract fieldErrors: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (formErrors: 'U[], fieldErrors: obj) : inferFlattenedErrors<'T, 'U> = jsNative
+
+    [<Interface>]
+    type typeToFlattenedError<'T, 'U> =
+        abstract formErrors: 'U[] with get, set
+        abstract fieldErrors: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (formErrors: 'U[], fieldErrors: obj) : typeToFlattenedError<'T, 'U> = jsNative
+
+    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
+    type ZodIssueCode =
+        | [<CompiledName("custom")>] Custom
+        | [<CompiledName("invalid_arguments")>] InvalidArguments
+        | [<CompiledName("invalid_date")>] InvalidDate
+        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue
+        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes
+        | [<CompiledName("invalid_literal")>] InvalidLiteral
+        | [<CompiledName("invalid_return_type")>] InvalidReturnType
+        | [<CompiledName("invalid_string")>] InvalidString
+        | [<CompiledName("invalid_type")>] InvalidType
+        | [<CompiledName("invalid_union")>] InvalidUnion
+        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator
+        | [<CompiledName("not_finite")>] NotFinite
+        | [<CompiledName("not_multiple_of")>] NotMultipleOf
+        | [<CompiledName("too_big")>] TooBig
+        | [<CompiledName("too_small")>] TooSmall
+        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys
+
+    [<Interface>]
+    type ZodIssueCodeValue =
+        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
+        abstract invalid_type: string with get, set
+        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
+        abstract too_big: string with get, set
+        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
+        abstract too_small: string with get, set
+        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
+        abstract not_multiple_of: string with get, set
+        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
+        abstract unrecognized_keys: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
+        abstract invalid_union: string with get, set
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        abstract custom: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
+        abstract invalid_literal: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
+        abstract invalid_union_discriminator: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
+        abstract invalid_enum_value: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
+        abstract invalid_arguments: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
+        abstract invalid_return_type: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
+        abstract invalid_date: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
+        abstract invalid_string: string with get, set
+        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
+        abstract invalid_intersection_types: string with get, set
+        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
+        abstract not_finite: string with get, set
+        [<Emit("({ invalid_type: 'invalid_type', too_big: 'too_big', too_small: 'too_small', not_multiple_of: 'not_multiple_of', unrecognized_keys: 'unrecognized_keys', invalid_union: 'invalid_union', custom: 'custom', invalid_literal: 'invalid_literal', invalid_union_discriminator: 'invalid_union_discriminator', invalid_enum_value: 'invalid_enum_value', invalid_arguments: 'invalid_arguments', invalid_return_type: 'invalid_return_type', invalid_date: 'invalid_date', invalid_string: 'invalid_string', invalid_intersection_types: 'invalid_intersection_types', not_finite: 'not_finite' })")>]
+        static member Create () : ZodIssueCodeValue = jsNative
+
+    module ZodIssueCodeValue =
+        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
+        [<Literal>]
+        let invalid_type = "invalid_type"
+        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
+        [<Literal>]
+        let too_big = "too_big"
+        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
+        [<Literal>]
+        let too_small = "too_small"
+        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
+        [<Literal>]
+        let not_multiple_of = "not_multiple_of"
+        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
+        [<Literal>]
+        let unrecognized_keys = "unrecognized_keys"
+        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
+        [<Literal>]
+        let invalid_union = "invalid_union"
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        [<Literal>]
+        let custom = "custom"
+        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
+        [<Literal>]
+        let invalid_literal = "invalid_literal"
+        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
+        [<Literal>]
+        let invalid_union_discriminator = "invalid_union_discriminator"
+        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
+        [<Literal>]
+        let invalid_enum_value = "invalid_enum_value"
+        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
+        [<Literal>]
+        let invalid_arguments = "invalid_arguments"
+        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
+        [<Literal>]
+        let invalid_return_type = "invalid_return_type"
+        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
+        [<Literal>]
+        let invalid_date = "invalid_date"
+        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
+        [<Literal>]
+        let invalid_string = "invalid_string"
+        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
+        [<Literal>]
+        let invalid_intersection_types = "invalid_intersection_types"
+        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
+        [<Literal>]
+        let not_finite = "not_finite"
+
+    [<Interface>]
+    type ZodIssueBase =
+        abstract path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] with get, set
+        abstract message: string option with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodIssueBase = jsNative
+
+    [<Interface>]
+    type ZodInvalidTypeIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
+        abstract code: string with get, set
+        abstract expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType with get, set
+        abstract received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType with get, set
+        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
+        static member Create (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidTypeIssue = jsNative
+
+    module ZodInvalidTypeIssue =
+        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
+        [<Literal>]
+        let code = "invalid_type"
+
+    [<Interface>]
+    type ZodInvalidLiteralIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
+        abstract code: string with get, set
+        abstract expected: obj with get, set
+        abstract received: obj with get, set
+        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
+        static member Create (expected: obj, received: obj, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidLiteralIssue = jsNative
+
+    module ZodInvalidLiteralIssue =
+        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
+        [<Literal>]
+        let code = "invalid_literal"
+
+    [<Interface>]
+    type ZodUnrecognizedKeysIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
+        abstract code: string with get, set
+        abstract keys: string[] with get, set
+        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
+        static member Create (keys: string[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodUnrecognizedKeysIssue = jsNative
+
+    module ZodUnrecognizedKeysIssue =
+        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
+        [<Literal>]
+        let code = "unrecognized_keys"
+
+    [<Interface>]
+    type ZodInvalidUnionIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
+        abstract code: string with get, set
+        abstract unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] with get, set
+        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
+        static member Create (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidUnionIssue = jsNative
+
+    module ZodInvalidUnionIssue =
+        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
+        [<Literal>]
+        let code = "invalid_union"
+
+    [<Interface>]
+    type ZodInvalidUnionDiscriminatorIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
+        abstract code: string with get, set
+        abstract options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] with get, set
+        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
+        static member Create (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidUnionDiscriminatorIssue = jsNative
+
+    module ZodInvalidUnionDiscriminatorIssue =
+        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
+        [<Literal>]
+        let code = "invalid_union_discriminator"
+
+    [<Interface>]
+    type ZodInvalidEnumValueIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        abstract received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent with get, set
+        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
+        abstract code: string with get, set
+        abstract options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] with get, set
+        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
+        static member Create (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidEnumValueIssue = jsNative
+
+    module ZodInvalidEnumValueIssue =
+        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
+        [<Literal>]
+        let code = "invalid_enum_value"
+
+    [<Interface>]
+    type ZodInvalidArgumentsIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
+        abstract code: string with get, set
+        abstract argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> with get, set
+        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
+        static member Create (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidArgumentsIssue = jsNative
+
+    module ZodInvalidArgumentsIssue =
+        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
+        [<Literal>]
+        let code = "invalid_arguments"
+
+    [<Interface>]
+    type ZodInvalidReturnTypeIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
+        abstract code: string with get, set
+        abstract returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> with get, set
+        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
+        static member Create (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidReturnTypeIssue = jsNative
+
+    module ZodInvalidReturnTypeIssue =
+        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
+        [<Literal>]
+        let code = "invalid_return_type"
+
+    [<Interface>]
+    type ZodInvalidDateIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
+        abstract code: string with get, set
+        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
+        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidDateIssue = jsNative
+
+    module ZodInvalidDateIssue =
+        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
+        [<Literal>]
+        let code = "invalid_date"
+
+    type StringValidation = U4<string, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation2, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation3, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation4>
+
+    [<Interface>]
+    type ZodInvalidStringIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
+        abstract code: string with get, set
+        abstract validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation with get, set
+        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
+        static member Create (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidStringIssue = jsNative
+
+    module ZodInvalidStringIssue =
+        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
+        [<Literal>]
+        let code = "invalid_string"
+
+    [<Interface>]
+    type ZodTooSmallIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
+        abstract code: string with get, set
+        abstract minimum: U2<float, bigint> with get, set
+        abstract inclusive: bool with get, set
+        abstract exact: bool option with get, set
+        abstract ``type``: V3.ZodIssue.Cases.TooBig.Type with get, set
+        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
+        static member Create (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?exact: bool, ?message: string) : ZodTooSmallIssue = jsNative
+
+    module ZodTooSmallIssue =
+        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
+        [<Literal>]
+        let code = "too_small"
+
+    [<Interface>]
+    type ZodTooBigIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
+        abstract code: string with get, set
+        abstract maximum: U2<float, bigint> with get, set
+        abstract inclusive: bool with get, set
+        abstract exact: bool option with get, set
+        abstract ``type``: V3.ZodIssue.Cases.TooBig.Type with get, set
+        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
+        static member Create (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?exact: bool, ?message: string) : ZodTooBigIssue = jsNative
+
+    module ZodTooBigIssue =
+        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
+        [<Literal>]
+        let code = "too_big"
+
+    [<Interface>]
+    type ZodInvalidIntersectionTypesIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
+        abstract code: string with get, set
+        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
+        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidIntersectionTypesIssue = jsNative
+
+    module ZodInvalidIntersectionTypesIssue =
+        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
+        [<Literal>]
+        let code = "invalid_intersection_types"
+
+    [<Interface>]
+    type ZodNotMultipleOfIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
+        abstract code: string with get, set
+        abstract multipleOf: U2<float, bigint> with get, set
+        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
+        static member Create (multipleOf: U2<float, bigint>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodNotMultipleOfIssue = jsNative
+
+    module ZodNotMultipleOfIssue =
+        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
+        [<Literal>]
+        let code = "not_multiple_of"
+
+    [<Interface>]
+    type ZodNotFiniteIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
+        abstract code: string with get, set
+        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
+        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodNotFiniteIssue = jsNative
+
+    module ZodNotFiniteIssue =
+        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
+        [<Literal>]
+        let code = "not_finite"
+
+    [<Interface>]
+    type ZodCustomIssue =
+        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        abstract code: string with get, set
+        abstract ``params``: JS.Record<string, obj> option with get, set
+        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
+        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?``params``: JS.Record<string, obj>, ?message: string) : ZodCustomIssue = jsNative
+
+    module ZodCustomIssue =
+        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
+        [<Literal>]
+        let code = "custom"
+
+    type DenormalizedError =
+        [<EmitIndexer>]
+        abstract Item: string -> U2<string[], FSharp.CloudEdge.Support.Zod.V4.V3.DenormalizedError> with get, set
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
+    type ZodIssueOptionalMessage =
+        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.Zod.V4.V3.ZodCustomIssue
+        | [<CompiledName("invalid_arguments"); Fickl.Core.InlineInterface>] InvalidArguments of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidArgumentsIssue
+        | [<CompiledName("invalid_date"); Fickl.Core.InlineInterface>] InvalidDate of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidDateIssue
+        | [<CompiledName("invalid_enum_value"); Fickl.Core.InlineInterface>] InvalidEnumValue of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidEnumValueIssue
+        | [<CompiledName("invalid_intersection_types"); Fickl.Core.InlineInterface>] InvalidIntersectionTypes of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidIntersectionTypesIssue
+        | [<CompiledName("invalid_literal"); Fickl.Core.InlineInterface>] InvalidLiteral of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidLiteralIssue
+        | [<CompiledName("invalid_return_type"); Fickl.Core.InlineInterface>] InvalidReturnType of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidReturnTypeIssue
+        | [<CompiledName("invalid_string"); Fickl.Core.InlineInterface>] InvalidString of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidStringIssue
+        | [<CompiledName("invalid_type"); Fickl.Core.InlineInterface>] InvalidType of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidTypeIssue
+        | [<CompiledName("invalid_union_discriminator"); Fickl.Core.InlineInterface>] InvalidUnionDiscriminator of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidUnionDiscriminatorIssue
+        | [<CompiledName("invalid_union"); Fickl.Core.InlineInterface>] InvalidUnion of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidUnionIssue
+        | [<CompiledName("not_finite"); Fickl.Core.InlineInterface>] NotFinite of FSharp.CloudEdge.Support.Zod.V4.V3.ZodNotFiniteIssue
+        | [<CompiledName("not_multiple_of"); Fickl.Core.InlineInterface>] NotMultipleOf of FSharp.CloudEdge.Support.Zod.V4.V3.ZodNotMultipleOfIssue
+        | [<CompiledName("too_big"); Fickl.Core.InlineInterface>] TooBig of FSharp.CloudEdge.Support.Zod.V4.V3.ZodTooBigIssue
+        | [<CompiledName("too_small"); Fickl.Core.InlineInterface>] TooSmall of FSharp.CloudEdge.Support.Zod.V4.V3.ZodTooSmallIssue
+        | [<CompiledName("unrecognized_keys"); Fickl.Core.InlineInterface>] UnrecognizedKeys of FSharp.CloudEdge.Support.Zod.V4.V3.ZodUnrecognizedKeysIssue
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
+    type ZodIssue =
+        | [<CompiledName("custom")>] Custom of ``params``: JS.Record<string, obj> option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_arguments")>] InvalidArguments of argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_date")>] InvalidDate of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue of received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent * options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_literal")>] InvalidLiteral of expected: obj * received: obj * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_return_type")>] InvalidReturnType of returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_string")>] InvalidString of validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_type")>] InvalidType of expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator of options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("invalid_union")>] InvalidUnion of unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("not_finite")>] NotFinite of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("not_multiple_of")>] NotMultipleOf of multipleOf: U2<float, bigint> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("too_big")>] TooBig of maximum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("too_small")>] TooSmall of minimum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys of keys: string[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
+        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
+        static member CreateCustom (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?``params``: JS.Record<string, obj>, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
+        static member CreateInvalidArguments (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
+        static member CreateInvalidDate (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
+        static member CreateInvalidEnumValue (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
+        static member CreateInvalidIntersectionTypes (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
+        static member CreateInvalidLiteral (expected: obj, received: obj, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
+        static member CreateInvalidReturnType (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
+        static member CreateInvalidString (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
+        static member CreateInvalidType (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
+        static member CreateInvalidUnionDiscriminator (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
+        static member CreateInvalidUnion (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
+        static member CreateNotFinite (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
+        static member CreateNotMultipleOf (multipleOf: U2<float, bigint>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
+        static member CreateTooBig (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?exact: bool, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
+        static member CreateTooSmall (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?exact: bool, ?fatal: bool) : ZodIssue = jsNative
+        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
+        static member CreateUnrecognizedKeys (keys: string[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
+
+    [<Erase>]
+    type ZodFormattedError<'T, 'U> = private Phantom_ZodFormattedError__ of obj
+
+    [<Erase>]
+    type inferFormattedError<'T, 'U when 'T :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>> = private Phantom_inferFormattedError__ of obj
+
+    [<Interface>]
+    [<Import("ZodError", "zod/v3")>]
+    type ZodError<'T> =
+        abstract issues: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] with get, set
+        abstract errors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[]
+        abstract format: unit -> obj
+        abstract format<'U>: mapper: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> 'U) -> obj
+        /// <summary>
+        /// Returns a string representation of an object.
+        /// </summary>
+        abstract toString: unit -> string
+        abstract message: string
+        abstract isEmpty: bool
+        abstract addIssue: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> unit) with get, set
+        abstract addIssues: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] option -> unit) with get, set
+        abstract flatten: unit -> V3.ZodError.Flatten.Result<'T>
+        abstract flatten<'U>: ?mapper: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> 'U) -> FSharp.CloudEdge.Support.Zod.V4.V3.typeToFlattenedError<'T, 'U>
+        abstract formErrors: V3.ZodError.Flatten.Result<'T>
+        abstract name: string with get, set
+        abstract stack: string option with get, set
+        abstract cause: obj option with get, set
+        static member create
+            with get (): (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>) = jsNative
+            and set (_: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>)): unit = jsNative
+        [<Import("ZodError.assert", "zod/v3")>]
+        static member ``assert`` (value: obj) : unit = jsNative
+        /// <summary>
+        /// Indicates whether the argument provided is a built-in Error instance or not.
+        /// </summary>
+        [<Import("ZodError.isError", "zod/v3")>]
+        static member isError (error: obj) : bool = jsNative
+        /// <summary>
+        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
+        /// a string representing the location in the code at which
+        /// <c>Error.captureStackTrace()</c> was called.
+        /// <code lang="js">
+        /// const myObject = {};
+        /// Error.captureStackTrace(myObject);
+        /// myObject.stack;  // Similar to `new Error().stack`
+        /// </code>
+        /// <br /><br />
+        /// The first line of the trace will be prefixed with
+        /// <c>${myObject.name}: ${myObject.message}</c>.
+        /// <br /><br />
+        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
+        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
+        /// generated stack trace.
+        /// <br /><br />
+        /// The <c>constructorOpt</c> argument is useful for hiding implementation
+        /// details of error generation from the user. For instance:
+        /// <code lang="js">
+        /// function a() {
+        ///   b();
+        /// }
+        ///
+        /// function b() {
+        ///   c();
+        /// }
+        ///
+        /// function c() {
+        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
+        ///   const { stackTraceLimit } = Error;
+        ///   Error.stackTraceLimit = 0;
+        ///   const error = new Error();
+        ///   Error.stackTraceLimit = stackTraceLimit;
+        ///
+        ///   // Capture the stack trace above function b
+        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
+        ///   throw error;
+        /// }
+        ///
+        /// a();
+        /// </code>
+        /// </summary>
+        [<Import("ZodError.captureStackTrace", "zod/v3")>]
+        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
+        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
+        [<Import("ZodError.prepareStackTrace", "zod/v3")>]
+        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
+        /// <summary>
+        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
+        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
+        /// <c>Error.captureStackTrace(obj)</c>).
+        /// <br /><br />
+        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
+        /// will affect any stack trace captured _after_ the value has been changed.
+        /// <br /><br />
+        /// If set to a non-number value, or set to a negative number, stack traces will
+        /// not capture any frames.
+        /// </summary>
+        static member stackTraceLimit
+            with get (): float = jsNative
+            and set (_: float): unit = jsNative
+
+    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
+    type IssueData =
+        | [<CompiledName("custom")>] Custom of message: string option * ``params``: JS.Record<string, obj> option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_arguments")>] InvalidArguments of message: string option * argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_date")>] InvalidDate of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue of message: string option * received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent * options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_literal")>] InvalidLiteral of message: string option * expected: obj * received: obj * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_return_type")>] InvalidReturnType of message: string option * returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_string")>] InvalidString of message: string option * validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_type")>] InvalidType of message: string option * expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator of message: string option * options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("invalid_union")>] InvalidUnion of message: string option * unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("not_finite")>] NotFinite of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("not_multiple_of")>] NotMultipleOf of message: string option * multipleOf: U2<float, bigint> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("too_big")>] TooBig of message: string option * maximum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("too_small")>] TooSmall of message: string option * minimum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys of message: string option * keys: string[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
+        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
+        static member CreateCustom (?message: string, ?``params``: JS.Record<string, obj>, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
+        static member CreateInvalidArguments (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
+        static member CreateInvalidDate (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
+        static member CreateInvalidEnumValue (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
+        static member CreateInvalidIntersectionTypes (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
+        static member CreateInvalidLiteral (expected: obj, received: obj, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
+        static member CreateInvalidReturnType (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
+        static member CreateInvalidString (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
+        static member CreateInvalidType (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
+        static member CreateInvalidUnionDiscriminator (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
+        static member CreateInvalidUnion (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
+        static member CreateNotFinite (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
+        static member CreateNotMultipleOf (multipleOf: U2<float, bigint>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
+        static member CreateTooBig (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, ?message: string, ?exact: bool, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
+        static member CreateTooSmall (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, ?message: string, ?exact: bool, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
+        static member CreateUnrecognizedKeys (keys: string[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
+
+    [<Interface>]
+    type ErrorMapCtx =
+        abstract defaultError: string with get, set
+        abstract data: obj with get, set
+        [<ParamObject; Emit("$0")>]
+        static member Create (defaultError: string, data: obj) : ErrorMapCtx = jsNative
+
+    type ZodErrorMap = delegate of issue: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueOptionalMessage * _ctx: FSharp.CloudEdge.Support.Zod.V4.V3.ErrorMapCtx -> V3.ZodErrorMap.Result
+
+    [<Interface>]
     type RawCreateParams2 =
         abstract errorMap: FSharp.CloudEdge.Support.Zod.V4.V3.ZodErrorMap option with get, set
         abstract invalid_type_error: string option with get, set
@@ -11412,7 +11999,7 @@ module V3 =
         abstract objectUtil: FSharp.CloudEdge.Support.Zod.V4.ObjectUtil with get, set
         abstract ZodParsedType: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.ZodParsedType
         abstract getParsedType: (obj -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType)
-        abstract ZodIssueCode: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.ZodIssueCode
+        abstract ZodIssueCode: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueCodeValue
         abstract quotelessJson: (obj -> string)
         abstract ZodError: ZodErrorConstructor3 with get, set
         abstract defaultErrorMap: FSharp.CloudEdge.Support.Zod.V4.V3.ZodErrorMap with get, set
@@ -11425,7 +12012,7 @@ module V3 =
         abstract INVALID: FSharp.CloudEdge.Support.Zod.V4.V3.INVALID
         abstract DIRTY: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.DIRTY
         abstract OK: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.OK
-        abstract isAborted: (U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2> -> bool)
+        abstract isAborted: (U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2> -> bool)
         abstract isDirty: V3.Zod.IsDirty
         abstract isValid: V3.Zod.IsValid
         abstract isAsync: V3.Zod.IsAsync
@@ -11751,7 +12338,7 @@ module V3 =
         abstract refine: check: ('Output -> obj) * ?message: U3<string, FSharp.CloudEdge.Support.Zod.V4.V3.CustomErrorParams, ('Output -> FSharp.CloudEdge.Support.Zod.V4.V3.CustomErrorParams)> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract refinement<'RefinedOutput>: check: ('Output -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract refinement: check: ('Output -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData2<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
-        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
+        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine<'RefinedOutput>: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement2<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement3<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
@@ -12277,7 +12864,7 @@ module V3 =
     type ZodAny =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodAnyDef, obj>
         abstract _any: bool with get, set
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>
+        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>
         abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<V3.ZodAny.SafeParse.Result, V3.ZodAny.SafeParse.Result2>
         abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<V3.ZodAny.SafeParse.Result, V3.ZodAny.SafeParse.Result2>>
         /// <summary>
@@ -12502,7 +13089,6 @@ module V3 =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodObjectDef<'T, 'UnknownKeys, 'Catchall>, 'Input>
         abstract _cached: V3.ZodObject.Cached<'T> option with get, set
         abstract _getCached: unit -> V3.ZodObject.GetCached.Result<'T>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<'Output>>, FSharp.CloudEdge.Support.Zod.V4.V3.DIRTY<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, FSharp.CloudEdge.Support.Zod.V4.V3.OK<'Output>>
         abstract shape: 'T
         abstract strict: ?message: ErrMessage -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodObject<'T, string, 'Catchall, obj, obj>
         abstract strip: unit -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodObject<'T, string, 'Catchall, obj, obj>
@@ -12533,15 +13119,13 @@ module V3 =
         abstract required: unit -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodObject<JS.Record<string, obj>, 'UnknownKeys, 'Catchall, obj, obj>
         abstract required<'Mask>: mask: 'Mask -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodObject<obj, 'UnknownKeys, 'Catchall, obj, obj>
         abstract keyof: unit -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEnum<obj>
-        abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'Input>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'Output>>
-        abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'Input>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'Output>>>
         /// <summary>
         /// Alias of safeParseAsync
         /// </summary>
         abstract spa: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Spa<'Input, 'Output> with get, set
         abstract refinement<'RefinedOutput>: check: ('Output -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract refinement: check: ('Output -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData2<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
-        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
+        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine<'RefinedOutput>: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement2<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement3<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
@@ -12867,7 +13451,7 @@ module V3 =
     [<Interface>]
     type ZodFunction<'Args, 'Returns when 'Args :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodTuple<obj, obj> and 'Returns :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny> =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<(obj -> obj), FSharp.CloudEdge.Support.Zod.V4.V3.ZodFunctionDef<'Args, 'Returns>, (obj -> obj)>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>
+        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>
         abstract parameters: unit -> 'Args
         abstract returnType: unit -> 'Returns
         abstract args<'Items>: [<ParamArray>] items: 'Items -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodFunction<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTuple<obj, obj>, 'Returns>
@@ -12947,17 +13531,14 @@ module V3 =
     [<Import("ZodLiteral", "zod/v3")>]
     type ZodLiteral<'T> =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'T, FSharp.CloudEdge.Support.Zod.V4.V3.ZodLiteralDef<'T>, 'T>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<'T>>, FSharp.CloudEdge.Support.Zod.V4.V3.DIRTY<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, FSharp.CloudEdge.Support.Zod.V4.V3.OK<'T>>
         abstract value: 'T
-        abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'T>>
-        abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'T>>>
         /// <summary>
         /// Alias of safeParseAsync
         /// </summary>
         abstract spa: V3.ZodLiteral.Spa<'T> with get, set
         abstract refinement<'RefinedOutput>: check: ('T -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'T>
         abstract refinement: check: ('T -> bool) * refinementData: U17<FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.Refinement.RefinementData2<'T>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'T, 'T>
-        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'T> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'T, 'T>
+        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'T> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'T, 'T>
         abstract superRefine<'RefinedOutput>: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement<'T> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'T>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement2<'T> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'T, 'T>
         abstract superRefine: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement3<'T> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'T, 'T>
@@ -13001,9 +13582,9 @@ module V3 =
         abstract _cache: Fable.Core.TS.Es.Set<obj> option with get, set
         abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodEnum.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodEnum.Parse.Result2>
         abstract options: 'T
-        abstract enum: obj
-        abstract Values: obj
-        abstract Enum: obj
+        abstract enum: FSharp.CloudEdge.Support.Zod.V4.V3.Values<'T>
+        abstract Values: FSharp.CloudEdge.Support.Zod.V4.V3.Values<'T>
+        abstract Enum: FSharp.CloudEdge.Support.Zod.V4.V3.Values<'T>
         abstract extract<'ToExtract>: values: 'ToExtract * ?newDef: FSharp.CloudEdge.Support.Zod.V4.V3.RawCreateParams2 -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEnum<obj[]>
         abstract exclude<'ToExclude>: values: 'ToExclude * ?newDef: FSharp.CloudEdge.Support.Zod.V4.V3.RawCreateParams2 -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEnum<string[]>
         abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<V3.ZodEnum.SafeParse.Result, V3.ZodEnum.SafeParse.Result2>
@@ -13110,40 +13691,46 @@ module V3 =
     type RefinementEffect<'T> =
         /// <remarks>TypeScript type: <c>"refinement"</c></remarks>
         abstract ``type``: string with get, set
-        abstract refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'T> with get, set
+        abstract refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'T> with get, set
         [<ParamObject; Emit("({ type: 'refinement', ...$0 })")>]
-        static member Create (refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'T>) : RefinementEffect<'T> = jsNative
+        static member Create (refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'T>) : RefinementEffect<'T> = jsNative
 
     module RefinementEffect =
         /// <remarks>TypeScript type: <c>"refinement"</c></remarks>
         [<Literal>]
         let ``type`` = "refinement"
 
+        type Refinement<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
+
     [<Interface>]
     type TransformEffect<'T> =
         /// <remarks>TypeScript type: <c>"transform"</c></remarks>
         abstract ``type``: string with get, set
-        abstract transform: FSharp.CloudEdge.Support.Zod.V4.V3.Effect4.Transform<'T> with get, set
+        abstract transform: V3.TransformEffect.Transform<'T> with get, set
         [<ParamObject; Emit("({ type: 'transform', ...$0 })")>]
-        static member Create (transform: FSharp.CloudEdge.Support.Zod.V4.V3.Effect4.Transform<'T>) : TransformEffect<'T> = jsNative
+        static member Create (transform: V3.TransformEffect.Transform<'T>) : TransformEffect<'T> = jsNative
 
     module TransformEffect =
         /// <remarks>TypeScript type: <c>"transform"</c></remarks>
         [<Literal>]
         let ``type`` = "transform"
 
+        type Transform<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
+
     [<Interface>]
     type PreprocessEffect<'T> =
         /// <remarks>TypeScript type: <c>"preprocess"</c></remarks>
         abstract ``type``: string with get, set
-        abstract transform: FSharp.CloudEdge.Support.Zod.V4.V3.Effect2.Transform<'T> with get, set
+        abstract transform: V3.PreprocessEffect.Transform<'T> with get, set
         [<ParamObject; Emit("({ type: 'preprocess', ...$0 })")>]
-        static member Create (transform: FSharp.CloudEdge.Support.Zod.V4.V3.Effect2.Transform<'T>) : PreprocessEffect<'T> = jsNative
+        static member Create (transform: V3.PreprocessEffect.Transform<'T>) : PreprocessEffect<'T> = jsNative
 
     module PreprocessEffect =
         /// <remarks>TypeScript type: <c>"preprocess"</c></remarks>
         [<Literal>]
         let ``type`` = "preprocess"
+
+        type Transform<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
 
     [<RequireQualifiedAccess; TypeScriptTaggedUnion("type", CaseRules.None)>]
     type Effect<'T> =
@@ -13166,16 +13753,13 @@ module V3 =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<'Output, FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffectsDef<'T>, 'Input>
         abstract innerType: unit -> 'T
         abstract sourceType: unit -> 'T
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<'Output>>, FSharp.CloudEdge.Support.Zod.V4.V3.DIRTY<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, FSharp.CloudEdge.Support.Zod.V4.V3.OK<'Output>>
-        abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'Input>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'Output>>
-        abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseError<'Input>, FSharp.CloudEdge.Support.Zod.V4.V3.SafeParseSuccess<'Output>>>
         /// <summary>
         /// Alias of safeParseAsync
         /// </summary>
         abstract spa: V3.ZodEffects.Spa<'Input, 'Output> with get, set
         abstract refinement<'RefinedOutput>: check: ('Output -> bool) * refinementData: U17<V3.ZodEffects.Refinement.RefinementData<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract refinement: check: ('Output -> bool) * refinementData: U17<V3.ZodEffects.Refinement.RefinementData2<'Output>, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData2, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData3, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData4, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData5, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData6, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData7, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData8, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData9, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData10, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData11, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData12, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData13, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData14, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData15, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData16, FSharp.CloudEdge.Support.Zod.V4.V3.IssueData17> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
-        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.Effect3.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
+        abstract _refinement: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementEffect.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine<'RefinedOutput>: refinement: FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects.SuperRefine.Refinement<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'RefinedOutput, 'Input>
         abstract superRefine: refinement: V3.ZodEffects.SuperRefine.Refinement2<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
         abstract superRefine: refinement: V3.ZodEffects.SuperRefine.Refinement3<'Output> -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, 'Output, 'Input>
@@ -13354,7 +13938,7 @@ module V3 =
     [<Import("ZodNaN", "zod/v3")>]
     type ZodNaN =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<float, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNaNDef, float>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>
+        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>
         abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<V3.ZodNumber.SafeParse.Result, V3.ZodNumber.SafeParse.Result2>
         abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<V3.ZodNumber.SafeParse.Result, V3.ZodNumber.SafeParse.Result2>>
         /// <summary>
@@ -13388,7 +13972,7 @@ module V3 =
 
     type ZodBranded<'T, 'B when 'T :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny> =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodBrandedDef<'T>, obj>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>
+        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>
         abstract unwrap: unit -> 'T
         abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<V3.ZodBranded.SafeParse.Result, V3.ZodBranded.SafeParse.Result2<'B>>
         abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<V3.ZodBranded.SafeParse.Result, V3.ZodBranded.SafeParse.Result2<'B>>>
@@ -13419,7 +14003,7 @@ module V3 =
     [<Interface>]
     type ZodPipeline<'A, 'B when 'A :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny and 'B :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny> =
         inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodPipelineDef<'A, 'B>, obj>
-        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>
+        abstract _parse: input: FSharp.CloudEdge.Support.Zod.V4.V3.ParseInput -> U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>
         abstract safeParse: data: obj * ?``params``: V3.ZodType.Parse.Params -> U2<V3.ZodPipeline.SafeParse.Result, V3.ZodPipeline.SafeParse.Result2>
         abstract safeParseAsync: data: obj * ?``params``: V3.ZodType.Parse.Params -> JS.Promise<U2<V3.ZodPipeline.SafeParse.Result, V3.ZodPipeline.SafeParse.Result2>>
         /// <summary>
@@ -13516,515 +14100,15 @@ module V3 =
 
     type ZodFirstPartySchemaTypes = U36<FSharp.CloudEdge.Support.Zod.V4.V3.ZodAny, FSharp.CloudEdge.Support.Zod.V4.V3.ZodArray<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodBigInt, FSharp.CloudEdge.Support.Zod.V4.V3.ZodBoolean, FSharp.CloudEdge.Support.Zod.V4.V3.ZodBranded<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodCatch<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodDate, FSharp.CloudEdge.Support.Zod.V4.V3.ZodDefault<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodDiscriminatedUnion<obj, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodEffects<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, obj, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodEnum<obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodFunction<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTuple<obj, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodIntersection<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodLazy<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodLiteral<obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodMap<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNaN, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNativeEnum<FSharp.CloudEdge.Support.Zod.V4.V3.EnumLike>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNever, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNull, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNullable<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodNumber, FSharp.CloudEdge.Support.Zod.V4.V3.ZodObject<obj, obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, JS.Record<string, obj>, JS.Record<string, obj>>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodOptional<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodPipeline<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodPromise<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodReadonly<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodRecord<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodSet<FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeAny>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodString, FSharp.CloudEdge.Support.Zod.V4.V3.ZodSymbol, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTuple<obj, obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodUndefined, FSharp.CloudEdge.Support.Zod.V4.V3.ZodUnion<obj>, FSharp.CloudEdge.Support.Zod.V4.V3.ZodUnknown, FSharp.CloudEdge.Support.Zod.V4.V3.ZodVoid>
 
-    [<Interface>]
-    type inferFlattenedErrors<'T, 'U when 'T :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>> =
-        abstract formErrors: 'U[] with get, set
-        abstract fieldErrors: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (formErrors: 'U[], fieldErrors: obj) : inferFlattenedErrors<'T, 'U> = jsNative
-
-    [<Interface>]
-    type typeToFlattenedError<'T, 'U> =
-        abstract formErrors: 'U[] with get, set
-        abstract fieldErrors: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (formErrors: 'U[], fieldErrors: obj) : typeToFlattenedError<'T, 'U> = jsNative
-
-    [<RequireQualifiedAccess; StringEnum(CaseRules.None)>]
-    type ZodIssueCode =
-        | [<CompiledName("custom")>] Custom
-        | [<CompiledName("invalid_arguments")>] InvalidArguments
-        | [<CompiledName("invalid_date")>] InvalidDate
-        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue
-        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes
-        | [<CompiledName("invalid_literal")>] InvalidLiteral
-        | [<CompiledName("invalid_return_type")>] InvalidReturnType
-        | [<CompiledName("invalid_string")>] InvalidString
-        | [<CompiledName("invalid_type")>] InvalidType
-        | [<CompiledName("invalid_union")>] InvalidUnion
-        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator
-        | [<CompiledName("not_finite")>] NotFinite
-        | [<CompiledName("not_multiple_of")>] NotMultipleOf
-        | [<CompiledName("too_big")>] TooBig
-        | [<CompiledName("too_small")>] TooSmall
-        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys
-
-    [<Interface>]
-    type ZodIssueBase =
-        abstract path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] with get, set
-        abstract message: string option with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodIssueBase = jsNative
-
-    [<Interface>]
-    type ZodInvalidTypeIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
-        abstract code: string with get, set
-        abstract expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType with get, set
-        abstract received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType with get, set
-        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
-        static member Create (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidTypeIssue = jsNative
-
-    module ZodInvalidTypeIssue =
-        /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
-        [<Literal>]
-        let code = "invalid_type"
-
-    [<Interface>]
-    type ZodInvalidLiteralIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
-        abstract code: string with get, set
-        abstract expected: obj with get, set
-        abstract received: obj with get, set
-        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
-        static member Create (expected: obj, received: obj, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidLiteralIssue = jsNative
-
-    module ZodInvalidLiteralIssue =
-        /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
-        [<Literal>]
-        let code = "invalid_literal"
-
-    [<Interface>]
-    type ZodUnrecognizedKeysIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
-        abstract code: string with get, set
-        abstract keys: string[] with get, set
-        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
-        static member Create (keys: string[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodUnrecognizedKeysIssue = jsNative
-
-    module ZodUnrecognizedKeysIssue =
-        /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
-        [<Literal>]
-        let code = "unrecognized_keys"
-
-    [<Interface>]
-    type ZodInvalidUnionIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
-        abstract code: string with get, set
-        abstract unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] with get, set
-        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
-        static member Create (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidUnionIssue = jsNative
-
-    module ZodInvalidUnionIssue =
-        /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
-        [<Literal>]
-        let code = "invalid_union"
-
-    [<Interface>]
-    type ZodInvalidUnionDiscriminatorIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
-        abstract code: string with get, set
-        abstract options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] with get, set
-        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
-        static member Create (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidUnionDiscriminatorIssue = jsNative
-
-    module ZodInvalidUnionDiscriminatorIssue =
-        /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
-        [<Literal>]
-        let code = "invalid_union_discriminator"
-
-    [<Interface>]
-    type ZodInvalidEnumValueIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        abstract received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent with get, set
-        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
-        abstract code: string with get, set
-        abstract options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] with get, set
-        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
-        static member Create (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidEnumValueIssue = jsNative
-
-    module ZodInvalidEnumValueIssue =
-        /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
-        [<Literal>]
-        let code = "invalid_enum_value"
-
-    [<Interface>]
-    type ZodInvalidArgumentsIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
-        abstract code: string with get, set
-        abstract argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> with get, set
-        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
-        static member Create (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidArgumentsIssue = jsNative
-
-    module ZodInvalidArgumentsIssue =
-        /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
-        [<Literal>]
-        let code = "invalid_arguments"
-
-    [<Interface>]
-    type ZodInvalidReturnTypeIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
-        abstract code: string with get, set
-        abstract returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> with get, set
-        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
-        static member Create (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidReturnTypeIssue = jsNative
-
-    module ZodInvalidReturnTypeIssue =
-        /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
-        [<Literal>]
-        let code = "invalid_return_type"
-
-    [<Interface>]
-    type ZodInvalidDateIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
-        abstract code: string with get, set
-        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
-        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidDateIssue = jsNative
-
-    module ZodInvalidDateIssue =
-        /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
-        [<Literal>]
-        let code = "invalid_date"
-
-    type StringValidation = U4<string, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation2, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation3, FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation4>
-
-    [<Interface>]
-    type ZodInvalidStringIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
-        abstract code: string with get, set
-        abstract validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation with get, set
-        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
-        static member Create (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidStringIssue = jsNative
-
-    module ZodInvalidStringIssue =
-        /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
-        [<Literal>]
-        let code = "invalid_string"
-
-    [<Interface>]
-    type ZodTooSmallIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
-        abstract code: string with get, set
-        abstract minimum: U2<float, bigint> with get, set
-        abstract inclusive: bool with get, set
-        abstract exact: bool option with get, set
-        abstract ``type``: V3.ZodIssue.Cases.TooBig.Type with get, set
-        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
-        static member Create (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?exact: bool, ?message: string) : ZodTooSmallIssue = jsNative
-
-    module ZodTooSmallIssue =
-        /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
-        [<Literal>]
-        let code = "too_small"
-
-    [<Interface>]
-    type ZodTooBigIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
-        abstract code: string with get, set
-        abstract maximum: U2<float, bigint> with get, set
-        abstract inclusive: bool with get, set
-        abstract exact: bool option with get, set
-        abstract ``type``: V3.ZodIssue.Cases.TooBig.Type with get, set
-        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
-        static member Create (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?exact: bool, ?message: string) : ZodTooBigIssue = jsNative
-
-    module ZodTooBigIssue =
-        /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
-        [<Literal>]
-        let code = "too_big"
-
-    [<Interface>]
-    type ZodInvalidIntersectionTypesIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
-        abstract code: string with get, set
-        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
-        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodInvalidIntersectionTypesIssue = jsNative
-
-    module ZodInvalidIntersectionTypesIssue =
-        /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
-        [<Literal>]
-        let code = "invalid_intersection_types"
-
-    [<Interface>]
-    type ZodNotMultipleOfIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
-        abstract code: string with get, set
-        abstract multipleOf: U2<float, bigint> with get, set
-        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
-        static member Create (multipleOf: U2<float, bigint>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodNotMultipleOfIssue = jsNative
-
-    module ZodNotMultipleOfIssue =
-        /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
-        [<Literal>]
-        let code = "not_multiple_of"
-
-    [<Interface>]
-    type ZodNotFiniteIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
-        abstract code: string with get, set
-        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
-        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string) : ZodNotFiniteIssue = jsNative
-
-    module ZodNotFiniteIssue =
-        /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
-        [<Literal>]
-        let code = "not_finite"
-
-    [<Interface>]
-    type ZodCustomIssue =
-        inherit FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueBase
-        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-        abstract code: string with get, set
-        abstract ``params``: JS.Record<string, obj> option with get, set
-        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
-        static member Create (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?``params``: JS.Record<string, obj>, ?message: string) : ZodCustomIssue = jsNative
-
-    module ZodCustomIssue =
-        /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-        [<Literal>]
-        let code = "custom"
-
-    type DenormalizedError =
-        [<EmitIndexer>]
-        abstract Item: string -> U2<string[], FSharp.CloudEdge.Support.Zod.V4.V3.DenormalizedError> with get, set
-
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
-    type ZodIssueOptionalMessage =
-        | [<CompiledName("custom"); Fickl.Core.InlineInterface>] Custom of FSharp.CloudEdge.Support.Zod.V4.V3.ZodCustomIssue
-        | [<CompiledName("invalid_arguments"); Fickl.Core.InlineInterface>] InvalidArguments of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidArgumentsIssue
-        | [<CompiledName("invalid_date"); Fickl.Core.InlineInterface>] InvalidDate of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidDateIssue
-        | [<CompiledName("invalid_enum_value"); Fickl.Core.InlineInterface>] InvalidEnumValue of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidEnumValueIssue
-        | [<CompiledName("invalid_intersection_types"); Fickl.Core.InlineInterface>] InvalidIntersectionTypes of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidIntersectionTypesIssue
-        | [<CompiledName("invalid_literal"); Fickl.Core.InlineInterface>] InvalidLiteral of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidLiteralIssue
-        | [<CompiledName("invalid_return_type"); Fickl.Core.InlineInterface>] InvalidReturnType of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidReturnTypeIssue
-        | [<CompiledName("invalid_string"); Fickl.Core.InlineInterface>] InvalidString of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidStringIssue
-        | [<CompiledName("invalid_type"); Fickl.Core.InlineInterface>] InvalidType of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidTypeIssue
-        | [<CompiledName("invalid_union_discriminator"); Fickl.Core.InlineInterface>] InvalidUnionDiscriminator of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidUnionDiscriminatorIssue
-        | [<CompiledName("invalid_union"); Fickl.Core.InlineInterface>] InvalidUnion of FSharp.CloudEdge.Support.Zod.V4.V3.ZodInvalidUnionIssue
-        | [<CompiledName("not_finite"); Fickl.Core.InlineInterface>] NotFinite of FSharp.CloudEdge.Support.Zod.V4.V3.ZodNotFiniteIssue
-        | [<CompiledName("not_multiple_of"); Fickl.Core.InlineInterface>] NotMultipleOf of FSharp.CloudEdge.Support.Zod.V4.V3.ZodNotMultipleOfIssue
-        | [<CompiledName("too_big"); Fickl.Core.InlineInterface>] TooBig of FSharp.CloudEdge.Support.Zod.V4.V3.ZodTooBigIssue
-        | [<CompiledName("too_small"); Fickl.Core.InlineInterface>] TooSmall of FSharp.CloudEdge.Support.Zod.V4.V3.ZodTooSmallIssue
-        | [<CompiledName("unrecognized_keys"); Fickl.Core.InlineInterface>] UnrecognizedKeys of FSharp.CloudEdge.Support.Zod.V4.V3.ZodUnrecognizedKeysIssue
-
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
-    type ZodIssue =
-        | [<CompiledName("custom")>] Custom of ``params``: JS.Record<string, obj> option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_arguments")>] InvalidArguments of argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_date")>] InvalidDate of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue of received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent * options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_literal")>] InvalidLiteral of expected: obj * received: obj * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_return_type")>] InvalidReturnType of returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_string")>] InvalidString of validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_type")>] InvalidType of expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator of options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("invalid_union")>] InvalidUnion of unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("not_finite")>] NotFinite of path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("not_multiple_of")>] NotMultipleOf of multipleOf: U2<float, bigint> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("too_big")>] TooBig of maximum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("too_small")>] TooSmall of minimum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys of keys: string[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * message: string * fatal: bool option
-        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
-        static member CreateCustom (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?``params``: JS.Record<string, obj>, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
-        static member CreateInvalidArguments (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
-        static member CreateInvalidDate (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
-        static member CreateInvalidEnumValue (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
-        static member CreateInvalidIntersectionTypes (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
-        static member CreateInvalidLiteral (expected: obj, received: obj, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
-        static member CreateInvalidReturnType (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
-        static member CreateInvalidString (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
-        static member CreateInvalidType (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
-        static member CreateInvalidUnionDiscriminator (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
-        static member CreateInvalidUnion (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
-        static member CreateNotFinite (path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
-        static member CreateNotMultipleOf (multipleOf: U2<float, bigint>, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
-        static member CreateTooBig (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?exact: bool, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
-        static member CreateTooSmall (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?exact: bool, ?fatal: bool) : ZodIssue = jsNative
-        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
-        static member CreateUnrecognizedKeys (keys: string[], path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], message: string, ?fatal: bool) : ZodIssue = jsNative
-
-    [<Erase>]
-    type ZodFormattedError<'T, 'U> = private Phantom_ZodFormattedError__ of obj
-
-    [<Erase>]
-    type inferFormattedError<'T, 'U when 'T :> FSharp.CloudEdge.Support.Zod.V4.V3.ZodType<obj, FSharp.CloudEdge.Support.Zod.V4.V3.ZodTypeDef, obj>> = private Phantom_inferFormattedError__ of obj
-
-    [<Interface>]
-    [<Import("ZodError", "zod/v3")>]
-    type ZodError<'T> =
-        abstract issues: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] with get, set
-        abstract errors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[]
-        abstract format: unit -> obj
-        abstract format<'U>: mapper: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> 'U) -> obj
-        /// <summary>
-        /// Returns a string representation of an object.
-        /// </summary>
-        abstract toString: unit -> string
-        abstract message: string
-        abstract isEmpty: bool
-        abstract addIssue: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> unit) with get, set
-        abstract addIssues: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] option -> unit) with get, set
-        abstract flatten: unit -> V3.ZodError.Flatten.Result<'T>
-        abstract flatten<'U>: ?mapper: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue -> 'U) -> V3.ZodError.Flatten.Result2<'T, 'U>
-        abstract formErrors: V3.ZodError.Flatten.Result<'T>
-        abstract name: string with get, set
-        abstract stack: string option with get, set
-        abstract cause: obj option with get, set
-        static member create
-            with get (): (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>) = jsNative
-            and set (_: (FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[] -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>)): unit = jsNative
-        [<Import("ZodError.assert", "zod/v3")>]
-        static member ``assert`` (value: obj) : unit = jsNative
-        /// <summary>
-        /// Indicates whether the argument provided is a built-in Error instance or not.
-        /// </summary>
-        [<Import("ZodError.isError", "zod/v3")>]
-        static member isError (error: obj) : bool = jsNative
-        /// <summary>
-        /// Creates a <c>.stack</c> property on <c>targetObject</c>, which when accessed returns
-        /// a string representing the location in the code at which
-        /// <c>Error.captureStackTrace()</c> was called.
-        /// <code lang="js">
-        /// const myObject = {};
-        /// Error.captureStackTrace(myObject);
-        /// myObject.stack;  // Similar to `new Error().stack`
-        /// </code>
-        /// <br /><br />
-        /// The first line of the trace will be prefixed with
-        /// <c>${myObject.name}: ${myObject.message}</c>.
-        /// <br /><br />
-        /// The optional <c>constructorOpt</c> argument accepts a function. If given, all frames
-        /// above <c>constructorOpt</c>, including <c>constructorOpt</c>, will be omitted from the
-        /// generated stack trace.
-        /// <br /><br />
-        /// The <c>constructorOpt</c> argument is useful for hiding implementation
-        /// details of error generation from the user. For instance:
-        /// <code lang="js">
-        /// function a() {
-        ///   b();
-        /// }
-        ///
-        /// function b() {
-        ///   c();
-        /// }
-        ///
-        /// function c() {
-        ///   // Create an error without stack trace to avoid calculating the stack trace twice.
-        ///   const { stackTraceLimit } = Error;
-        ///   Error.stackTraceLimit = 0;
-        ///   const error = new Error();
-        ///   Error.stackTraceLimit = stackTraceLimit;
-        ///
-        ///   // Capture the stack trace above function b
-        ///   Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace
-        ///   throw error;
-        /// }
-        ///
-        /// a();
-        /// </code>
-        /// </summary>
-        [<Import("ZodError.captureStackTrace", "zod/v3")>]
-        static member captureStackTrace (targetObject: obj, ?constructorOpt: Fable.Core.TS.Es.Function) : unit = jsNative
-        /// <remarks>@see https://v8.dev/docs/stack-trace-api#customizing-stack-traces</remarks>
-        [<Import("ZodError.prepareStackTrace", "zod/v3")>]
-        static member prepareStackTrace (err: exn, stackTraces: obj[]) : obj = jsNative
-        /// <summary>
-        /// The <c>Error.stackTraceLimit</c> property specifies the number of stack frames
-        /// collected by a stack trace (whether generated by <c>new Error().stack</c> or
-        /// <c>Error.captureStackTrace(obj)</c>).
-        /// <br /><br />
-        /// The default value is <c>10</c> but may be set to any valid JavaScript number. Changes
-        /// will affect any stack trace captured _after_ the value has been changed.
-        /// <br /><br />
-        /// If set to a non-number value, or set to a negative number, stack traces will
-        /// not capture any frames.
-        /// </summary>
-        static member stackTraceLimit
-            with get (): float = jsNative
-            and set (_: float): unit = jsNative
-
-    [<RequireQualifiedAccess; TypeScriptTaggedUnion("code", CaseRules.None)>]
-    type IssueData =
-        | [<CompiledName("custom")>] Custom of message: string option * ``params``: JS.Record<string, obj> option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_arguments")>] InvalidArguments of message: string option * argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_date")>] InvalidDate of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_enum_value")>] InvalidEnumValue of message: string option * received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent * options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_intersection_types")>] InvalidIntersectionTypes of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_literal")>] InvalidLiteral of message: string option * expected: obj * received: obj * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_return_type")>] InvalidReturnType of message: string option * returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_string")>] InvalidString of message: string option * validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_type")>] InvalidType of message: string option * expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_union_discriminator")>] InvalidUnionDiscriminator of message: string option * options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("invalid_union")>] InvalidUnion of message: string option * unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("not_finite")>] NotFinite of message: string option * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("not_multiple_of")>] NotMultipleOf of message: string option * multipleOf: U2<float, bigint> * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("too_big")>] TooBig of message: string option * maximum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("too_small")>] TooSmall of message: string option * minimum: U2<float, bigint> * inclusive: bool * exact: bool option * ``type``: V3.ZodIssue.Cases.TooBig.Type * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        | [<CompiledName("unrecognized_keys")>] UnrecognizedKeys of message: string option * keys: string[] * path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[] option * fatal: bool option
-        [<ParamObject; Emit("({ code: 'custom', ...$0 })")>]
-        static member CreateCustom (?message: string, ?``params``: JS.Record<string, obj>, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_arguments', ...$0 })")>]
-        static member CreateInvalidArguments (argumentsError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_date', ...$0 })")>]
-        static member CreateInvalidDate (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_enum_value', ...$0 })")>]
-        static member CreateInvalidEnumValue (received: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent, options: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_intersection_types', ...$0 })")>]
-        static member CreateInvalidIntersectionTypes (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_literal', ...$0 })")>]
-        static member CreateInvalidLiteral (expected: obj, received: obj, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_return_type', ...$0 })")>]
-        static member CreateInvalidReturnType (returnTypeError: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_string', ...$0 })")>]
-        static member CreateInvalidString (validation: FSharp.CloudEdge.Support.Zod.V4.V3.StringValidation, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_type', ...$0 })")>]
-        static member CreateInvalidType (expected: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, received: FSharp.CloudEdge.Support.Zod.V4.V3.ZodParsedType, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_union_discriminator', ...$0 })")>]
-        static member CreateInvalidUnionDiscriminator (options: FSharp.CloudEdge.Support.Zod.V4.V3.Primitive[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'invalid_union', ...$0 })")>]
-        static member CreateInvalidUnion (unionErrors: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'not_finite', ...$0 })")>]
-        static member CreateNotFinite (?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'not_multiple_of', ...$0 })")>]
-        static member CreateNotMultipleOf (multipleOf: U2<float, bigint>, ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'too_big', ...$0 })")>]
-        static member CreateTooBig (maximum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, ?message: string, ?exact: bool, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'too_small', ...$0 })")>]
-        static member CreateTooSmall (minimum: U2<float, bigint>, inclusive: bool, ``type``: V3.ZodIssue.Cases.TooBig.Type, ?message: string, ?exact: bool, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-        [<ParamObject; Emit("({ code: 'unrecognized_keys', ...$0 })")>]
-        static member CreateUnrecognizedKeys (keys: string[], ?message: string, ?path: FSharp.CloudEdge.Support.Zod.V4.V3.ParsePathComponent[], ?fatal: bool) : IssueData = jsNative
-
-    [<Interface>]
-    type ErrorMapCtx =
-        abstract defaultError: string with get, set
-        abstract data: obj with get, set
-        [<ParamObject; Emit("$0")>]
-        static member Create (defaultError: string, data: obj) : ErrorMapCtx = jsNative
-
-    type ZodErrorMap = delegate of issue: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueOptionalMessage * _ctx: FSharp.CloudEdge.Support.Zod.V4.V3.ErrorMapCtx -> V3.ZodErrorMap.Result
-
     /// <summary>The package's value exports, each bound to its import.</summary>
     [<Erase>]
     type Exports =
+        [<Import("ZodIssueCode", "zod/v3")>]
+        static member ZodIssueCode: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssueCodeValue = jsNative
+        [<Import("quotelessJson", "zod/v3")>]
+        static member quotelessJson (obj: obj) : string = jsNative
+        [<Import("ZodError", "zod/v3"); EmitConstructor>]
+        static member ZodError<'T> (issues: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[]) : FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<'T> = jsNative
         [<Import("setErrorMap", "zod/v3")>]
         static member setErrorMap (map: FSharp.CloudEdge.Support.Zod.V4.V3.ZodErrorMap) : unit = jsNative
         [<Import("getErrorMap", "zod/v3")>]
@@ -14048,7 +14132,7 @@ module V3 =
         [<Import("OK", "zod/v3")>]
         static member OK: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.OK = jsNative
         [<Import("isAborted", "zod/v3")>]
-        static member isAborted (x: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>) : bool = jsNative
+        static member isAborted (x: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>) : bool = jsNative
         [<Import("isDirty", "zod/v3")>]
         static member isDirty: V3.Zod.IsDirty = jsNative
         [<Import("isValid", "zod/v3")>]
@@ -14245,21 +14329,6 @@ module V3 =
         static member coerce: V3.Zod.Coerce = jsNative
         [<Import("NEVER", "zod/v3")>]
         static member NEVER: unit = jsNative
-        [<Import("ZodIssueCode", "zod/v3")>]
-        static member ZodIssueCode: FSharp.CloudEdge.Support.Zod.V4.V3.Zod.ZodIssueCode = jsNative
-        [<Import("quotelessJson", "zod/v3")>]
-        static member quotelessJson (obj: obj) : string = jsNative
-        [<Import("ZodError", "zod/v3"); EmitConstructor>]
-        static member ZodError<'T> (issues: FSharp.CloudEdge.Support.Zod.V4.V3.ZodIssue[]) : FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<'T> = jsNative
-
-    module Effect2 =
-        type Transform<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
-
-    module Effect3 =
-        type Refinement<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
-
-    module Effect4 =
-        type Transform<'T> = delegate of arg: 'T * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
 
     module IssueData =
         module Cases =
@@ -14700,93 +14769,6 @@ module V3 =
             abstract Invoke<'Options>: types: 'Options * ?``params``: FSharp.CloudEdge.Support.Zod.V4.V3.RawCreateParams2 -> FSharp.CloudEdge.Support.Zod.V4.V3.ZodUnion<'Options>
 
         [<Interface>]
-        type ZodIssueCode =
-            /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
-            abstract invalid_type: string with get, set
-            /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
-            abstract too_big: string with get, set
-            /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
-            abstract too_small: string with get, set
-            /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
-            abstract not_multiple_of: string with get, set
-            /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
-            abstract unrecognized_keys: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
-            abstract invalid_union: string with get, set
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            abstract custom: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
-            abstract invalid_literal: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
-            abstract invalid_union_discriminator: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
-            abstract invalid_enum_value: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
-            abstract invalid_arguments: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
-            abstract invalid_return_type: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
-            abstract invalid_date: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
-            abstract invalid_string: string with get, set
-            /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
-            abstract invalid_intersection_types: string with get, set
-            /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
-            abstract not_finite: string with get, set
-            [<Emit("({ invalid_type: 'invalid_type', too_big: 'too_big', too_small: 'too_small', not_multiple_of: 'not_multiple_of', unrecognized_keys: 'unrecognized_keys', invalid_union: 'invalid_union', custom: 'custom', invalid_literal: 'invalid_literal', invalid_union_discriminator: 'invalid_union_discriminator', invalid_enum_value: 'invalid_enum_value', invalid_arguments: 'invalid_arguments', invalid_return_type: 'invalid_return_type', invalid_date: 'invalid_date', invalid_string: 'invalid_string', invalid_intersection_types: 'invalid_intersection_types', not_finite: 'not_finite' })")>]
-            static member Create () : ZodIssueCode = jsNative
-
-        module ZodIssueCode =
-            /// <remarks>TypeScript type: <c>"invalid_type"</c></remarks>
-            [<Literal>]
-            let invalid_type = "invalid_type"
-            /// <remarks>TypeScript type: <c>"too_big"</c></remarks>
-            [<Literal>]
-            let too_big = "too_big"
-            /// <remarks>TypeScript type: <c>"too_small"</c></remarks>
-            [<Literal>]
-            let too_small = "too_small"
-            /// <remarks>TypeScript type: <c>"not_multiple_of"</c></remarks>
-            [<Literal>]
-            let not_multiple_of = "not_multiple_of"
-            /// <remarks>TypeScript type: <c>"unrecognized_keys"</c></remarks>
-            [<Literal>]
-            let unrecognized_keys = "unrecognized_keys"
-            /// <remarks>TypeScript type: <c>"invalid_union"</c></remarks>
-            [<Literal>]
-            let invalid_union = "invalid_union"
-            /// <remarks>TypeScript type: <c>"custom"</c></remarks>
-            [<Literal>]
-            let custom = "custom"
-            /// <remarks>TypeScript type: <c>"invalid_literal"</c></remarks>
-            [<Literal>]
-            let invalid_literal = "invalid_literal"
-            /// <remarks>TypeScript type: <c>"invalid_union_discriminator"</c></remarks>
-            [<Literal>]
-            let invalid_union_discriminator = "invalid_union_discriminator"
-            /// <remarks>TypeScript type: <c>"invalid_enum_value"</c></remarks>
-            [<Literal>]
-            let invalid_enum_value = "invalid_enum_value"
-            /// <remarks>TypeScript type: <c>"invalid_arguments"</c></remarks>
-            [<Literal>]
-            let invalid_arguments = "invalid_arguments"
-            /// <remarks>TypeScript type: <c>"invalid_return_type"</c></remarks>
-            [<Literal>]
-            let invalid_return_type = "invalid_return_type"
-            /// <remarks>TypeScript type: <c>"invalid_date"</c></remarks>
-            [<Literal>]
-            let invalid_date = "invalid_date"
-            /// <remarks>TypeScript type: <c>"invalid_string"</c></remarks>
-            [<Literal>]
-            let invalid_string = "invalid_string"
-            /// <remarks>TypeScript type: <c>"invalid_intersection_types"</c></remarks>
-            [<Literal>]
-            let invalid_intersection_types = "invalid_intersection_types"
-            /// <remarks>TypeScript type: <c>"not_finite"</c></remarks>
-            [<Literal>]
-            let not_finite = "not_finite"
-
-        [<Interface>]
         type ZodParsedType =
             /// <remarks>TypeScript type: <c>"string"</c></remarks>
             abstract string: string with get, set
@@ -14964,37 +14946,10 @@ module V3 =
                 module Pairs =
                     [<Interface>]
                     type Item =
-                        abstract key: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2> with get, set
-                        abstract value: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2> with get, set
+                        abstract key: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2> with get, set
+                        abstract value: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2> with get, set
                         [<ParamObject; Emit("$0")>]
-                        static member Create (key: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>, value: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.Zod.ParseStatus.MergeObjectAsync.Pairs.Item.Key2>) : Item = jsNative
-
-                    module Item =
-                        [<Interface>]
-                        type Key =
-                            /// <remarks>TypeScript type: <c>"dirty"</c></remarks>
-                            abstract status: string with get, set
-                            abstract value: obj with get, set
-                            [<ParamObject; Emit("({ status: 'dirty', ...$0 })")>]
-                            static member Create (value: obj) : Key = jsNative
-
-                        module Key =
-                            /// <remarks>TypeScript type: <c>"dirty"</c></remarks>
-                            [<Literal>]
-                            let status = "dirty"
-
-                        [<Interface>]
-                        type Key2 =
-                            /// <remarks>TypeScript type: <c>"valid"</c></remarks>
-                            abstract status: string with get, set
-                            abstract value: obj with get, set
-                            [<ParamObject; Emit("({ status: 'valid', ...$0 })")>]
-                            static member Create (value: obj) : Key2 = jsNative
-
-                        module Key2 =
-                            /// <remarks>TypeScript type: <c>"valid"</c></remarks>
-                            [<Literal>]
-                            let status = "valid"
+                        static member Create (key: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>, value: U4<JS.Promise<FSharp.CloudEdge.Support.Zod.V4.V3.SyncParseReturnType<obj>>, V3.ZodBranded.Parse.Result, FSharp.CloudEdge.Support.Zod.V4.V3.INVALID, V3.ZodBranded.Parse.Result2>) : Item = jsNative
 
             module MergeObjectSync =
                 module Pairs =
@@ -15501,6 +15456,33 @@ module V3 =
                     [<ParamObject; Emit("$0")>]
                     static member Create (error: FSharp.CloudEdge.Support.Zod.V4.V3.ZodError<obj>, input: obj) : Ctx = jsNative
 
+        module Parse =
+            [<Interface>]
+            type Result =
+                /// <remarks>TypeScript type: <c>"dirty"</c></remarks>
+                abstract status: string with get, set
+                abstract value: obj with get, set
+                [<ParamObject; Emit("({ status: 'dirty', ...$0 })")>]
+                static member Create (value: obj) : Result = jsNative
+
+            module Result =
+                /// <remarks>TypeScript type: <c>"dirty"</c></remarks>
+                [<Literal>]
+                let status = "dirty"
+
+            [<Interface>]
+            type Result2 =
+                /// <remarks>TypeScript type: <c>"valid"</c></remarks>
+                abstract status: string with get, set
+                abstract value: obj with get, set
+                [<ParamObject; Emit("({ status: 'valid', ...$0 })")>]
+                static member Create (value: obj) : Result2 = jsNative
+
+            module Result2 =
+                /// <remarks>TypeScript type: <c>"valid"</c></remarks>
+                [<Literal>]
+                let status = "valid"
+
         module Refinement =
             type Refinement<'B> = delegate of arg: obj * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> obj
 
@@ -15534,10 +15516,6 @@ module V3 =
 
         module Transform =
             type Transform<'B, 'NewOut> = delegate of arg: obj * ctx: FSharp.CloudEdge.Support.Zod.V4.V3.RefinementCtx -> U2<'NewOut, JS.Promise<'NewOut>>
-
-        module Type =
-            type Base<'B> =
-                interface end
 
     module ZodCatch =
         type Spa = delegate of data: obj * ``params``: V3.ZodType.Parse.Params option -> JS.Promise<U2<V3.ZodCatch.SafeParse.Result, V3.ZodCatch.SafeParse.Result2>>
@@ -15948,13 +15926,6 @@ module V3 =
                 abstract fieldErrors: obj with get, set
                 [<ParamObject; Emit("$0")>]
                 static member Create (formErrors: string[], fieldErrors: obj) : Result<'T> = jsNative
-
-            [<Interface>]
-            type Result2<'T, 'U> =
-                abstract formErrors: 'U[] with get, set
-                abstract fieldErrors: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (formErrors: 'U[], fieldErrors: obj) : Result2<'T, 'U> = jsNative
 
     module ZodErrorMap =
         [<Interface>]
@@ -23482,9 +23453,9 @@ module V4 =
             [<Import("$ZodRealError", "zod/v4/core")>]
             static member ``$ZodRealError``: ZodRealErrorConstructor = jsNative
             [<Import("flattenError", "zod/v4/core")>]
-            static member flattenError<'T> (error: FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodError<'T>) : Zod.Core.FlattenError.Result<'T> = jsNative
+            static member flattenError<'T> (error: FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodError<'T>) : Zod.Core.FlattenError.Result2<'T> = jsNative
             [<Import("flattenError", "zod/v4/core")>]
-            static member flattenError<'T, 'U> (error: FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodError<'T>, ?mapper: (FSharp.CloudEdge.Support.Zod.V4.ZodIssue -> 'U)) : Zod.Core.FlattenError.Result2<'T, 'U> = jsNative
+            static member flattenError<'T, 'U> (error: FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodError<'T>, ?mapper: (FSharp.CloudEdge.Support.Zod.V4.ZodIssue -> 'U)) : Zod.Core.FlattenError.Result<'T, 'U> = jsNative
             [<Import("formatError", "zod/v4/core")>]
             static member formatError<'T> (error: FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodError<'T>) : FSharp.CloudEdge.Support.Zod.V4.V4.Core.ZodFormattedError<'T, string> = jsNative
             [<Import("formatError", "zod/v4/core")>]
@@ -25072,8 +25043,8 @@ module Zod =
         abstract ``$ZodCheckOverwrite``: ZodCheckOverwriteConstructor
         abstract ``$ZodError``: ZodErrorConstructor2
         abstract ``$ZodRealError``: ZodRealErrorConstructor
-        abstract flattenError<'T>: error: V4.Core.ZodError<'T> -> Zod.Core.FlattenError.Result<'T>
-        abstract flattenError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> Zod.Core.FlattenError.Result2<'T, 'U>
+        abstract flattenError<'T>: error: V4.Core.ZodError<'T> -> Zod.Core.FlattenError.Result2<'T>
+        abstract flattenError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> Zod.Core.FlattenError.Result<'T, 'U>
         abstract formatError<'T>: error: V4.Core.ZodError<'T> -> V4.Core.ZodFormattedError<'T, string>
         abstract formatError<'T, 'U>: error: V4.Core.ZodError<'T> * ?mapper: (ZodIssue -> 'U) -> V4.Core.ZodFormattedError<'T, 'U>
         abstract treeifyError<'T>: error: V4.Core.ZodError<'T> -> obj
@@ -25815,18 +25786,18 @@ module Zod =
 
         module FlattenError =
             [<Interface>]
-            type Result<'T> =
-                abstract formErrors: string[] with get, set
-                abstract fieldErrors: obj with get, set
-                [<ParamObject; Emit("$0")>]
-                static member Create (formErrors: string[], fieldErrors: obj) : Result<'T> = jsNative
-
-            [<Interface>]
-            type Result2<'T, 'U> =
+            type Result<'T, 'U> =
                 abstract formErrors: 'U[] with get, set
                 abstract fieldErrors: obj with get, set
                 [<ParamObject; Emit("$0")>]
-                static member Create (formErrors: 'U[], fieldErrors: obj) : Result2<'T, 'U> = jsNative
+                static member Create (formErrors: 'U[], fieldErrors: obj) : Result<'T, 'U> = jsNative
+
+            [<Interface>]
+            type Result2<'T> =
+                abstract formErrors: string[] with get, set
+                abstract fieldErrors: obj with get, set
+                [<ParamObject; Emit("$0")>]
+                static member Create (formErrors: string[], fieldErrors: obj) : Result2<'T> = jsNative
 
         module JSONSchemaGenerator =
             [<Interface>]

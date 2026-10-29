@@ -26,7 +26,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let! counts = IndexUpdate.reindex env.DB env.VECTORS env.AI page
                     return Workers.Exports.Response.json counts
                 | "POST", _ ->
-                    return Workers.Exports.Response.Create("Unauthorized", Workers.ResponseInit.Create(status = 401.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Unauthorized", Workers.ResponseInit.Create(status = 401.))
                 | _, Some query when query.Trim() <> "" ->
                     let! rankings =
                         Async.Parallel
@@ -35,7 +35,7 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let results = RankFusion.fuse rankings |> Array.truncate 10
                     return Workers.Exports.Response.json {| query = query; results = results |}
                 | _ ->
-                    return Workers.Exports.Response.Create("Add ?q= to the URL", Workers.ResponseInit.Create(status = 400.))
+                    return Workers.Exports.Response.Create(U9.Case1 "Add ?q= to the URL", Workers.ResponseInit.Create(status = 400.))
             }
             |> Async.StartAsPromise
             |> U2.Case1

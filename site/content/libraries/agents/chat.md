@@ -49,8 +49,9 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 import { autoTransformMessages } from "@cloudflare/ai-chat/ai-chat-v5-migration";
 
 export const worker = {
@@ -84,6 +85,6 @@ Useful test cases include history migration with stored messages and chat lifecy
 
 ## NuGet packages
 
-[Runtime.AIChat 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIChat/0.1.0), [Runtime.Think 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Think/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.AIChat 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AIChat/0.1.1), [Runtime.Think 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Think/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

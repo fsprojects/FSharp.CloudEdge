@@ -96,14 +96,14 @@ module V3 = FSharp.CloudEdge.Support.AI.V3.Provider
 
 let askWithUsage (model: V3.LanguageModelV3) (question: string) =
     async {
-        let part = V3.LanguageModelV3Message3.Content.Item.Text(question, None)
+        let part = V3.LanguageModelV3Message.Cases.User.Content.Item.Text(V3.LanguageModelV3TextPart.Create(question))
         let prompt = [| V3.LanguageModelV3Message.User([| part |], None) |]
         let options = V3.LanguageModelV3CallOptions.Create(prompt = prompt, maxOutputTokens = 400.)
         let! result = model.doGenerate options |> Async.AwaitPromise
         let answer =
             result.content
             |> Array.choose (function
-                | V3.LanguageModelV3Content.Text(text, _) -> Some text
+                | V3.LanguageModelV3Content.Text part -> Some part.text
                 | _ -> None)
             |> String.concat ""
         return
@@ -174,8 +174,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { substring } from "./fable_modules/fable-library-js.5.13.0/String.js";
-import { requireFetchTransport } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.0/DurableObjects.fs.js";
+
+import { substring } from "./fable_modules/fable-library-js.5.24.0/String.js";
+import { requireFetchTransport } from "./fable_modules/FSharp.CloudEdge.Support.Workers.0.1.1/DurableObjects.fs.js";
 
 export const westernEurope = {
     locationHint: "weur",
@@ -213,6 +214,6 @@ export default worker;
 
 ## NuGet packages
 
-[Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0), [Runtime.WorkersAIProvider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.0), [Support.AI.V3.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.0), [Support.AI.V4.OpenAICompatible 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/0.1.0), [Support.AI.V4.Provider 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.0), [Support.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.0).
+[Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1), [Runtime.WorkersAIProvider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.WorkersAIProvider/0.1.1), [Support.AI.V3.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V3.Provider/0.1.1), [Support.AI.V4.OpenAICompatible 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.OpenAICompatible/0.1.1), [Support.AI.V4.Provider 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.AI.V4.Provider/0.1.1), [Support.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Support.Workers/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

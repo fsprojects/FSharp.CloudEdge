@@ -19,7 +19,7 @@ You write the Worker and its deployment in F#. Fable compiles the Worker to Java
 
 <div class="ce-next">
 <a class="ce-next__card" href="/FSharp.CloudEdge/guide/credentials/"><strong>Credentials</strong><span>Account ID and API token in .env</span></a>
-<a class="ce-next__card" href="/FSharp.CloudEdge/guide/packages/"><strong>Packages</strong><span>Install the 0.1.0 libraries</span></a>
+<a class="ce-next__card" href="/FSharp.CloudEdge/guide/packages/"><strong>Packages</strong><span>Install the 0.1.1 libraries</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/guide/first-worker/"><strong>First Worker</strong><span>Worker.fs, compiled and run locally</span></a>
 <a class="ce-next__card" href="/FSharp.CloudEdge/guide/first-deploy/"><strong>First Deploy</strong><span>hello-worker, uploaded from F#</span></a>
 </div>

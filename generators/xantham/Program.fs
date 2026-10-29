@@ -15,7 +15,7 @@ let main arguments =
             arguments[index + 1]
 
         if arguments.Length < 2 || arguments[0] <> "generate" then
-            invalidArg "arguments" "Expected generate <package> --config <json> --out <directory> [--workspace <directory> --projection <json>]"
+            invalidArg "arguments" "Expected generate <package> --config <json> --out <directory> [--workspace <directory> --projection <json> --references <json>]"
 
         let config = GeneratorConfig.loadFile (option "--config")
 
@@ -40,7 +40,23 @@ let main arguments =
                     |> Seq.toList
                 let workspace = option "--workspace"
                 let identity = { Id = "cloudedge.operations"; Version = "1"; Configuration = Map.ofList [ "selections", text ] }
-                let references = [ "Xantham.Fable.Core"; "Xantham.Fable.Core.TS" ] |> List.map (fun name -> Path.Combine(AppContext.BaseDirectory, name + ".dll"))
+                let dependencies =
+                    if arguments |> Array.contains "--references" then
+                        use references = JsonDocument.Parse(File.ReadAllText(option "--references"))
+                        references.RootElement.EnumerateArray()
+                        |> Seq.map (fun value ->
+                            let file = value.GetString()
+                            if String.IsNullOrWhiteSpace file || not (Path.IsPathFullyQualified file) || not (File.Exists file) then
+                                invalidArg "--references" "Projection references must name existing absolute assembly paths"
+                            file)
+                        |> Seq.toList
+                    else
+                        []
+                let references =
+                    ([ "Fable.Core"; "Fickl.Core"; "Xantham.Fable.Core"; "Xantham.Fable.Core.TS" ]
+                     |> List.map (fun name -> Path.Combine(AppContext.BaseDirectory, name + ".dll")))
+                    @ dependencies
+                    |> List.distinct
                 let compiler = Compiler.dotnet workspace references
                 Pipeline.runProjectedWith compiler [ Operations.createShared identity workspace selections ] [] config arguments[1] (option "--out")
             else

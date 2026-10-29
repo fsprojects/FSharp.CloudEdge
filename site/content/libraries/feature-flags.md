@@ -47,8 +47,9 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 <details class="ce-js"><summary>Emitted JavaScript</summary>
 
 ```javascript
-import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.13.0/Async.js";
-import { singleton } from "./fable_modules/fable-library-js.5.13.0/AsyncBuilder.js";
+
+import { awaitPromise, startAsPromise } from "./fable_modules/fable-library-js.5.24.0/Async.js";
+import { singleton } from "./fable_modules/fable-library-js.5.24.0/AsyncBuilder.js";
 
 export const worker = {
     fetch: (_arg, env, _arg_1) => startAsPromise(singleton.Delay(() => singleton.Bind(awaitPromise(env.FLAGS.getBooleanValue("dark-mode", false)), (_arg_2) => singleton.Return(globalThis.Response.json({
@@ -139,6 +140,6 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
 
 ## NuGet packages
 
-[Management.Compute 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.0), [Runtime.Flagship 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Flagship/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Management.Compute 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Compute/0.1.1), [Runtime.Flagship 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Flagship/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

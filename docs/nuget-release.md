@@ -1,16 +1,16 @@
 # NuGet release and publisher setup
 
-FSharp.CloudEdge **0.1.0** is published for the 47 projects selected in `FSharp.CloudEdge.Bindings.slnx`. [Browse the packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). **GitHub Actions builds, validates, and publishes the packages.** Like Furnace, the workflow supports `v*` release tags and manual dispatch. A release tag must match the configured package version. Local commands below reproduce the checks when investigating a failure; maintainers do not need to upload packages manually.
+FSharp.CloudEdge **0.1.0** is published as 47 packages. The **0.1.1** candidate retains those libraries and adds five shared support dependencies and three Pi libraries, for 55 packages. Release roots come from the source projects in `FSharp.CloudEdge.slnx`; the release tool follows their project references. The generated inventory solution does not define publication scope. [Browse the packages on NuGet](https://www.nuget.org/packages?q=FSharp.CloudEdge). **GitHub Actions builds, validates, and publishes the packages.** Like Furnace, the workflow supports `v*` release tags and manual dispatch. A release tag must match the configured package version. Local commands below reproduce the checks when investigating a failure; maintainers do not need to upload packages manually.
 
 NuGet account ownership and publishing authorization are setup tasks independent of GitHub repository administration. This workflow uses **NuGet Trusted Publishing** with GitHub OIDC. GitHub obtains temporary publishing credentials for each run.
 
 ## Release dependencies and validation
 
-The release uses the published **0.1.0** versions of `Xantham.Fable.Core` and `Xantham.Fable.Core.TS` from nuget.org. `publicDependencies` in `config/nuget-release.json` records those versions. Publishing CloudEdge does not require publishing or modifying Xantham.
+The 0.1.1 candidate requires `Xantham.Fable.Core` 0.3.0-beta.1 and `Xantham.Fable.Core.TS` 0.4.0-beta.3 from the [Xantham Cloudsmith feed](https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json). Publish those support versions before the CloudEdge candidate and public-feed checks. CloudEdge itself remains on nuget.org.
 
-Release validation builds the 19 site example projects against the candidate CloudEdge packages and public external dependencies, then compiles the Fable examples and checks the site's code snippets. Isolated package caches and resolved-package reports make those checks reproducible. Verification of the published **0.1.0** release uses the same consumers with nuget.org as their only source.
+Release validation builds the 19 site example projects, the Pi composition witness, and the Pi lifecycle client against candidate packages, emits the Pi client with Fickl, and checks the site's code snippets. Isolated package caches and resolved-package reports make those checks reproducible. Public verification uses nuget.org for CloudEdge and Cloudsmith for Xantham support.
 
-The `support` check restores both public Xantham packages, compiles `tests/SupportPackage/Smoke.fs` with .NET and Fable, and executes its key-value and indexer checks in JavaScript. This covers the support bindings used by CloudEdge; upstream inline helper functions are outside this release gate.
+The `support` check restores both public Xantham packages, compares their Fable source hashes with those used by the Pi lifecycle gate, compiles `tests/SupportPackage/Smoke.fs` with .NET and Fickl, and executes its key-value and indexer checks in JavaScript. This covers the support bindings used by CloudEdge; upstream inline helper functions are outside this release gate.
 
 ## Restore account access
 
@@ -60,11 +60,15 @@ If NuGet shows a seven-day activation window, complete a successful publish duri
 
 ## Candidate package preparation
 
-The F# release tool reads the selected solution, orders packages by dependency, and stages clean projects from checked-in source. Generator-only tools and the other unselected projects under `src/` are excluded. Staging leaves the contributor projects and their local generator pins unchanged.
+The F# release tool reads source project roots from the selected solution, includes their transitive project dependencies, orders packages by dependency, and stages clean projects from checked-in source. Test consumers, generator-only tools and other unselected projects under `src/` are excluded. Staging leaves the contributor projects and their local generator pins unchanged. The release checks require the 55-package closure and a passing Pi lifecycle receipt bound to the selected sources.
+
+The added dependency packages are `Support.AI.V4.ProviderUtils`, `Support.AI.V7`, `Support.Hono.V4`, `Support.JsonSchema`, and `Support.Zod.V4`, all with the `FSharp.CloudEdge.` prefix. PiAi, PiDurable and AgentsPi are included only after their lifecycle gate passes.
+
+The checked-in Think binding redirects `staticToolResults` to the equivalent static-result type owned by AI V7 because the updated AI binding stopped emitting the former helper. Full Think regeneration currently fails closed on an `Agent` catalog API mismatch; resolve that mismatch and regenerate the whole Think binding before removing this correction. The release package build and consumer checks compile the checked-in binding.
 
 `config/nuget-release.json` pins the release and public support dependency versions. Release consumers must not restore `0.1.0-local.*` dependencies. Candidate packages contain license and README metadata; Fable packages also contain their project and source files under `fable/`.
 
-Sample projects use `0.1.*` so they can adopt stable patches. Published CloudEdge and Xantham support dependencies permit `[0.1.0,0.2.0)`. Release validation replaces sample floats with exact candidate references and pins both support packages to the configured public versions. Each consumer's `resolved-packages/*.json` report records the actual dependency versions and is retained in the workflow artifact.
+Sample projects use `0.1.*` so they can adopt stable patches. CloudEdge dependencies use `[0.1.1,0.2.0)`; Xantham support dependencies are pinned exactly to their configured prereleases. Release validation replaces sample floats with exact candidate references and pins both support packages to the configured public versions. Each consumer's `resolved-packages/*.json` report records the actual dependency versions and is retained in the workflow artifact.
 
 From the repository root:
 
@@ -74,19 +78,19 @@ dotnet run --project tools/NuGetRelease -- check
 dotnet run --project tools/NuGetRelease -- pack --jobs 2
 dotnet run --project tools/NuGetRelease -- verify
 dotnet run --project tools/NuGetRelease -- examples --fable
-dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.0/consumers-candidate/js
+dotnet run --project tools/NuGetRelease -- snippets --js-root artifacts/nuget-release/0.1.1/consumers-candidate/js
 dotnet run --project tools/NuGetRelease -- support
 ```
 
 The pack step compiles the large shared API assembly and can take several minutes. It builds that assembly alone, then groups independent projects into temporary solutions and invokes native MSBuild with `-maxcpucount:2`. Each group finishes packing before its dependents restore. `--jobs N` adjusts the process limit; the default is at most two processes. Use `--jobs 1` for serial builds or a larger value on a machine with enough CPU and memory.
 
-Outputs are under `artifacts/nuget-release/0.1.0`. `pack-logs/` contains the generated solutions, text logs, and MSBuild binary logs. `manifest.json` records package hashes and dependency order. Consumer validation stages all 19 site projects with package references only, uses a fresh package cache, builds them, and compiles Worker examples through Fable. Logs and partial results remain available if a check fails. This validates packaging and compilation, not hosted Cloudflare service behavior.
+Outputs are under `artifacts/nuget-release/0.1.1`. `pack-logs/` contains the generated solutions, text logs, and MSBuild binary logs. `manifest.json` records package hashes and dependency order. Consumer validation stages all 19 site projects with package references only, uses a fresh package cache, builds them, and compiles Worker examples through Fickl, which supports the generated inline tagged unions. Logs and partial results remain available if a check fails. This validates packaging and compilation, not hosted Cloudflare service behavior.
 
 Inspect the README, license, dependency versions, source assets, and emitted imports before publishing. Every CloudEdge candidate includes a README identifying its package and version, with links to the documentation and source and a brief note on Fable or .NET consumption.
 
 ## Publish and verify the public feed
 
-**0.1.0 has already been uploaded.** Use **verify_only** to check that release again. The upload instructions below apply to a new, unpublished release version.
+**0.1.0 has already been uploaded.** The workflow's **verify_only** mode checks the version configured at the selected commit. To recheck 0.1.0, rerun that release's verification job; the current configuration targets 0.1.1.
 
 Run the **NuGet** workflow on `main` with **publish disabled** first. It builds candidates, checks consumers, and uploads the packages and verification evidence as an artifact. Fix failures before requesting the actual release.
 
@@ -94,11 +98,11 @@ After committing and merging fixes into `main`, use **Actions → NuGet → Run 
 
 GitHub runs the public support binding check alongside candidate package and consumer validation. The publication job requires both jobs to succeed. Package compilation uses two MSBuild processes on the standard runner; uploads remain ordered by dependency.
 
-For a new release, when account ownership, the Trusted Publishing policy, and candidate checks are complete, push the matching **`v*` release tag**, or run the workflow manually with **publish enabled**. GitHub repeats validation, obtains temporary credentials, then uploads packages in the manifest's dependency order. A partial upload is possible: NuGet publication is not a transaction across 47 packages. The workflow stops on an upload error rather than silently skipping an existing version. Inspect ownership, versions, and package contents before deciding how to resume.
+For a new release, when account ownership, the Trusted Publishing policy, and candidate checks are complete, push the matching **`v*` release tag**, or run the workflow manually with **publish enabled**. GitHub repeats validation, obtains temporary credentials, then uploads packages in the manifest's dependency order. A partial upload is possible: NuGet publication is not a transaction across 55 packages. The workflow stops on an upload error rather than silently skipping an existing version. Inspect ownership, versions, and package contents before deciding how to resume.
 
 NuGet package versions are immutable. Do not publish a placeholder `0.1.0` as a test. If an uploaded version is wrong, unlisting does not free that version for replacement; publish a corrected version. [NuGet publication behavior](https://learn.microsoft.com/en-us/dotnet/standard/library-guidance/publish-nuget-package).
 
-After packages finish processing, verify every planned version and repeat the consumer checks against the public feed alone:
+After packages finish processing, verify every planned version and repeat the consumer checks against the public feeds:
 
 ```bash
 dotnet run --project tools/NuGetRelease -- availability

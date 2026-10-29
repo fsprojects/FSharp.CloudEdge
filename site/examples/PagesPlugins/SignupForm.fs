@@ -13,10 +13,10 @@ let register (context: Workers.EventContext<obj, string, Turnstile.PluginData>) 
     async {
         let! form = context.request.formData () |> Async.AwaitPromise
         match form.get "email" with
-        | Some (U2.Case1 email) -> return Workers.Exports.Response.Create($"Thanks for signing up, {email}.")
+        | Some (U2.Case1 email) -> return Workers.Exports.Response.Create(U9.Case1 $"Thanks for signing up, {email}.")
         | _ ->
             let badRequest = Workers.ResponseInit.Create(status = 400.)
-            return Workers.Exports.Response.Create("An email address is required.", badRequest)
+            return Workers.Exports.Response.Create(U9.Case1 "An email address is required.", badRequest)
     }
     |> Async.StartAsPromise
 

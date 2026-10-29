@@ -62,6 +62,6 @@ Useful test cases include status records, option unions, commits and refs, remot
 
 ## NuGet packages
 
-[Runtime.Computer 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.0), [Runtime.ShellGit 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ShellGit/0.1.0).
+[Runtime.Computer 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Computer/0.1.1), [Runtime.ShellGit 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.ShellGit/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

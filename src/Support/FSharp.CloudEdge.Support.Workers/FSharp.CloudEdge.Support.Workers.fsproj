@@ -7,9 +7,6 @@
     <Compile Include="DurableObjects.fs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fable.Core" Version="5.2.0" />
-    <PackageReference Include="Xantham.Fable.Core" Version="0.2.0" />
-    <PackageReference Include="Xantham.Fable.Core.TS" Version="0.4.0-beta.1" />
     <ProjectReference Include="../../Runtime/Platform/FSharp.CloudEdge.Runtime.Workers/FSharp.CloudEdge.Runtime.Workers.fsproj" />
   </ItemGroup>
 </Project>

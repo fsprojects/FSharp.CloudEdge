@@ -4,9 +4,67 @@ open System
 open System.IO
 open System.IO.Compression
 open System.Net
+open System.Text.Json
 open NuGetRelease.Common
 open NuGetRelease.Packages
 open NuGetRelease.Consumers
+
+// The runtime gate writes a durable receipt only after it has passed. Release
+// checks bind that receipt to the tracked Pi dependency closure and test inputs.
+let checkPiGateFile (projects: Package array) file =
+    ensure (File.Exists file) "Pi lifecycle acceptance receipt is missing"
+    use receipt = JsonDocument.Parse(File.ReadAllText file)
+    let evidence = receipt.RootElement
+    for flag in ["passed"; "runtimeStopped"; "durableStateObserved"; "stateRemoved"; "xanthamClean"] do
+        ensure (evidence.GetProperty(flag).GetBoolean()) $"Pi lifecycle gate did not establish {flag}"
+    let supportSources = evidence.GetProperty("supportFableSources")
+    for KeyValue(id, _) in config.PublicDependencies do
+        ensure (supportSources.GetProperty(id).EnumerateObject() |> Seq.isEmpty |> not) $"Pi gate did not bind {id} Fable sources"
+    use delivery = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "config/sdk-delivery.json")))
+    let expectedRevision =
+        delivery.RootElement.GetProperty("supportTargets").EnumerateArray()
+        |> Seq.find (fun target -> target.GetProperty("id").GetString() = "agents-pi")
+        |> fun target -> target.GetProperty("projection").GetProperty("xanthamRevision").GetString()
+    ensure (evidence.GetProperty("xanthamRevision").GetString() = expectedRevision) "Pi gate generator revision differs"
+    let inputs = evidence.GetProperty("inputSha256")
+    let byName = projects |> Array.map (fun project -> project.Id, project) |> Map.ofArray
+    let mutable visited = Set.empty
+    let rec visit id =
+        if not (Set.contains id visited) then
+            ensure (Map.containsKey id byName) $"Pi gate dependency missing from release: {id}"
+            visited <- Set.add id visited
+            byName[id].Dependencies |> Map.iter (fun dependency _ -> visit dependency)
+    visit "FSharp.CloudEdge.Runtime.AgentsPi"
+    let required =
+        visited
+        |> Set.toList
+        |> List.collect (fun id ->
+            let project = byName[id]
+            project.Path :: (project.Sources |> Array.map (fun source ->
+                Path.Combine(Path.GetDirectoryName project.Path, source).Replace('\\', '/')) |> Array.toList))
+    let required = required @ ["tests/AgentsPi/Client.fs"; "tests/AgentsPi/check.mjs"; "tests/AgentsPi/AgentsPi.fsproj"; "tests/AgentsPi/.config/dotnet-tools.json"; "tests/SDKComposition/Pi.fs"; "config/sdk-delivery.json"; "config/targets.json"; "config/nuget-release.json"; ".config/dotnet-tools.json"; "config/tool-packages.json"; "Directory.Build.props"]
+    use targets = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "config/targets.json")))
+    let profiles = targets.RootElement.GetProperty("profiles").EnumerateArray() |> Seq.map (fun item -> item.GetProperty("id").GetString(), item.GetProperty("directory").GetString()) |> Map.ofSeq
+    for checkedProject in evidence.GetProperty("checked").EnumerateArray() do
+        let profile = checkedProject.GetProperty("profile").GetString()
+        ensure (Map.containsKey profile profiles) $"Pi gate profile is missing: {profile}"
+        let directory = profiles[profile]
+        for name in ["package.json"; "package-lock.json"] do
+            let key = directory + "/" + name
+            let mutable value = Unchecked.defaultof<JsonElement>
+            ensure (inputs.TryGetProperty(key, &value)) $"Pi gate did not bind {key}"
+    for path in required do
+        let mutable value = Unchecked.defaultof<JsonElement>
+        ensure (inputs.TryGetProperty(path, &value)) $"Pi gate did not bind {path}"
+    let prefix = Path.GetFullPath(root) + string Path.DirectorySeparatorChar
+    for input in inputs.EnumerateObject() do
+        if not (input.Name.StartsWith("artifacts/", StringComparison.Ordinal)) then
+            let path = Path.GetFullPath(Path.Combine(root, input.Name))
+            ensure (path.StartsWith(prefix, StringComparison.Ordinal) && File.Exists path) $"Pi gate input missing: {input.Name}"
+            ensure (sha256 path = input.Value.GetString()) $"Pi gate input changed: {input.Name}"
+
+let checkPiGate projects =
+    checkPiGateFile projects (Path.Combine(root, "inventory/pi-lifecycle-acceptance.json"))
 
 let checkAvailabilityPolling () =
     let seconds (value: float) = TimeSpan.FromSeconds value
@@ -66,7 +124,18 @@ let runChecks () =
     let projects = inventory ()
     ensure (sampleVersion = "0.1.*") "Samples must follow the current patch line"
     ensure (patchRange "0.1.1" = "[0.1.1,0.2.0)") "Patch dependency range is incorrect"
-    ensure (projects.Length = 47 && (projects |> Array.filter _.Fable |> Array.length) = 35) "Unexpected release scope"
+    ensure (dependencyRange "Xantham.Fable.Core" "0.3.0-beta.1" = "[0.3.0-beta.1]") "Prerelease support dependency must be pinned exactly"
+    ensure (config.Solution = "FSharp.CloudEdge.slnx") "Release roots must use the selected library solution"
+    ensure (projects.Length = 55 && (projects |> Array.filter _.Fable |> Array.length) = 43) "Unexpected release scope"
+    let requiredSupport = set [
+        "FSharp.CloudEdge.Support.AI.V4.ProviderUtils"; "FSharp.CloudEdge.Support.AI.V7"
+        "FSharp.CloudEdge.Support.Hono.V4"; "FSharp.CloudEdge.Support.JsonSchema"; "FSharp.CloudEdge.Support.Zod.V4"
+    ]
+    let names = projects |> Array.map _.Id |> Set.ofArray
+    ensure (Set.isSubset requiredSupport names) "Release omitted a shared support dependency"
+    let piPackages = [|"AgentsPi"; "PiAi"; "PiDurable"|] |> Array.map (fun name -> $"FSharp.CloudEdge.Runtime.{name}/{config.Version}")
+    requirePiPackages (projects |> Array.map (fun project -> $"{project.Id}/{config.Version}"))
+    checkPiGate projects
     let mutable seen = Set.empty
     for project in projects do
         ensure (project.Dependencies |> Map.keys |> Seq.forall seen.Contains) $"Invalid dependency order: {project.Id}"
@@ -87,11 +156,28 @@ let runChecks () =
         ensure (batch |> Array.forall (fun p -> p.Dependencies |> Map.keys |> Seq.forall packed.Contains)) "A package would restore before its dependency was packed"
         packed <- Set.union packed (batch |> Array.map _.Id |> Set.ofArray)
     ensure (packed.Count = projects.Length) "Package batching omitted projects"
-    let directory = Path.Combine(Path.GetTempPath(), "cloudedge-release-tests-" + Guid.NewGuid().ToString("N"))
+    let directory = Path.Combine(output, "checks", Guid.NewGuid().ToString("N"))
     mkdir directory
     let expectFailure action =
         let failed = try action (); false with _ -> true
         ensure failed "Expected validation to reject the fixture"
+    let originalReceipt = File.ReadAllText(Path.Combine(root, "inventory/pi-lifecycle-acceptance.json"))
+    let mutatedReceipt = Path.Combine(directory, "pi-gate.json")
+    let mutateReceipt (change: System.Text.Json.Nodes.JsonNode -> unit) =
+        let value = System.Text.Json.Nodes.JsonNode.Parse originalReceipt
+        change value
+        File.WriteAllText(mutatedReceipt, value.ToJsonString())
+        expectFailure (fun () -> checkPiGateFile projects mutatedReceipt)
+    expectFailure (fun () -> checkPiGateFile projects (Path.Combine(directory, "missing.json")))
+    for flag in ["passed"; "runtimeStopped"; "durableStateObserved"; "stateRemoved"; "xanthamClean"] do
+        mutateReceipt (fun value -> value[flag] <- System.Text.Json.Nodes.JsonValue.Create false)
+    mutateReceipt (fun value -> value["xanthamRevision"] <- System.Text.Json.Nodes.JsonValue.Create "wrong")
+    mutateReceipt (fun value -> value["inputSha256"].AsObject().Remove("config/nuget-release.json") |> ignore)
+    mutateReceipt (fun value -> value["inputSha256"]["tests/AgentsPi/Client.fs"] <- System.Text.Json.Nodes.JsonValue.Create "changed")
+    mutateReceipt (fun value -> value["supportFableSources"].AsObject().Remove("Xantham.Fable.Core") |> ignore)
+    requirePiPackages piPackages
+    expectFailure (fun () -> requirePiPackages piPackages[..1])
+    expectFailure (fun () -> requirePiPackages (piPackages |> Array.map (fun name -> name.Replace(config.Version, "0.0.0"))))
     let create dependency source =
         let file = Path.Combine(directory, $"{fixture.Id}.{config.Version}.nupkg")
         if File.Exists file then File.Delete file
@@ -103,16 +189,18 @@ let runChecks () =
         for name in ["README.md"; "LICENSE"; "lib/net8.0/Test.dll"; "fable/" + fixture.Id + ".fsproj"] do add name "fixture"
         if source then add "fable/Test.fs" "module Test"
     try
-        create "[0.1.0,0.2.0)" true
+        create "[0.1.0]" true
         let entry = inspectPackage directory fixture
         ensure (entry.Sha256.Length = 64) "Missing package hash"
         create "0.1.0-local.test" true
         expectFailure (fun () -> inspectPackage directory fixture |> ignore)
-        create "[0.1.0]" true
+        create "[0.1.0,0.2.0)" true
         expectFailure (fun () -> inspectPackage directory fixture |> ignore)
-        create "[0.1.0,0.2.0)" false
+        create "[0.1.0]" false
         expectFailure (fun () -> inspectPackage directory fixture |> ignore)
         expectFailure (fun () -> order [| { fixture with Dependencies = Map.ofList [fixture.Id, config.Version] } |] |> ignore)
+        expectFailure (fun () -> order [| { fixture with Dependencies = Map.ofList ["Missing", config.Version] } |] |> ignore)
+        expectFailure (fun () -> order [|fixture; fixture|] |> ignore)
         ensure (isExcerpt "  let x = 1\n  let y = 2" "module Test\nlet x = 1\nlet y = 2\n") "Uniform snippet indentation rejected"
         ensure (not (isExcerpt "let x = 1\n    let y = 2" "let x = 1\nlet y = 2")) "Broken snippet indentation accepted"
         printfn "Release graph, package rejection, hash, snippet and availability checks passed"

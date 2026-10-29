@@ -63,7 +63,7 @@ let onRequestGet (context: Workers.EventContext<obj, string, Access.PluginData>)
             return Workers.Exports.Response.json profile
         | None ->
             let notFound = Workers.ResponseInit.Create(status = 404.)
-            return Workers.Exports.Response.Create("No identity for this sign-in", notFound)
+            return Workers.Exports.Response.Create(U9.Case1 "No identity for this sign-in", notFound)
     }
     |> Async.StartAsPromise
 ```
@@ -118,10 +118,10 @@ let register (context: Workers.EventContext<obj, string, Turnstile.PluginData>) 
     async {
         let! form = context.request.formData () |> Async.AwaitPromise
         match form.get "email" with
-        | Some (U2.Case1 email) -> return Workers.Exports.Response.Create($"Thanks for signing up, {email}.")
+        | Some (U2.Case1 email) -> return Workers.Exports.Response.Create(U9.Case1 $"Thanks for signing up, {email}.")
         | _ ->
             let badRequest = Workers.ResponseInit.Create(status = 400.)
-            return Workers.Exports.Response.Create("An email address is required.", badRequest)
+            return Workers.Exports.Response.Create(U9.Case1 "An email address is required.", badRequest)
     }
     |> Async.StartAsPromise
 
@@ -153,6 +153,6 @@ The type of a form value is `U2<string, File>`, and `U2.Case1` matches the text 
 
 ## NuGet packages
 
-[Management.Security 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Security/0.1.0), [Runtime.PagesPluginCloudflareAccess 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/0.1.0), [Runtime.PagesPluginStaticForms 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginStaticForms/0.1.0), [Runtime.PagesPluginTurnstile 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Management.Security 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Management.Security/0.1.1), [Runtime.PagesPluginCloudflareAccess 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginCloudflareAccess/0.1.1), [Runtime.PagesPluginStaticForms 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginStaticForms/0.1.1), [Runtime.PagesPluginTurnstile 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.PagesPluginTurnstile/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../guide/packages.md).

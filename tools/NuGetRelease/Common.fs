@@ -14,6 +14,7 @@ type ReleaseConfig = {
     Repository: string
     ProjectUrl: string
     Authors: string
+    SupportSource: string
     PublicDependencies: Dictionary<string, string>
 }
 
@@ -94,6 +95,7 @@ let writeNuGetConfig path cache candidate =
     let sources = [
         xml "clear" [] []
         if candidate then source "candidate" feed
+        source "xantham" config.SupportSource
         source "nuget.org" "https://api.nuget.org/v3/index.json"
     ]
     let mapping name pattern = xml "packageSource" ["key", name] [xml "package" ["pattern", pattern] []]
@@ -103,6 +105,9 @@ let writeNuGetConfig path cache candidate =
         xml "packageSourceMapping" [] [
             xml "clear" [] []
             if candidate then mapping "candidate" "FSharp.CloudEdge.*"
+            xml "packageSource" ["key", "xantham"] [
+                for KeyValue(id, _) in config.PublicDependencies do xml "package" ["pattern", id] []
+            ]
             mapping "nuget.org" "*"
         ]
     ] |> saveXml path

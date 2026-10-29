@@ -7,7 +7,7 @@ description: Connect an agent to remote tools and expose application capabilitie
 <p class="ce-block-lead">Connect an agent to remote tools and expose application capabilities through MCP.</p>
 <ul class="ce-facts">
 <li><span>Libraries</span> <code>Runtime.Agents</code> <code>Runtime.AgentsAiChatAgent</code> <code>Runtime.AgentsMcpClient</code></li>
-<li><span>npm</span> <code>agents 0.22.0</code></li>
+<li><span>npm</span> <code>agents 0.30.1</code></li>
 <li><span>Upstream/API</span> Uses the pinned Agents SDK interfaces</li>
 </ul>
 </div>
@@ -62,6 +62,6 @@ Useful test cases include connection and OAuth states, discovery after recovery,
 
 ## NuGet packages
 
-[Runtime.Agents 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Agents/0.1.0), [Runtime.AgentsAiChatAgent 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/0.1.0), [Runtime.AgentsMcpClient 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsMcpClient/0.1.0).
+[Runtime.Agents 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Agents/0.1.1), [Runtime.AgentsAiChatAgent 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsAiChatAgent/0.1.1), [Runtime.AgentsMcpClient 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.AgentsMcpClient/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

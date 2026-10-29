@@ -26,11 +26,12 @@ The Worker responds to a POSTed article with MPEG audio of its first two sentenc
 open Fable.Core
 
 module Workers = FSharp.CloudEdge.Runtime.Workers
+module Agents = FSharp.CloudEdge.Runtime.Agents
 module Voice = FSharp.CloudEdge.Runtime.Voice
 module Errors = FSharp.CloudEdge.Runtime.VoiceErrors.Errors
 
 type Env =
-    abstract AI: Voice.AiLike
+    abstract AI: Agents.AiLike
 
 let opening (article: string) =
     let chunker = Voice.Exports.SentenceChunker()
@@ -50,12 +51,13 @@ let worker: Workers.ExportedHandler<Env, obj, obj, obj> =
                     let! audio = tts.synthesize (opening article) |> Async.AwaitPromise
                     match audio with
                     | Some bytes ->
-                        let headers = [| [| "content-type"; "audio/mpeg" |] |]
-                        return Workers.Exports.Response.Create(bytes, Workers.ResponseInit.Create(headers = headers))
+                        let headers = Workers.Exports.Headers()
+                        headers.set("content-type", "audio/mpeg")
+                        return Workers.Exports.Response.Create(unbox<Workers.BodyInit> bytes, Workers.ResponseInit.Create(headers = U3.Case1 headers))
                     | None -> return failed "No audio"
                 with caught ->
                     let error = Errors.Exports.toVoiceError (caught, "Speech is unavailable")
-                    Errors.Exports.logVoiceError (Errors.VoiceErrorLogOptions.Create(``component`` = "AudioPreview", stage = "synthesize", message = "Preview failed", error = error))
+                    Errors.Exports.logVoiceError ({| ``component`` = "AudioPreview"; stage = "synthesize"; message = "Preview failed"; error = error |})
                     return failed (Errors.Exports.voiceErrorMessage (error, "Speech is unavailable"))
             }
             |> Async.StartAsPromise
@@ -83,6 +85,6 @@ Useful test cases include audio and stream types, provider callbacks, synthesis 
 
 ## NuGet packages
 
-[Runtime.Voice 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Voice/0.1.0), [Runtime.VoiceErrors 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.VoiceErrors/0.1.0), [Runtime.Workers 0.1.0](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.0).
+[Runtime.Voice 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Voice/0.1.1), [Runtime.VoiceErrors 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.VoiceErrors/0.1.1), [Runtime.Workers 0.1.1](https://www.nuget.org/packages/FSharp.CloudEdge.Runtime.Workers/0.1.1).
 
 See [installation and release availability](../../guide/packages.md).

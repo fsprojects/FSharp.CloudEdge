@@ -12,7 +12,9 @@ let spec =
        info = {| title = "Tasks API"; version = "1.0.0" |}
        paths = {| ``/tasks`` = {| get = listTasks |} |} |}
 
-let html = Workers.ResponseInit.Create(headers = {| ``content-type`` = "text/html; charset=utf-8" |})
+let headers = Workers.Exports.Headers()
+headers.set("content-type", "text/html; charset=utf-8")
+let html = Workers.ResponseInit.Create(headers = U3.Case1 headers)
 
 [<ExportDefault>]
 let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
@@ -20,6 +22,6 @@ let worker: Workers.ExportedHandler<obj, obj, obj, obj> =
         fetch = fun request _ _ ->
             match Workers.Exports.URL(U2.Case1 request.url).pathname with
             | "/openapi.json" -> U2.Case2(Workers.Exports.Response.json spec)
-            | "/redoc" -> U2.Case2(Workers.Exports.Response.Create(Chanfana.Exports.getReDocUI "/openapi.json", html))
-            | _ -> U2.Case2(Workers.Exports.Response.Create(Chanfana.Exports.getSwaggerUI "/openapi.json", html))
+            | "/redoc" -> U2.Case2(Workers.Exports.Response.Create(U9.Case1 (Chanfana.Exports.getReDocUI "/openapi.json"), html))
+            | _ -> U2.Case2(Workers.Exports.Response.Create(U9.Case1 (Chanfana.Exports.getSwaggerUI "/openapi.json"), html))
     )

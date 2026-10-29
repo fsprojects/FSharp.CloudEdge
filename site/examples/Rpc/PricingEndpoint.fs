@@ -4,4 +4,4 @@ module Workers = FSharp.CloudEdge.Runtime.Workers
 module Capnweb = FSharp.CloudEdge.Runtime.Capnweb
 
 let onRequest (context: Workers.EventContext<obj, string, obj>) =
-    Capnweb.Exports.newWorkersRpcResponse(context.request, Pricing.PricingApi())
+    Capnweb.Exports.newWorkersRpcResponse(unbox context.request, Pricing.PricingApi())

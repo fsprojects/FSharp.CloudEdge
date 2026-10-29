@@ -1,11 +1,12 @@
 {
-  "version": "0.1.0",
-  "solution": "FSharp.CloudEdge.Bindings.slnx",
+  "version": "0.1.1",
+  "solution": "FSharp.CloudEdge.slnx",
   "repository": "https://github.com/fsprojects/FSharp.CloudEdge",
   "projectUrl": "https://fsprojects.github.io/FSharp.CloudEdge/",
   "authors": "FSharp.CloudEdge Contributors",
+  "supportSource": "https://nuget.cloudsmith.io/shayanhabibi/xantham/v3/index.json",
   "publicDependencies": {
-    "Xantham.Fable.Core": "0.1.0",
-    "Xantham.Fable.Core.TS": "0.1.0"
+    "Xantham.Fable.Core": "0.3.0-beta.1",
+    "Xantham.Fable.Core.TS": "0.4.0-beta.3"
   }
 }

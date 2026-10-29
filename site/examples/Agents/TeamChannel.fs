@@ -27,5 +27,6 @@ type TeamChannel(ctx: Workers.DurableObjectState<obj>, env: obj) as this =
         match message with
         | U3.Case1 text ->
             ctx.storage.sql.exec ("INSERT INTO messages (body) VALUES (?)", text) |> ignore
-            lifecycle.broadcast (message, [| sender.id |])
+            for socket in ctx.getWebSockets() do
+                if not (obj.ReferenceEquals(socket, sender)) then socket.send message
         | _ -> ()
