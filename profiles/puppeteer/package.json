@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "devDependencies": {
-    "@cloudflare/puppeteer": "1.4.0",
+    "@cloudflare/puppeteer": "2.0.0",
     "@cloudflare/workers-types": "5.20260906.1",
     "mitt": "3.0.1",
     "parsel-js": "1.1.2",
